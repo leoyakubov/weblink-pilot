@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/urls")
 public class UrlController {
+
+    private static final Logger log = LoggerFactory.getLogger(UrlController.class);
 
     private final UrlService urlService;
     private final QrCodeService qrCodeService;
@@ -75,7 +79,7 @@ public class UrlController {
     }
 
     @GetMapping("/{code}")
-    public ResponseEntity<LinkResponse> details(@PathVariable String code) {
+    public ResponseEntity<LinkResponse> details(@PathVariable("code") String code) {
         return ResponseEntity.ok(urlService.getByCode(code, baseUrl));
     }
 
@@ -84,7 +88,7 @@ public class UrlController {
             summary = "Preview redirect target",
             description = "Returns a JSON preview of the redirect target without issuing an actual HTTP redirect."
     )
-    public ResponseEntity<RedirectPreviewResponse> preview(@PathVariable String code) {
+    public ResponseEntity<RedirectPreviewResponse> preview(@PathVariable("code") String code) {
         LinkResponse response = urlService.getByCode(code, baseUrl);
         return ResponseEntity.ok(new RedirectPreviewResponse(
                 response.code(),
@@ -107,10 +111,12 @@ public class UrlController {
                     )
             }
     )
-    public ResponseEntity<byte[]> qr(@PathVariable String code) {
+    public ResponseEntity<byte[]> qr(@PathVariable("code") String code) {
         String shortUrl = urlService.getByCode(code, baseUrl).shortUrl();
+        byte[] png = qrCodeService.generatePng(shortUrl);
+        log.info("link.qr.generated code={} bytes={}", code, png.length);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
-                .body(qrCodeService.generatePng(shortUrl));
+                .body(png);
     }
 }

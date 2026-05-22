@@ -13,12 +13,16 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UrlService {
+
+    private static final Logger log = LoggerFactory.getLogger(UrlService.class);
 
     private final ShortLinkRepository repository;
     private final Base62Codec base62Codec;
@@ -40,11 +44,13 @@ public class UrlService {
         String normalizedUrl = normalizeUrl(request.originalUrl());
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (request.expiresAt() != null && request.expiresAt().isBefore(now)) {
+            log.warn("link.create.rejected reason=expired_request expiresAt={}", request.expiresAt());
             throw new IllegalArgumentException("Expiration time must be in the future");
         }
 
         String alias = normalizeAlias(request.customAlias());
         if (alias != null && repository.existsByCustomAlias(alias)) {
+            log.warn("link.create.rejected reason=duplicate_alias alias={}", alias);
             throw new DuplicateAliasException(alias);
         }
 
@@ -73,6 +79,15 @@ public class UrlService {
                 link.getExpiresAt()
         ));
 
+        log.info(
+                "link.create.success code={} aliasType={} originalHost={} expiresAt={} shortUrl={}",
+                link.getCode(),
+                alias == null ? "generated" : "custom",
+                hostOf(link.getOriginalUrl()),
+                link.getExpiresAt(),
+                buildShortUrl(baseUrl, link.getCode())
+        );
+
         return new LinkResponse(
                 link.getCode(),
                 buildShortUrl(baseUrl, link.getCode()),
@@ -88,10 +103,18 @@ public class UrlService {
     public LinkResponse getByCode(String code, String baseUrl) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
+            log.warn("link.read.miss code={}", code);
             throw new UrlNotFoundException(code);
         }
 
         ShortLink link = repository.findByCode(code).orElseThrow(() -> new UrlNotFoundException(code));
+        log.info(
+                "link.read.success code={} clickCount={} originalHost={} expiresAt={}",
+                link.getCode(),
+                link.getClickCount(),
+                hostOf(link.getOriginalUrl()),
+                link.getExpiresAt()
+        );
         return new LinkResponse(
                 link.getCode(),
                 buildShortUrl(baseUrl, link.getCode()),
@@ -134,5 +157,10 @@ public class UrlService {
 
     private String temporaryCode() {
         return "tmp-" + UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    private String hostOf(String url) {
+        String host = URI.create(url).getHost();
+        return host == null ? url : host;
     }
 }

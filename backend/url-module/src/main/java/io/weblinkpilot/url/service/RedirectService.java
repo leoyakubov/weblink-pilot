@@ -8,11 +8,16 @@ import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RedirectService {
+
+    private static final Logger log = LoggerFactory.getLogger(RedirectService.class);
 
     private final ShortLinkRepository repository;
     private final UrlCacheService cacheService;
@@ -28,12 +33,14 @@ public class RedirectService {
     public String resolveTarget(String code, String ipAddress, String userAgent, String referrer) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
+            log.warn("link.redirect.miss code={}", code);
             throw new UrlNotFoundException(code);
         }
 
         ShortLink link = repository.findByCode(code).orElseThrow(() -> new UrlNotFoundException(code));
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (link.isExpired(now)) {
+            log.warn("link.redirect.expired code={} expiredAt={}", code, link.getExpiresAt());
             throw new UrlExpiredException(code);
         }
 
@@ -48,6 +55,38 @@ public class RedirectService {
                 referrer
         ));
 
+        log.info(
+                "link.redirect.success code={} targetHost={} clickCount={} clientIp={} referrerPresent={} userAgentPresent={}",
+                code,
+                hostOf(link.getOriginalUrl()),
+                link.getClickCount(),
+                maskIp(ipAddress),
+                referrer != null && !referrer.isBlank(),
+                userAgent != null && !userAgent.isBlank()
+        );
+
         return link.getOriginalUrl();
+    }
+
+    private String hostOf(String url) {
+        String host = URI.create(url).getHost();
+        return host == null ? url : host;
+    }
+
+    private String maskIp(String ipAddress) {
+        if (ipAddress == null || ipAddress.isBlank()) {
+            return "unknown";
+        }
+        if (ipAddress.contains(".")) {
+            String[] parts = ipAddress.split("\\.");
+            if (parts.length == 4) {
+                return parts[0] + "." + parts[1] + "." + parts[2] + ".***";
+            }
+        }
+        if (ipAddress.contains(":")) {
+            int index = ipAddress.indexOf(':');
+            return index > 0 ? ipAddress.substring(0, index + 1) + "****" : "****";
+        }
+        return "masked";
     }
 }

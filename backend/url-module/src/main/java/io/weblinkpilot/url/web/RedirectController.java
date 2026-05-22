@@ -22,13 +22,14 @@ public class RedirectController {
     }
 
     @GetMapping("/{code}")
-    public ResponseEntity<Void> redirect(@PathVariable String code, HttpServletRequest request) {
+    public ResponseEntity<Void> redirect(@PathVariable("code") String code, HttpServletRequest request) {
         String originalUrl = redirectService.resolveTarget(
                 code,
                 extractClientIp(request),
                 request.getHeader("User-Agent"),
                 request.getHeader("Referer")
         );
+        // The service logs the resolved redirect; the controller only performs the HTTP response.
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, URI.create(originalUrl).toString())
                 .build();

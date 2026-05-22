@@ -3,11 +3,15 @@ package io.weblinkpilot.analytics.service;
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AnalyticsService {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
 
     private final ClickEventRepository repository;
     private final UserAgentParser userAgentParser;
@@ -30,5 +34,12 @@ public class AnalyticsService {
                 metadata.browserFamily(),
                 metadata.deviceType()
         ));
+        log.info(
+                "analytics.click.persisted code={} browser={} device={} referrerPresent={}",
+                event.code(),
+                metadata.browserFamily(),
+                metadata.deviceType(),
+                event.referrer() != null && !event.referrer().isBlank()
+        );
     }
 }
