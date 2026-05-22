@@ -1,0 +1,53 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Java / Maven / Gradle
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot / logs
+logs/
+*.log
+hs_err_pid*
+replay_pid*
+
+# Test / coverage
+surefire-reports/
+failsafe-reports/
+jacoco.exec
+coverage/
+.coverage
+
+# Node / Vue / frontend
+node_modules/
+dist/
+vite.svg
+*.tsbuildinfo
+coverage-final.json
+
+# Package managers
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Docker / local runtime
+.docker/
+docker-data/
+
