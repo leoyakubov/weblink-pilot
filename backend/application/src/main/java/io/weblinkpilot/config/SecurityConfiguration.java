@@ -23,6 +23,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/r/**").permitAll()
+                        .requestMatchers("/api/v1/urls/*/qr").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

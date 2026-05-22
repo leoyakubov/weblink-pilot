@@ -50,6 +50,7 @@ class UrlServiceTest {
 
         assertThat(response.code()).isEqualTo("my-link");
         assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/my-link");
+        assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/my-link/qr");
         assertThat(response.clickCount()).isZero();
 
         ArgumentCaptor<LinkCreatedEvent> captor = ArgumentCaptor.forClass(LinkCreatedEvent.class);

@@ -1,6 +1,8 @@
 package io.weblinkpilot.url.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,9 +17,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
@@ -51,11 +54,24 @@ class UrlApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("demo-it"))
                 .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
+                .andExpect(jsonPath("$.qrCodeUrl").value("http://localhost:8080/api/v1/urls/demo-it/qr"))
                 .andExpect(jsonPath("$.originalUrl").value("https://example.com"));
 
         mockMvc.perform(get("/r/demo-it"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "https://example.com"));
+
+        MvcResult qrResult = mockMvc.perform(get("/api/v1/urls/demo-it/qr"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andReturn();
+
+        byte[] png = qrResult.getResponse().getContentAsByteArray();
+        assertThat(png).isNotEmpty();
+        assertThat(png[0]).isEqualTo((byte) 0x89);
+        assertThat(png[1]).isEqualTo((byte) 0x50);
+        assertThat(png[2]).isEqualTo((byte) 0x4E);
+        assertThat(png[3]).isEqualTo((byte) 0x47);
     }
 
     @Test

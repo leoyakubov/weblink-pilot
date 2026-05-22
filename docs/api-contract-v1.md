@@ -80,12 +80,12 @@ Response:
 Response options:
 
 - `image/png`
-- `image/svg+xml`
 
 Suggested behavior:
 
 - backend returns a generated QR code for the short URL
 - frontend can render it inline or download it
+- SVG support can be added later if we decide we want vector output
 
 ### 5. Get analytics summary
 
@@ -158,4 +158,3 @@ Later versions may add:
 - bulk creation
 - branded domains
 - export endpoints
-

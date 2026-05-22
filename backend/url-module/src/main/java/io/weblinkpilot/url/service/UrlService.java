@@ -76,6 +76,7 @@ public class UrlService {
         return new LinkResponse(
                 link.getCode(),
                 buildShortUrl(baseUrl, link.getCode()),
+                buildQrCodeUrl(baseUrl, link.getCode()),
                 link.getOriginalUrl(),
                 link.getCreatedAt(),
                 link.getExpiresAt(),
@@ -94,6 +95,7 @@ public class UrlService {
         return new LinkResponse(
                 link.getCode(),
                 buildShortUrl(baseUrl, link.getCode()),
+                buildQrCodeUrl(baseUrl, link.getCode()),
                 link.getOriginalUrl(),
                 link.getCreatedAt(),
                 link.getExpiresAt(),
@@ -123,6 +125,11 @@ public class UrlService {
     private String buildShortUrl(String baseUrl, String code) {
         String normalizedBase = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         return normalizedBase + "/r/" + code;
+    }
+
+    private String buildQrCodeUrl(String baseUrl, String code) {
+        String normalizedBase = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        return normalizedBase + "/api/v1/urls/" + code + "/qr";
     }
 
     private String temporaryCode() {
