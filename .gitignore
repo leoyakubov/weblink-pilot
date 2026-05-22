@@ -41,10 +41,6 @@ vite.svg
 coverage-final.json
 
 # Package managers
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
 # Env / secrets
 .env
 .env.*

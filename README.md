@@ -45,3 +45,25 @@ Useful API endpoints after startup:
 - `http://localhost:8080/r/{code}`
 - `http://localhost:8080/api/v1/urls/{code}/preview`
 - `http://localhost:8080/api/v1/urls/{code}/qr`
+
+## Frontend Quick Start
+
+Requires Node.js 22+.
+
+From `frontend/`:
+
+```bash
+npm install
+npm run dev
+```
+
+The app expects the backend at `http://localhost:8080/api/v1` by default. You can override that with a local `.env` file:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8080/api/v1
+```
+
+Default dev credentials for the current backend:
+
+- username: `admin`
+- password: `admin123`

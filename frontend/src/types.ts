@@ -1,0 +1,29 @@
+export interface ApiSettings {
+  apiBaseUrl: string
+  username: string
+  password: string
+}
+
+export interface CreateLinkRequest {
+  originalUrl: string
+  customAlias?: string | null
+  expiresAt?: string | null
+}
+
+export interface LinkResponse {
+  code: string
+  shortUrl: string
+  qrCodeUrl: string
+  originalUrl: string
+  createdAt: string
+  expiresAt: string | null
+  clickCount: number
+}
+
+export interface RedirectPreviewResponse {
+  code: string
+  shortUrl: string
+  targetUrl: string
+  status: number
+  locationHeader: string
+}
