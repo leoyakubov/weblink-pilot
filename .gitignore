@@ -16,6 +16,9 @@ out/
 *.war
 *.ear
 !.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/wrapper/apache-maven-*/
+backend/.mvn/wrapper/*.zip
+backend/.mvn/wrapper/*.tar.gz
 
 # Spring Boot / logs
 logs/
@@ -50,4 +53,3 @@ pnpm-lock.yaml
 # Docker / local runtime
 .docker/
 docker-data/
-

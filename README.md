@@ -19,3 +19,21 @@ Modern URL shortening platform with QR codes, analytics, and a mobile-first web 
 - `frontend/` - Vue mobile-first web application
 - `docs/` - architecture, product, roadmap, and decisions
 - `infra/` - Docker, deployment, and local environment tooling
+
+## Backend Quick Start
+
+Requires Java 21. Maven is downloaded automatically by the wrapper on the first run.
+
+From `backend/` on Windows:
+
+```powershell
+.\mvnw.cmd -pl application -am clean package -DskipTests
+java -jar application\target\application-0.1.0-SNAPSHOT.jar
+```
+
+On macOS/Linux:
+
+```bash
+./mvnw -pl application -am clean package -DskipTests
+java -jar application/target/application-0.1.0-SNAPSHOT.jar
+```
