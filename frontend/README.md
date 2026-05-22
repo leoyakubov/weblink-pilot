@@ -21,6 +21,12 @@ copy .env.example .env.local
 npm run dev
 ```
 
+## Test
+
+```bash
+npm test
+```
+
 ## Backend access
 
 The frontend expects the backend to be available at `VITE_API_BASE_URL`.

@@ -224,6 +224,9 @@ function openExternal(url: string) {
             <button class="button button-secondary" type="button" @click="openExternal(createdLink.shortUrl)">
               Open redirect
             </button>
+            <RouterLink class="button button-secondary" :to="{ name: 'link', params: { code: createdLink.code } }">
+              Open details page
+            </RouterLink>
             <button class="button button-secondary" type="button" @click="copy(linkPreviewUrl)">
               Copy preview URL
             </button>
