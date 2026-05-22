@@ -1,9 +1,9 @@
 package io.weblinkpilot.url.web;
 
 import io.weblinkpilot.shared.contracts.ApiErrorResponse;
-import io.weblinkpilot.url.service.DuplicateAliasException;
-import io.weblinkpilot.url.service.UrlExpiredException;
-import io.weblinkpilot.url.service.UrlNotFoundException;
+import io.weblinkpilot.url.exception.DuplicateAliasException;
+import io.weblinkpilot.url.exception.UrlExpiredException;
+import io.weblinkpilot.url.exception.UrlNotFoundException;
 import java.time.OffsetDateTime;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

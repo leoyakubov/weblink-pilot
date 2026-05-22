@@ -1,4 +1,4 @@
-package io.weblinkpilot.url.service;
+package io.weblinkpilot.url.exception;
 
 public class UrlExpiredException extends RuntimeException {
     public UrlExpiredException(String code) {

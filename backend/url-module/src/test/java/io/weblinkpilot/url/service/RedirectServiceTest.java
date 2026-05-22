@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.time.OffsetDateTime;

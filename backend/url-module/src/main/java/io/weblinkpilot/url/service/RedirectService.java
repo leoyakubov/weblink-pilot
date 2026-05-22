@@ -1,6 +1,9 @@
 package io.weblinkpilot.url.service;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import io.weblinkpilot.url.event.LinkPublisher;
+import io.weblinkpilot.url.exception.UrlExpiredException;
+import io.weblinkpilot.url.exception.UrlNotFoundException;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.time.OffsetDateTime;

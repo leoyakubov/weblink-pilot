@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.url.codegen.Base62Codec;
+import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.time.OffsetDateTime;

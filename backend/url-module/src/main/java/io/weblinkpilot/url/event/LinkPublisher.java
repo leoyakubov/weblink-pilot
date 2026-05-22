@@ -1,4 +1,4 @@
-package io.weblinkpilot.url.service;
+package io.weblinkpilot.url.event;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;

@@ -1,4 +1,4 @@
-package io.weblinkpilot.url.service;
+package io.weblinkpilot.url.codegen;
 
 import org.springframework.stereotype.Component;
 
