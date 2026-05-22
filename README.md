@@ -8,6 +8,9 @@ Modern URL shortening platform with QR codes, analytics, and a mobile-first web 
 - [Product Spec](docs/product-spec.md)
 - [Backend Module Plan](docs/backend-module-plan.md)
 - [Frontend Plan](docs/frontend-plan.md)
+- [Architecture Decisions](docs/adr.md)
+- [Tech Stack](docs/tech-stack.md)
+- [API Contract v1](docs/api-contract-v1.md)
 
 ## Repository Structure
 
