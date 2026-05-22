@@ -5,7 +5,12 @@ import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.service.UrlService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +31,38 @@ public class UrlController {
     }
 
     @PostMapping
+    @Operation(
+            summary = "Create a short link",
+            description = "Creates a short link with an optional custom alias and expiration date.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CreateLinkRequest.class),
+                            examples = {
+                                    @ExampleObject(
+                                            name = "Branded link",
+                                            value = """
+                                                    {
+                                                      "originalUrl": "https://openai.com/careers",
+                                                      "customAlias": "openai-jobs",
+                                                      "expiresAt": "2026-12-31T23:59:59Z"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Auto-generated alias",
+                                            value = """
+                                                    {
+                                                      "originalUrl": "https://example.com/blog/engineering",
+                                                      "expiresAt": "2026-08-31T23:59:59Z"
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    )
     public ResponseEntity<LinkResponse> create(@Valid @RequestBody CreateLinkRequest request) {
         return ResponseEntity.ok(urlService.create(request, baseUrl));
     }
