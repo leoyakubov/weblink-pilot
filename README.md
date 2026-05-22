@@ -37,3 +37,9 @@ On macOS/Linux:
 ./mvnw -pl application -am clean package -DskipTests
 java -jar application/target/application-0.1.0-SNAPSHOT.jar
 ```
+
+Useful API endpoints after startup:
+
+- `http://localhost:8080/swagger-ui.html`
+- `http://localhost:8080/v3/api-docs`
+- `http://localhost:8080/r/{code}`

@@ -15,9 +15,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UrlExceptionHandler {
 
-    @ExceptionHandler({IllegalArgumentException.class, DuplicateAliasException.class})
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> badRequest(RuntimeException exception, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "BAD_REQUEST", exception.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(DuplicateAliasException.class)
+    public ResponseEntity<ApiErrorResponse> conflict(DuplicateAliasException exception, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "CONFLICT", exception.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(UrlNotFoundException.class)
