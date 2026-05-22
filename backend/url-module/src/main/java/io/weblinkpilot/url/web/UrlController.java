@@ -44,8 +44,8 @@ public class UrlController {
                                             name = "Branded link",
                                             value = """
                                                     {
-                                                      "originalUrl": "https://openai.com/careers",
-                                                      "customAlias": "openai-jobs",
+                                                      "originalUrl": "https://github.com/openai",
+                                                      "customAlias": "github-org",
                                                       "expiresAt": "2026-12-31T23:59:59Z"
                                                     }
                                                     """
@@ -54,7 +54,7 @@ public class UrlController {
                                             name = "Auto-generated alias",
                                             value = """
                                                     {
-                                                      "originalUrl": "https://example.com/blog/engineering",
+                                                      "originalUrl": "https://google.com/about",
                                                       "expiresAt": "2026-08-31T23:59:59Z"
                                                     }
                                                     """
