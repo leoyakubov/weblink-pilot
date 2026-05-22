@@ -218,15 +218,18 @@ function openExternal(url: string) {
             <p>Target URL that the redirect endpoint will resolve.</p>
           </div>
           <div class="actions">
+            <RouterLink
+              class="button button-primary"
+              :to="{ name: 'link', params: { code: createdLink.code } }"
+            >
+              View details page
+            </RouterLink>
             <button class="button button-primary" type="button" @click="copy(createdLink.shortUrl)">
               Copy short URL
             </button>
             <button class="button button-secondary" type="button" @click="openExternal(createdLink.shortUrl)">
               Open redirect
             </button>
-            <RouterLink class="button button-secondary" :to="{ name: 'link', params: { code: createdLink.code } }">
-              Open details page
-            </RouterLink>
             <button class="button button-secondary" type="button" @click="copy(linkPreviewUrl)">
               Copy preview URL
             </button>

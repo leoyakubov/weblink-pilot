@@ -340,10 +340,14 @@ button {
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 999px;
   padding: 0.9rem 1.2rem;
   font-weight: 700;
+  text-align: center;
   transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
 }
 
