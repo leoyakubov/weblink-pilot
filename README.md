@@ -43,4 +43,5 @@ Useful API endpoints after startup:
 - `http://localhost:8080/swagger-ui.html`
 - `http://localhost:8080/v3/api-docs`
 - `http://localhost:8080/r/{code}`
+- `http://localhost:8080/api/v1/urls/{code}/preview`
 - `http://localhost:8080/api/v1/urls/{code}/qr`

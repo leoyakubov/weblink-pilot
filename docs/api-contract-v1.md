@@ -55,7 +55,28 @@ Behavior:
 - returns HTTP redirect
 - publishes click event asynchronously
 
-### 3. Get link details
+### 3. Redirect preview
+
+`GET /api/v1/urls/{code}/preview`
+
+Response:
+
+```json
+{
+  "code": "my-link",
+  "shortUrl": "https://weblink-pilot.io/r/my-link",
+  "targetUrl": "https://example.com/some/long/link",
+  "status": 302,
+  "locationHeader": "https://example.com/some/long/link"
+}
+```
+
+Notes:
+
+- meant for debugging and Swagger testing
+- does not issue a real redirect
+
+### 4. Get link details
 
 `GET /api/v1/urls/{code}`
 
@@ -73,7 +94,7 @@ Response:
 }
 ```
 
-### 4. Get QR code
+### 5. Get QR code
 
 `GET /api/v1/urls/{code}/qr`
 
@@ -87,7 +108,7 @@ Suggested behavior:
 - frontend can render it inline or download it
 - SVG support can be added later if we decide we want vector output
 
-### 5. Get analytics summary
+### 6. Get analytics summary
 
 `GET /api/v1/analytics/{code}`
 

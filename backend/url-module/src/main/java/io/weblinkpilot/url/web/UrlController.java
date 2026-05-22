@@ -2,6 +2,7 @@ package io.weblinkpilot.url.web;
 
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
 import io.weblinkpilot.url.service.UrlService;
 import io.weblinkpilot.url.service.QrCodeService;
 import jakarta.validation.Valid;
@@ -28,7 +29,9 @@ public class UrlController {
     private final QrCodeService qrCodeService;
     private final String baseUrl;
 
-    public UrlController(UrlService urlService, QrCodeService qrCodeService, @Value("${app.public-base-url:http://localhost:8080}") String baseUrl) {
+    public UrlController(UrlService urlService,
+                         QrCodeService qrCodeService,
+                         @Value("${app.public-base-url:http://localhost:8080}") String baseUrl) {
         this.urlService = urlService;
         this.qrCodeService = qrCodeService;
         this.baseUrl = baseUrl;
@@ -74,6 +77,22 @@ public class UrlController {
     @GetMapping("/{code}")
     public ResponseEntity<LinkResponse> details(@PathVariable String code) {
         return ResponseEntity.ok(urlService.getByCode(code, baseUrl));
+    }
+
+    @GetMapping("/{code}/preview")
+    @Operation(
+            summary = "Preview redirect target",
+            description = "Returns a JSON preview of the redirect target without issuing an actual HTTP redirect."
+    )
+    public ResponseEntity<RedirectPreviewResponse> preview(@PathVariable String code) {
+        LinkResponse response = urlService.getByCode(code, baseUrl);
+        return ResponseEntity.ok(new RedirectPreviewResponse(
+                response.code(),
+                response.shortUrl(),
+                response.originalUrl(),
+                302,
+                response.originalUrl()
+        ));
     }
 
     @GetMapping(value = "/{code}/qr", produces = MediaType.IMAGE_PNG_VALUE)

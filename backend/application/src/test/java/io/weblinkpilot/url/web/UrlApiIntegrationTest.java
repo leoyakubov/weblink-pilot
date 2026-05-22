@@ -61,6 +61,15 @@ class UrlApiIntegrationTest {
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "https://example.com"));
 
+        mockMvc.perform(get("/api/v1/urls/demo-it/preview")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("demo-it"))
+                .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
+                .andExpect(jsonPath("$.targetUrl").value("https://example.com"))
+                .andExpect(jsonPath("$.status").value(302))
+                .andExpect(jsonPath("$.locationHeader").value("https://example.com"));
+
         MvcResult qrResult = mockMvc.perform(get("/api/v1/urls/demo-it/qr"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG))
