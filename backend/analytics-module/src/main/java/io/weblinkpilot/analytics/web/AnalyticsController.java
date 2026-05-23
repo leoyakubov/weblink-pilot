@@ -1,6 +1,7 @@
 package io.weblinkpilot.analytics.web;
 
-import io.weblinkpilot.analytics.repository.ClickEventRepository;
+import io.weblinkpilot.analytics.service.AnalyticsService;
+import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,16 +15,21 @@ public class AnalyticsController {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
-    private final ClickEventRepository repository;
+    private final AnalyticsService analyticsService;
 
-    public AnalyticsController(ClickEventRepository repository) {
-        this.repository = repository;
+    public AnalyticsController(AnalyticsService analyticsService) {
+        this.analyticsService = analyticsService;
     }
 
     @GetMapping("/{code}/count")
     public long count(@PathVariable("code") String code) {
-        long count = repository.countByShortCode(code);
-        log.info("analytics.count.code={} count={}", code, count);
-        return count;
+        return analyticsService.countClicks(code);
+    }
+
+    @GetMapping("/{code}")
+    public AnalyticsSummaryResponse summary(@PathVariable("code") String code) {
+        AnalyticsSummaryResponse response = analyticsService.summarize(code);
+        log.info("analytics.summary.code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
+        return response;
     }
 }

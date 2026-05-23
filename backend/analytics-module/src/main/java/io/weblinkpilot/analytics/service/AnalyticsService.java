@@ -2,7 +2,12 @@ package io.weblinkpilot.analytics.service;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
+import io.weblinkpilot.analytics.repository.CountryClicksView;
+import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
+import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,5 +46,44 @@ public class AnalyticsService {
                 metadata.deviceType(),
                 event.referrer() != null && !event.referrer().isBlank()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public long countClicks(String code) {
+        long count = repository.countByShortCode(code);
+        log.info("analytics.count.code={} count={}", code, count);
+        return count;
+    }
+
+    @Transactional(readOnly = true)
+    public AnalyticsSummaryResponse summarize(String code) {
+        long totalClicks = repository.countByShortCode(code);
+        long uniqueVisitors = repository.countDistinctIpAddressByShortCode(code);
+        Optional<ClickEvent> latestEvent = repository.findFirstByShortCodeOrderByClickedAtDesc(code);
+        List<AnalyticsCountryStatResponse> topCountries = repository.findTopCountriesByShortCode(code).stream()
+                .limit(5)
+                .map(view -> new AnalyticsCountryStatResponse(view.getCountry(), view.getClicks()))
+                .toList();
+
+        ClickEvent latest = latestEvent.orElse(null);
+        AnalyticsSummaryResponse summary = new AnalyticsSummaryResponse(
+                code,
+                totalClicks,
+                uniqueVisitors,
+                latest == null ? null : latest.getClickedAt(),
+                latest == null ? null : latest.getReferrer(),
+                latest == null ? null : latest.getBrowserFamily(),
+                latest == null ? null : latest.getDeviceType(),
+                topCountries
+        );
+
+        log.info(
+                "analytics.summary.code={} totalClicks={} uniqueVisitors={} topCountries={}",
+                code,
+                totalClicks,
+                uniqueVisitors,
+                topCountries.size()
+        );
+        return summary;
     }
 }

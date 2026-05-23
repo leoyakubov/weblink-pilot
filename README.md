@@ -45,6 +45,8 @@ Useful API endpoints after startup:
 - `http://localhost:8080/r/{code}`
 - `http://localhost:8080/api/v1/urls/{code}/preview`
 - `http://localhost:8080/api/v1/urls/{code}/qr`
+- `http://localhost:8080/api/v1/analytics/{code}`
+- `http://localhost:8080/api/v1/analytics/{code}/count`
 
 ## Frontend Quick Start
 
