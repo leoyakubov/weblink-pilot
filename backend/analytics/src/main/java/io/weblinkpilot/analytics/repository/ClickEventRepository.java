@@ -1,6 +1,7 @@
 package io.weblinkpilot.analytics.repository;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface ClickEventRepository extends JpaRepository<ClickEvent, Long> {
     long countByShortCode(String shortCode);
+
+    long countByShortCodeAndEventSource(String shortCode, LinkTrackingSource eventSource);
 
     @Query("select count(distinct c.ipAddress) from ClickEvent c where c.shortCode = :shortCode and c.ipAddress is not null")
     long countDistinctIpAddressByShortCode(@Param("shortCode") String shortCode);

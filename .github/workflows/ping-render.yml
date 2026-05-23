@@ -1,0 +1,25 @@
+name: Ping Render
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping backend health endpoint
+        env:
+          RENDER_HEALTH_URL: ${{ vars.RENDER_HEALTH_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RENDER_HEALTH_URL:-}" ]; then
+            echo "RENDER_HEALTH_URL repository variable is not set."
+            exit 1
+          fi
+
+          curl --fail --silent --show-error --max-time 30 "$RENDER_HEALTH_URL" >/dev/null
+          echo "Pinged $RENDER_HEALTH_URL"

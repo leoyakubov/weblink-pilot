@@ -91,10 +91,12 @@ Goals:
 - consume events asynchronously
 - persist click data
 - expose analytics summary endpoints
+- distinguish redirect clicks from QR scans in the analytics model
 
 Exit criteria:
 
 - redirect path emits events
+- QR scan path emits events separately
 - analytics are stored and queryable
 - metrics are visible for one short code
 

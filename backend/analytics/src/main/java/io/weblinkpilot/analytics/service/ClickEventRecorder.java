@@ -27,6 +27,7 @@ public class ClickEventRecorder {
         repository.save(new ClickEvent(
                 event.code(),
                 event.clickedAt(),
+                event.source(),
                 event.ipAddress(),
                 event.userAgent(),
                 event.referrer(),
@@ -35,8 +36,9 @@ public class ClickEventRecorder {
                 metadata.deviceType()
         ));
         log.info(
-                "analytics.click.persisted code={} country={} browser={} device={} referrerPresent={}",
+                "analytics.click.persisted code={} source={} country={} browser={} device={} referrerPresent={}",
                 event.code(),
+                event.source(),
                 event.country(),
                 metadata.browserFamily(),
                 metadata.deviceType(),

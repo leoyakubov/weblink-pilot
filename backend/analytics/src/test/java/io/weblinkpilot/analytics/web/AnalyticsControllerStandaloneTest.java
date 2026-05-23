@@ -48,6 +48,8 @@ class AnalyticsControllerStandaloneTest {
         AnalyticsSummaryResponse summary = new AnalyticsSummaryResponse(
                 "demo",
                 12L,
+                9L,
+                3L,
                 5L,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 "https://github.com",
@@ -61,6 +63,8 @@ class AnalyticsControllerStandaloneTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("demo"))
                 .andExpect(jsonPath("$.totalClicks").value(12))
+                .andExpect(jsonPath("$.redirectClicks").value(9))
+                .andExpect(jsonPath("$.qrScans").value(3))
                 .andExpect(jsonPath("$.topCountries[0].country").value("US"));
     }
 }

@@ -12,6 +12,7 @@ class PublicUrlBuilderTest {
 
         assertThat(builder.buildShortUrl("abc123")).isEqualTo("http://localhost:8080/r/abc123");
         assertThat(builder.buildQrCodeUrl("abc123")).isEqualTo("http://localhost:8080/api/v1/urls/abc123/qr");
+        assertThat(builder.buildQrScanUrl("abc123")).isEqualTo("http://localhost:8080/q/abc123");
         assertThat(builder.buildPreviewUrl("abc123")).isEqualTo("http://localhost:8080/api/v1/urls/abc123/preview");
     }
 

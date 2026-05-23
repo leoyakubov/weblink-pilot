@@ -99,6 +99,8 @@ describe('api helpers', () => {
       return new Response(JSON.stringify({
         code: 'github-org',
         totalClicks: 7,
+        redirectClicks: 5,
+        qrScans: 2,
         uniqueVisitors: 3,
         lastClickAt: '2026-05-22T14:00:00Z',
         lastReferrer: 'https://news.ycombinator.com',
@@ -116,6 +118,8 @@ describe('api helpers', () => {
     await expect(getAnalyticsSummary('github-org', settings)).resolves.toEqual({
       code: 'github-org',
       totalClicks: 7,
+      redirectClicks: 5,
+      qrScans: 2,
       uniqueVisitors: 3,
       lastClickAt: '2026-05-22T14:00:00Z',
       lastReferrer: 'https://news.ycombinator.com',

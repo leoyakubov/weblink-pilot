@@ -27,7 +27,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/info", "/actuator/metrics", "/actuator/metrics/**", "/actuator/prometheus").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/r/**").permitAll()
+                        .requestMatchers("/r/**", "/q/**").permitAll()
                         .requestMatchers("/api/v1/urls/*/preview").permitAll()
                         .requestMatchers("/api/v1/urls/*/qr").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

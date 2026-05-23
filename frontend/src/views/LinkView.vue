@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api'
+import { countryLabel } from '@/lib/countries'
 import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types'
@@ -83,18 +84,22 @@ function formatDate(value: string | null) {
         </p>
 
         <template v-else-if="link">
-          <div class="grid-3">
+          <div class="grid-2">
             <div class="metric">
               <span class="value">{{ link.clickCount }}</span>
-              <span class="label">Clicks</span>
+              <span class="label">Total interactions</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics?.redirectClicks ?? 0 }}</span>
+              <span class="label">Redirect clicks</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics?.qrScans ?? 0 }}</span>
+              <span class="label">QR scans</span>
             </div>
             <div class="metric">
               <span class="value">{{ analytics?.uniqueVisitors ?? 0 }}</span>
               <span class="label">Unique visitors</span>
-            </div>
-            <div class="metric">
-              <span class="value">{{ link.expiresAt ? 'Set' : 'Open' }}</span>
-              <span class="label">Expiration</span>
             </div>
           </div>
 
@@ -145,7 +150,15 @@ function formatDate(value: string | null) {
           <div class="grid-2">
             <div class="metric">
               <span class="value">{{ analytics.totalClicks }}</span>
-              <span class="label">Total clicks</span>
+              <span class="label">Total interactions</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics.redirectClicks }}</span>
+              <span class="label">Redirect clicks</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics.qrScans }}</span>
+              <span class="label">QR scans</span>
             </div>
             <div class="metric">
               <span class="value">{{ analytics.uniqueVisitors }}</span>
@@ -175,7 +188,7 @@ function formatDate(value: string | null) {
             </div>
             <div class="list">
               <div v-for="country in analytics.topCountries" :key="country.country" class="list-item">
-                <strong>{{ country.country }}</strong>
+                <strong>{{ countryLabel(country.country) }}</strong>
                 <p>{{ country.clicks }} clicks</p>
               </div>
             </div>

@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api'
+import { countryLabel } from '@/lib/countries'
 import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types'
@@ -32,6 +33,7 @@ const topCountryBars = computed(() => {
   const max = Math.max(...countries.map(item => item.clicks), 1)
   return countries.map(item => ({
     country: item.country,
+    label: countryLabel(item.country),
     clicks: item.clicks,
     width: Math.max(8, Math.round((item.clicks / max) * 100)),
   }))
@@ -191,13 +193,13 @@ watch(
               <p class="eyebrow">Country distribution</p>
               <h4 class="card-title">Clicks by country</h4>
             </div>
-            <span class="badge"><strong>{{ summary.totalClicks }}</strong> total clicks</span>
+            <span class="badge"><strong>{{ summary.totalClicks }}</strong> total interactions</span>
           </div>
 
           <div class="bar-chart" v-if="topCountryBars.length">
             <div v-for="bar in topCountryBars" :key="bar.country" class="bar-row">
               <div class="bar-labels">
-                <strong>{{ bar.country }}</strong>
+                <strong>{{ bar.label }}</strong>
                 <span>{{ bar.clicks }}</span>
               </div>
               <div class="bar-track">
@@ -226,18 +228,22 @@ watch(
         </div>
 
         <div v-else class="stack">
-          <div class="grid-3">
+          <div class="grid-2">
             <div class="metric">
               <span class="value">{{ summary?.totalClicks }}</span>
-              <span class="label">Total clicks</span>
+              <span class="label">Total interactions</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ summary?.redirectClicks }}</span>
+              <span class="label">Redirect clicks</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ summary?.qrScans }}</span>
+              <span class="label">QR scans</span>
             </div>
             <div class="metric">
               <span class="value">{{ summary?.uniqueVisitors }}</span>
               <span class="label">Unique visitors</span>
-            </div>
-            <div class="metric">
-              <span class="value">{{ summary?.topCountries.length }}</span>
-              <span class="label">Countries tracked</span>
             </div>
           </div>
 
@@ -328,7 +334,7 @@ watch(
 
           <div class="list">
             <div v-for="country in summary.topCountries" :key="country.country" class="list-item">
-              <strong>{{ country.country }}</strong>
+              <strong>{{ countryLabel(country.country) }}</strong>
               <p>{{ country.clicks }} clicks</p>
             </div>
           </div>

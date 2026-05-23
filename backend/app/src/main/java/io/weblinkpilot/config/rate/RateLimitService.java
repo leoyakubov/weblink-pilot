@@ -58,6 +58,9 @@ public class RateLimitService {
         if (path.startsWith("/r/")) {
             return "redirect";
         }
+        if (path.startsWith("/q/")) {
+            return "redirect";
+        }
         if (path.startsWith("/api/v1/")) {
             return "api";
         }

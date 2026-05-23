@@ -5,6 +5,7 @@ import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
 import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ public class AnalyticsQueryService {
     @Transactional(readOnly = true)
     public AnalyticsSummaryResponse summarize(String code) {
         long totalClicks = repository.countByShortCode(code);
+        long redirectClicks = repository.countByShortCodeAndEventSource(code, LinkTrackingSource.REDIRECT);
+        long qrScans = repository.countByShortCodeAndEventSource(code, LinkTrackingSource.QR_SCAN);
         long uniqueVisitors = repository.countDistinctIpAddressByShortCode(code);
         Optional<ClickEvent> latestEvent = repository.findFirstByShortCodeOrderByClickedAtDesc(code);
         List<AnalyticsCountryStatResponse> topCountries = repository.findTopCountriesByShortCode(code).stream()
@@ -44,6 +47,8 @@ public class AnalyticsQueryService {
         AnalyticsSummaryResponse summary = new AnalyticsSummaryResponse(
                 code,
                 totalClicks,
+                redirectClicks,
+                qrScans,
                 uniqueVisitors,
                 latest == null ? null : latest.getClickedAt(),
                 latest == null ? null : latest.getReferrer(),
@@ -53,9 +58,11 @@ public class AnalyticsQueryService {
         );
 
         log.info(
-                "analytics.summary.code={} totalClicks={} uniqueVisitors={} topCountries={}",
+                "analytics.summary.code={} totalClicks={} redirectClicks={} qrScans={} uniqueVisitors={} topCountries={}",
                 code,
                 totalClicks,
+                redirectClicks,
+                qrScans,
                 uniqueVisitors,
                 topCountries.size()
         );

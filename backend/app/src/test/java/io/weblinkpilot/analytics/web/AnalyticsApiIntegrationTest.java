@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -53,6 +54,7 @@ class AnalyticsApiIntegrationTest {
                 new ClickEvent(
                         "demo-it",
                         first,
+                        LinkTrackingSource.REDIRECT,
                         "203.0.113.10",
                         "Mozilla/5.0 Chrome/123.0",
                         "https://news.ycombinator.com",
@@ -63,6 +65,7 @@ class AnalyticsApiIntegrationTest {
                 new ClickEvent(
                         "demo-it",
                         second,
+                        LinkTrackingSource.REDIRECT,
                         "203.0.113.11",
                         "Mozilla/5.0 Safari/17.0",
                         "https://github.com",
@@ -73,6 +76,7 @@ class AnalyticsApiIntegrationTest {
                 new ClickEvent(
                         "demo-it",
                         third,
+                        LinkTrackingSource.QR_SCAN,
                         "203.0.113.10",
                         "Mozilla/5.0 Firefox/124.0",
                         null,
@@ -87,6 +91,8 @@ class AnalyticsApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("demo-it"))
                 .andExpect(jsonPath("$.totalClicks").value(3))
+                .andExpect(jsonPath("$.redirectClicks").value(2))
+                .andExpect(jsonPath("$.qrScans").value(1))
                 .andExpect(jsonPath("$.uniqueVisitors").value(2))
                 .andExpect(jsonPath("$.lastClickedAt").value("2026-05-22T12:05:00Z"))
                 .andExpect(jsonPath("$.lastReferrer").value(Matchers.nullValue()))

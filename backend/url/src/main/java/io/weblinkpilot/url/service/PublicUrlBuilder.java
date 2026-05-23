@@ -20,6 +20,10 @@ public class PublicUrlBuilder {
         return baseUrl + "/api/v1/urls/" + code + "/qr";
     }
 
+    public String buildQrScanUrl(String code) {
+        return baseUrl + "/q/" + code;
+    }
+
     public String buildPreviewUrl(String code) {
         return baseUrl + "/api/v1/urls/" + code + "/preview";
     }

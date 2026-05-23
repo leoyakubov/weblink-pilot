@@ -8,6 +8,7 @@ import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -43,6 +44,7 @@ class AnalyticsQueryServiceTest {
         ClickEvent latest = new ClickEvent(
                 "demo",
                 clickedAt,
+                LinkTrackingSource.REDIRECT,
                 "127.0.0.1",
                 "Mozilla/5.0",
                 "https://github.com",
@@ -63,6 +65,8 @@ class AnalyticsQueryServiceTest {
         };
 
         when(repository.countByShortCode("demo")).thenReturn(9L);
+        when(repository.countByShortCodeAndEventSource("demo", LinkTrackingSource.REDIRECT)).thenReturn(6L);
+        when(repository.countByShortCodeAndEventSource("demo", LinkTrackingSource.QR_SCAN)).thenReturn(3L);
         when(repository.countDistinctIpAddressByShortCode("demo")).thenReturn(4L);
         when(repository.findFirstByShortCodeOrderByClickedAtDesc("demo")).thenReturn(Optional.of(latest));
         when(repository.findTopCountriesByShortCode("demo")).thenReturn(List.of(country));
@@ -71,6 +75,8 @@ class AnalyticsQueryServiceTest {
 
         assertThat(summary.code()).isEqualTo("demo");
         assertThat(summary.totalClicks()).isEqualTo(9L);
+        assertThat(summary.redirectClicks()).isEqualTo(6L);
+        assertThat(summary.qrScans()).isEqualTo(3L);
         assertThat(summary.uniqueVisitors()).isEqualTo(4L);
         assertThat(summary.lastClickedAt()).isEqualTo(clickedAt);
         assertThat(summary.lastReferrer()).isEqualTo("https://github.com");
@@ -83,6 +89,8 @@ class AnalyticsQueryServiceTest {
     @Test
     void summarizesEmptyData() {
         when(repository.countByShortCode("empty")).thenReturn(0L);
+        when(repository.countByShortCodeAndEventSource("empty", LinkTrackingSource.REDIRECT)).thenReturn(0L);
+        when(repository.countByShortCodeAndEventSource("empty", LinkTrackingSource.QR_SCAN)).thenReturn(0L);
         when(repository.countDistinctIpAddressByShortCode("empty")).thenReturn(0L);
         when(repository.findFirstByShortCodeOrderByClickedAtDesc("empty")).thenReturn(Optional.empty());
         when(repository.findTopCountriesByShortCode("empty")).thenReturn(List.of());
@@ -90,6 +98,8 @@ class AnalyticsQueryServiceTest {
         AnalyticsSummaryResponse summary = service.summarize("empty");
 
         assertThat(summary.totalClicks()).isZero();
+        assertThat(summary.redirectClicks()).isZero();
+        assertThat(summary.qrScans()).isZero();
         assertThat(summary.uniqueVisitors()).isZero();
         assertThat(summary.lastClickedAt()).isNull();
         assertThat(summary.topCountries()).isEmpty();

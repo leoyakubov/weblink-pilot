@@ -42,6 +42,14 @@
 - `NETLIFY_SITE_ID`
 - `VITE_API_BASE_URL`
 
+## Optional keep-alive
+
+If you use Render free and want to reduce cold starts, add a GitHub repository variable:
+
+- `RENDER_HEALTH_URL=https://<your-render-backend>/actuator/health`
+
+Then let the scheduled GitHub workflow ping that URL every 10 minutes.
+
 ## How it works
 
 1. CI validates the backend and frontend on every push and pull request.

@@ -5,8 +5,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 
 @Entity
 @Table(name = "click_events")
@@ -21,6 +24,10 @@ public class ClickEvent {
 
     @Column(name = "clicked_at", nullable = false)
     private OffsetDateTime clickedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_source", nullable = false, length = 16)
+    private LinkTrackingSource eventSource;
 
     @Column(name = "ip_address", length = 64)
     private String ipAddress;
@@ -45,6 +52,7 @@ public class ClickEvent {
 
     public ClickEvent(String shortCode,
                       OffsetDateTime clickedAt,
+                      LinkTrackingSource eventSource,
                       String ipAddress,
                       String userAgent,
                       String referrer,
@@ -53,6 +61,7 @@ public class ClickEvent {
                       String deviceType) {
         this.shortCode = shortCode;
         this.clickedAt = clickedAt;
+        this.eventSource = eventSource;
         this.ipAddress = ipAddress;
         this.userAgent = userAgent;
         this.referrer = referrer;
@@ -71,6 +80,10 @@ public class ClickEvent {
 
     public OffsetDateTime getClickedAt() {
         return clickedAt;
+    }
+
+    public LinkTrackingSource getEventSource() {
+        return eventSource;
     }
 
     public String getIpAddress() {

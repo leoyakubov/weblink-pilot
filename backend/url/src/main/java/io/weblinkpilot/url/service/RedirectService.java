@@ -1,6 +1,7 @@
 package io.weblinkpilot.url.service;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
@@ -32,6 +33,11 @@ public class RedirectService {
 
     @Transactional
     public String resolveTarget(String code, RedirectRequestContext context) {
+        return resolveTarget(code, context, LinkTrackingSource.REDIRECT);
+    }
+
+    @Transactional
+    public String resolveTarget(String code, RedirectRequestContext context, LinkTrackingSource source) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
             log.warn("link.redirect.miss code={}", code);
@@ -51,6 +57,7 @@ public class RedirectService {
         linkPublisher.publish(new LinkClickedEvent(
                 code,
                 now,
+                source,
                 context.clientIp(),
                 context.userAgent(),
                 context.referrer(),
@@ -58,8 +65,9 @@ public class RedirectService {
         ));
 
         log.info(
-                "link.redirect.success code={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
+                "link.redirect.success code={} source={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
                 code,
+                source,
                 hostOf(link.getOriginalUrl()),
                 link.getClickCount(),
                 maskIp(context.clientIp()),

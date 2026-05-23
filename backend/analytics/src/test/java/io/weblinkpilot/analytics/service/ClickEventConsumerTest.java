@@ -3,6 +3,7 @@ package io.weblinkpilot.analytics.service;
 import static org.mockito.Mockito.verify;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ class ClickEventConsumerTest {
         LinkClickedEvent event = new LinkClickedEvent(
                 "demo",
                 OffsetDateTime.now(ZoneOffset.UTC),
+                LinkTrackingSource.QR_SCAN,
                 "127.0.0.1",
                 "Mozilla/5.0",
                 "https://github.com",

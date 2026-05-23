@@ -3,6 +3,7 @@ package io.weblinkpilot.url.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.IMAGE_PNG;
@@ -17,6 +18,7 @@ import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
 import io.weblinkpilot.url.service.QrCodeService;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
 import io.weblinkpilot.url.service.UrlLookupService;
 import io.weblinkpilot.url.service.UrlService;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
@@ -46,11 +48,14 @@ class UrlControllerStandaloneTest {
     @Mock
     private QrCodeService qrCodeService;
 
+    @Mock
+    private PublicUrlBuilder publicUrlBuilder;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        UrlController controller = new UrlController(urlService, urlLookupService, qrCodeService, new SimpleMeterRegistry());
+        UrlController controller = new UrlController(urlService, urlLookupService, qrCodeService, publicUrlBuilder, new SimpleMeterRegistry());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new UrlExceptionHandler())
                 .build();
@@ -161,7 +166,8 @@ class UrlControllerStandaloneTest {
                 2
         );
         when(urlLookupService.getByCode("demo")).thenReturn(response);
-        when(qrCodeService.generatePng("http://localhost:8080/r/demo")).thenReturn(new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47});
+        lenient().when(publicUrlBuilder.buildQrScanUrl("demo")).thenReturn("http://localhost:8080/q/demo");
+        when(qrCodeService.generatePng("http://localhost:8080/q/demo")).thenReturn(new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47});
 
         mockMvc.perform(get("/api/v1/urls/demo/qr"))
                 .andExpect(status().isOk())

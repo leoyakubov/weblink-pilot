@@ -1,6 +1,6 @@
 # WebLinkPilot
 
-Modern URL shortening platform with QR codes, analytics, and a mobile-first web UI.
+Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
 ## Docs
 

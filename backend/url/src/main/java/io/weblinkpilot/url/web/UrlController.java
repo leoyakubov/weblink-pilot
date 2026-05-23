@@ -6,6 +6,7 @@ import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
 import io.weblinkpilot.url.service.UrlService;
 import io.weblinkpilot.url.service.UrlLookupService;
 import io.weblinkpilot.url.service.QrCodeService;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
 import jakarta.validation.Valid;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -36,6 +37,7 @@ public class UrlController {
     private final UrlService urlService;
     private final UrlLookupService urlLookupService;
     private final QrCodeService qrCodeService;
+    private final PublicUrlBuilder publicUrlBuilder;
     private final Counter browseCounter;
     private final Counter detailsCounter;
     private final Counter previewCounter;
@@ -44,10 +46,12 @@ public class UrlController {
     public UrlController(UrlService urlService,
                          UrlLookupService urlLookupService,
                          QrCodeService qrCodeService,
+                         PublicUrlBuilder publicUrlBuilder,
                          MeterRegistry meterRegistry) {
         this.urlService = urlService;
         this.urlLookupService = urlLookupService;
         this.qrCodeService = qrCodeService;
+        this.publicUrlBuilder = publicUrlBuilder;
         this.browseCounter = Counter.builder("weblinkpilot.urls.browse.requests")
                 .description("Number of authenticated browse requests for recent links")
                 .register(meterRegistry);
@@ -142,8 +146,7 @@ public class UrlController {
     )
     public ResponseEntity<byte[]> qr(@PathVariable("code") String code) {
         qrCounter.increment();
-        String shortUrl = urlLookupService.getByCode(code).shortUrl();
-        byte[] png = qrCodeService.generatePng(shortUrl);
+        byte[] png = qrCodeService.generatePng(publicUrlBuilder.buildQrScanUrl(code));
         log.info("link.qr.generated code={} bytes={}", code, png.length);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)

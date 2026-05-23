@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
+import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -33,12 +34,14 @@ class ClickEventRepositoryTest {
         OffsetDateTime second = first.plusMinutes(2);
 
         repository.saveAll(List.of(
-                new ClickEvent("demo", first, "203.0.113.10", "Mozilla/5.0", "https://github.com", "US", "Chrome", "Desktop"),
-                new ClickEvent("demo", second, "203.0.113.11", "Mozilla/5.0", null, "DE", "Safari", "Mobile"),
-                new ClickEvent("demo", second.plusMinutes(1), "203.0.113.10", "Mozilla/5.0", null, "US", "Firefox", "Mobile")
+                new ClickEvent("demo", first, LinkTrackingSource.REDIRECT, "203.0.113.10", "Mozilla/5.0", "https://github.com", "US", "Chrome", "Desktop"),
+                new ClickEvent("demo", second, LinkTrackingSource.REDIRECT, "203.0.113.11", "Mozilla/5.0", null, "DE", "Safari", "Mobile"),
+                new ClickEvent("demo", second.plusMinutes(1), LinkTrackingSource.QR_SCAN, "203.0.113.10", "Mozilla/5.0", null, "US", "Firefox", "Mobile")
         ));
 
         assertThat(repository.countByShortCode("demo")).isEqualTo(3L);
+        assertThat(repository.countByShortCodeAndEventSource("demo", LinkTrackingSource.REDIRECT)).isEqualTo(2L);
+        assertThat(repository.countByShortCodeAndEventSource("demo", LinkTrackingSource.QR_SCAN)).isEqualTo(1L);
         assertThat(repository.countDistinctIpAddressByShortCode("demo")).isEqualTo(2L);
         assertThat(repository.findFirstByShortCodeOrderByClickedAtDesc("demo")).isPresent();
         assertThat(repository.findTopCountriesByShortCode("demo"))

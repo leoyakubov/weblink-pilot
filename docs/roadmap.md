@@ -7,7 +7,7 @@
 | Done | Repo readiness | Repo layout, docs, scripts, Maven wrapper, Docker, Sonar, coverage, and test tooling are in place. |
 | Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
 | Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, and QR flows are implemented. |
-| Done | Analytics | Click events, summaries, and enrichment are implemented. |
+| Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
 | Done | Frontend foundation | Vue app shell and backend integration are in place. |
 | Done | Frontend feature set | Create flow, dashboard, history, details, and QR UI are in place. |
 | Done | Hardening baseline | Tests, coverage, rate limiting, Docker, Sonar, ArchUnit, and Testcontainers are in place. |

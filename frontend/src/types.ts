@@ -36,6 +36,8 @@ export interface AnalyticsCountryStat {
 export interface AnalyticsSummaryResponse {
   code: string
   totalClicks: number
+  redirectClicks: number
+  qrScans: number
   uniqueVisitors: number
   lastClickAt: string | null
   lastReferrer: string | null
