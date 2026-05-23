@@ -36,6 +36,10 @@ const linkPreviewUrl = computed(() =>
   createdLink.value ? buildApiBaseUrl(`/urls/${createdLink.value.code}/preview`, settings) : '',
 )
 
+const dashboardUrl = computed(() =>
+  createdLink.value ? { name: 'dashboard', query: { code: createdLink.value.code } } : '/',
+)
+
 function syncSettings() {
   saveSettings({
     apiBaseUrl: settings.apiBaseUrl || defaultSettings().apiBaseUrl,
@@ -223,6 +227,9 @@ function openExternal(url: string) {
               :to="{ name: 'link', params: { code: createdLink.code } }"
             >
               View details page
+            </RouterLink>
+            <RouterLink class="button button-secondary" :to="dashboardUrl">
+              Open analytics
             </RouterLink>
             <button class="button button-primary" type="button" @click="copy(createdLink.shortUrl)">
               Copy short URL

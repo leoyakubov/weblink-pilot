@@ -4,6 +4,9 @@ import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
+import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,22 @@ public class UrlLookupService {
                 hostOf(link.getOriginalUrl()),
                 link.getExpiresAt()
         );
+        return toResponse(link);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LinkResponse> listRecentLinks(int limit) {
+        int size = Math.max(1, Math.min(limit, 50));
+        List<LinkResponse> links = repository.findAll(PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt")))
+                .getContent()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        log.info("link.list.success limit={} returned={}", size, links.size());
+        return links;
+    }
+
+    private LinkResponse toResponse(ShortLink link) {
         return new LinkResponse(
                 link.getCode(),
                 publicUrlBuilder.buildShortUrl(link.getCode()),

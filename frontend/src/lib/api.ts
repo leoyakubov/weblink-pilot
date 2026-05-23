@@ -1,4 +1,10 @@
-import type { ApiSettings, CreateLinkRequest, LinkResponse, RedirectPreviewResponse } from '@/types'
+import type {
+  ApiSettings,
+  AnalyticsSummaryResponse,
+  CreateLinkRequest,
+  LinkResponse,
+  RedirectPreviewResponse,
+} from '@/types'
 import { loadSettings, normalizeBaseUrl } from '@/lib/settings'
 
 function basicAuthHeader(username: string, password: string) {
@@ -54,10 +60,18 @@ export function createLink(request: CreateLinkRequest, settings: ApiSettings = l
   }, settings)
 }
 
+export function listLinks(limit: number = 10, settings: ApiSettings = loadSettings()) {
+  return requestJson<LinkResponse[]>(`/urls?limit=${encodeURIComponent(String(limit))}`, { method: 'GET' }, settings)
+}
+
 export function getLink(code: string, settings: ApiSettings = loadSettings()) {
   return requestJson<LinkResponse>(`/urls/${encodeURIComponent(code)}`, { method: 'GET' }, settings)
 }
 
 export function getRedirectPreview(code: string, settings: ApiSettings = loadSettings()) {
   return requestJson<RedirectPreviewResponse>(`/urls/${encodeURIComponent(code)}/preview`, { method: 'GET' }, settings)
+}
+
+export function getAnalyticsSummary(code: string, settings: ApiSettings = loadSettings()) {
+  return requestJson<AnalyticsSummaryResponse>(`/analytics/${encodeURIComponent(code)}`, { method: 'GET' }, settings)
 }

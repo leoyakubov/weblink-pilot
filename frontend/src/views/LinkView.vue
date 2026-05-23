@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { buildApiBaseUrl, getLink, getRedirectPreview } from '@/lib/api'
+import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api'
 import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
-import type { LinkResponse, RedirectPreviewResponse } from '@/types'
+import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types'
 
 const route = useRoute()
 const settings = loadSettings()
 
 const link = ref<LinkResponse | null>(null)
 const preview = ref<RedirectPreviewResponse | null>(null)
+const analytics = ref<AnalyticsSummaryResponse | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 
@@ -25,12 +26,15 @@ async function load(codeValue: string) {
   errorMessage.value = ''
 
   try {
-    const [details, redirectPreview] = await Promise.all([
+    const [details, redirectPreview, analyticsSummary] = await Promise.all([
       getLink(codeValue, settings),
       getRedirectPreview(codeValue, settings),
+      getAnalyticsSummary(codeValue, settings),
     ])
+
     link.value = details
     preview.value = redirectPreview
+    analytics.value = analyticsSummary
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Could not load link details'
   } finally {
@@ -50,6 +54,17 @@ function copy(value: string) {
 }
 
 const qrImage = computed(() => link.value?.qrCodeUrl ?? '')
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return 'No clicks yet'
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
 </script>
 
 <template>
@@ -68,10 +83,14 @@ const qrImage = computed(() => link.value?.qrCodeUrl ?? '')
         </p>
 
         <template v-else-if="link">
-          <div class="grid-2">
+          <div class="grid-3">
             <div class="metric">
               <span class="value">{{ link.clickCount }}</span>
               <span class="label">Clicks</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics?.uniqueVisitors ?? 0 }}</span>
+              <span class="label">Unique visitors</span>
             </div>
             <div class="metric">
               <span class="value">{{ link.expiresAt ? 'Set' : 'Open' }}</span>
@@ -114,13 +133,54 @@ const qrImage = computed(() => link.value?.qrCodeUrl ?? '')
     <article class="card">
       <div class="card-inner stack">
         <div>
-          <p class="eyebrow">QR and debug</p>
+          <p class="eyebrow">QR and analytics</p>
           <h3 class="panel-title">Scan-friendly output</h3>
         </div>
 
         <figure v-if="link">
           <img class="qr-image" :src="qrImage" :alt="`QR code for ${link.code}`" />
         </figure>
+
+        <div v-if="analytics" class="stack">
+          <div class="grid-2">
+            <div class="metric">
+              <span class="value">{{ analytics.totalClicks }}</span>
+              <span class="label">Total clicks</span>
+            </div>
+            <div class="metric">
+              <span class="value">{{ analytics.uniqueVisitors }}</span>
+              <span class="label">Unique visitors</span>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>Last click</strong>
+            <p>{{ formatDate(analytics.lastClickAt) }}</p>
+          </div>
+          <div class="list-item">
+            <strong>Last referrer</strong>
+            <p>{{ analytics.lastReferrer ?? 'No referrer captured yet' }}</p>
+          </div>
+          <div class="list-item">
+            <strong>Browser / device</strong>
+            <p>
+              {{ analytics.lastBrowserFamily ?? 'Unknown browser' }} - {{ analytics.lastDeviceType ?? 'Unknown device' }}
+            </p>
+          </div>
+
+          <div v-if="analytics.topCountries.length" class="stack">
+            <div>
+              <p class="eyebrow">Top countries</p>
+              <h4 class="card-title">Where clicks are coming from</h4>
+            </div>
+            <div class="list">
+              <div v-for="country in analytics.topCountries" :key="country.country" class="list-item">
+                <strong>{{ country.country }}</strong>
+                <p>{{ country.clicks }} clicks</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div v-if="preview" class="stack">
           <div class="list-item">

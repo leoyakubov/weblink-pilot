@@ -27,3 +27,19 @@ export interface RedirectPreviewResponse {
   status: number
   locationHeader: string
 }
+
+export interface AnalyticsCountryStat {
+  country: string
+  clicks: number
+}
+
+export interface AnalyticsSummaryResponse {
+  code: string
+  totalClicks: number
+  uniqueVisitors: number
+  lastClickAt: string | null
+  lastReferrer: string | null
+  lastBrowserFamily: string | null
+  lastDeviceType: string | null
+  topCountries: AnalyticsCountryStat[]
+}

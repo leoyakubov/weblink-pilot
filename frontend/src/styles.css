@@ -225,6 +225,7 @@ button {
   box-shadow: var(--shadow);
   border-radius: var(--radius-xl);
   overflow: hidden;
+  animation: rise-in 520ms ease both;
 }
 
 .card::before {
@@ -438,6 +439,66 @@ button {
   gap: 1rem;
 }
 
+.section-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.chart-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-xl);
+  border: var(--border);
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 36%),
+    rgba(4, 10, 20, 0.46);
+}
+
+.bar-chart {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bar-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+}
+
+.bar-labels strong {
+  color: var(--text);
+}
+
+.bar-track {
+  height: 0.7rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8 0%, #22c55e 100%);
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.18);
+}
+
+.sparkline {
+  width: 100%;
+  height: 132px;
+  margin-top: 0.25rem;
+}
+
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -529,6 +590,18 @@ button {
   background: rgba(4, 10, 20, 0.44);
 }
 
+.button-reset {
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  appearance: none;
+}
+
+.button-reset:hover {
+  transform: translateY(-1px);
+}
+
 .list-item strong {
   display: block;
   margin-bottom: 0.35rem;
@@ -545,6 +618,10 @@ button {
   .grid-3,
   .grid-2 {
     grid-template-columns: 1fr;
+  }
+
+  .section-row {
+    flex-direction: column;
   }
 
   .topbar {
@@ -570,5 +647,17 @@ button {
 
   .metrics-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/urls")
@@ -76,6 +78,11 @@ public class UrlController {
     )
     public ResponseEntity<LinkResponse> create(@Valid @RequestBody CreateLinkRequest request) {
         return ResponseEntity.ok(urlService.create(request));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LinkResponse>> list(@RequestParam(name = "limit", defaultValue = "10") int limit) {
+        return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
     }
 
     @GetMapping("/{code}")

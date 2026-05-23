@@ -84,6 +84,40 @@ class UrlApiIntegrationTest {
     }
 
     @Test
+    void listsRecentLinksForAuthenticatedUsers() throws Exception {
+        mockMvc.perform(post("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "originalUrl": "https://example.com/one",
+                                  "customAlias": "one"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "originalUrl": "https://example.com/two",
+                                  "customAlias": "two"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .param("limit", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("two"))
+                .andExpect(jsonPath("$[0].shortUrl").value("http://localhost:8080/r/two"))
+                .andExpect(jsonPath("$[1].code").value("one"))
+                .andExpect(jsonPath("$[1].shortUrl").value("http://localhost:8080/r/one"));
+    }
+
+    @Test
     void returnsConflictForDuplicateAlias() throws Exception {
         String payload = """
                 {

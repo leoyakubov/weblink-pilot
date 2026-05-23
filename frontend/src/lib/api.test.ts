@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { buildApiBaseUrl, createLink, getRedirectPreview } from './api'
+import { buildApiBaseUrl, createLink, getAnalyticsSummary, getRedirectPreview, listLinks } from './api'
 import type { ApiSettings } from '@/types'
 
 const settings: ApiSettings = {
@@ -91,5 +91,71 @@ describe('api helpers', () => {
       status: 302,
       locationHeader: 'https://github.com',
     })
+  })
+
+  it('loads analytics summary from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/analytics/github-org')
+      return new Response(JSON.stringify({
+        code: 'github-org',
+        totalClicks: 7,
+        uniqueVisitors: 3,
+        lastClickAt: '2026-05-22T14:00:00Z',
+        lastReferrer: 'https://news.ycombinator.com',
+        lastBrowserFamily: 'Chrome',
+        lastDeviceType: 'Desktop',
+        topCountries: [{ country: 'Ukraine', clicks: 4 }],
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(getAnalyticsSummary('github-org', settings)).resolves.toEqual({
+      code: 'github-org',
+      totalClicks: 7,
+      uniqueVisitors: 3,
+      lastClickAt: '2026-05-22T14:00:00Z',
+      lastReferrer: 'https://news.ycombinator.com',
+      lastBrowserFamily: 'Chrome',
+      lastDeviceType: 'Desktop',
+      topCountries: [{ country: 'Ukraine', clicks: 4 }],
+    })
+  })
+
+  it('lists recent links from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/urls?limit=5')
+      return new Response(JSON.stringify([
+        {
+          code: 'two',
+          shortUrl: 'http://localhost:8080/r/two',
+          qrCodeUrl: 'http://localhost:8080/api/v1/urls/two/qr',
+          originalUrl: 'https://example.com/two',
+          createdAt: '2026-05-22T15:00:00Z',
+          expiresAt: null,
+          clickCount: 2,
+        },
+      ]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(listLinks(5, settings)).resolves.toEqual([
+      {
+        code: 'two',
+        shortUrl: 'http://localhost:8080/r/two',
+        qrCodeUrl: 'http://localhost:8080/api/v1/urls/two/qr',
+        originalUrl: 'https://example.com/two',
+        createdAt: '2026-05-22T15:00:00Z',
+        expiresAt: null,
+        clickCount: 2,
+      },
+    ])
   })
 })

@@ -94,7 +94,33 @@ Response:
 }
 ```
 
-### 5. Get QR code
+### 5. List recent links
+
+`GET /api/v1/urls?limit=10`
+
+Response:
+
+```json
+[
+  {
+    "code": "my-link",
+    "shortUrl": "https://weblink-pilot.io/r/my-link",
+    "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr",
+    "originalUrl": "https://example.com/some/long/link",
+    "createdAt": "2026-05-22T11:00:00Z",
+    "expiresAt": "2026-12-31T23:59:59Z",
+    "clickCount": 128
+  }
+]
+```
+
+Notes:
+
+- returns the newest links first
+- intended for authenticated dashboard and history views
+- `limit` is capped server-side
+
+### 6. Get QR code
 
 `GET /api/v1/urls/{code}/qr`
 
@@ -108,7 +134,7 @@ Suggested behavior:
 - frontend can render it inline or download it
 - SVG support can be added later if we decide we want vector output
 
-### 6. Get analytics summary
+### 7. Get analytics summary
 
 `GET /api/v1/analytics/{code}`
 
@@ -119,7 +145,7 @@ Response:
   "code": "my-link",
   "totalClicks": 128,
   "uniqueVisitors": 91,
-  "lastClickedAt": "2026-05-22T11:30:00Z",
+  "lastClickAt": "2026-05-22T11:30:00Z",
   "lastReferrer": "https://news.ycombinator.com",
   "lastBrowserFamily": "CHROME",
   "lastDeviceType": "MOBILE",
@@ -163,6 +189,9 @@ The Vue app should rely on:
 - `code`
 - `shortUrl`
 - `qrCodeUrl`
+- `originalUrl`
+- `createdAt`
+- `expiresAt`
 - `clickCount`
 - analytics summary fields
 

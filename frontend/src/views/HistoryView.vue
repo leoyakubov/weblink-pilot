@@ -1,25 +1,118 @@
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
+import { buildApiBaseUrl, listLinks } from '@/lib/api'
+import { copyText } from '@/lib/clipboard'
+import { loadSettings } from '@/lib/settings'
+import type { LinkResponse } from '@/types'
+
+const settings = loadSettings()
+const links = ref<LinkResponse[]>([])
+const loading = ref(false)
+const errorMessage = ref('')
+
+const hasLinks = computed(() => links.value.length > 0)
+
+async function refresh() {
+  loading.value = true
+  errorMessage.value = ''
+
+  try {
+    links.value = await listLinks(20, settings)
+  } catch (error) {
+    links.value = []
+    errorMessage.value = error instanceof Error ? error.message : 'Could not load recent links'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  refresh()
+})
+
+function openExternal(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+function copy(value: string) {
+  return copyText(value)
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+</script>
+
 <template>
   <section class="page-grid">
     <article class="card">
       <div class="card-inner stack">
-        <div>
-          <p class="eyebrow">Link history</p>
-          <h3 class="panel-title">A place for your created links.</h3>
+        <div class="section-row">
+          <div>
+            <p class="eyebrow">Link history</p>
+            <h3 class="panel-title">Recent links from the backend.</h3>
+          </div>
+          <button class="button button-secondary" type="button" :disabled="loading" @click="refresh">
+            {{ loading ? 'Refreshing...' : 'Refresh' }}
+          </button>
         </div>
 
         <p class="help-text">
-          The list view will show search, filters, and quick actions once we add persistence-backed browsing to the frontend.
+          This list now comes from the Spring Boot browse endpoint, so it reflects the same data your dashboard and details pages use.
         </p>
 
-        <div class="list">
-          <div class="list-item">
-            <strong>github-org</strong>
-            <p>github.com/docs</p>
+        <p v-if="errorMessage" class="status error">
+          <span class="status-dot"></span>
+          {{ errorMessage }}
+        </p>
+
+        <div v-if="hasLinks" class="list">
+          <div v-for="item in links" :key="item.code" class="list-item">
+            <div class="section-row">
+              <div>
+                <strong>{{ item.code }}</strong>
+                <p>{{ item.originalUrl }}</p>
+              </div>
+              <span class="footnote">{{ formatDate(item.createdAt) }}</span>
+            </div>
+            <p class="footnote">{{ item.clickCount }} clicks</p>
+            <div class="actions">
+              <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: item.code } }">
+                Details
+              </RouterLink>
+              <RouterLink class="button button-secondary" :to="{ name: 'dashboard', query: { code: item.code } }">
+                Analytics
+              </RouterLink>
+              <button class="button button-secondary" type="button" @click="copy(item.shortUrl)">
+                Copy short URL
+              </button>
+              <button class="button button-secondary" type="button" @click="openExternal(item.qrCodeUrl)">
+                Open QR
+              </button>
+              <button
+                class="button button-secondary"
+                type="button"
+                @click="openExternal(buildApiBaseUrl(`/urls/${item.code}/preview`, settings))"
+              >
+                Preview JSON
+              </button>
+            </div>
           </div>
-          <div class="list-item">
-            <strong>demo4</strong>
-            <p>example.com</p>
-          </div>
+        </div>
+
+        <div v-else class="empty-state">
+          <p class="eyebrow">No history yet</p>
+          <h4 class="card-title">Create a link first and it will appear here.</h4>
+          <p class="muted">
+            The history list is backed by the URL browse endpoint, so there is no separate client-side state to manage.
+          </p>
+          <RouterLink class="button button-primary" to="/">
+            Create link
+          </RouterLink>
         </div>
       </div>
     </article>

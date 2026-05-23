@@ -1,6 +1,6 @@
 # WebLinkPilot Frontend
 
-Vue 3 mobile-first web app for creating short links, previewing redirect targets, and showing QR codes.
+Vue 3 mobile-first web app for creating short links, previewing redirect targets, showing QR codes, and browsing backend-powered link history plus analytics snapshots.
 
 ## Setup
 
