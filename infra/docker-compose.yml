@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: weblink-pilot-postgres
+    environment:
+      POSTGRES_DB: weblinkpilot
+      POSTGRES_USER: weblinkpilot
+      POSTGRES_PASSWORD: weblinkpilot
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weblinkpilot -d weblinkpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    container_name: weblink-pilot-backend
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weblinkpilot
+      SPRING_DATASOURCE_USERNAME: weblinkpilot
+      SPRING_DATASOURCE_PASSWORD: weblinkpilot
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      APP_PUBLIC_BASE_URL: http://localhost:8080
+      APP_CACHE_PROVIDER: local
+      APP_RATE_LIMIT_ENABLED: "true"
+      APP_RATE_LIMIT_API_PER_MINUTE: "120"
+      APP_RATE_LIMIT_REDIRECT_PER_MINUTE: "300"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    container_name: weblink-pilot-frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"

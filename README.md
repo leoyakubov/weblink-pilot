@@ -59,12 +59,40 @@ From the repo root, you can start the apps with:
 
 The backend script uses the Maven wrapper and the frontend script installs dependencies on first run if `node_modules/` is missing.
 
+To run the whole Docker stack from the repo root:
+
+- Windows: [`scripts/run-docker.ps1`](scripts/run-docker.ps1)
+- Unix: [`scripts/run-docker.sh`](scripts/run-docker.sh)
+
 For a faster backend dev loop, use the dev launcher instead:
 
 - Windows backend dev: [`scripts/run-backend-dev.ps1`](scripts/run-backend-dev.ps1)
 - Unix backend dev: [`scripts/run-backend-dev.sh`](scripts/run-backend-dev.sh)
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
+
+## Docker Stack
+
+The repo also includes a containerized local stack:
+
+- [`infra/docker-compose.yml`](infra/docker-compose.yml)
+- backend image built from [`backend/Dockerfile`](backend/Dockerfile)
+- frontend image built from [`frontend/Dockerfile`](frontend/Dockerfile)
+- Postgres 17 for persistence
+
+Start it from the repo root:
+
+```bash
+docker compose -f infra/docker-compose.yml up --build
+```
+
+Services:
+
+- frontend: `http://localhost:8081`
+- backend API: `http://localhost:8080/api/v1`
+- backend direct: `http://localhost:8080`
+
+The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The backend uses Postgres in this setup, while local scripts still use the in-memory H2 profile.
 
 ## Frontend Quick Start
 
