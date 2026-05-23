@@ -65,28 +65,65 @@ On macOS/Linux:
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
 
+## SonarQube / Code Quality
+
+Local SonarQube support is available through the Docker stack in `infra/sonar/`.
+
+Start it from the repo root:
+
+```powershell
+.\scripts\sonar\run-sonar-stack.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/sonar/run-sonar-stack.sh
+```
+
+Then run analysis from `backend/`:
+
+```powershell
+$env:SONAR_TOKEN = "<your-token>"
+.\mvnw.cmd clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+```
+
+On macOS/Linux:
+
+```bash
+export SONAR_TOKEN="<your-token>"
+./mvnw clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+```
+
+The default local SonarQube UI is available at `http://localhost:9001`.
+
+If you prefer not to type the Maven command manually, use the helper scripts:
+
+- Windows: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)
+- Unix: [`scripts/sonar/run-sonar-analysis.sh`](scripts/sonar/run-sonar-analysis.sh)
+
+For a local-only convenience file, create `.env.local` at the repo root with:
+
+```bash
+SONAR_TOKEN=your-token-here
+```
+
 ## Run Scripts
 
-From the repo root, you can start the apps with:
+From the repo root, the preferred quick-run entrypoints are grouped by area:
 
-- Windows backend: [`scripts/run-backend.ps1`](scripts/run-backend.ps1)
-- Unix backend: [`scripts/run-backend.sh`](scripts/run-backend.sh)
-- Windows frontend: [`scripts/run-frontend.ps1`](scripts/run-frontend.ps1)
-- Unix frontend: [`scripts/run-frontend.sh`](scripts/run-frontend.sh)
-- Windows backend tests: [`scripts/test-backend.ps1`](scripts/test-backend.ps1)
-- Unix backend tests: [`scripts/test-backend.sh`](scripts/test-backend.sh)
+- Backend run: [`scripts/backend/run-backend.ps1`](scripts/backend/run-backend.ps1)
+- Backend dev: [`scripts/backend/run-backend-dev.ps1`](scripts/backend/run-backend-dev.ps1)
+- Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
+- Frontend run: [`scripts/frontend/run-frontend.ps1`](scripts/frontend/run-frontend.ps1)
+- Frontend smoke test: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
+- Docker stack: [`scripts/docker/run-docker.ps1`](scripts/docker/run-docker.ps1)
+- SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
+- Sonar analysis: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)
 
-The backend script uses the Maven wrapper and the frontend script installs dependencies on first run if `node_modules/` is missing.
+Unix versions live beside them with the same names ending in `.sh`.
 
-To run the whole Docker stack from the repo root:
-
-- Windows: [`scripts/run-docker.ps1`](scripts/run-docker.ps1)
-- Unix: [`scripts/run-docker.sh`](scripts/run-docker.sh)
-
-For a faster backend dev loop, use the dev launcher instead:
-
-- Windows backend dev: [`scripts/run-backend-dev.ps1`](scripts/run-backend-dev.ps1)
-- Unix backend dev: [`scripts/run-backend-dev.sh`](scripts/run-backend-dev.sh)
+The original flat scripts still exist for compatibility, but the grouped ones are easier to scan and tab-complete.
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
 

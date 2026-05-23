@@ -97,6 +97,27 @@ The HTML report is generated under:
 
 - `backend/coverage/target/site/jacoco-aggregate/index.html`
 
+## SonarQube
+
+The repo also has a local SonarQube stack under `infra/sonar/`.
+
+Start it from the repo root:
+
+```powershell
+.\scripts\sonar\run-sonar-stack.ps1
+```
+
+Then run the analysis from `backend/` with a Sonar token:
+
+```powershell
+$env:SONAR_TOKEN = "<your-token>"
+.\mvnw.cmd clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+```
+
+The backend POM points Sonar at the aggregate JaCoCo XML report:
+
+- `coverage/target/site/jacoco-aggregate/jacoco.xml`
+
 ## Current Rule of Thumb
 
 The goal is not to test every line equally.

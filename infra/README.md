@@ -16,11 +16,11 @@ This folder contains the Docker Compose stack for running the full project local
 From the repository root:
 
 ```powershell
-.\scripts\run-docker.ps1
+.\scripts\docker\run-docker.ps1
 ```
 
 ```bash
-./scripts/run-docker.sh
+./scripts/docker/run-docker.sh
 ```
 
 Or run Compose directly:
