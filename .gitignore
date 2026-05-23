@@ -32,6 +32,9 @@ failsafe-reports/
 jacoco.exec
 coverage/
 .coverage
+!backend/coverage/
+!backend/coverage/pom.xml
+backend/coverage/target/
 
 # Node / Vue / frontend
 node_modules/
