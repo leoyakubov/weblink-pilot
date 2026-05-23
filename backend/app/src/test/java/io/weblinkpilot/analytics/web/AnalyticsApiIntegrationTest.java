@@ -39,6 +39,7 @@ class AnalyticsApiIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        clickEventRepository.deleteAllInBatch();
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
