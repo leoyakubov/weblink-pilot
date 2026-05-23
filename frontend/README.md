@@ -21,6 +21,8 @@ copy .env.example .env.local
 npm run dev
 ```
 
+Netlify needs a SPA fallback for direct route refreshes like `/dashboard`, so the repo includes `public/_redirects` with `/* /index.html 200`.
+
 ## Test
 
 ```bash
