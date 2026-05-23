@@ -1,0 +1,34 @@
+package io.weblinkpilot.url.web;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+
+class CountryResolverTest {
+
+    private final CountryResolver resolver = new CountryResolver();
+
+    @Test
+    void prefersTrustedCountryHeaders() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("CF-IPCountry", "de");
+
+        assertThat(resolver.resolve(request, "198.51.100.10")).isEqualTo("DE");
+    }
+
+    @Test
+    void fallsBackToAcceptLanguageCountry() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Accept-Language", "en-US,en;q=0.9");
+
+        assertThat(resolver.resolve(request, "198.51.100.10")).isEqualTo("US");
+    }
+
+    @Test
+    void marksLocalLoopbackAsLocalWhenNoCountrySignalsExist() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        assertThat(resolver.resolve(request, "127.0.0.1")).isEqualTo("LOCAL");
+    }
+}

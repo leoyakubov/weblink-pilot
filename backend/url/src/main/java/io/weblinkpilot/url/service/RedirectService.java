@@ -53,15 +53,17 @@ public class RedirectService {
                 now,
                 context.clientIp(),
                 context.userAgent(),
-                context.referrer()
+                context.referrer(),
+                context.country()
         ));
 
         log.info(
-                "link.redirect.success code={} targetHost={} clickCount={} clientIp={} referrerPresent={} userAgentPresent={}",
+                "link.redirect.success code={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
                 code,
                 hostOf(link.getOriginalUrl()),
                 link.getClickCount(),
                 maskIp(context.clientIp()),
+                context.country(),
                 context.referrer() != null && !context.referrer().isBlank(),
                 context.userAgent() != null && !context.userAgent().isBlank()
         );

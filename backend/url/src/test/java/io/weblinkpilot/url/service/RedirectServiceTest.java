@@ -41,7 +41,7 @@ class RedirectServiceTest {
 
         String target = service.resolveTarget(
                 "abc123",
-                new RedirectRequestContext("127.0.0.1", "JUnit", "https://referrer.example")
+                new RedirectRequestContext("127.0.0.1", "JUnit", "https://referrer.example", "US")
         );
 
         assertThat(target).isEqualTo("https://example.com");
@@ -51,5 +51,6 @@ class RedirectServiceTest {
         ArgumentCaptor<LinkClickedEvent> captor = ArgumentCaptor.forClass(LinkClickedEvent.class);
         verify(linkPublisher).publish(captor.capture());
         assertThat(captor.getValue().code()).isEqualTo("abc123");
+        assertThat(captor.getValue().country()).isEqualTo("US");
     }
 }

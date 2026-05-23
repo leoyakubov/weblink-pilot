@@ -57,7 +57,8 @@ class UrlApiIntegrationTest {
                 .andExpect(jsonPath("$.qrCodeUrl").value("http://localhost:8080/api/v1/urls/demo-it/qr"))
                 .andExpect(jsonPath("$.originalUrl").value("https://example.com"));
 
-        mockMvc.perform(get("/r/demo-it"))
+        mockMvc.perform(get("/r/demo-it")
+                        .header("Accept-Language", "en-US,en;q=0.9"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "https://example.com"));
 
@@ -69,6 +70,12 @@ class UrlApiIntegrationTest {
                 .andExpect(jsonPath("$.targetUrl").value("https://example.com"))
                 .andExpect(jsonPath("$.status").value(302))
                 .andExpect(jsonPath("$.locationHeader").value("https://example.com"));
+
+        mockMvc.perform(get("/api/v1/analytics/demo-it")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.topCountries[0].country").value("US"))
+                .andExpect(jsonPath("$.topCountries[0].clicks").value(1));
 
         MvcResult qrResult = mockMvc.perform(get("/api/v1/urls/demo-it/qr"))
                 .andExpect(status().isOk())

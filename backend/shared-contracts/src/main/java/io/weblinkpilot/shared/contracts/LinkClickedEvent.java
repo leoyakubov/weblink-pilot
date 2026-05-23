@@ -7,6 +7,7 @@ public record LinkClickedEvent(
         OffsetDateTime clickedAt,
         String ipAddress,
         String userAgent,
-        String referrer
+        String referrer,
+        String country
 ) {
 }

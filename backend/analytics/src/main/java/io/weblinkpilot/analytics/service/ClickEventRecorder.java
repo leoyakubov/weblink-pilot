@@ -30,13 +30,14 @@ public class ClickEventRecorder {
                 event.ipAddress(),
                 event.userAgent(),
                 event.referrer(),
-                "UNKNOWN",
+                event.country(),
                 metadata.browserFamily(),
                 metadata.deviceType()
         ));
         log.info(
-                "analytics.click.persisted code={} browser={} device={} referrerPresent={}",
+                "analytics.click.persisted code={} country={} browser={} device={} referrerPresent={}",
                 event.code(),
+                event.country(),
                 metadata.browserFamily(),
                 metadata.deviceType(),
                 event.referrer() != null && !event.referrer().isBlank()

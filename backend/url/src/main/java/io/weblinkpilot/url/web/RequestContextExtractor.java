@@ -6,11 +6,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class RequestContextExtractor {
 
+    private final CountryResolver countryResolver;
+
+    public RequestContextExtractor(CountryResolver countryResolver) {
+        this.countryResolver = countryResolver;
+    }
+
     public RedirectRequestContext extract(HttpServletRequest request) {
+        String clientIp = extractClientIp(request);
         return new RedirectRequestContext(
-                extractClientIp(request),
+                clientIp,
                 request.getHeader("User-Agent"),
-                request.getHeader("Referer")
+                request.getHeader("Referer"),
+                countryResolver.resolve(request, clientIp)
         );
     }
 
