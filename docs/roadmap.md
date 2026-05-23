@@ -1,5 +1,22 @@
 # Roadmap
 
+## Status Overview
+
+| Status | Area | Notes |
+|---|---|---|
+| Done | Repo readiness | Repo layout, docs, scripts, Maven wrapper, Docker, Sonar, coverage, and test tooling are in place. |
+| Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
+| Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, and QR flows are implemented. |
+| Done | Analytics | Click events, summaries, and enrichment are implemented. |
+| Done | Frontend foundation | Vue app shell and backend integration are in place. |
+| Done | Frontend feature set | Create flow, dashboard, history, details, and QR UI are in place. |
+| Done | Hardening baseline | Tests, coverage, rate limiting, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
+| Next | Deployment setup | Add CI and deploy the backend/frontend to Oracle and Netlify. |
+| Later | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack after deployment. |
+| Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
+| Nice to do | Environment profiles | Add Maven/Spring profiles only if they reduce complexity. |
+| Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
+
 ## Phase 1 - Planning
 
 - define architecture and product scope
@@ -42,3 +59,5 @@
 - introduce broker if needed
 - extract analytics if it becomes valuable
 - split services only when the boundaries prove themselves
+- add Maven profiles only if they reduce complexity
+- add Spring Boot profiles if the runtime environments clearly diverge

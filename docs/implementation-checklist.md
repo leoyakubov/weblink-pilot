@@ -6,6 +6,23 @@ This checklist turns the planning documents into an execution order.
 
 It helps us build the project in small, verifiable slices without jumping too early into deep implementation details.
 
+## Current Status
+
+| Status | Phase | Summary |
+|---|---|---|
+| Done | Phase 0 | Repo readiness, docs, scripts, and naming are in place. |
+| Done | Phase 1 | Backend foundation is implemented. |
+| Done | Phase 2 | URL lifecycle is implemented. |
+| Done | Phase 3 | QR code support is implemented. |
+| Done | Phase 4 | Analytics is implemented. |
+| Done | Phase 5 | Frontend foundation is implemented. |
+| Done | Phase 6 | Frontend feature set is implemented. |
+| Done | Phase 7 baseline | Tests, observability, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
+| Next | Phase 7 follow-up | Deployment setup for Oracle and Netlify plus the live demo path. |
+| Nice to do | Phase 8 | Environment profiles if and when they simplify the runtime story. |
+| Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
+| Later | Phase 9 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
+
 ## Phase 0 - Repo readiness
 
 Goals:
@@ -126,6 +143,35 @@ Exit criteria:
 - tests cover key flows
 - README and docs describe how to use it
 
+## Phase 8 - Environment profiles
+
+Goals:
+
+- decide where Maven profiles help versus separate scripts
+- add Spring Boot profiles if the app needs distinct runtime config sets
+- document the local/dev/docker/test/prod configuration story
+
+Exit criteria:
+
+- environment-specific behavior is explicit
+- configuration is easier to reason about
+- local and container workflows stay simple
+
+## Phase 9 - Monitoring
+
+Goals:
+
+- add the internal monitoring page in the frontend
+- link or embed health, metrics, Prometheus, and Grafana views
+- add local Prometheus + Grafana support if needed for the deployed demo
+- decide whether monitoring endpoints need JWT protection
+
+Exit criteria:
+
+- monitoring is visible from the app
+- the deploy path stays simple
+- the monitoring stack can be enabled after the app is live
+
 ## Suggested build order
 
 1. backend foundation
@@ -135,4 +181,6 @@ Exit criteria:
 5. frontend foundation
 6. frontend features
 7. hardening
-
+8. deployment
+9. environment profiles
+10. monitoring

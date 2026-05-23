@@ -12,6 +12,7 @@ Modern URL shortening platform with QR codes, analytics, and a mobile-first web 
 - [Tech Stack](docs/tech-stack.md)
 - [API Contract v1](docs/api-contract-v1.md)
 - [Backend Testing Strategy](docs/backend-testing.md)
+- [Deployment](docs/deployment.md)
 - [Implementation Checklist](docs/implementation-checklist.md)
 
 ## Repository Structure
