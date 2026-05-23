@@ -56,6 +56,8 @@ From the repo root, you can start the apps with:
 - Unix backend: [`scripts/run-backend.sh`](scripts/run-backend.sh)
 - Windows frontend: [`scripts/run-frontend.ps1`](scripts/run-frontend.ps1)
 - Unix frontend: [`scripts/run-frontend.sh`](scripts/run-frontend.sh)
+- Windows backend tests: [`scripts/test-backend.ps1`](scripts/test-backend.ps1)
+- Unix backend tests: [`scripts/test-backend.sh`](scripts/test-backend.sh)
 
 The backend script uses the Maven wrapper and the frontend script installs dependencies on first run if `node_modules/` is missing.
 
@@ -93,6 +95,14 @@ Services:
 - backend direct: `http://localhost:8080`
 
 The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The backend uses Postgres in this setup, while local scripts still use the in-memory H2 profile.
+
+For a lightweight browser smoke check against the Docker stack, run the frontend script:
+
+```bash
+npm run smoke:docker
+```
+
+It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 
 ## Frontend Quick Start
 

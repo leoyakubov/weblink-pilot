@@ -27,6 +27,18 @@ npm run dev
 npm test
 ```
 
+For a one-shot run that does not stay in watch mode:
+
+```bash
+npm run test:run
+```
+
+For the Docker smoke check:
+
+```bash
+npm run smoke:docker
+```
+
 ## Backend access
 
 The frontend expects the backend to be available at `VITE_API_BASE_URL`.
