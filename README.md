@@ -11,6 +11,7 @@ Modern URL shortening platform with QR codes, analytics, and a mobile-first web 
 - [Architecture Decisions](docs/adr.md)
 - [Tech Stack](docs/tech-stack.md)
 - [API Contract v1](docs/api-contract-v1.md)
+- [Backend Testing Strategy](docs/backend-testing.md)
 - [Implementation Checklist](docs/implementation-checklist.md)
 
 ## Repository Structure
@@ -47,6 +48,22 @@ Useful API endpoints after startup:
 - `http://localhost:8080/api/v1/urls/{code}/qr`
 - `http://localhost:8080/api/v1/analytics/{code}`
 - `http://localhost:8080/api/v1/analytics/{code}/count`
+
+## Backend Coverage
+
+To generate the aggregate backend coverage report from `backend/`:
+
+```powershell
+.\mvnw.cmd -pl coverage -am verify
+```
+
+On macOS/Linux:
+
+```bash
+./mvnw -pl coverage -am verify
+```
+
+The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
 
 ## Run Scripts
 

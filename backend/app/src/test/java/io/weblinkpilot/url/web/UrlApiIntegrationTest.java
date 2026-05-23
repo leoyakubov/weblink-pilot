@@ -10,6 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.weblinkpilot.url.domain.ShortLink;
+import io.weblinkpilot.url.repository.ShortLinkRepository;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import io.weblinkpilot.url.service.UrlCacheService;
 
 @SpringBootTest
 @Transactional
@@ -32,6 +38,12 @@ class UrlApiIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private ShortLinkRepository shortLinkRepository;
+
+    @Autowired
+    private UrlCacheService urlCacheService;
 
     private MockMvc mockMvc;
 
@@ -146,6 +158,56 @@ class UrlApiIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CONFLICT"))
                 .andExpect(jsonPath("$.message", containsString("demo-duplicate")));
+    }
+
+    @Test
+    void rejectsInvalidCreatePayloads() throws Exception {
+        mockMvc.perform(post("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "originalUrl": "   ",
+                                  "customAlias": null
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message", containsString("Original URL is required")));
+    }
+
+    @Test
+    void returnsGoneForExpiredRedirects() throws Exception {
+        mockMvc.perform(post("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "originalUrl": "https://example.com",
+                                  "customAlias": "expired-it"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        ShortLink link = shortLinkRepository.findByCode("expired-it").orElseThrow();
+        setExpiresAt(link, OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5));
+        shortLinkRepository.saveAndFlush(link);
+        urlCacheService.evict("expired-it");
+
+        mockMvc.perform(get("/r/expired-it"))
+                .andExpect(status().isGone())
+                .andExpect(jsonPath("$.code").value("LINK_EXPIRED"))
+                .andExpect(jsonPath("$.message", containsString("expired-it")));
+    }
+
+    private static void setExpiresAt(ShortLink link, OffsetDateTime expiresAt) {
+        try {
+            Field field = ShortLink.class.getDeclaredField("expiresAt");
+            field.setAccessible(true);
+            field.set(link, expiresAt);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Failed to update expiresAt in test", exception);
+        }
     }
 
     @Test
