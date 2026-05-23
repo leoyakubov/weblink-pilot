@@ -27,15 +27,15 @@ Requires Java 21. Maven is downloaded automatically by the wrapper on the first 
 From `backend/` on Windows:
 
 ```powershell
-.\mvnw.cmd -pl application -am clean package -DskipTests
-java -jar application\target\application-0.1.0-SNAPSHOT.jar
+.\mvnw.cmd -pl app -am clean package -DskipTests
+java -jar app\target\app-0.1.0-SNAPSHOT.jar
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw -pl application -am clean package -DskipTests
-java -jar application/target/application-0.1.0-SNAPSHOT.jar
+./mvnw -pl app -am clean package -DskipTests
+java -jar app/target/app-0.1.0-SNAPSHOT.jar
 ```
 
 Useful API endpoints after startup:

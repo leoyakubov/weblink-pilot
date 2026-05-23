@@ -12,8 +12,8 @@ if (-not (Test-Path $mvnw)) {
 }
 
 Set-Location $backendDir
-& $mvnw -pl application -am package -DskipTests
+& $mvnw -pl app -am package -DskipTests
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
-java -jar (Join-Path $backendDir 'application/target/application-0.1.0-SNAPSHOT.jar')
+java -jar (Join-Path $backendDir 'app/target/app-0.1.0-SNAPSHOT.jar')

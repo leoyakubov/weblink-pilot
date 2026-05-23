@@ -11,9 +11,9 @@
 
     <modules>
         <module>shared-contracts</module>
-        <module>url-module</module>
-        <module>analytics-module</module>
-        <module>application</module>
+        <module>url</module>
+        <module>analytics</module>
+        <module>app</module>
     </modules>
 
     <properties>

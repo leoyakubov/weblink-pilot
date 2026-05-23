@@ -6,10 +6,10 @@
 weblink-pilot/
 ├── backend/
 │   ├── pom.xml
-│   ├── common-lib/
-│   ├── url-module/
-│   ├── analytics-module/
-│   └── application/
+│   ├── shared-contracts/
+│   ├── url/
+│   ├── analytics/
+│   └── app/
 ├── frontend/
 │   ├── package.json
 │   ├── src/
@@ -35,10 +35,10 @@ weblink-pilot/
 
 Backend should remain a modular monolith:
 
-- `common-lib` for contracts
-- `url-module` for URL lifecycle
-- `analytics-module` for click event processing
-- `application` for wiring, security, and runtime
+- `shared-contracts` for DTOs, events, and cross-module contracts
+- `url` for URL lifecycle
+- `analytics` for click event processing
+- `app` for wiring, security, and runtime
 
 ## Frontend structure
 

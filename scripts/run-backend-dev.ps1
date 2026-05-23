@@ -12,9 +12,9 @@ if (-not (Test-Path $mvnw)) {
 }
 
 Set-Location $backendDir
-& $mvnw -pl shared-contracts,url-module,analytics-module,application -am install -DskipTests
+& $mvnw -pl shared-contracts,url,analytics,app -am install -DskipTests
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-& $mvnw -f (Join-Path $backendDir 'application/pom.xml') spring-boot:run
+& $mvnw -f (Join-Path $backendDir 'app/pom.xml') spring-boot:run

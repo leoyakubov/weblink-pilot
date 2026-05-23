@@ -41,7 +41,7 @@ Core concepts:
 - `Alias`
 - `ExpirationPolicy`
 
-### 3. `redirect`
+### 3. `url`
 
 Responsibilities:
 
@@ -107,7 +107,7 @@ Recommended dependency direction:
 ```text
 shared-contracts
      ↑
-url → redirect → analytics
+url ↔ analytics
      ↑
 auth
      ↑
@@ -329,4 +329,3 @@ The design should keep extraction cheap by:
 - avoiding direct cross-module persistence access
 - using events instead of hidden service calls
 - keeping DTO contracts in `shared-contracts`
-
