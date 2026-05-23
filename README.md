@@ -48,6 +48,17 @@ Useful API endpoints after startup:
 - `http://localhost:8080/api/v1/analytics/{code}`
 - `http://localhost:8080/api/v1/analytics/{code}/count`
 
+## Run Scripts
+
+From the repo root, you can start the apps with:
+
+- Windows backend: [`scripts/run-backend.ps1`](scripts/run-backend.ps1)
+- Unix backend: [`scripts/run-backend.sh`](scripts/run-backend.sh)
+- Windows frontend: [`scripts/run-frontend.ps1`](scripts/run-frontend.ps1)
+- Unix frontend: [`scripts/run-frontend.sh`](scripts/run-frontend.sh)
+
+The backend script uses the Maven wrapper and the frontend script installs dependencies on first run if `node_modules/` is missing.
+
 ## Frontend Quick Start
 
 Requires Node.js 22+.
