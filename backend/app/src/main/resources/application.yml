@@ -27,6 +27,10 @@ management:
 app:
   cache:
     provider: local
+  rate-limit:
+    enabled: true
+    api-per-minute: 120
+    redirect-per-minute: 300
 
 logging:
   pattern:
