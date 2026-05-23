@@ -69,7 +69,7 @@ describe('LinkView', () => {
       redirectClicks: 2,
       qrScans: 1,
       uniqueVisitors: 2,
-      lastClickAt: '2026-05-23T11:05:00Z',
+      lastClickedAt: '2026-05-23T11:05:00Z',
       lastReferrer: 'https://news.ycombinator.com',
       lastBrowserFamily: 'CHROME',
       lastDeviceType: 'DESKTOP',

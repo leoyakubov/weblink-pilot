@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api'
-import { countryLabel } from '@/lib/countries'
+import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
 import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types'
@@ -168,7 +168,7 @@ function formatDate(value: string | null) {
 
           <div class="list-item">
             <strong>Last click</strong>
-            <p>{{ formatDate(analytics.lastClickAt) }}</p>
+            <p>{{ formatDate(analytics.lastClickedAt) }}</p>
           </div>
           <div class="list-item">
             <strong>Last referrer</strong>
@@ -188,7 +188,15 @@ function formatDate(value: string | null) {
             </div>
             <div class="list">
               <div v-for="country in analytics.topCountries" :key="country.country" class="list-item">
-                <strong>{{ countryLabel(country.country) }}</strong>
+                <strong class="country-label">
+                  <img
+                    v-if="countryFlagUrl(country.country)"
+                    class="country-flag"
+                    :src="countryFlagUrl(country.country) || ''"
+                    :alt="`${countryCodeLabel(country.country)} flag`"
+                  />
+                  <span>{{ countryCodeLabel(country.country) }}</span>
+                </strong>
                 <p>{{ country.clicks }} clicks</p>
               </div>
             </div>

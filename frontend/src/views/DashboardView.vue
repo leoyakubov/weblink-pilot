@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api'
-import { countryLabel } from '@/lib/countries'
+import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
 import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types'
@@ -33,7 +33,8 @@ const topCountryBars = computed(() => {
   const max = Math.max(...countries.map(item => item.clicks), 1)
   return countries.map(item => ({
     country: item.country,
-    label: countryLabel(item.country),
+    code: countryCodeLabel(item.country),
+    flagUrl: countryFlagUrl(item.country),
     clicks: item.clicks,
     width: Math.max(8, Math.round((item.clicks / max) * 100)),
   }))
@@ -199,7 +200,10 @@ watch(
           <div class="bar-chart" v-if="topCountryBars.length">
             <div v-for="bar in topCountryBars" :key="bar.country" class="bar-row">
               <div class="bar-labels">
-                <strong>{{ bar.label }}</strong>
+                <strong class="country-label">
+                  <img v-if="bar.flagUrl" class="country-flag" :src="bar.flagUrl" :alt="`${bar.code} flag`" />
+                  <span>{{ bar.code }}</span>
+                </strong>
                 <span>{{ bar.clicks }}</span>
               </div>
               <div class="bar-track">
@@ -249,7 +253,7 @@ watch(
 
           <div class="list-item">
             <strong>Last click</strong>
-            <p>{{ formatDate(summary?.lastClickAt ?? null) }}</p>
+            <p>{{ formatDate(summary?.lastClickedAt ?? null) }}</p>
           </div>
           <div class="list-item">
             <strong>Last referrer</strong>
@@ -334,7 +338,15 @@ watch(
 
           <div class="list">
             <div v-for="country in summary.topCountries" :key="country.country" class="list-item">
-              <strong>{{ countryLabel(country.country) }}</strong>
+              <strong class="country-label">
+                <img
+                  v-if="countryFlagUrl(country.country)"
+                  class="country-flag"
+                  :src="countryFlagUrl(country.country) || ''"
+                  :alt="`${countryCodeLabel(country.country)} flag`"
+                />
+                <span>{{ countryCodeLabel(country.country) }}</span>
+              </strong>
               <p>{{ country.clicks }} clicks</p>
             </div>
           </div>

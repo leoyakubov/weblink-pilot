@@ -39,7 +39,7 @@ export interface AnalyticsSummaryResponse {
   redirectClicks: number
   qrScans: number
   uniqueVisitors: number
-  lastClickAt: string | null
+  lastClickedAt: string | null
   lastReferrer: string | null
   lastBrowserFamily: string | null
   lastDeviceType: string | null
