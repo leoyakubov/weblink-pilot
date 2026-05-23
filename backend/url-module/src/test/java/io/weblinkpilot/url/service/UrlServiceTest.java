@@ -4,18 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.url.codegen.Base62Codec;
-import io.weblinkpilot.url.event.LinkPublisher;
-import io.weblinkpilot.url.domain.ShortLink;
-import io.weblinkpilot.url.repository.ShortLinkRepository;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,38 +15,55 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class UrlServiceTest {
 
     @Mock
-    private ShortLinkRepository repository;
+    private UrlCreationService creationService;
 
     @Mock
-    private Base62Codec base62Codec;
+    private UrlLookupService lookupService;
 
-    @Mock
-    private UrlCacheService cacheService;
-
-    @Mock
-    private LinkPublisher linkPublisher;
+    @InjectMocks
+    private UrlService service;
 
     @Test
-    void createsLinkWithCustomAliasAndPublishesEvent() {
-        UrlService service = new UrlService(repository, base62Codec, cacheService, linkPublisher);
-        OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
-        ShortLink saved = new ShortLink("my-link", "https://example.com", "my-link", createdAt, null);
-
-        when(repository.existsByCustomAlias("my-link")).thenReturn(false);
-        when(repository.saveAndFlush(org.mockito.ArgumentMatchers.any(ShortLink.class))).thenReturn(saved);
-
-        LinkResponse response = service.create(
-                new CreateLinkRequest("https://example.com", "my-link", null),
-                "http://localhost:8080"
+    void delegatesCreateToCreationService() {
+        LinkResponse response = new LinkResponse(
+                "my-link",
+                "http://localhost:8080/r/my-link",
+                "http://localhost:8080/api/v1/urls/my-link/qr",
+                "https://example.com",
+                null,
+                null,
+                0
         );
 
-        assertThat(response.code()).isEqualTo("my-link");
-        assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/my-link");
-        assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/my-link/qr");
-        assertThat(response.clickCount()).isZero();
+        when(creationService.create(org.mockito.ArgumentMatchers.any())).thenReturn(response);
 
-        ArgumentCaptor<LinkCreatedEvent> captor = ArgumentCaptor.forClass(LinkCreatedEvent.class);
-        verify(linkPublisher).publish(captor.capture());
-        assertThat(captor.getValue().code()).isEqualTo("my-link");
+        LinkResponse result = service.create(new io.weblinkpilot.shared.contracts.CreateLinkRequest(
+                "https://example.com",
+                "my-link",
+                null
+        ));
+
+        assertThat(result).isEqualTo(response);
+        verify(creationService).create(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void delegatesReadToLookupService() {
+        LinkResponse response = new LinkResponse(
+                "abc123",
+                "http://localhost:8080/r/abc123",
+                "http://localhost:8080/api/v1/urls/abc123/qr",
+                "https://example.com",
+                null,
+                null,
+                3
+        );
+
+        when(lookupService.getByCode("abc123")).thenReturn(response);
+
+        LinkResponse result = service.getByCode("abc123");
+
+        assertThat(result).isEqualTo(response);
+        verify(lookupService).getByCode("abc123");
     }
 }

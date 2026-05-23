@@ -16,5 +16,5 @@ if [[ ! -f "$mvnw" ]]; then
 fi
 
 cd "$backend_dir"
-"$mvnw" -pl application -am package -DskipTests
-exec java -jar "$backend_dir/application/target/application-0.1.0-SNAPSHOT.jar"
+"$mvnw" -pl shared-contracts,url-module,analytics-module,application -am install -DskipTests
+exec "$mvnw" -f "$backend_dir/application/pom.xml" spring-boot:run

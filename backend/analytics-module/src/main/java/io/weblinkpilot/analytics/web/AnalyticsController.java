@@ -1,6 +1,6 @@
 package io.weblinkpilot.analytics.web;
 
-import io.weblinkpilot.analytics.service.AnalyticsService;
+import io.weblinkpilot.analytics.service.AnalyticsQueryService;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,20 +15,20 @@ public class AnalyticsController {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
-    private final AnalyticsService analyticsService;
+    private final AnalyticsQueryService analyticsQueryService;
 
-    public AnalyticsController(AnalyticsService analyticsService) {
-        this.analyticsService = analyticsService;
+    public AnalyticsController(AnalyticsQueryService analyticsQueryService) {
+        this.analyticsQueryService = analyticsQueryService;
     }
 
     @GetMapping("/{code}/count")
     public long count(@PathVariable("code") String code) {
-        return analyticsService.countClicks(code);
+        return analyticsQueryService.countClicks(code);
     }
 
     @GetMapping("/{code}")
     public AnalyticsSummaryResponse summary(@PathVariable("code") String code) {
-        AnalyticsSummaryResponse response = analyticsService.summarize(code);
+        AnalyticsSummaryResponse response = analyticsQueryService.summarize(code);
         log.info("analytics.summary.code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
         return response;
     }

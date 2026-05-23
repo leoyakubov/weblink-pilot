@@ -5,9 +5,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.domain.ShortLink;
+import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
+import io.weblinkpilot.url.web.RedirectRequestContext;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -38,7 +39,10 @@ class RedirectServiceTest {
         when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", createdAt, null));
         when(repository.findByCode("abc123")).thenReturn(Optional.of(link));
 
-        String target = service.resolveTarget("abc123", "127.0.0.1", "JUnit", "https://referrer.example");
+        String target = service.resolveTarget(
+                "abc123",
+                new RedirectRequestContext("127.0.0.1", "JUnit", "https://referrer.example")
+        );
 
         assertThat(target).isEqualTo("https://example.com");
         assertThat(link.getClickCount()).isEqualTo(1);

@@ -59,6 +59,13 @@ From the repo root, you can start the apps with:
 
 The backend script uses the Maven wrapper and the frontend script installs dependencies on first run if `node_modules/` is missing.
 
+For a faster backend dev loop, use the dev launcher instead:
+
+- Windows backend dev: [`scripts/run-backend-dev.ps1`](scripts/run-backend-dev.ps1)
+- Unix backend dev: [`scripts/run-backend-dev.sh`](scripts/run-backend-dev.sh)
+
+Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
+
 ## Frontend Quick Start
 
 Requires Node.js 22+.

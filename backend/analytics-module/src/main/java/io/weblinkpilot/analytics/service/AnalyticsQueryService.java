@@ -5,7 +5,6 @@ import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
 import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -14,38 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AnalyticsService {
+public class AnalyticsQueryService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
+    private static final Logger log = LoggerFactory.getLogger(AnalyticsQueryService.class);
 
     private final ClickEventRepository repository;
-    private final UserAgentParser userAgentParser;
 
-    public AnalyticsService(ClickEventRepository repository, UserAgentParser userAgentParser) {
+    public AnalyticsQueryService(ClickEventRepository repository) {
         this.repository = repository;
-        this.userAgentParser = userAgentParser;
-    }
-
-    @Transactional
-    public void record(LinkClickedEvent event) {
-        UserAgentMetadata metadata = userAgentParser.parse(event.userAgent());
-        repository.save(new ClickEvent(
-                event.code(),
-                event.clickedAt(),
-                event.ipAddress(),
-                event.userAgent(),
-                event.referrer(),
-                "UNKNOWN",
-                metadata.browserFamily(),
-                metadata.deviceType()
-        ));
-        log.info(
-                "analytics.click.persisted code={} browser={} device={} referrerPresent={}",
-                event.code(),
-                metadata.browserFamily(),
-                metadata.deviceType(),
-                event.referrer() != null && !event.referrer().isBlank()
-        );
     }
 
     @Transactional(readOnly = true)

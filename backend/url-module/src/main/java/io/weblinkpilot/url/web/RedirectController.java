@@ -16,30 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class RedirectController {
 
     private final RedirectService redirectService;
+    private final RequestContextExtractor requestContextExtractor;
 
-    public RedirectController(RedirectService redirectService) {
+    public RedirectController(RedirectService redirectService, RequestContextExtractor requestContextExtractor) {
         this.redirectService = redirectService;
+        this.requestContextExtractor = requestContextExtractor;
     }
 
     @GetMapping("/{code}")
     public ResponseEntity<Void> redirect(@PathVariable("code") String code, HttpServletRequest request) {
-        String originalUrl = redirectService.resolveTarget(
-                code,
-                extractClientIp(request),
-                request.getHeader("User-Agent"),
-                request.getHeader("Referer")
-        );
-        // The service logs the resolved redirect; the controller only performs the HTTP response.
+        String originalUrl = redirectService.resolveTarget(code, requestContextExtractor.extract(request));
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, URI.create(originalUrl).toString())
                 .build();
-    }
-
-    private String extractClientIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }

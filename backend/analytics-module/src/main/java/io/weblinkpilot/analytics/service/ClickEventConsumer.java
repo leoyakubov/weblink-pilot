@@ -12,16 +12,16 @@ public class ClickEventConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(ClickEventConsumer.class);
 
-    private final AnalyticsService analyticsService;
+    private final ClickEventRecorder clickEventRecorder;
 
-    public ClickEventConsumer(AnalyticsService analyticsService) {
-        this.analyticsService = analyticsService;
+    public ClickEventConsumer(ClickEventRecorder clickEventRecorder) {
+        this.clickEventRecorder = clickEventRecorder;
     }
 
     @Async
     @EventListener
     public void handle(LinkClickedEvent event) {
         log.info("analytics.click.event.received code={} clickedAt={}", event.code(), event.clickedAt());
-        analyticsService.record(event);
+        clickEventRecorder.record(event);
     }
 }

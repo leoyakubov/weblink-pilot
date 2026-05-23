@@ -4,7 +4,6 @@ import io.weblinkpilot.shared.contracts.ApiErrorResponse;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
 import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
-import java.time.OffsetDateTime;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,13 +49,6 @@ public class UrlExceptionHandler {
 
     private ResponseEntity<ApiErrorResponse> build(HttpStatus status, String code, String message, String path) {
         log.warn("request.rejected status={} code={} path={} message={}", status.value(), code, path, message);
-        return ResponseEntity.status(status).body(new ApiErrorResponse(
-                OffsetDateTime.now(),
-                status.value(),
-                status.getReasonPhrase(),
-                code,
-                message,
-                path
-        ));
+        return ResponseEntity.status(status).body(ApiErrorResponseFactory.create(status, code, message, path));
     }
 }

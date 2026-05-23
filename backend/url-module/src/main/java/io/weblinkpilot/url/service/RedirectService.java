@@ -6,6 +6,7 @@ import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
+import io.weblinkpilot.url.web.RedirectRequestContext;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.net.URI;
@@ -30,7 +31,7 @@ public class RedirectService {
     }
 
     @Transactional
-    public String resolveTarget(String code, String ipAddress, String userAgent, String referrer) {
+    public String resolveTarget(String code, RedirectRequestContext context) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
             log.warn("link.redirect.miss code={}", code);
@@ -50,9 +51,9 @@ public class RedirectService {
         linkPublisher.publish(new LinkClickedEvent(
                 code,
                 now,
-                ipAddress,
-                userAgent,
-                referrer
+                context.clientIp(),
+                context.userAgent(),
+                context.referrer()
         ));
 
         log.info(
@@ -60,9 +61,9 @@ public class RedirectService {
                 code,
                 hostOf(link.getOriginalUrl()),
                 link.getClickCount(),
-                maskIp(ipAddress),
-                referrer != null && !referrer.isBlank(),
-                userAgent != null && !userAgent.isBlank()
+                maskIp(context.clientIp()),
+                context.referrer() != null && !context.referrer().isBlank(),
+                context.userAgent() != null && !context.userAgent().isBlank()
         );
 
         return link.getOriginalUrl();
