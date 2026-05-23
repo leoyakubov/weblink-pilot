@@ -3,7 +3,6 @@ package io.weblinkpilot.url.web;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.IMAGE_PNG;
@@ -35,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class UrlControllerStandaloneTest {
@@ -48,13 +48,13 @@ class UrlControllerStandaloneTest {
     @Mock
     private QrCodeService qrCodeService;
 
-    @Mock
     private PublicUrlBuilder publicUrlBuilder;
 
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
+        publicUrlBuilder = new PublicUrlBuilder("http://localhost:8080");
         UrlController controller = new UrlController(urlService, urlLookupService, qrCodeService, publicUrlBuilder, new SimpleMeterRegistry());
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new UrlExceptionHandler())
@@ -156,17 +156,6 @@ class UrlControllerStandaloneTest {
 
     @Test
     void returnsQrImage() throws Exception {
-        LinkResponse response = new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://example.com",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                2
-        );
-        when(urlLookupService.getByCode("demo")).thenReturn(response);
-        lenient().when(publicUrlBuilder.buildQrScanUrl("demo")).thenReturn("http://localhost:8080/q/demo");
         when(qrCodeService.generatePng("http://localhost:8080/q/demo")).thenReturn(new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47});
 
         mockMvc.perform(get("/api/v1/urls/demo/qr"))
