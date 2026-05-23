@@ -65,6 +65,11 @@ On macOS/Linux:
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
 
+Helper script:
+
+- Windows: [`scripts/backend/coverage.ps1`](scripts/backend/coverage.ps1)
+- Unix: [`scripts/backend/coverage.sh`](scripts/backend/coverage.sh)
+
 ## SonarQube / Code Quality
 
 Local SonarQube support is available through the Docker stack in `infra/sonar/`.
@@ -127,6 +132,12 @@ The original flat scripts still exist for compatibility, but the grouped ones ar
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
 
+If you want the exact test/build shortcuts the project uses day to day:
+
+- Frontend tests: [`scripts/frontend/test.ps1`](scripts/frontend/test.ps1)
+- Frontend build: [`scripts/frontend/build.ps1`](scripts/frontend/build.ps1)
+- Frontend smoke test: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
+
 ## Docker Stack
 
 The repo also includes a containerized local stack:
@@ -150,11 +161,10 @@ Services:
 
 The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The backend uses Postgres in this setup, while local scripts still use the in-memory H2 profile.
 
-For a lightweight browser smoke check against the Docker stack, run the frontend script:
+For a lightweight browser smoke check against the Docker stack, use:
 
-```bash
-npm run smoke:docker
-```
+- Windows: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
+- Unix: [`scripts/frontend/smoke-docker.sh`](scripts/frontend/smoke-docker.sh)
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 

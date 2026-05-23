@@ -29,6 +29,18 @@ Use these when you want the web or persistence layer with only part of Spring lo
 
 These are useful when the full application context is too expensive or when you want faster feedback around a specific layer.
 
+### Testcontainers-backed integration tests
+
+Use these when you want a production-like PostgreSQL database instead of H2:
+
+- Flyway runs against a real PostgreSQL container
+- JPA and repository mappings are exercised against the same database family used in production
+- useful for catching SQL dialect or migration differences that H2 can hide
+
+Example in this repo:
+
+- `backend/app/src/test/java/io/weblinkpilot/config/testcontainers/PostgresUrlApiIntegrationTest.java`
+
 ### Integration tests
 
 Use these to verify module wiring and real runtime behavior:
@@ -80,12 +92,28 @@ Use these to keep module boundaries healthy:
 
 These are optional but useful once the modular monolith grows further.
 
+Example in this repo:
+
+- `backend/app/src/test/java/io/weblinkpilot/architecture/ArchitectureTest.java`
+
 ## Coverage
 
 The backend build now produces:
 
 - module-level coverage checks for `url`, `analytics`, and `app`
 - an aggregate multi-module report in `backend/coverage`
+
+Run the backend test suite from the repo root:
+
+```powershell
+.\scripts\backend\test-backend.ps1
+```
+
+Run the coverage build from the repo root:
+
+```powershell
+.\scripts\backend\coverage.ps1
+```
 
 Run the aggregate coverage build from `backend/`:
 
