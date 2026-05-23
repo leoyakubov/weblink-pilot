@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: ${PORT:8080}
+
+app:
+  public-base-url: ${APP_PUBLIC_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS}

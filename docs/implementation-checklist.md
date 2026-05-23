@@ -145,17 +145,19 @@ Exit criteria:
 
 ## Phase 8 - Environment profiles
 
+Status: done for the local/demo split, with Maven convenience profiles for direct backend runs.
+
 Goals:
 
-- decide where Maven profiles help versus separate scripts
-- add Spring Boot profiles if the app needs distinct runtime config sets
-- document the local/dev/docker/test/prod configuration story
+- keep the local/demo runtime split explicit
+- use Maven profiles only as a convenience for `spring-boot:run`
+- document the local/dev/docker/test/demo configuration story
 
 Exit criteria:
 
 - environment-specific behavior is explicit
 - configuration is easier to reason about
-- local and container workflows stay simple
+- local, container, and demo workflows stay simple
 
 ## Phase 9 - Monitoring
 
@@ -182,5 +184,4 @@ Exit criteria:
 6. frontend features
 7. hardening
 8. deployment
-9. environment profiles
-10. monitoring
+9. monitoring

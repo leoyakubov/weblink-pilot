@@ -17,4 +17,9 @@ Set-Location $backendDir
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
-java -jar (Join-Path $backendDir 'app/target/app-0.1.0-SNAPSHOT.jar')
+$env:SPRING_PROFILES_ACTIVE = 'local'
+try {
+    java -jar (Join-Path $backendDir 'app/target/app-0.1.0-SNAPSHOT.jar')
+} finally {
+    Remove-Item Env:SPRING_PROFILES_ACTIVE -ErrorAction SilentlyContinue
+}

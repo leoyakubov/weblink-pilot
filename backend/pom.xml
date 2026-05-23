@@ -29,6 +29,7 @@
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
         <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <spring-boot.run.profiles>local</spring-boot.run.profiles>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
@@ -80,4 +81,19 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <spring-boot.run.profiles>local</spring-boot.run.profiles>
+            </properties>
+        </profile>
+        <profile>
+            <id>demo</id>
+            <properties>
+                <spring-boot.run.profiles>demo</spring-boot.run.profiles>
+            </properties>
+        </profile>
+    </profiles>
 </project>

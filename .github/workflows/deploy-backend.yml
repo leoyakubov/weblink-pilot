@@ -75,7 +75,7 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.ORACLE_POSTGRES_PASSWORD }}
             APP_PUBLIC_BASE_URL=${{ secrets.ORACLE_PUBLIC_BASE_URL }}
             APP_CORS_ALLOWED_ORIGIN_PATTERNS=${{ secrets.ORACLE_CORS_ALLOWED_ORIGIN_PATTERNS }}
-            SPRING_PROFILES_ACTIVE=docker
+            SPRING_PROFILES_ACTIVE=demo
             EOF
             docker compose --env-file .env -f docker-compose.yml pull
             docker compose --env-file .env -f docker-compose.yml up -d --remove-orphans

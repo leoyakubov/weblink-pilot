@@ -53,6 +53,7 @@
 
 The Netlify frontend will need a backend URL that is reachable from the browser or a same-origin proxy setup.
 For a live demo, HTTPS is strongly recommended for the backend endpoint.
+The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` so it picks up PostgreSQL, public URL, and CORS settings from `application-demo.yml`.
 
 ## Deployment checklist
 

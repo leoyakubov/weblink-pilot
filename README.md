@@ -160,7 +160,19 @@ Services:
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
 
-The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The backend uses Postgres in this setup, while local scripts still use the in-memory H2 profile.
+The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. Local development uses the `local` Spring profile with in-memory H2, while demo deployments use the `demo` profile with PostgreSQL and environment-driven public URL / CORS settings.
+
+### Backend Profiles
+
+- `local`: default for developer workflows, uses H2 and localhost origins
+- `demo`: use for deployed demo instances, uses PostgreSQL and runtime secrets
+
+You can also select the Maven convenience profiles when running the backend directly:
+
+```powershell
+.\mvnw.cmd -Plocal -pl app -am spring-boot:run
+.\mvnw.cmd -Pdemo -pl app -am spring-boot:run
+```
 
 For a lightweight browser smoke check against the Docker stack, use:
 

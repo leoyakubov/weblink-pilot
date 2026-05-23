@@ -14,7 +14,7 @@
 | Next | Deployment setup | Add CI and deploy the backend/frontend to Oracle and Netlify. |
 | Later | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack after deployment. |
 | Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
-| Nice to do | Environment profiles | Add Maven/Spring profiles only if they reduce complexity. |
+| Done | Environment profiles | Local and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
 | Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
 
 ## Phase 1 - Planning
@@ -59,5 +59,4 @@
 - introduce broker if needed
 - extract analytics if it becomes valuable
 - split services only when the boundaries prove themselves
-- add Maven profiles only if they reduce complexity
-- add Spring Boot profiles if the runtime environments clearly diverge
+- refine Maven profiles only if they reduce complexity further

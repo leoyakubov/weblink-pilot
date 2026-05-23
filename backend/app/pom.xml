@@ -167,6 +167,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>io.weblinkpilot.Application</mainClass>
+                    <profiles>${spring-boot.run.profiles}</profiles>
                 </configuration>
                 <executions>
                     <execution>

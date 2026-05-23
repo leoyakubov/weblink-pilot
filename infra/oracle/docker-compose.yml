@@ -37,7 +37,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-weblinkpilot}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-weblinkpilot}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-weblinkpilot}
