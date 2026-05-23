@@ -7,6 +7,8 @@ import io.weblinkpilot.url.service.UrlService;
 import io.weblinkpilot.url.service.UrlLookupService;
 import io.weblinkpilot.url.service.QrCodeService;
 import jakarta.validation.Valid;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
@@ -34,13 +36,30 @@ public class UrlController {
     private final UrlService urlService;
     private final UrlLookupService urlLookupService;
     private final QrCodeService qrCodeService;
+    private final Counter browseCounter;
+    private final Counter detailsCounter;
+    private final Counter previewCounter;
+    private final Counter qrCounter;
 
     public UrlController(UrlService urlService,
                          UrlLookupService urlLookupService,
-                         QrCodeService qrCodeService) {
+                         QrCodeService qrCodeService,
+                         MeterRegistry meterRegistry) {
         this.urlService = urlService;
         this.urlLookupService = urlLookupService;
         this.qrCodeService = qrCodeService;
+        this.browseCounter = Counter.builder("weblinkpilot.urls.browse.requests")
+                .description("Number of authenticated browse requests for recent links")
+                .register(meterRegistry);
+        this.detailsCounter = Counter.builder("weblinkpilot.urls.details.requests")
+                .description("Number of authenticated detail lookups")
+                .register(meterRegistry);
+        this.previewCounter = Counter.builder("weblinkpilot.urls.preview.requests")
+                .description("Number of redirect preview requests")
+                .register(meterRegistry);
+        this.qrCounter = Counter.builder("weblinkpilot.urls.qr.requests")
+                .description("Number of QR code requests")
+                .register(meterRegistry);
     }
 
     @PostMapping
@@ -82,11 +101,13 @@ public class UrlController {
 
     @GetMapping
     public ResponseEntity<List<LinkResponse>> list(@RequestParam(name = "limit", defaultValue = "10") int limit) {
+        browseCounter.increment();
         return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
     }
 
     @GetMapping("/{code}")
     public ResponseEntity<LinkResponse> details(@PathVariable("code") String code) {
+        detailsCounter.increment();
         return ResponseEntity.ok(urlLookupService.getByCode(code));
     }
 
@@ -96,6 +117,7 @@ public class UrlController {
             description = "Returns a JSON preview of the redirect target without issuing an actual HTTP redirect."
     )
     public ResponseEntity<RedirectPreviewResponse> preview(@PathVariable("code") String code) {
+        previewCounter.increment();
         LinkResponse response = urlLookupService.getByCode(code);
         return ResponseEntity.ok(new RedirectPreviewResponse(
                 response.code(),
@@ -119,6 +141,7 @@ public class UrlController {
             }
     )
     public ResponseEntity<byte[]> qr(@PathVariable("code") String code) {
+        qrCounter.increment();
         String shortUrl = urlLookupService.getByCode(code).shortUrl();
         byte[] png = qrCodeService.generatePng(shortUrl);
         log.info("link.qr.generated code={} bytes={}", code, png.length);

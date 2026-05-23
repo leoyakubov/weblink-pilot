@@ -51,7 +51,9 @@ public class UrlLookupService {
     @Transactional(readOnly = true)
     public List<LinkResponse> listRecentLinks(int limit) {
         int size = Math.max(1, Math.min(limit, 50));
-        List<LinkResponse> links = repository.findAll(PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt")))
+        Sort newestFirst = Sort.by(Sort.Direction.DESC, "createdAt")
+                .and(Sort.by(Sort.Direction.DESC, "id"));
+        List<LinkResponse> links = repository.findAll(PageRequest.of(0, size, newestFirst))
                 .getContent()
                 .stream()
                 .map(this::toResponse)
