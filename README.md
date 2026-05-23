@@ -2,6 +2,8 @@
 
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
+Live demo: Netlify frontend and Render backend.
+
 ## Docs
 
 - [Architecture Plan](docs/architecture-plan.md)

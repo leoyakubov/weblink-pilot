@@ -18,10 +18,10 @@ It helps us build the project in small, verifiable slices without jumping too ea
 | Done | Phase 5 | Frontend foundation is implemented. |
 | Done | Phase 6 | Frontend feature set is implemented. |
 | Done | Phase 7 baseline | Tests, observability, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
-| Next | Phase 7 follow-up | Deployment setup for Oracle and Netlify plus the live demo path. |
+| Done | Phase 7 follow-up | Deployment setup for Netlify and Render plus the live demo path. |
 | Nice to do | Phase 8 | Environment profiles if and when they simplify the runtime story. |
 | Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
-| Later | Phase 9 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
+| Next | Phase 9 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
 
 ## Phase 0 - Repo readiness
 

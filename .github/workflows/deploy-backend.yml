@@ -11,71 +11,19 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: demo
-    permissions:
-      contents: read
-      packages: write
 
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/weblink-pilot-backend
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Trigger Render deploy
+        run: |
+          set -euo pipefail
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
+          if [ -z "${RENDER_DEPLOY_HOOK_URL:-}" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL secret is not set."
+            exit 1
+          fi
 
-      - name: Build backend artifact
-        working-directory: backend
-        run: ./mvnw -B -ntp -pl app -am package -DskipTests
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-      - name: Copy Oracle compose file
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.ORACLE_HOST }}
-          username: ${{ secrets.ORACLE_USER }}
-          key: ${{ secrets.ORACLE_SSH_KEY }}
-          source: "infra/oracle/docker-compose.yml"
-          target: "~/weblink-pilot"
-
-      - name: Deploy on Oracle VM
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.ORACLE_HOST }}
-          username: ${{ secrets.ORACLE_USER }}
-          key: ${{ secrets.ORACLE_SSH_KEY }}
-          script: |
-            set -e
-            cd ~/weblink-pilot
-            cat > .env <<EOF
-            BACKEND_IMAGE=${{ env.IMAGE_NAME }}:${{ github.sha }}
-            POSTGRES_DB=${{ secrets.ORACLE_POSTGRES_DB }}
-            POSTGRES_USER=${{ secrets.ORACLE_POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.ORACLE_POSTGRES_PASSWORD }}
-            APP_PUBLIC_BASE_URL=${{ secrets.ORACLE_PUBLIC_BASE_URL }}
-            APP_CORS_ALLOWED_ORIGIN_PATTERNS=${{ secrets.ORACLE_CORS_ALLOWED_ORIGIN_PATTERNS }}
-            SPRING_PROFILES_ACTIVE=demo
-            EOF
-            docker compose --env-file .env -f docker-compose.yml pull
-            docker compose --env-file .env -f docker-compose.yml up -d --remove-orphans
+          curl --fail --silent --show-error --request POST "${RENDER_DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}" >/dev/null
+          echo "Triggered Render deploy for ${GITHUB_SHA}"
