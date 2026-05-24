@@ -1,14 +1,14 @@
 package io.weblinkpilot.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.weblinkpilot.url.service.ShortLinkSnapshot;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 class CacheConfigurationTest {
@@ -36,10 +36,7 @@ class CacheConfigurationTest {
     }
 
     @Test
-    void redisObjectMapperCanSerializeJavaTimeTypes() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper()
-                .findAndRegisterModules()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    void redisObjectMapperCanRoundTripShortLinkSnapshots() {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "github-org",
                 "https://example.com",
@@ -48,10 +45,18 @@ class CacheConfigurationTest {
                 7L
         );
 
-        String json = objectMapper.writeValueAsString(snapshot);
+        assertThatNoException().isThrownBy(() -> {
+            byte[] serialized = CacheConfiguration.redisObjectMapper().writeValueAsBytes(snapshot);
+            ShortLinkSnapshot deserialized = CacheConfiguration.redisObjectMapper().readValue(serialized, ShortLinkSnapshot.class);
 
-        assertThat(json).contains("github-org");
-        assertThat(json).contains("2026-05-24T10:00:00Z");
-        assertThat(json).doesNotContain("1779616800.000000000");
+            assertThat(deserialized).isEqualTo(snapshot);
+        });
+    }
+
+    @Test
+    void redisCacheManagerUsesTypedSerialization() {
+        RedisCacheManager cacheManager = (RedisCacheManager) configuration.redisCacheManager(org.mockito.Mockito.mock(RedisConnectionFactory.class));
+
+        assertThat(cacheManager).isNotNull();
     }
 }

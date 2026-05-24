@@ -32,6 +32,10 @@ services:
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weblinkpilot
+      SPRING_DATASOURCE_USERNAME: weblinkpilot
+      SPRING_DATASOURCE_PASSWORD: weblinkpilot
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
         condition: service_healthy
