@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import CopyActionButton from '@/components/CopyActionButton.vue'
 import { buildApiBaseUrl, createLink } from '@/lib/api'
-import { copyText } from '@/lib/clipboard'
 import { defaultSettings, loadSettings, saveSettings } from '@/lib/settings'
 import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types'
 
@@ -72,11 +72,6 @@ async function submit() {
   } finally {
     submitting.value = false
   }
-}
-
-async function copy(value: string) {
-  await copyText(value)
-  successMessage.value = 'Copied to clipboard'
 }
 
 function openExternal(url: string) {
@@ -232,15 +227,20 @@ function openExternal(url: string) {
             <RouterLink class="button button-secondary" :to="dashboardUrl">
               Open analytics
             </RouterLink>
-            <button class="button button-primary" type="button" @click="copy(createdLink.shortUrl)">
-              Copy short URL
-            </button>
+            <CopyActionButton
+              :value="createdLink.shortUrl"
+              label="Copy short URL"
+              copied-label="Short URL copied"
+              variant="primary"
+            />
             <button class="button button-secondary" type="button" @click="openExternal(createdLink.shortUrl)">
               Open redirect
             </button>
-            <button class="button button-secondary" type="button" @click="copy(linkPreviewUrl)">
-              Copy preview URL
-            </button>
+            <CopyActionButton
+              :value="linkPreviewUrl"
+              label="Copy preview URL"
+              copied-label="Preview URL copied"
+            />
           </div>
         </div>
       </div>
@@ -258,9 +258,12 @@ function openExternal(url: string) {
         </figure>
 
         <div class="grid-2">
-          <button class="button button-primary" type="button" @click="copy(createdLink.qrCodeUrl)">
-            Copy QR URL
-          </button>
+          <CopyActionButton
+            :value="createdLink.qrCodeUrl"
+            label="Copy QR URL"
+            copied-label="QR URL copied"
+            variant="primary"
+          />
           <button class="button button-secondary" type="button" @click="openExternal(createdLink.qrCodeUrl)">
             Open QR image
           </button>

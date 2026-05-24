@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import CopyActionButton from '@/components/CopyActionButton.vue'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api'
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
-import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types'
 
@@ -48,10 +48,6 @@ watch(code, value => load(value))
 
 function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-function copy(value: string) {
-  return copyText(value)
 }
 
 const qrImage = computed(() => link.value?.qrCodeUrl ?? '')
@@ -118,9 +114,12 @@ function formatDate(value: string | null) {
           </div>
 
           <div class="actions">
-            <button class="button button-primary" type="button" @click="copy(link.shortUrl)">
-              Copy short URL
-            </button>
+            <CopyActionButton
+              :value="link.shortUrl"
+              label="Copy short URL"
+              copied-label="Short URL copied"
+              variant="primary"
+            />
             <button class="button button-secondary" type="button" @click="openExternal(link.shortUrl)">
               Open redirect
             </button>
@@ -213,9 +212,12 @@ function formatDate(value: string | null) {
         </div>
 
         <div class="actions" v-if="link">
-          <button class="button button-primary" type="button" @click="copy(link.qrCodeUrl)">
-            Copy QR URL
-          </button>
+          <CopyActionButton
+            :value="link.qrCodeUrl"
+            label="Copy QR URL"
+            copied-label="QR URL copied"
+            variant="primary"
+          />
           <button class="button button-secondary" type="button" @click="openExternal(link.qrCodeUrl)">
             Open QR image
           </button>

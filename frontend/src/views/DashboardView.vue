@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import CopyActionButton from '@/components/CopyActionButton.vue'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api'
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
-import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types'
 
@@ -109,10 +109,6 @@ async function load(codeValue: string) {
 function loadRecent(code: string) {
   form.code = code
   load(code)
-}
-
-function copy(value: string) {
-  return copyText(value)
 }
 
 function openExternal(url: string) {
@@ -289,9 +285,7 @@ watch(
             <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: link.code } }">
               Open details page
             </RouterLink>
-            <button class="button button-secondary" type="button" @click="copy(link.shortUrl)">
-              Copy short URL
-            </button>
+            <CopyActionButton :value="link.shortUrl" label="Copy short URL" copied-label="Short URL copied" />
             <button class="button button-secondary" type="button" @click="openExternal(link.shortUrl)">
               Open redirect
             </button>
@@ -306,9 +300,12 @@ watch(
 
           <figure class="stack" style="margin: 0;">
             <img class="qr-image" :src="link.qrCodeUrl" :alt="`QR code for ${link.code}`" />
-            <button class="button button-primary" type="button" @click="copy(link.qrCodeUrl)">
-              Copy QR URL
-            </button>
+            <CopyActionButton
+              :value="link.qrCodeUrl"
+              label="Copy QR URL"
+              copied-label="QR URL copied"
+              variant="primary"
+            />
           </figure>
         </template>
 

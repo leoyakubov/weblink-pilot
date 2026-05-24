@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import CopyActionButton from '@/components/CopyActionButton.vue'
 import { buildApiBaseUrl, listLinks } from '@/lib/api'
-import { copyText } from '@/lib/clipboard'
 import { loadSettings } from '@/lib/settings'
 import type { LinkResponse } from '@/types'
 
@@ -33,10 +33,6 @@ onMounted(() => {
 
 function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
-}
-
-function copy(value: string) {
-  return copyText(value)
 }
 
 function formatDate(value: string) {
@@ -87,9 +83,7 @@ function formatDate(value: string) {
               <RouterLink class="button button-secondary" :to="{ name: 'dashboard', query: { code: item.code } }">
                 Analytics
               </RouterLink>
-              <button class="button button-secondary" type="button" @click="copy(item.shortUrl)">
-                Copy short URL
-              </button>
+              <CopyActionButton :value="item.shortUrl" label="Copy short URL" copied-label="Short URL copied" />
               <button class="button button-secondary" type="button" @click="openExternal(item.qrCodeUrl)">
                 Open QR
               </button>
