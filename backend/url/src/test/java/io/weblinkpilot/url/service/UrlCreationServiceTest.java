@@ -4,17 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.url.codegen.Base62Codec;
+import io.weblinkpilot.url.codegen.ShortCodeGenerator;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
-import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class UrlCreationServiceTest {
     private ShortLinkRepository repository;
 
     @Mock
-    private Base62Codec base62Codec;
+    private ShortCodeGenerator shortCodeGenerator;
 
     @Mock
     private UrlCacheService cacheService;
@@ -69,16 +69,12 @@ class UrlCreationServiceTest {
     }
 
     @Test
-    void createsGeneratedAliasLink() throws Exception {
-        when(repository.saveAndFlush(any())).thenAnswer(invocation -> {
-            ShortLink link = invocation.getArgument(0);
-            setId(link, 42L);
-            return link;
-        });
-        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(base62Codec.encode(42L)).thenReturn("abc123");
-        when(publicUrlBuilder.buildShortUrl("abc123")).thenReturn("http://localhost:8080/r/abc123");
-        when(publicUrlBuilder.buildQrCodeUrl("abc123")).thenReturn("http://localhost:8080/api/v1/urls/abc123/qr");
+    void createsGeneratedAliasLink() {
+        when(shortCodeGenerator.generate()).thenReturn("abc1234");
+        when(repository.existsByCode("abc1234")).thenReturn(false);
+        when(repository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(publicUrlBuilder.buildShortUrl("abc1234")).thenReturn("http://localhost:8080/r/abc1234");
+        when(publicUrlBuilder.buildQrCodeUrl("abc1234")).thenReturn("http://localhost:8080/api/v1/urls/abc1234/qr");
 
         LinkResponse response = service.create(new CreateLinkRequest(
                 "https://google.com/about",
@@ -86,11 +82,12 @@ class UrlCreationServiceTest {
                 null
         ));
 
-        assertThat(response.code()).isEqualTo("abc123");
-        assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/abc123");
-        assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/abc123/qr");
-        verify(base62Codec).encode(42L);
-        verify(cacheService).evict("abc123");
+        assertThat(response.code()).isEqualTo("abc1234");
+        assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/abc1234");
+        assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/abc1234/qr");
+        verify(shortCodeGenerator).generate();
+        verify(repository).existsByCode("abc1234");
+        verify(cacheService).evict("abc1234");
         verify(linkPublisher).publish(org.mockito.ArgumentMatchers.any(LinkCreatedEvent.class));
     }
 
@@ -117,6 +114,18 @@ class UrlCreationServiceTest {
     }
 
     @Test
+    void rejectsInvalidAliasFormat() {
+        assertThatThrownBy(() -> service.create(new CreateLinkRequest(
+                "https://example.com",
+                "bad alias!",
+                null
+        ))).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Custom alias must be 3-64 characters long");
+
+        verifyNoInteractions(repository, cacheService, linkPublisher, shortCodeGenerator, publicUrlBuilder);
+    }
+
+    @Test
     void rejectsInvalidUrl() {
         assertThatThrownBy(() -> service.create(new CreateLinkRequest(
                 "not-a-url",
@@ -124,11 +133,5 @@ class UrlCreationServiceTest {
                 null
         ))).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("absolute");
-    }
-
-    private static void setId(ShortLink link, Long id) throws Exception {
-        Field field = ShortLink.class.getDeclaredField("id");
-        field.setAccessible(true);
-        field.set(link, id);
     }
 }

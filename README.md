@@ -124,7 +124,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Backend dev: [`scripts/backend/run-backend-dev.ps1`](scripts/backend/run-backend-dev.ps1)
 - Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
 - Frontend run: [`scripts/frontend/run-frontend.ps1`](scripts/frontend/run-frontend.ps1)
-- Frontend smoke test: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
+- Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Docker stack: [`scripts/docker/run-docker.ps1`](scripts/docker/run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
 - Sonar analysis: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)
@@ -137,9 +137,9 @@ Note: stop any already running backend instance before starting dev mode, otherw
 
 If you want the exact test/build shortcuts the project uses day to day:
 
-- Frontend tests: [`scripts/frontend/test.ps1`](scripts/frontend/test.ps1)
-- Frontend build: [`scripts/frontend/build.ps1`](scripts/frontend/build.ps1)
-- Frontend smoke test: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
+- Frontend tests: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
+- Frontend build: [`scripts/frontend/build-frontend.ps1`](scripts/frontend/build-frontend.ps1)
+- Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 
 ## Docker Stack
 
@@ -179,8 +179,8 @@ You can also select the Maven convenience profiles when running the backend dire
 
 For a lightweight browser smoke check against the Docker stack, use:
 
-- Windows: [`scripts/frontend/smoke-docker.ps1`](scripts/frontend/smoke-docker.ps1)
-- Unix: [`scripts/frontend/smoke-docker.sh`](scripts/frontend/smoke-docker.sh)
+- Windows: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
+- Unix: [`scripts/frontend/smoke-frontend.sh`](scripts/frontend/smoke-frontend.sh)
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 

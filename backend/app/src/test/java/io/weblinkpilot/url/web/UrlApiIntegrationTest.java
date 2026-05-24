@@ -177,6 +177,22 @@ class UrlApiIntegrationTest {
     }
 
     @Test
+    void createsRandomCodeWhenAliasIsBlank() throws Exception {
+        mockMvc.perform(post("/api/v1/urls")
+                        .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "originalUrl": "https://example.com/random-code"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(org.hamcrest.Matchers.matchesPattern("^[A-Za-z0-9]{7}$")))
+                .andExpect(jsonPath("$.shortUrl").value(org.hamcrest.Matchers.matchesPattern("http://localhost:8080/r/[A-Za-z0-9]{7}")))
+                .andExpect(jsonPath("$.qrCodeUrl").value(org.hamcrest.Matchers.matchesPattern("http://localhost:8080/api/v1/urls/[A-Za-z0-9]{7}/qr")))
+                .andExpect(jsonPath("$.originalUrl").value("https://example.com/random-code"));
+    }
+    @Test
     void returnsGoneForExpiredRedirects() throws Exception {
         mockMvc.perform(post("/api/v1/urls")
                         .with(httpBasic(AUTH_USER, AUTH_PASSWORD))

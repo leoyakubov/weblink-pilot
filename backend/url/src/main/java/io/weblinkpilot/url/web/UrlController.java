@@ -79,21 +79,21 @@ public class UrlController {
                             schema = @Schema(implementation = CreateLinkRequest.class),
                             examples = {
                                     @ExampleObject(
-                                            name = "Branded link",
-                                            value = """
-                                                    {
-                                                      "originalUrl": "https://github.com/docs",
-                                                      "customAlias": "github-org",
-                                                      "expiresAt": "2026-12-31T23:59:59Z"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Auto-generated alias",
+                                            name = "Random default code",
                                             value = """
                                                     {
                                                       "originalUrl": "https://google.com/about",
                                                       "expiresAt": "2026-08-31T23:59:59Z"
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            name = "Custom alias",
+                                            value = """
+                                                    {
+                                                      "originalUrl": "https://github.com/docs",
+                                                      "customAlias": "docs-team",
+                                                      "expiresAt": "2026-12-31T23:59:59Z"
                                                     }
                                                     """
                                     )

@@ -9,7 +9,7 @@ import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types'
 const settings = reactive<ApiSettings>(loadSettings())
 const form = reactive<CreateLinkRequest>({
   originalUrl: 'https://example.com/docs/getting-started',
-  customAlias: 'github-org',
+  customAlias: '',
   expiresAt: '',
 })
 
@@ -169,8 +169,9 @@ function openExternal(url: string) {
           </label>
 
           <label class="form-field">
-            <span class="field-label">Custom alias</span>
+            <span class="field-label">Custom alias (optional)</span>
             <input v-model="form.customAlias" class="input" type="text" placeholder="github-org" />
+            <p class="help-text">Leave this blank to generate a random short code.</p>
           </label>
 
           <label class="form-field">

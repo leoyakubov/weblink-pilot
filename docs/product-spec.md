@@ -17,8 +17,8 @@ The product is designed to look and feel like a real production service rather t
 
 ### URL creation
 
-- As a user, I want to shorten a long URL.
-- As a user, I want to set a custom alias.
+- As a user, I want a short URL to be generated automatically.
+- As a user, I want to optionally set a custom alias.
 - As a user, I want to set expiration.
 - As a user, I want to generate a QR code for the short URL.
 
@@ -42,8 +42,8 @@ The product is designed to look and feel like a real production service rather t
 
 ### MVP
 
-- create short URL
-- custom alias
+- create short URL with random default code
+- optional custom alias
 - expiration time
 - redirect endpoint
 - QR code generation
@@ -163,4 +163,3 @@ The project is successful if it can demonstrate:
 - event-driven design
 - production readiness
 - a clear story for interviews
-

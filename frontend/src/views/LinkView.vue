@@ -106,6 +106,7 @@ function formatDate(value: string | null) {
           <div class="list-item">
             <strong>Short URL</strong>
             <p>{{ link.shortUrl }}</p>
+            <p class="help-text">Short URLs are generated randomly unless you choose a custom alias.</p>
           </div>
           <div class="list-item">
             <strong>Target URL</strong>

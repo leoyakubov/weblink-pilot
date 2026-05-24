@@ -3,7 +3,7 @@ package io.weblinkpilot.url.service;
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.url.codegen.Base62Codec;
+import io.weblinkpilot.url.codegen.ShortCodeGenerator;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
@@ -11,7 +11,7 @@ import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,20 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class UrlCreationService {
 
     private static final Logger log = LoggerFactory.getLogger(UrlCreationService.class);
+    private static final int MAX_GENERATION_ATTEMPTS = 10;
+    private static final Pattern CUSTOM_ALIAS_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{3,64}$");
 
     private final ShortLinkRepository repository;
-    private final Base62Codec base62Codec;
+    private final ShortCodeGenerator shortCodeGenerator;
     private final UrlCacheService cacheService;
     private final LinkPublisher linkPublisher;
     private final PublicUrlBuilder publicUrlBuilder;
 
     public UrlCreationService(ShortLinkRepository repository,
-                              Base62Codec base62Codec,
+                              ShortCodeGenerator shortCodeGenerator,
                               UrlCacheService cacheService,
                               LinkPublisher linkPublisher,
                               PublicUrlBuilder publicUrlBuilder) {
         this.repository = repository;
-        this.base62Codec = base62Codec;
+        this.shortCodeGenerator = shortCodeGenerator;
         this.cacheService = cacheService;
         this.linkPublisher = linkPublisher;
         this.publicUrlBuilder = publicUrlBuilder;
@@ -51,26 +53,9 @@ public class UrlCreationService {
         }
 
         String alias = normalizeAlias(request.customAlias());
-        if (alias != null && repository.existsByCustomAlias(alias)) {
-            log.warn("link.create.rejected reason=duplicate_alias alias={}", alias);
-            throw new DuplicateAliasException(alias);
-        }
-
-        String initialCode = alias != null ? alias : temporaryCode();
-        ShortLink link = new ShortLink(initialCode, normalizedUrl, alias, now, request.expiresAt());
-        try {
-            link = repository.saveAndFlush(link);
-        } catch (DataIntegrityViolationException ex) {
-            if (alias != null) {
-                throw new DuplicateAliasException(alias);
-            }
-            throw ex;
-        }
-
-        if (alias == null) {
-            link.setCode(base62Codec.encode(link.getId()));
-            link = repository.save(link);
-        }
+        ShortLink link = alias != null
+                ? createWithCustomAlias(alias, normalizedUrl, now, request.expiresAt())
+                : createWithGeneratedCode(normalizedUrl, now, request.expiresAt());
 
         cacheService.evict(link.getCode());
         linkPublisher.publish(new LinkCreatedEvent(
@@ -101,11 +86,49 @@ public class UrlCreationService {
         );
     }
 
+    private ShortLink createWithCustomAlias(String alias, String normalizedUrl, OffsetDateTime now, OffsetDateTime expiresAt) {
+        if (repository.existsByCustomAlias(alias)) {
+            log.warn("link.create.rejected reason=duplicate_alias alias={}", alias);
+            throw new DuplicateAliasException(alias);
+        }
+
+        ShortLink link = new ShortLink(alias, normalizedUrl, alias, now, expiresAt);
+        try {
+            return repository.saveAndFlush(link);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateAliasException(alias);
+        }
+    }
+
+    private ShortLink createWithGeneratedCode(String normalizedUrl, OffsetDateTime now, OffsetDateTime expiresAt) {
+        for (int attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
+            String code = shortCodeGenerator.generate();
+            if (repository.existsByCode(code)) {
+                continue;
+            }
+
+            try {
+                return repository.saveAndFlush(new ShortLink(code, normalizedUrl, null, now, expiresAt));
+            } catch (DataIntegrityViolationException exception) {
+                if (attempt == MAX_GENERATION_ATTEMPTS) {
+                    throw exception;
+                }
+            }
+        }
+
+        throw new IllegalStateException("Unable to generate a unique short code");
+    }
+
     private String normalizeAlias(String customAlias) {
         if (customAlias == null || customAlias.isBlank()) {
             return null;
         }
-        return customAlias.trim();
+        String alias = customAlias.trim();
+        if (!CUSTOM_ALIAS_PATTERN.matcher(alias).matches()) {
+            throw new IllegalArgumentException(
+                    "Custom alias must be 3-64 characters long and contain only letters, digits, dash or underscore");
+        }
+        return alias;
     }
 
     private String normalizeUrl(String rawUrl) {
@@ -118,10 +141,6 @@ public class UrlCreationService {
             throw new IllegalArgumentException("Original URL must be absolute and include scheme and host");
         }
         return uri.toString();
-    }
-
-    private String temporaryCode() {
-        return "tmp-" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private String hostOf(String url) {
