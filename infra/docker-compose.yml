@@ -36,11 +36,9 @@ services:
       SPRING_DATASOURCE_USERNAME: weblinkpilot
       SPRING_DATASOURCE_PASSWORD: weblinkpilot
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      REDIS_URL: redis://redis:6379
       APP_PUBLIC_BASE_URL: http://localhost:8080
       APP_CORS_ALLOWED_ORIGIN_PATTERNS: http://localhost:8081,http://127.0.0.1:8081
-      APP_CACHE_PROVIDER: redis
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
       APP_RATE_LIMIT_ENABLED: "true"
       APP_RATE_LIMIT_API_PER_MINUTE: "120"
       APP_RATE_LIMIT_REDIRECT_PER_MINUTE: "300"

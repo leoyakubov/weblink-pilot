@@ -5,6 +5,7 @@
 - frontend: Netlify
 - backend: Render
 - database: Render Postgres
+- cache: Render Key Value (Redis)
 
 ## Status
 
@@ -14,6 +15,7 @@
 | Backend deploy workflow | Done | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`. |
 | Frontend deploy workflow | Done | GitHub Actions builds the Vue app and deploys it to Netlify. |
 | Render runtime | Done | The backend runs on Render with Postgres and the demo profile. |
+| Redis cache | Next | Add a Render Key Value instance and point the demo profile at its internal Redis URL. |
 | Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
 | Backend public URL | Done | The backend is reachable over HTTPS from the browser. |
 | CORS origin | Done | The exact Netlify origin is allowed by the backend CORS config. |
@@ -28,6 +30,15 @@
 ## Backend deploy secret
 
 - `RENDER_DEPLOY_HOOK_URL`
+
+## Backend Render env vars
+
+- `SPRING_PROFILES_ACTIVE=demo`
+- `SPRING_DATASOURCE_URL=jdbc:postgresql://<render-postgres-host>:5432/<database>`
+- `SPRING_DATASOURCE_USERNAME=<database-user>`
+- `SPRING_DATASOURCE_PASSWORD=<database-password>`
+- `REDIS_URL=<render-key-value-internal-url>`
+- `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
 
 ## Frontend deploy secrets
 
@@ -81,6 +92,7 @@ Create:
 
 - a Render Web Service for the backend
 - a Render Postgres database
+- a Render Key Value instance for Redis
 
 Set in the Render dashboard:
 
@@ -88,6 +100,7 @@ Set in the Render dashboard:
 - `SPRING_DATASOURCE_URL=jdbc:postgresql://<render-postgres-host>:5432/<database>`
 - `SPRING_DATASOURCE_USERNAME=<database-user>`
 - `SPRING_DATASOURCE_PASSWORD=<database-password>`
+- `REDIS_URL=<render-key-value-internal-url>`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
 
 Optional:
@@ -107,6 +120,7 @@ Notes:
 
 - `RENDER_DEPLOY_HOOK_URL` is optional if you rely entirely on Render's built-in Git auto-deploys, but we keep it for a GitHub-triggered deploy path.
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS` should contain only the exact Netlify origin(s) you trust.
+- `REDIS_URL` should use the Render Key Value instance's internal URL from the Connect menu.
 
 ### 4. Deploy in this order
 

@@ -2,7 +2,7 @@
 
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
-Live demo: Netlify frontend and Render backend.
+Live demo: Netlify frontend and Render backend with Render Postgres and Render Key Value Redis.
 
 ## Docs
 
@@ -168,7 +168,7 @@ The frontend container serves the Vue app through nginx and proxies API and redi
 ### Backend Profiles
 
 - `local`: default for developer workflows, uses H2 and localhost origins
-- `demo`: use for deployed demo instances, uses PostgreSQL and runtime secrets
+- `demo`: use for deployed demo instances, uses PostgreSQL, Redis, and runtime secrets
 
 You can also select the Maven convenience profiles when running the backend directly:
 
