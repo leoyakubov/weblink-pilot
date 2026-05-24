@@ -1,21 +1,40 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { onMounted } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth'
 
 const route = useRoute()
 
-const navItems = [
-  { label: 'Create', to: '/' },
-  { label: 'Dashboard', to: '/dashboard' },
-  { label: 'History', to: '/history' },
-  { label: 'Monitoring', to: '/monitoring' },
-  { label: 'About', to: '/about' },
-]
+const navItems = computed(() => {
+  const items = [
+    { label: 'Home', to: '/' },
+    { label: 'Dashboard', to: '/dashboard' },
+    { label: 'History', to: '/history' },
+    { label: 'About', to: '/about' },
+  ]
 
-const authLinks = [
-  { label: 'Sign in', to: { path: '/', hash: '#access', query: { auth: 'login' } } },
-  { label: 'Sign up', to: { path: '/', hash: '#access', query: { auth: 'register' } } },
-]
+  if (isAdminUser()) {
+    items.push({ label: 'Monitoring', to: '/monitoring' })
+  }
+
+  return items
+})
+
+const authLinks = computed(() => {
+  if (authState.currentUser) {
+    return []
+  }
+
+  return [
+    { label: 'Sign in', to: '/auth/signin' },
+    { label: 'Sign up', to: '/auth/signup' },
+  ]
+})
+
+const userChip = computed(() => authState.currentUser
+  ? `Logged in as: ${authState.currentUser.username}`
+  : '')
 
 const currentSection = computed(() => {
   if (route.name === 'link') {
@@ -38,7 +57,15 @@ const currentSection = computed(() => {
     return 'About this product'
   }
 
-  return 'Create link'
+  return 'Home'
+})
+
+const showSectionHeader = computed(() =>
+  !['home', 'about', 'signin', 'signup'].includes(String(route.name ?? '')),
+)
+
+onMounted(() => {
+  bootstrapAuth()
 })
 </script>
 
@@ -60,7 +87,7 @@ const currentSection = computed(() => {
         <nav class="nav">
           <RouterLink
             v-for="item in navItems"
-            :key="item.to"
+            :key="typeof item.to === 'string' ? item.to : item.label"
             :to="item.to"
             class="nav-link"
             :class="{ active: route.path === item.to }"
@@ -74,16 +101,20 @@ const currentSection = computed(() => {
             v-for="item in authLinks"
             :key="String(item.label)"
             :to="item.to"
-            class="button button-secondary button-small"
+            class="button button-secondary button-small auth-link-button"
           >
             {{ item.label }}
           </RouterLink>
+          <span v-if="userChip" class="user-chip">{{ userChip }}</span>
+          <button v-if="authState.currentUser" class="button button-secondary button-small" type="button" @click="signOut()">
+            Sign out
+          </button>
         </div>
       </div>
     </header>
 
     <main class="shell">
-      <section class="section-header">
+      <section v-if="showSectionHeader" class="section-header">
         <p class="eyebrow">Frontend foundation</p>
         <h1>{{ currentSection }}</h1>
         <p class="lede">

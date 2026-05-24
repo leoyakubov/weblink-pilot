@@ -70,6 +70,10 @@ public class ShortLink {
         return customAlias;
     }
 
+    public void setCustomAlias(String customAlias) {
+        this.customAlias = customAlias;
+    }
+
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
@@ -84,6 +88,10 @@ public class ShortLink {
 
     public String getOwnerUsername() {
         return ownerUsername;
+    }
+
+    public void setOwnerUsername(String ownerUsername) {
+        this.ownerUsername = ownerUsername;
     }
 
     public void incrementClickCount() {

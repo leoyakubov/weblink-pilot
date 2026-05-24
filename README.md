@@ -6,6 +6,7 @@ Live demo: Netlify frontend and Render backend with Render Postgres and Render K
 
 The app supports both anonymous demo links and signed-in user-owned links. Guests can shorten URLs immediately, while authenticated users get owned links, private history, and admin-only monitoring if they have the admin role.
 The cleaner SaaS-style landing page keeps the main create flow front and center, while the About page now holds the tech stack and developer settings.
+Local/dev startup also seeds the shared `admin` and `user` accounts plus a small set of starter links so the dashboards are never empty on first run.
 
 ## Docs
 
@@ -18,7 +19,7 @@ The cleaner SaaS-style landing page keeps the main create flow front and center,
 - [API Contract v1](docs/api-contract-v1.md)
 - [Backend Testing Strategy](docs/backend-testing.md)
 - [Deployment](docs/deployment.md)
-- [Implementation Checklist](docs/implementation-checklist.md)
+- [Roadmap](docs/roadmap.md)
 
 ## Repository Structure
 
@@ -214,9 +215,11 @@ The app expects the backend at `http://localhost:8080/api/v1` by default. You ca
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
-Default demo credentials for the current backend:
+Default local/dev credentials for the current backend:
 
-- username: `admin`
-- password: `admin123`
+- `admin / admin123`
+- `user / user123`
+
+Demo deployments can seed the same accounts through the `BOOTSTRAP_*` environment variables listed in the deployment docs.
 
 Guest mode does not require signing in and is the fastest way to create a demo link.

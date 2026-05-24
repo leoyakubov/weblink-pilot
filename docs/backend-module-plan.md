@@ -2,134 +2,129 @@
 
 ## Purpose
 
-The backend will be a modular monolith that behaves like a set of small services inside one deployable application.
+The backend is a modular monolith. The goal is to keep business boundaries explicit while still shipping one deployable application.
 
-The main goal is to keep domain boundaries explicit so that any high-value module can later be extracted into a microservice with minimal refactoring.
+The current shape is optimized for:
 
-## Backend modules
+- clear ownership boundaries
+- easy local testing
+- extraction readiness later, if a module outgrows the monolith
+
+## Current Modules
 
 ### 1. `shared-contracts`
 
+Shared DTOs and response contracts used across backend modules.
+
 Responsibilities:
 
-- shared request/response DTOs
-- domain event contracts
-- common error payloads
-- pagination/filter contracts if needed later
+- request/response records
+- shared response payloads
+- admin overview contract
+- any other cross-module API contract that must stay stable
 
 Rules:
 
 - no infrastructure dependencies
 - no business logic
-- stable API between modules
+- minimal surface area
 
 ### 2. `url`
 
+All short-link lifecycle behavior.
+
 Responsibilities:
 
-- create short URLs
+- create short links
 - validate original URLs
-- manage custom aliases
+- support custom aliases and random code generation
 - handle expiration
-- generate canonical short code
-- return QR metadata or QR payload references
+- resolve redirect targets
+- generate QR payloads
+- maintain redirect-path caching
+- publish click events
 
 Core concepts:
 
-- `ShortUrl`
-- `ShortUrlCode`
-- `Alias`
-- `ExpirationPolicy`
+- short link
+- code generation
+- redirect lookup
+- QR generation
+- ownership state
 
-### 3. `url`
+### 3. `analytics`
 
-Responsibilities:
-
-- resolve short code to original URL
-- serve redirect response
-- keep redirect latency low
-- emit click events asynchronously
-
-Rules:
-
-- no heavy analytics logic here
-- minimal dependency surface
-- cache-first read path
-
-### 4. `analytics`
+Click-event enrichment, persistence, and read models.
 
 Responsibilities:
 
 - consume click events
-- enrich click data
-- store event history
-- expose reporting endpoints
-- build aggregate read models
+- enrich clicks with country/device/browser metadata
+- store click history
+- expose analytics summary endpoints
+- maintain analytics cache invalidation
 
 Potential enrichments:
 
 - user-agent parsing
 - device classification
 - referrer capture
-- IP-based geo approximation
+- geo enrichment
 
-### 5. `auth`
+### 4. `app`
 
-Responsibilities:
-
-- protect management endpoints
-- support user authentication later
-- provide role-based access for dashboard actions
-
-For v1:
-
-- basic auth or simple auth boundary for admin-only routes
-
-### 6. `infrastructure`
+Application composition and technical wiring.
 
 Responsibilities:
 
-- database configuration
-- cache configuration
-- security wiring
-- observability setup
-- messaging adapter abstraction
+- Spring Boot application bootstrap
+- security configuration
+- JWT auth endpoints
+- user and role management
+- admin monitoring endpoints
+- Flyway wiring
+- cache wiring
+- observability wiring
+- bootstrap data runners
+- deployment-facing configuration
 
 Rules:
 
-- should not contain domain rules
-- should only wire technical concerns
+- no domain logic that belongs in `url` or `analytics`
+- use it as the composition root and runtime shell
 
-## Module dependencies
+### 5. `coverage`
 
-Recommended dependency direction:
+Build/reporting module only.
 
-```text
-shared-contracts
-     ↑
-url ↔ analytics
-     ↑
-auth
-     ↑
-infrastructure
-```
+Responsibilities:
 
-Better expressed as:
+- aggregate JaCoCo reports across modules
+- support coverage checks and Sonar integration
 
-- domain modules depend on `shared-contracts`
-- `infrastructure` depends on all modules for wiring
-- modules should not depend on each other's internals
-- cross-module interaction should happen through interfaces or events
+Rules:
 
-## Domain boundaries
+- not a runtime module
+- not part of the business domain
 
-### URL creation boundary
+## Module Dependencies
+
+- `url` and `analytics` depend on `shared-contracts`
+- `app` wires the runtime and depends on the feature modules
+- `coverage` only aggregates reports
+- feature modules should not depend on each other's internals
+- `coverage` does not participate in the runtime dependency graph
+
+## Domain Boundaries
+
+### URL Creation Boundary
 
 Input:
 
 - original URL
 - optional alias
 - optional expiration
+- optional owner
 
 Output:
 
@@ -137,7 +132,7 @@ Output:
 - full short URL
 - QR information
 
-### Redirect boundary
+### Redirect Boundary
 
 Input:
 
@@ -148,8 +143,9 @@ Output:
 
 - redirect target
 - redirect status
+- click event publication
 
-### Analytics boundary
+### Analytics Boundary
 
 Input:
 
@@ -158,29 +154,67 @@ Input:
 Output:
 
 - persisted click
-- aggregate update
+- aggregate updates
 - dashboard-ready metrics
 
-## API plan
+### Auth and Access Control Boundary
 
-### Public API
+Input:
+
+- login credentials
+- registration data
+- JWT token
+- role checks
+
+Output:
+
+- authenticated principal
+- role-aware access
+- admin-only route authorization
+
+## Public API Shape
+
+Public endpoints:
 
 - `POST /api/v1/urls`
 - `GET /r/{code}`
+- `GET /q/{code}`
 - `GET /api/v1/urls/{code}`
 - `GET /api/v1/urls/{code}/qr`
+- `GET /api/v1/urls/{code}/preview`
 - `GET /api/v1/analytics/{code}`
+- `GET /api/v1/analytics/{code}/count`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
 
-### Management API
+Admin endpoints:
 
-- `GET /api/v1/admin/urls`
-- `GET /api/v1/admin/urls/{code}`
-- `PATCH /api/v1/admin/urls/{code}`
-- `DELETE /api/v1/admin/urls/{code}`
+- `GET /api/v1/admin/overview`
 
-## Data model plan
+## Data Model Snapshot
 
-### `short_urls`
+### `roles`
+
+Fields:
+
+- `id`
+- `name`
+- `description`
+
+### `app_users`
+
+Fields:
+
+- `id`
+- `username`
+- `password_hash`
+- `role_id`
+- `enabled`
+- `created_at`
+- `last_login_at`
+
+### `short_links`
 
 Fields:
 
@@ -192,7 +226,7 @@ Fields:
 - `expires_at`
 - `status`
 - `click_count`
-- `created_by`
+- `owner_username`
 
 ### `click_events`
 
@@ -207,125 +241,40 @@ Fields:
 - `country`
 - `device_type`
 - `browser_family`
+- `event_source`
 
-### Optional later tables
+## Cache Strategy
 
-- `users`
-- `api_keys`
-- `link_tags`
-- `link_groups`
-- `audit_log`
+Current cache strategy:
 
-## Event model
+- hot short-link lookups use Redis
+- analytics read paths use cacheable read models where it helps
+- cache invalidation happens on new clicks
 
-### `LinkCreated`
+Cache keys are versioned and implementation-specific.
 
-Emitted when a short link is successfully created.
+## Bootstrapping Strategy
 
-Contains:
+Local/dev:
 
-- code
-- original URL
-- alias flag
-- expiration
-- created timestamp
+- seed `admin` and `user` accounts
+- seed a few starter links
 
-### `LinkClicked`
+Demo:
 
-Emitted on each redirect.
+- seed accounts from environment variables
+- keep the demo data minimal and explicit
 
-Contains:
+## Extraction Readiness
 
-- code
-- timestamp
-- ip
-- referrer
-- user-agent
-
-### `LinkDeleted` or `LinkDisabled`
-
-Useful later for cleanup and analytics consistency.
-
-## Cache strategy
-
-Use cache-aside for redirect lookups.
-
-Cache keys:
-
-- `short-url:{code}`
-
-Cached payload:
-
-- original URL
-- expiration
-- status
-
-Cache invalidation:
-
-- on URL update
-- on deletion
-- on expiration handling if necessary
-
-## QR code strategy
-
-Backend owns QR generation because it is part of the product contract.
-
-Possible outputs:
-
-- PNG endpoint
-- SVG endpoint
-- Base64 payload in API response for quick preview
-
-Recommended approach:
-
-- canonical QR generation in backend
-- frontend consumes preview or download link
-
-## Error handling plan
-
-Standard error categories:
-
-- validation errors
-- duplicate alias errors
-- not found errors
-- expired link errors
-- auth errors
-- rate limit errors
-
-Error response should be stable and machine-readable.
-
-## Testing plan
-
-### Unit tests
-
-- alias validation
-- URL normalization
-- code generation
-- expiration rules
-- event mapping
-
-### Integration tests
-
-- create and redirect flow
-- cache fallback behavior
-- analytics event handling
-- auth-protected management endpoints
-
-### Contract tests
-
-- request and response schemas
-- event payload compatibility
-
-## Extraction readiness
-
-The following modules are the best candidates for future extraction:
+Best future extraction candidates:
 
 - `analytics`
-- `redirect` if traffic or scaling demands it
-- `auth` if identity becomes complex
+- `url` if redirect volume or isolation needs grow
 
-The design should keep extraction cheap by:
+Keep extraction cheap by:
 
-- avoiding direct cross-module persistence access
-- using events instead of hidden service calls
 - keeping DTO contracts in `shared-contracts`
+- avoiding direct cross-module persistence access
+- using events for click propagation
+- keeping the composition root in `app`

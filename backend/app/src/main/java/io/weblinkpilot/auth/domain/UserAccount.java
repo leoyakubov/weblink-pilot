@@ -2,9 +2,12 @@ package io.weblinkpilot.auth.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
@@ -22,8 +25,9 @@ public class UserAccount {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "role", nullable = false, length = 32)
-    private String role;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
@@ -37,7 +41,7 @@ public class UserAccount {
     protected UserAccount() {
     }
 
-    public UserAccount(String username, String passwordHash, String role, boolean enabled, OffsetDateTime createdAt) {
+    public UserAccount(String username, String passwordHash, Role role, boolean enabled, OffsetDateTime createdAt) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.role = role;
@@ -61,8 +65,12 @@ public class UserAccount {
         this.passwordHash = passwordHash;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
+    }
+
+    public String getRoleName() {
+        return role == null ? null : role.getName();
     }
 
     public boolean isEnabled() {

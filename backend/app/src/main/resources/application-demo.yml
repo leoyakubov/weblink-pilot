@@ -12,6 +12,13 @@ server:
   port: ${PORT:8080}
 
 app:
+  auth:
+    bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:}
+    bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    bootstrap-admin-role: ${BOOTSTRAP_ADMIN_ROLE:ADMIN}
+    bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:}
+    bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:}
+    bootstrap-user-role: USER
   cache:
     provider: redis
   public-base-url: ${APP_PUBLIC_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}

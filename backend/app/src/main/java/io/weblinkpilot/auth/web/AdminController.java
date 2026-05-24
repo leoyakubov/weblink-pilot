@@ -26,7 +26,7 @@ public class AdminController {
     @SecurityRequirement(name = "bearerAuth")
     public AdminOverviewResponse overview() {
         long totalUsers = userAccountRepository.count();
-        long adminUsers = userAccountRepository.countByRole("ADMIN");
+        long adminUsers = userAccountRepository.countByRole_Name("ADMIN");
         long totalLinks = shortLinkRepository.count();
         long anonymousLinks = shortLinkRepository.countByOwnerUsernameIsNull();
         long ownedLinks = shortLinkRepository.countByOwnerUsernameIsNotNull();

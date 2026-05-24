@@ -11,6 +11,9 @@ public class AuthProperties {
     private String bootstrapAdminUsername = "admin";
     private String bootstrapAdminPassword = "admin123";
     private String bootstrapAdminRole = "ADMIN";
+    private String bootstrapUserUsername = "";
+    private String bootstrapUserPassword = "";
+    private String bootstrapUserRole = "USER";
 
     public String getIssuer() {
         return issuer;
@@ -58,5 +61,29 @@ public class AuthProperties {
 
     public void setBootstrapAdminRole(String bootstrapAdminRole) {
         this.bootstrapAdminRole = bootstrapAdminRole;
+    }
+
+    public String getBootstrapUserUsername() {
+        return bootstrapUserUsername;
+    }
+
+    public void setBootstrapUserUsername(String bootstrapUserUsername) {
+        this.bootstrapUserUsername = bootstrapUserUsername;
+    }
+
+    public String getBootstrapUserPassword() {
+        return bootstrapUserPassword;
+    }
+
+    public void setBootstrapUserPassword(String bootstrapUserPassword) {
+        this.bootstrapUserPassword = bootstrapUserPassword;
+    }
+
+    public String getBootstrapUserRole() {
+        return bootstrapUserRole;
+    }
+
+    public void setBootstrapUserRole(String bootstrapUserRole) {
+        this.bootstrapUserRole = bootstrapUserRole;
     }
 }

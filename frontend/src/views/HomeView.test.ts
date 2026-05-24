@@ -3,32 +3,26 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import HomeView from './HomeView.vue'
 
 const mocks = vi.hoisted(() => ({
+  authState: {
+    currentUser: null as null | { username: string; role: string },
+  },
   createLinkMock: vi.fn(),
-  copyTextMock: vi.fn(),
-  getCurrentUserMock: vi.fn(),
-  loginMock: vi.fn(),
-  registerMock: vi.fn(),
+  listLinksMock: vi.fn(),
   saveSettingsMock: vi.fn(),
   buildApiBaseUrlMock: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
+}))
+
+vi.mock('@/lib/auth', () => ({
+  authState: mocks.authState,
 }))
 
 vi.mock('@/lib/api', () => ({
   buildApiBaseUrl: mocks.buildApiBaseUrlMock,
   createLink: mocks.createLinkMock,
-  getCurrentUser: mocks.getCurrentUserMock,
-  login: mocks.loginMock,
-  register: mocks.registerMock,
-}))
-
-vi.mock('@/lib/clipboard', () => ({
-  copyText: mocks.copyTextMock,
+  listLinks: mocks.listLinksMock,
 }))
 
 vi.mock('@/lib/settings', () => ({
-  defaultSettings: () => ({
-    apiBaseUrl: 'http://localhost:8080/api/v1',
-    authToken: '',
-  }),
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
@@ -39,6 +33,31 @@ vi.mock('@/lib/settings', () => ({
 describe('HomeView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mocks.authState.currentUser = null
+    mocks.listLinksMock.mockResolvedValue([])
+  })
+
+  function mountHome() {
+    return mount(HomeView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    })
+  }
+
+  it('renders the hero and the recent links area', async () => {
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Short links, QR codes, and analytics in one clean workspace.')
+    expect(wrapper.text()).toContain('Quick create')
+    expect(wrapper.text()).toContain('Recent links')
+    expect(wrapper.text()).toContain('Guest mode ready for demo links')
   })
 
   it('creates a random-code link when the alias is left blank', async () => {
@@ -53,19 +72,11 @@ describe('HomeView', () => {
       ownerUsername: null,
     })
 
-    const wrapper = mount(HomeView, {
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ['to'],
-            template: '<a><slot /></a>',
-          },
-        },
-      },
-    })
+    const wrapper = mountHome()
+    await flushPromises()
 
-    expect((wrapper.get('input[placeholder="github-org"]').element as HTMLInputElement).value).toBe('')
     await wrapper.get('input[type="url"]').setValue(' https://github.com/docs/getting-started ')
+    await wrapper.get('input[type="text"]').setValue(' ')
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
@@ -87,49 +98,32 @@ describe('HomeView', () => {
     expect(wrapper.text()).toContain('http://localhost:8080/r/abc1234')
   })
 
-  it('creates a link and shows the created-link actions when a custom alias is provided', async () => {
-    mocks.createLinkMock.mockResolvedValue({
-      code: 'github-org',
-      shortUrl: 'http://localhost:8080/r/github-org',
-      qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-      originalUrl: 'https://github.com/docs/getting-started',
-      createdAt: '2026-05-23T11:00:00Z',
-      expiresAt: null,
-      clickCount: 0,
-      ownerUsername: 'admin',
-    })
+  it('shows signed-in status and owned links when the user is authenticated', async () => {
+    mocks.authState.currentUser = {
+      username: 'admin',
+      role: 'ADMIN',
+    }
 
-    const wrapper = mount(HomeView, {
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ['to'],
-            template: '<a><slot /></a>',
-          },
-        },
+    mocks.listLinksMock.mockResolvedValue([
+      {
+        code: 'github-org',
+        shortUrl: 'http://localhost:8080/r/github-org',
+        qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+        originalUrl: 'https://github.com/orgs/github-org',
+        createdAt: '2026-05-23T11:00:00Z',
+        expiresAt: null,
+        clickCount: 3,
+        ownerUsername: 'admin',
       },
-    })
+    ])
 
-    await wrapper.get('input[type="url"]').setValue(' https://github.com/docs/getting-started ')
-    await wrapper.get('input[placeholder="github-org"]').setValue(' github-org ')
-    await wrapper.find('form').trigger('submit.prevent')
+    const wrapper = mountHome()
     await flushPromises()
 
-    expect(mocks.createLinkMock).toHaveBeenCalledWith(
-      {
-        originalUrl: 'https://github.com/docs/getting-started',
-        customAlias: 'github-org',
-        expiresAt: null,
-      },
-      {
-        apiBaseUrl: 'http://localhost:8080/api/v1',
-        authToken: '',
-      },
-    )
-    expect(mocks.saveSettingsMock).toHaveBeenCalled()
-    expect(wrapper.text()).toContain('Created github-org successfully')
-    expect(wrapper.text()).toContain('View details page')
-    expect(wrapper.text()).toContain('Copy QR URL')
-    expect(wrapper.text()).toContain('http://localhost:8080/r/github-org')
+    expect(wrapper.text()).toContain('Signed in as admin (ADMIN)')
+    expect(wrapper.text()).toContain('Your Recent Links')
+    expect(wrapper.text()).toContain('admin')
+    expect(wrapper.text()).toContain('Details')
+    expect(wrapper.text()).toContain('Analytics')
   })
 })

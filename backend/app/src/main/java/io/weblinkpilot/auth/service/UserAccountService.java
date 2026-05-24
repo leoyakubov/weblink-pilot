@@ -2,6 +2,7 @@ package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.UserAccount;
+import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
@@ -20,13 +21,16 @@ public class UserAccountService {
     private final UserAccountRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AuthProperties authProperties;
+    private final RoleCatalogService roleCatalogService;
 
     public UserAccountService(UserAccountRepository repository,
                               PasswordEncoder passwordEncoder,
-                              AuthProperties authProperties) {
+                              AuthProperties authProperties,
+                              RoleCatalogService roleCatalogService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.authProperties = authProperties;
+        this.roleCatalogService = roleCatalogService;
     }
 
     @Transactional
@@ -36,10 +40,11 @@ public class UserAccountService {
             throw new UsernameAlreadyExistsException(normalizedUsername);
         }
 
+        Role userRole = roleCatalogService.getRequiredRole("USER");
         UserAccount account = new UserAccount(
                 normalizedUsername,
                 passwordEncoder.encode(rawPassword),
-                "USER",
+                userRole,
                 true,
                 OffsetDateTime.now(ZoneOffset.UTC)
         );
@@ -75,9 +80,33 @@ public class UserAccountService {
                 .orElseGet(() -> repository.save(new UserAccount(
                         username,
                         passwordEncoder.encode(password),
-                        authProperties.getBootstrapAdminRole() == null || authProperties.getBootstrapAdminRole().isBlank()
-                                ? "ADMIN"
-                                : authProperties.getBootstrapAdminRole().trim().toUpperCase(Locale.ROOT),
+                        roleCatalogService.getRequiredRole(
+                                authProperties.getBootstrapAdminRole() == null || authProperties.getBootstrapAdminRole().isBlank()
+                                        ? "ADMIN"
+                                        : authProperties.getBootstrapAdminRole().trim().toUpperCase(Locale.ROOT)
+                        ),
+                        true,
+                        OffsetDateTime.now(ZoneOffset.UTC)
+                )));
+    }
+
+    @Transactional
+    public UserAccount ensureBootstrapUser() {
+        String username = normalizeUsername(authProperties.getBootstrapUserUsername());
+        String password = authProperties.getBootstrapUserPassword();
+        if (username.isBlank() || password == null || password.isBlank()) {
+            return null;
+        }
+
+        return repository.findByUsername(username)
+                .orElseGet(() -> repository.save(new UserAccount(
+                        username,
+                        passwordEncoder.encode(password),
+                        roleCatalogService.getRequiredRole(
+                                authProperties.getBootstrapUserRole() == null || authProperties.getBootstrapUserRole().isBlank()
+                                        ? "USER"
+                                        : authProperties.getBootstrapUserRole().trim().toUpperCase(Locale.ROOT)
+                        ),
                         true,
                         OffsetDateTime.now(ZoneOffset.UTC)
                 )));
@@ -87,7 +116,7 @@ public class UserAccountService {
     public UserProfileResponse profile(String username) {
         UserAccount account = repository.findByUsername(normalizeUsername(username))
                 .orElseThrow(InvalidCredentialsException::new);
-        return new UserProfileResponse(account.getUsername(), account.getRole());
+        return new UserProfileResponse(account.getUsername(), account.getRoleName());
     }
 
     @Transactional(readOnly = true)

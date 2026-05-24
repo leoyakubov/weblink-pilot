@@ -1,66 +1,344 @@
 # Roadmap
 
+This document is the single planning source of truth.
+The old implementation checklist has been merged here so we only maintain one plan.
+
 ## Status Overview
 
-| Status | Area | Notes |
-|---|---|---|
-| Done | Repo readiness | Repo layout, docs, scripts, Maven wrapper, Docker, Sonar, coverage, and test tooling are in place. |
-| Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
-| Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, and QR flows are implemented. |
-| Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
-| Done | Frontend foundation | Vue app shell and backend integration are in place. |
-| Done | Frontend feature set | Create flow, dashboard, history, details, and QR UI are in place. |
-| Done | Hardening baseline | Tests, coverage, rate limiting, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
-| Done | Deployment setup | CI and deploy workflows are in place for the live Netlify frontend and Render backend. |
-| Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
-| Next | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack now that the app is deployed. |
-| Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
-| Later | Auth expansion | Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes. |
-| Done | Environment profiles | Local, dev, and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
-| Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
+<table>
+  <tr>
+    <th>Status</th>
+    <th>Area</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Project bootstrap</td>
+    <td bgcolor="#dcfce7">Repo layout, baseline docs, naming, and initial tooling are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Backend foundation</td>
+    <td bgcolor="#dcfce7">Modular backend, persistence, security, cache, actuator, logging, and observability are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">URL lifecycle</td>
+    <td bgcolor="#dcfce7">Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Analytics</td>
+    <td bgcolor="#dcfce7">Click events are tracked by source (redirect and QR), with summaries and enrichment.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Frontend foundation</td>
+    <td bgcolor="#dcfce7">Vue app shell and backend integration are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Frontend feature set</td>
+    <td bgcolor="#dcfce7">Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Authentication and access control</td>
+    <td bgcolor="#dcfce7">JWT login/register/me flows, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Tests, code quality, Sonar</td>
+    <td bgcolor="#dcfce7">Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Rate limiting</td>
+    <td bgcolor="#dcfce7">Request throttling is implemented for the public and API paths that need it.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Docker</td>
+    <td bgcolor="#dcfce7">Local and dev Docker workflows are in place for the full stack and backend support services.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Environment profiles and scripts</td>
+    <td bgcolor="#dcfce7">Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Deployment setup</td>
+    <td bgcolor="#dcfce7">CI and deploy workflows are in place for the live Netlify frontend and Render backend.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#dcfce7"><strong>Done</strong></td>
+    <td bgcolor="#dcfce7">Redis cache</td>
+    <td bgcolor="#dcfce7">Redis-backed hot short-code lookup caching and analytics cache invalidation are in place.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#fde68a"><strong>Next</strong></td>
+    <td bgcolor="#fde68a">Monitoring stack integration</td>
+    <td bgcolor="#fde68a">Wire Prometheus/Grafana links and the local monitoring stack into the admin monitoring page now that the app is deployed.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#e5e7eb"><strong>Maybe</strong></td>
+    <td bgcolor="#e5e7eb">Auth expansion</td>
+    <td bgcolor="#e5e7eb">Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes.</td>
+  </tr>
+  <tr>
+    <td bgcolor="#e5e7eb"><strong>Maybe</strong></td>
+    <td bgcolor="#e5e7eb">Async broker</td>
+    <td bgcolor="#e5e7eb">Add RabbitMQ or Kafka only if event volume or service separation warrants it.</td>
+  </tr>
+</table>
 
-## Phase 1 - Planning
+## Execution Checklist
 
-- define architecture and product scope
-- lock repository layout
-- agree on technical stack and version baseline
+### Phase 0 - Repo readiness
 
-## Phase 2 - Backend foundation
+Goals:
 
-- create backend monorepo structure
+- project bootstrap
+- final repo naming
+- baseline docs in place
+- clean `.gitignore`
+- repo structure agreed
+
+Exit criteria:
+
+- planning docs committed
+- README links updated
+- tech stack finalized
+- initial tooling agreed
+
+### Phase 1 - Backend foundation
+
+Goals:
+
+- create backend module structure
+- wire Spring Boot application
+- configure PostgreSQL, Flyway, security, cache, and basic observability
 - define shared contracts and domain modules
-- add persistence model and initial API contracts
-- set up auth, cache, and event boundaries
 
-## Phase 3 - Frontend foundation
+Exit criteria:
 
-- create Vue app with mobile-first UI
-- implement link creation flow
-- implement QR preview and download flow
-- implement analytics dashboard shell
+- backend starts locally
+- database migrations run successfully
+- health endpoint is available
+- module boundaries are visible in code
 
-## Phase 4 - Core features
+### Phase 2 - Tests, code quality, Sonar
 
-- short URL creation
-- custom aliases
-- expiration handling
-- redirect flow
-- QR code generation
-- click analytics
+Goals:
 
-## Phase 5 - Production hardening
+- keep the test suite green
+- maintain coverage checks
+- enforce ArchUnit and integration test safety
+- run local SonarQube analysis
 
-- integration tests
-- observability
-- rate limiting
-- Redis-backed caching
-- deployment setup
+Exit criteria:
+
+- CI checks cover the important quality gates
+- test and coverage reports are available
+- the code quality feedback loop is quick
+
+### Phase 3 - Docker
+
+Goals:
+
+- keep the dev Docker stack reproducible
+- run backend, frontend, database, and cache through Compose
+- mirror the demo deployment shape as closely as practical
+
+Exit criteria:
+
+- the full stack can be started locally
+- the dev environment matches the demo topology closely
+- container orchestration is documented and stable
+
+### Phase 4 - URL lifecycle
+
+Goals:
+
+- implement short URL creation
+- support custom aliases
+- support expiration
+- implement redirect flow
+- return short link details
+
+Exit criteria:
+
+- user can create and resolve links
+- redirect path is working end to end
+- basic validation and error handling are in place
+
+### Phase 5 - QR code support
+
+Goals:
+
+- generate QR code for a short URL
+- expose QR endpoint
+- make QR visible in the API contract and frontend
+
+Exit criteria:
+
+- backend can generate QR output
+- frontend can display or download QR
+
+### Phase 6 - Analytics
+
+Goals:
+
+- publish click events
+- consume events asynchronously
+- persist click data
+- expose analytics summary endpoints
+- distinguish redirect clicks from QR scans in the analytics model
+
+Exit criteria:
+
+- redirect path emits events
+- QR scan path emits events separately
+- analytics are stored and queryable
+- metrics are visible for one short code
+
+### Phase 7 - Frontend foundation
+
+Goals:
+
+- scaffold Vue app
+- create mobile-first shell
+- wire routing and base layout
+- connect to backend API
+
+Exit criteria:
+
+- frontend loads and navigates
+- create-link form is present
+- API integration is working
+
+### Phase 8 - Frontend feature set
+
+Goals:
+
+- create link flow UI
+- success page with short link and QR
+- analytics dashboard
+- link details/history views
+
+Exit criteria:
+
+- core user journeys work on mobile and desktop
+- UI is stable enough for demo and review
+
+### Phase 9 - Authentication and access control
+
+Goals:
+
+- add JWT login/register/me flows
+- support user and admin roles
+- seed bootstrap accounts and starter links in the auth layer
+- make navigation and routes role-aware
+- keep guest link creation available for demo users
+- protect admin-only monitoring access
+
+Exit criteria:
+
+- users can sign up and sign in
+- admins see admin-only navigation and routes
+- anonymous and owned links both work
+- the auth model supports the current product flow
+
+### Phase 10 - Production hardening
+
+Goals:
+
+- logging and metrics
 - documentation polish
+- release checks and deploy safety
 
-## Phase 6 - Future evolution
+Exit criteria:
 
-- introduce broker if needed
-- extract analytics if it becomes valuable
-- split services only when the boundaries prove themselves
-- expand auth into refresh tokens, password reset, email verification, OAuth/social login, multiple providers, and deeper account management when the current JWT/user model proves its shape
-- refine Maven profiles only if they reduce complexity further
+- project runs in containers
+- tests cover key flows
+- README and docs describe how to use it
+
+### Phase 11 - Environment profiles and scripts
+
+Goals:
+
+- keep the local/dev/demo runtime split explicit
+- use Maven profiles only as a convenience for `spring-boot:run`
+- document the local/dev/docker/test/demo configuration story
+- keep the helper scripts readable and predictable
+- seed local/dev users and demo bootstrap data in a profile-driven way
+
+Exit criteria:
+
+- environment-specific behavior is explicit
+- configuration is easier to reason about
+- local, container, and demo workflows stay simple
+
+### Phase 12 - Redis caching
+
+Goals:
+
+- replace the in-memory cache with Redis for hot short-code lookups and cacheable analytics paths
+- use Redis for rate-limiting counters if that becomes the simplest production path
+- keep cache behavior explicit in local, dev, demo, and deployment profiles
+
+Exit criteria:
+
+- URL lookups no longer rely only on the in-memory cache
+- analytics and other hot paths can use Redis-backed caching where it helps
+- cache behavior is documented and testable
+
+### Phase 13 - Monitoring
+
+Goals:
+
+- wire Prometheus/Grafana links and local monitoring stack into the admin monitoring page
+- surface health and metrics in the UI
+- decide whether any monitoring endpoints need additional JWT protection
+
+Exit criteria:
+
+- monitoring is visible from the app
+- the deploy path stays simple
+- the monitoring stack can be enabled after the app is live
+
+### Phase 14 - Auth expansion
+
+Goals:
+
+- add refresh tokens for longer-lived sessions
+- add password reset flows
+- add email verification
+- support OAuth or social login providers
+- support multiple auth providers if the product needs them
+- add account management UI and API with dedicated tests and migrations
+
+Exit criteria:
+
+- users can recover access without manual intervention
+- the app can support more than one identity provider
+- account lifecycle flows are explicit and testable
+- admin and user account management remain separated cleanly
+
+## Suggested Build Order
+
+1. backend foundation
+2. tests, code quality, Sonar
+3. Docker
+4. URL lifecycle
+5. QR support
+6. analytics
+7. frontend foundation
+8. frontend features
+9. authentication and access control
+10. production hardening
+11. environment profiles and scripts
+12. Redis caching
+13. monitoring
+14. auth expansion

@@ -22,13 +22,13 @@ public class AuthService {
     @Transactional
     public AuthResponse register(AuthCredentialsRequest request) {
         UserAccount account = userAccountService.registerUser(request.username(), request.password());
-        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRole()), account.getUsername(), account.getRole());
+        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRoleName()), account.getUsername(), account.getRoleName());
     }
 
     @Transactional
     public AuthResponse login(AuthCredentialsRequest request) {
         UserAccount account = userAccountService.authenticate(request.username(), request.password());
-        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRole()), account.getUsername(), account.getRole());
+        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRoleName()), account.getUsername(), account.getRoleName());
     }
 
     @Transactional(readOnly = true)

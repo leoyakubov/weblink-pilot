@@ -38,6 +38,11 @@
 - `SPRING_DATASOURCE_USERNAME=<database-user>`
 - `SPRING_DATASOURCE_PASSWORD=<database-password>`
 - `REDIS_URL=<render-key-value-internal-url>`
+- `BOOTSTRAP_ADMIN_USERNAME=<admin-username>`
+- `BOOTSTRAP_ADMIN_PASSWORD=<admin-password>`
+- `BOOTSTRAP_ADMIN_ROLE=ADMIN`
+- `BOOTSTRAP_USER_USERNAME=<user-username>`
+- `BOOTSTRAP_USER_PASSWORD=<user-password>`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
 
 ## Frontend deploy secrets
@@ -101,6 +106,11 @@ Set in the Render dashboard:
 - `SPRING_DATASOURCE_USERNAME=<database-user>`
 - `SPRING_DATASOURCE_PASSWORD=<database-password>`
 - `REDIS_URL=<render-key-value-internal-url>`
+- `BOOTSTRAP_ADMIN_USERNAME=<admin-username>`
+- `BOOTSTRAP_ADMIN_PASSWORD=<admin-password>`
+- `BOOTSTRAP_ADMIN_ROLE=ADMIN`
+- `BOOTSTRAP_USER_USERNAME=<user-username>`
+- `BOOTSTRAP_USER_PASSWORD=<user-password>`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
 
 Optional:
@@ -121,6 +131,8 @@ Notes:
 - `RENDER_DEPLOY_HOOK_URL` is optional if you rely entirely on Render's built-in Git auto-deploys, but we keep it for a GitHub-triggered deploy path.
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS` should contain only the exact Netlify origin(s) you trust.
 - `REDIS_URL` should use the Render Key Value instance's internal URL from the Connect menu.
+- The bootstrap env vars seed the shared `admin / admin123` and `user / user123` accounts for demo/local/dev. Leave them empty if you want to opt out in a specific environment.
+- The startup seeder also creates two anonymous starter links and one owned link for each seeded account so the first-run UI has real content.
 
 ### 4. Deploy in this order
 
