@@ -15,7 +15,7 @@
 | Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | Next | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack now that the app is deployed. |
 | Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
-| Done | Environment profiles | Local and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
+| Done | Environment profiles | Local, dev, and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
 | Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
 
 ## Phase 1 - Planning

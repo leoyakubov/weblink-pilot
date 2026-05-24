@@ -19,7 +19,7 @@ It helps us build the project in small, verifiable slices without jumping too ea
 | Done | Phase 6 | Frontend feature set is implemented. |
 | Done | Phase 7 baseline | Tests, observability, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
 | Done | Phase 7 follow-up | Deployment setup for Netlify and Render plus the live demo path. |
-| Nice to do | Phase 8 | Environment profiles if and when they simplify the runtime story. |
+| Done | Phase 8 | Environment profiles with local, dev, and demo splits. |
 | Done | Phase 9 | Redis-backed caching for URL hot lookups and analytics cache invalidation are implemented. |
 | Next | Phase 10 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
 | Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
@@ -148,11 +148,11 @@ Exit criteria:
 
 ## Phase 8 - Environment profiles
 
-Status: done for the local/demo split, with Maven convenience profiles for direct backend runs.
+Status: done for the local/dev/demo split, with Maven convenience profiles for direct backend runs.
 
 Goals:
 
-- keep the local/demo runtime split explicit
+- keep the local/dev/demo runtime split explicit
 - use Maven profiles only as a convenience for `spring-boot:run`
 - document the local/dev/docker/test/demo configuration story
 
@@ -170,7 +170,7 @@ Goals:
 
 - replace the in-memory cache with Redis for hot short-code lookups and cacheable analytics paths
 - use Redis for rate-limiting counters if that becomes the simplest production path
-- keep cache behavior explicit in local, demo, and deployment profiles
+- keep cache behavior explicit in local, dev, demo, and deployment profiles
 
 Exit criteria:
 

@@ -120,8 +120,8 @@ SONAR_TOKEN=your-token-here
 
 From the repo root, the preferred quick-run entrypoints are grouped by area:
 
-- Backend run: [`scripts/backend/run-backend.ps1`](scripts/backend/run-backend.ps1)
-- Backend dev: [`scripts/backend/run-backend-dev.ps1`](scripts/backend/run-backend-dev.ps1)
+- Backend local: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
+- Backend dev: [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1)
 - Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
 - Frontend run: [`scripts/frontend/run-frontend.ps1`](scripts/frontend/run-frontend.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
@@ -163,19 +163,29 @@ Services:
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
 
-The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `demo` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped deployment, while direct local development still uses the `local` profile with in-memory H2.
+The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `dev` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped local stack, while direct local development still uses the `local` profile with in-memory H2.
 
 ### Backend Profiles
 
 - `local`: default for developer workflows, uses H2 and localhost origins
+- `dev`: Docker stack profile, uses PostgreSQL, Redis, and localhost deployment wiring
 - `demo`: use for deployed demo instances, uses PostgreSQL, Redis, and runtime secrets
+
+When running `local`, the H2 console is available at `http://localhost:8080/h2-console`.
 
 You can also select the Maven convenience profiles when running the backend directly:
 
 ```powershell
 .\mvnw.cmd -Plocal -pl app -am spring-boot:run
+.\mvnw.cmd -Pdev -pl app -am spring-boot:run
 .\mvnw.cmd -Pdemo -pl app -am spring-boot:run
 ```
+
+Quick guide:
+
+- `local`: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
+- `dev`: [`scripts/docker/run-docker.ps1`](scripts/docker/run-docker.ps1) for the full stack, or [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1) after Postgres and Redis are up locally
+- `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:
 

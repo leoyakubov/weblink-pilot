@@ -90,6 +90,12 @@
             </properties>
         </profile>
         <profile>
+            <id>dev</id>
+            <properties>
+                <spring-boot.run.profiles>dev</spring-boot.run.profiles>
+            </properties>
+        </profile>
+        <profile>
             <id>demo</id>
             <properties>
                 <spring-boot.run.profiles>demo</spring-boot.run.profiles>

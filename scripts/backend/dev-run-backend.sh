@@ -16,5 +16,5 @@ if [[ ! -f "$mvnw" ]]; then
 fi
 
 cd "$backend_dir"
-"$mvnw" -Plocal -pl shared-contracts,url,analytics,app -am install -DskipTests
-exec "$mvnw" -Plocal -f "$backend_dir/app/pom.xml" spring-boot:run
+"$mvnw" -Pdev -pl shared-contracts,url,analytics,app -am install -DskipTests
+exec "$mvnw" -Pdev -f "$backend_dir/app/pom.xml" spring-boot:run
