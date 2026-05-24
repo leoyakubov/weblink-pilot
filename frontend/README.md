@@ -21,6 +21,11 @@ copy .env.example .env.local
 npm run dev
 ```
 
+Repo-level helpers:
+
+- local frontend shell: [`scripts/frontend/local-run-frontend.ps1`](../scripts/frontend/local-run-frontend.ps1)
+- dev frontend shell: [`scripts/frontend/dev-run-frontend.ps1`](../scripts/frontend/dev-run-frontend.ps1)
+
 Netlify needs a SPA fallback for direct route refreshes like `/dashboard`, so the repo includes `public/_redirects` with `/* /index.html 200`.
 
 ## Test
