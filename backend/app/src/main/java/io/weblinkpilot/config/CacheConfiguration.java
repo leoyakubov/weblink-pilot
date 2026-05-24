@@ -2,6 +2,7 @@ package io.weblinkpilot.config;
 
 import java.time.Duration;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -27,15 +28,14 @@ public class CacheConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "app.cache.provider", havingValue = "redis")
-    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
-        GenericJackson2JsonRedisSerializer valueSerializer = GenericJackson2JsonRedisSerializer.builder()
-                .objectMapper(objectMapper)
-                .build();
-
+    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
+        ObjectMapper objectMapper = new ObjectMapper()
+                .findAndRegisterModules()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         RedisCacheConfiguration defaults = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(SerializationPair.fromSerializer(valueSerializer));
+                .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaults.entryTtl(Duration.ofMinutes(10)))
