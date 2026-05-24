@@ -23,15 +23,16 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 2
 
+      - name: Mark manual deploy
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
+        run: echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
+
       - name: Detect frontend changes
+        if: github.event_name == 'workflow_run'
         id: changes
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           changed_files="$(git diff --name-only HEAD^ HEAD)"
           echo "Changed files:"
           printf '%s\n' "$changed_files"
@@ -43,13 +44,13 @@ jobs:
           fi
 
       - name: Skip deploy when frontend did not change
-        if: steps.changes.outputs.frontend_changed != 'true'
+        if: steps.manual.outputs.frontend_changed != 'true' && steps.changes.outputs.frontend_changed != 'true'
         run: |
           echo "No frontend-relevant files changed; skipping frontend deploy."
           exit 0
 
       - name: Set up Node 22
-        if: steps.changes.outputs.frontend_changed == 'true'
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -57,21 +58,21 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        if: steps.changes.outputs.frontend_changed == 'true'
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         working-directory: frontend
         run: npm ci
 
       - name: Run frontend tests
-        if: steps.changes.outputs.frontend_changed == 'true'
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         working-directory: frontend
         run: npm test -- --run
 
       - name: Build frontend
-        if: steps.changes.outputs.frontend_changed == 'true'
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         working-directory: frontend
         run: npm run build
 
       - name: Deploy to Netlify
-        if: steps.changes.outputs.frontend_changed == 'true'
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         working-directory: frontend
         run: npx --yes netlify-cli deploy --dir=dist --prod --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN"

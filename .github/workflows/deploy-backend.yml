@@ -22,15 +22,16 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 2
 
+      - name: Mark manual deploy
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
+        run: echo "backend_changed=true" >> "$GITHUB_OUTPUT"
+
       - name: Detect backend changes
+        if: github.event_name == 'workflow_run'
         id: changes
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "backend_changed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           changed_files="$(git diff --name-only HEAD^ HEAD)"
           echo "Changed files:"
           printf '%s\n' "$changed_files"
@@ -42,13 +43,13 @@ jobs:
           fi
 
       - name: Skip deploy when backend did not change
-        if: steps.changes.outputs.backend_changed != 'true'
+        if: steps.manual.outputs.backend_changed != 'true' && steps.changes.outputs.backend_changed != 'true'
         run: |
           echo "No backend-relevant files changed; skipping backend deploy."
           exit 0
 
       - name: Trigger Render deploy
-        if: steps.changes.outputs.backend_changed == 'true'
+        if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
         run: |
           set -euo pipefail
 
