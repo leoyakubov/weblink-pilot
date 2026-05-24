@@ -20,8 +20,9 @@ It helps us build the project in small, verifiable slices without jumping too ea
 | Done | Phase 7 baseline | Tests, observability, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
 | Done | Phase 7 follow-up | Deployment setup for Netlify and Render plus the live demo path. |
 | Nice to do | Phase 8 | Environment profiles if and when they simplify the runtime story. |
+| Next | Phase 9 | Redis-backed caching for URL hot lookups, analytics caching, and production-grade rate limiting support. |
+| Later | Phase 10 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
 | Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
-| Next | Phase 9 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
 
 ## Phase 0 - Repo readiness
 
@@ -161,7 +162,21 @@ Exit criteria:
 - configuration is easier to reason about
 - local, container, and demo workflows stay simple
 
-## Phase 9 - Monitoring
+## Phase 9 - Redis caching
+
+Goals:
+
+- replace the in-memory cache with Redis for hot short-code lookups and cacheable analytics paths
+- use Redis for rate-limiting counters if that becomes the simplest production path
+- keep cache behavior explicit in local, demo, and deployment profiles
+
+Exit criteria:
+
+- URL lookups no longer rely only on the in-memory cache
+- analytics and other hot paths can use Redis-backed caching where it helps
+- cache behavior is documented and testable
+
+## Phase 10 - Monitoring
 
 Goals:
 
@@ -186,4 +201,5 @@ Exit criteria:
 6. frontend features
 7. hardening
 8. deployment
-9. monitoring
+9. Redis caching
+10. monitoring

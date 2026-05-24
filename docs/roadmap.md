@@ -12,7 +12,8 @@
 | Done | Frontend feature set | Create flow, dashboard, history, details, and QR UI are in place. |
 | Done | Hardening baseline | Tests, coverage, rate limiting, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
 | Done | Deployment setup | CI and deploy workflows are in place for the live Netlify frontend and Render backend. |
-| Next | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack now that the app is deployed. |
+| Next | Redis cache | Replace the in-memory cache with Redis for hot short-code lookups, analytics cache, and production-grade rate limiting support. |
+| Later | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack now that the app is deployed. |
 | Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
 | Done | Environment profiles | Local and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
 | Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
@@ -51,6 +52,7 @@
 - integration tests
 - observability
 - rate limiting
+- Redis-backed caching
 - deployment setup
 - documentation polish
 
