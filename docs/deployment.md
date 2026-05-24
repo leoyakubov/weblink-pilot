@@ -43,6 +43,8 @@ If you use Render free and want to reduce cold starts, add a GitHub repository v
 
 Then let the scheduled GitHub workflow ping that URL every 10 minutes.
 
+If you store it in the `demo` environment instead, the ping workflow will pick it up from that environment too.
+
 ## How it works
 
 1. CI validates the backend and frontend on every push and pull request.
