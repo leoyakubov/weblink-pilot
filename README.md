@@ -124,7 +124,6 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Backend dev: [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1)
 - Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
-- Frontend dev: [`scripts/frontend/dev-run-frontend.ps1`](scripts/frontend/dev-run-frontend.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
