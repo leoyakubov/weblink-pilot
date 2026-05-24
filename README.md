@@ -126,7 +126,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
 - Frontend dev: [`scripts/frontend/dev-run-frontend.ps1`](scripts/frontend/dev-run-frontend.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
-- Docker stack: [`scripts/docker/run-docker.ps1`](scripts/docker/run-docker.ps1)
+- Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
 - Sonar analysis: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)
 
@@ -185,7 +185,7 @@ You can also select the Maven convenience profiles when running the backend dire
 Quick guide:
 
 - `local`: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
-- `dev`: [`scripts/docker/run-docker.ps1`](scripts/docker/run-docker.ps1) for the full stack, or [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1) after Postgres and Redis are up locally
+- `dev`: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1) for the full stack, or [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1) after Postgres and Redis are up locally
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:
