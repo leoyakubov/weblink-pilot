@@ -48,6 +48,7 @@ npm run smoke:docker
 ## Backend access
 
 The frontend expects the backend to be available at `VITE_API_BASE_URL`.
+The About page in the app now holds the tech stack summary and the editable backend URL setting.
 
 Guest users can create anonymous demo links immediately. If you sign in with the default demo credentials, new links become owned by your account and you can open the admin monitoring page if your account has the admin role.
 

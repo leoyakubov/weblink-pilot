@@ -5,6 +5,7 @@ Modern URL shortening platform with QR codes, separate redirect vs QR analytics,
 Live demo: Netlify frontend and Render backend with Render Postgres and Render Key Value Redis.
 
 The app supports both anonymous demo links and signed-in user-owned links. Guests can shorten URLs immediately, while authenticated users get owned links, private history, and admin-only monitoring if they have the admin role.
+The cleaner SaaS-style landing page keeps the main create flow front and center, while the About page now holds the tech stack and developer settings.
 
 ## Docs
 

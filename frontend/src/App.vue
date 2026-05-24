@@ -9,6 +9,12 @@ const navItems = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'History', to: '/history' },
   { label: 'Monitoring', to: '/monitoring' },
+  { label: 'About', to: '/about' },
+]
+
+const authLinks = [
+  { label: 'Sign in', to: { path: '/', hash: '#access', query: { auth: 'login' } } },
+  { label: 'Sign up', to: { path: '/', hash: '#access', query: { auth: 'register' } } },
 ]
 
 const currentSection = computed(() => {
@@ -26,6 +32,10 @@ const currentSection = computed(() => {
 
   if (route.name === 'monitoring') {
     return 'Admin monitoring'
+  }
+
+  if (route.name === 'about') {
+    return 'About this product'
   }
 
   return 'Create link'
@@ -46,17 +56,30 @@ const currentSection = computed(() => {
         </span>
       </RouterLink>
 
-      <nav class="nav">
-        <RouterLink
-          v-for="item in navItems"
-          :key="item.to"
-          :to="item.to"
-          class="nav-link"
-          :class="{ active: route.path === item.to }"
-        >
-          {{ item.label }}
-        </RouterLink>
-      </nav>
+      <div class="topbar-actions">
+        <nav class="nav">
+          <RouterLink
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="nav-link"
+            :class="{ active: route.path === item.to }"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </nav>
+
+        <div class="auth-links">
+          <RouterLink
+            v-for="item in authLinks"
+            :key="String(item.label)"
+            :to="item.to"
+            class="button button-secondary button-small"
+          >
+            {{ item.label }}
+          </RouterLink>
+        </div>
+      </div>
     </header>
 
     <main class="shell">

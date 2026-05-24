@@ -64,9 +64,8 @@ describe('HomeView', () => {
       },
     })
 
-    const urlInputs = wrapper.findAll('input[type="url"]')
     expect((wrapper.get('input[placeholder="github-org"]').element as HTMLInputElement).value).toBe('')
-    await urlInputs[1].setValue(' https://github.com/docs/getting-started ')
+    await wrapper.get('input[type="url"]').setValue(' https://github.com/docs/getting-started ')
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
@@ -111,8 +110,7 @@ describe('HomeView', () => {
       },
     })
 
-    const urlInputs = wrapper.findAll('input[type="url"]')
-    await urlInputs[1].setValue(' https://github.com/docs/getting-started ')
+    await wrapper.get('input[type="url"]').setValue(' https://github.com/docs/getting-started ')
     await wrapper.get('input[placeholder="github-org"]').setValue(' github-org ')
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()

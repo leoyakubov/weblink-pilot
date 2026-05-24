@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
 import CopyActionButton from '@/components/CopyActionButton.vue'
 import { buildApiBaseUrl, createLink, getCurrentUser, login, register } from '@/lib/api'
-import { defaultSettings, loadSettings, saveSettings } from '@/lib/settings'
+import { loadSettings, saveSettings } from '@/lib/settings'
 import type { ApiSettings, AuthCredentialsRequest, CreateLinkRequest, LinkResponse, UserProfileResponse } from '@/types'
 
+const route = useRoute()
 const settings = reactive<ApiSettings>(loadSettings())
 const form = reactive<CreateLinkRequest>({
   originalUrl: 'https://example.com/docs/getting-started',
@@ -25,23 +26,14 @@ const authError = ref('')
 const authSuccess = ref('')
 const submitting = ref(false)
 const authBusy = ref(false)
+const authMode = ref<'login' | 'register'>('login')
 
 const connectionStatus = computed(() => {
-  if (!settings.apiBaseUrl) {
-    return 'API base URL missing'
-  }
   if (currentUser.value) {
     return `Signed in as ${currentUser.value.username} (${currentUser.value.role})`
   }
-  return `${settings.apiBaseUrl} - guest mode ready for demo links`
+  return 'Guest mode ready for demo links'
 })
-
-const quickStats = computed(() => [
-  { value: 'QR', label: 'PNG preview endpoint' },
-  { value: '302', label: 'Redirect response' },
-  { value: 'JWT', label: 'Guest or signed-in create flow' },
-  { value: 'Vue 3', label: 'Mobile-first frontend' },
-])
 
 const linkPreviewUrl = computed(() =>
   createdLink.value ? buildApiBaseUrl(`/urls/${createdLink.value.code}/preview`, settings) : '',
@@ -52,10 +44,7 @@ const dashboardUrl = computed(() =>
 )
 
 function syncSettings() {
-  saveSettings({
-    apiBaseUrl: settings.apiBaseUrl || defaultSettings().apiBaseUrl,
-    authToken: settings.authToken,
-  })
+  saveSettings(settings)
 }
 
 async function refreshSession() {
@@ -92,6 +81,7 @@ async function authenticate(mode: 'login' | 'register') {
     authSuccess.value = mode === 'login'
       ? `Signed in as ${response.username}`
       : `Registered ${response.username} and signed in`
+    authMode.value = mode
   } catch (error) {
     authError.value = error instanceof Error ? error.message : 'Authentication failed'
   } finally {
@@ -137,154 +127,177 @@ function openExternal(url: string) {
 }
 
 onMounted(() => {
+  if (route.query.auth === 'register') {
+    authMode.value = 'register'
+  }
+
   refreshSession()
 })
+
+watch(
+  () => route.query.auth,
+  value => {
+    if (value === 'register' || value === 'login') {
+      authMode.value = value
+    }
+  },
+)
 </script>
 
 <template>
-  <section class="page-grid two-col">
-    <div class="stack">
-      <article class="card">
-        <div class="card-inner hero-copy">
-          <p class="eyebrow">Create flow</p>
-          <h2 class="hero-title">Short links that feel like a product, not a toy.</h2>
+  <section class="landing-layout stack">
+    <article class="card hero-card">
+      <div class="card-inner hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Link management</p>
+          <h2 class="hero-title">Short links that feel like a modern SaaS product.</h2>
           <p class="hero-note">
-            This shell is wired for link creation, preview, QR output, guest demo links, and signed-in user ownership.
-            It is designed to be comfortable on a phone and still read well on a bigger screen.
+            Create a demo link in seconds, or sign in to keep ownership and private history. The redirect, QR, and
+            analytics paths stay public and fast either way.
           </p>
 
           <div class="hero-badges">
-            <span class="badge"><strong>Mobile-first</strong> layout</span>
-            <span class="badge"><strong>Vue 3</strong> + Vite</span>
-            <span class="badge"><strong>JWT</strong> guest or owned links</span>
+            <span class="badge"><strong>Guest</strong> demo links</span>
+            <span class="badge"><strong>Owned</strong> user links</span>
+            <span class="badge"><strong>QR</strong> and analytics</span>
           </div>
 
-          <div class="metrics-grid">
-            <div v-for="stat in quickStats" :key="stat.label" class="metric">
-              <span class="value">{{ stat.value }}</span>
-              <span class="label">{{ stat.label }}</span>
+          <div class="hero-points">
+            <div class="hero-point">
+              <strong>Anonymous mode</strong>
+              <p>Use the app instantly without creating an account.</p>
+            </div>
+            <div class="hero-point">
+              <strong>Signed-in mode</strong>
+              <p>Keep private history, ownership, and admin access where appropriate.</p>
             </div>
           </div>
         </div>
-      </article>
 
-      <article class="card">
-        <div class="card-inner stack">
+        <div class="stack">
           <div>
-            <p class="eyebrow">Account</p>
-            <h3 class="panel-title">Guest or signed-in mode</h3>
+            <p class="eyebrow">Create short link</p>
+            <h3 class="panel-title">Launch a new link</h3>
+            <p class="help-text">
+              Anonymous demo links still work. If you are signed in, the new link belongs to your account.
+            </p>
           </div>
 
-          <label class="form-field">
-            <span class="field-label">API base URL</span>
-            <input
-              v-model="settings.apiBaseUrl"
-              class="input"
-              type="url"
-              placeholder="http://localhost:8080/api/v1"
-              @blur="syncSettings"
-            />
-          </label>
-
-          <div class="grid-2">
+          <form class="form-grid" @submit.prevent="submit">
             <label class="form-field">
-              <span class="field-label">Username</span>
-              <input v-model="authForm.username" class="input" type="text" placeholder="admin" />
+              <span class="field-label">Original URL</span>
+              <input
+                v-model="form.originalUrl"
+                class="input"
+                type="url"
+                placeholder="https://example.com/docs/getting-started"
+                required
+              />
             </label>
+
             <label class="form-field">
-              <span class="field-label">Password</span>
-              <input v-model="authForm.password" class="input" type="password" placeholder="admin123" />
+              <span class="field-label">Custom alias (optional)</span>
+              <input v-model="form.customAlias" class="input" type="text" placeholder="github-org" />
+              <p class="help-text">Leave this blank to generate a random short code.</p>
             </label>
-          </div>
 
-          <div class="actions">
-            <button class="button button-primary" type="button" :disabled="authBusy" @click="authenticate('login')">
-              {{ authBusy ? 'Signing in...' : 'Sign in' }}
-            </button>
-            <button class="button button-secondary" type="button" :disabled="authBusy" @click="authenticate('register')">
-              Register
-            </button>
-            <button class="button button-secondary" type="button" @click="signOut">
-              Sign out
-            </button>
-          </div>
+            <label class="form-field">
+              <span class="field-label">Expiration</span>
+              <input v-model="form.expiresAt" class="input" type="datetime-local" />
+            </label>
 
-          <p v-if="authError" class="status error">
-            <span class="status-dot"></span>
-            {{ authError }}
-          </p>
-          <p v-else-if="authSuccess" class="status">
-            <span class="status-dot"></span>
-            {{ authSuccess }}
-          </p>
-          <p v-else class="help-text">
-            Guests can create anonymous demo links. Signing in makes new links owned by your account and unlocks your private history and analytics.
-          </p>
+            <div class="actions">
+              <button class="button button-primary" type="submit" :disabled="submitting">
+                {{ submitting ? 'Creating...' : 'Create link' }}
+              </button>
+              <RouterLink class="button button-secondary" to="/dashboard">
+                Open dashboard
+              </RouterLink>
+            </div>
+
+            <p v-if="errorMessage" class="status error">
+              <span class="status-dot"></span>
+              {{ errorMessage }}
+            </p>
+            <p v-else-if="successMessage" class="status">
+              <span class="status-dot"></span>
+              {{ successMessage }}
+            </p>
+            <p v-else class="status warning">
+              <span class="status-dot"></span>
+              {{ connectionStatus }}
+            </p>
+          </form>
         </div>
-      </article>
-    </div>
-
-    <article class="card">
-      <div class="card-inner stack">
-        <div>
-          <p class="eyebrow">Create short link</p>
-          <h3 class="panel-title">URL shortener form</h3>
-          <p class="help-text">
-            Anonymous demo links still work. If you are signed in, the link will belong to your account.
-            Preview and QR URLs stay public.
-          </p>
-        </div>
-
-        <form class="form-grid" @submit.prevent="submit">
-          <label class="form-field">
-            <span class="field-label">Original URL</span>
-            <input
-              v-model="form.originalUrl"
-              class="input"
-              type="url"
-              placeholder="https://example.com/docs/getting-started"
-              required
-            />
-          </label>
-
-          <label class="form-field">
-            <span class="field-label">Custom alias (optional)</span>
-            <input v-model="form.customAlias" class="input" type="text" placeholder="github-org" />
-            <p class="help-text">Leave this blank to generate a random short code.</p>
-          </label>
-
-          <label class="form-field">
-            <span class="field-label">Expiration</span>
-            <input v-model="form.expiresAt" class="input" type="datetime-local" />
-          </label>
-
-          <div class="actions">
-            <button class="button button-primary" type="submit" :disabled="submitting">
-              {{ submitting ? 'Creating...' : 'Create link' }}
-            </button>
-            <RouterLink class="button button-secondary" to="/dashboard">
-              Open dashboard
-            </RouterLink>
-          </div>
-
-          <p v-if="errorMessage" class="status error">
-            <span class="status-dot"></span>
-            {{ errorMessage }}
-          </p>
-          <p v-else-if="successMessage" class="status">
-            <span class="status-dot"></span>
-            {{ successMessage }}
-          </p>
-          <p v-else class="status warning">
-            <span class="status-dot"></span>
-            {{ connectionStatus }}
-          </p>
-        </form>
       </div>
     </article>
-  </section>
 
-  <section v-if="createdLink" class="page-grid two-col" style="margin-top: 1rem;">
+    <article class="card" id="access">
+      <div class="card-inner stack">
+        <div>
+          <p class="eyebrow">Account access</p>
+          <h3 class="panel-title">Sign in or create an account</h3>
+          <p class="help-text">
+            Use the top-right buttons to jump here. Sign in to own new links and keep private history.
+          </p>
+        </div>
+
+        <div class="segmented-control" role="tablist" aria-label="Authentication mode">
+          <button
+            class="segmented-control__button"
+            :class="{ active: authMode === 'login' }"
+            type="button"
+            @click="authMode = 'login'"
+          >
+            Sign in
+          </button>
+          <button
+            class="segmented-control__button"
+            :class="{ active: authMode === 'register' }"
+            type="button"
+            @click="authMode = 'register'"
+          >
+            Sign up
+          </button>
+        </div>
+
+        <div class="grid-2">
+          <label class="form-field">
+            <span class="field-label">Username</span>
+            <input v-model="authForm.username" class="input" type="text" placeholder="admin" />
+          </label>
+          <label class="form-field">
+            <span class="field-label">Password</span>
+            <input v-model="authForm.password" class="input" type="password" placeholder="admin123" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="button button-primary" type="button" :disabled="authBusy" @click="authenticate(authMode)">
+            {{ authBusy ? 'Working...' : authMode === 'login' ? 'Sign in' : 'Sign up' }}
+          </button>
+          <button class="button button-secondary" type="button" :disabled="authBusy" @click="authenticate(authMode === 'login' ? 'register' : 'login')">
+            {{ authMode === 'login' ? 'Switch to sign up' : 'Switch to sign in' }}
+          </button>
+          <button class="button button-secondary" type="button" @click="signOut">
+            Sign out
+          </button>
+        </div>
+
+        <p v-if="authError" class="status error">
+          <span class="status-dot"></span>
+          {{ authError }}
+        </p>
+        <p v-else-if="authSuccess" class="status">
+          <span class="status-dot"></span>
+          {{ authSuccess }}
+        </p>
+        <p v-else class="help-text">
+          Guests can create anonymous demo links. Signing in makes new links owned by your account and unlocks private history and analytics.
+        </p>
+      </div>
+    </article>
+
     <article class="card">
       <div class="card-inner stack">
         <div>
@@ -292,7 +305,7 @@ onMounted(() => {
           <h3 class="panel-title">Share card</h3>
         </div>
 
-        <div class="link-preview">
+        <div v-if="createdLink" class="link-preview">
           <div class="list-item">
             <strong>{{ createdLink.shortUrl }}</strong>
             <p>Short URL ready to copy, open, or share.</p>
@@ -331,9 +344,15 @@ onMounted(() => {
             />
           </div>
         </div>
+
+        <p v-else class="help-text">
+          Create a link to see the share card, QR, and quick actions here.
+        </p>
       </div>
     </article>
+  </section>
 
+  <section v-if="createdLink" class="page-grid two-col" style="margin-top: 1rem;">
     <article class="card">
       <div class="card-inner stack">
         <div>
@@ -360,6 +379,31 @@ onMounted(() => {
         <p class="help-text">
           QR code endpoint: <span class="inline-code">{{ createdLink.qrCodeUrl }}</span>
         </p>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-inner stack">
+        <div>
+          <p class="eyebrow">Next step</p>
+          <h3 class="panel-title">Keep the flow moving</h3>
+        </div>
+        <div class="list-item">
+          <strong>Analytics dashboard</strong>
+          <p>Open the dashboard to inspect redirect clicks, QR scans, and country breakdowns.</p>
+        </div>
+        <div class="list-item">
+          <strong>Ownership</strong>
+          <p>{{ createdLink.ownerUsername ?? 'Anonymous demo' }}</p>
+        </div>
+        <div class="actions">
+          <RouterLink class="button button-primary" :to="dashboardUrl">
+            Open analytics
+          </RouterLink>
+          <RouterLink class="button button-secondary" :to="{ name: 'about' }">
+            About the stack
+          </RouterLink>
+        </div>
       </div>
     </article>
   </section>
