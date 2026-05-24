@@ -21,20 +21,8 @@ const navItems = computed(() => {
   return items
 })
 
-const authLinks = computed(() => {
-  if (authState.currentUser) {
-    return []
-  }
-
-  return [
-    { label: 'Sign in', to: '/auth/signin' },
-    { label: 'Sign up', to: '/auth/signup' },
-  ]
-})
-
-const userChip = computed(() => authState.currentUser
-  ? `Logged in as: ${authState.currentUser.username}`
-  : '')
+const accountLabel = computed(() => authState.currentUser?.username ?? '')
+const isLoggedIn = computed(() => Boolean(authState.currentUser))
 
 const currentSection = computed(() => {
   if (route.name === 'link') {
@@ -97,20 +85,52 @@ onMounted(() => {
         </nav>
 
         <div class="auth-links">
-          <RouterLink
-            v-for="item in authLinks"
-            :key="String(item.label)"
-            :to="item.to"
-            class="button button-secondary button-small auth-link-button"
-          >
-            {{ item.label }}
-          </RouterLink>
-          <span v-if="userChip" class="user-chip">{{ userChip }}</span>
-          <button v-if="authState.currentUser" class="button button-secondary button-small" type="button" @click="signOut()">
-            Sign out
-          </button>
+          <div class="session-controls">
+            <span class="session-slot">
+              <RouterLink
+                v-if="!isLoggedIn"
+                to="/auth/signin"
+                class="button button-secondary button-small auth-link-button"
+              >
+                Log in
+              </RouterLink>
+              <span v-else class="account-pill" aria-label="Signed in account">
+                <span class="account-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                    <path
+                      d="M12 12.5c2.9 0 5.25-2.46 5.25-5.5S14.9 1.5 12 1.5 6.75 3.96 6.75 7s2.35 5.5 5.25 5.5Zm0 2.25c-4.36 0-7.95 2.75-8.45 6.25h16.9c-.5-3.5-4.09-6.25-8.45-6.25Z"
+                    />
+                  </svg>
+                </span>
+                <span class="account-name">{{ accountLabel }}</span>
+              </span>
+            </span>
+
+            <span class="session-slot session-slot--secondary">
+              <RouterLink
+                v-if="!isLoggedIn"
+                to="/auth/signup"
+                class="button button-secondary button-small auth-link-button"
+              >
+                Sign up
+              </RouterLink>
+              <button
+                v-else
+                class="button button-secondary button-small"
+                type="button"
+                @click="signOut()"
+              >
+                Sign out
+              </button>
+            </span>
+          </div>
         </div>
       </div>
+      <Transition name="session-notice">
+        <div v-if="authState.sessionNotice" class="session-notice" role="status" aria-live="polite">
+          {{ authState.sessionNotice }}
+        </div>
+      </Transition>
     </header>
 
     <main class="shell">

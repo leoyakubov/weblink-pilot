@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserAccountService {
 
+    private static final String USERNAME_PATTERN = "^(?=.*[A-Za-z])[A-Za-z0-9]{4,}$";
+    private static final String PASSWORD_PATTERN = "^(?=.*[A-Za-z])(?=.*\\d)\\S{6,}$";
+
     private final UserAccountRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final AuthProperties authProperties;
@@ -37,6 +40,7 @@ public class UserAccountService {
     @Transactional
     public UserAccount registerUser(String username, String rawPassword) {
         String normalizedUsername = normalizeUsername(username);
+        validateSignupCredentials(normalizedUsername, rawPassword);
         if (repository.existsByUsername(normalizedUsername)) {
             throw new UsernameAlreadyExistsException(normalizedUsername);
         }
@@ -55,6 +59,7 @@ public class UserAccountService {
     @Transactional
     public UserAccount authenticate(String username, String rawPassword) {
         String normalizedUsername = normalizeUsername(username);
+        validateLoginCredentials(normalizedUsername, rawPassword);
         UserAccount account = repository.findByUsername(normalizedUsername)
                 .orElseThrow(InvalidCredentialsException::new);
 
@@ -136,5 +141,29 @@ public class UserAccountService {
             return defaultRole;
         }
         return configuredRole.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private void validateSignupCredentials(String username, String password) {
+        if (username.isBlank() && (password == null || password.isBlank())) {
+            throw new IllegalArgumentException("Enter both username and password.");
+        }
+        if (username.isBlank()) {
+            throw new IllegalArgumentException("Username must use at least 4 symbols.");
+        }
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password must use at least 6 characters, including 1 letter and 1 number.");
+        }
+        if (!username.matches(USERNAME_PATTERN)) {
+            throw new IllegalArgumentException("Username must use at least 4 symbols.");
+        }
+        if (!password.matches(PASSWORD_PATTERN)) {
+            throw new IllegalArgumentException("Password must use at least 6 characters, including 1 letter and 1 number.");
+        }
+    }
+
+    private void validateLoginCredentials(String username, String password) {
+        if (username.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Enter both username and password.");
+        }
     }
 }

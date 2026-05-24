@@ -98,6 +98,17 @@ function saveBaseUrl() {
         </div>
 
         <div class="list-item">
+          <strong>Demo accounts</strong>
+          <p>
+            Local and dev seed the starter accounts:
+            <br />
+            admin / admin123
+            <br />
+            user / user123
+          </p>
+        </div>
+
+        <div class="list-item">
           <strong>What stays public</strong>
           <p>Short URL redirects, QR URLs, and preview endpoints remain public. Sign-in only controls ownership and admin views.</p>
         </div>

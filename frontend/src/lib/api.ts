@@ -11,6 +11,20 @@ import type {
 } from '@/types'
 import { loadSettings, normalizeBaseUrl } from '@/lib/settings'
 
+export class ApiRequestError extends Error {
+  status: number
+  code?: string
+  path?: string
+
+  constructor(message: string, status: number, code?: string, path?: string) {
+    super(message)
+    this.name = 'ApiRequestError'
+    this.status = status
+    this.code = code
+    this.path = path
+  }
+}
+
 function bearerAuthHeader(token: string) {
   if (!token) {
     return undefined
@@ -21,10 +35,11 @@ function bearerAuthHeader(token: string) {
 async function parseError(response: Response) {
   const text = await response.text()
   try {
-    const body = JSON.parse(text) as { message?: string; error?: string; code?: string }
-    return new Error(body.message ?? body.error ?? body.code ?? `Request failed with ${response.status}`)
+    const body = JSON.parse(text) as { message?: string; error?: string; code?: string; path?: string }
+    const message = body.message ?? body.error ?? body.code ?? `Request failed with ${response.status}`
+    return new ApiRequestError(message, response.status, body.code, body.path)
   } catch {
-    return new Error(text || `Request failed with ${response.status}`)
+    return new ApiRequestError(text || `Request failed with ${response.status}`, response.status)
   }
 }
 

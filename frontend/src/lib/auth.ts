@@ -7,9 +7,22 @@ export const authState = reactive({
   currentUser: null as UserProfileResponse | null,
   ready: false,
   loading: false,
+  sessionNotice: '',
 })
 
 let bootstrapPromise: Promise<void> | null = null
+let noticeTimer: ReturnType<typeof globalThis.setTimeout> | null = null
+
+function showSessionNotice(message: string) {
+  authState.sessionNotice = message
+  if (noticeTimer) {
+    globalThis.clearTimeout(noticeTimer)
+  }
+  noticeTimer = globalThis.setTimeout(() => {
+    authState.sessionNotice = ''
+    noticeTimer = null
+  }, 2400)
+}
 
 export async function bootstrapAuth() {
   if (bootstrapPromise) {
@@ -51,6 +64,11 @@ export async function authenticate(mode: 'login' | 'register', request: AuthCred
     username: response.username,
     role: response.role,
   }
+  showSessionNotice(
+    mode === 'login'
+      ? `Signed in as ${response.username}`
+      : `Created ${response.username} and signed in`,
+  )
 
   return response
 }
@@ -60,6 +78,7 @@ export function signOut() {
   settings.authToken = ''
   saveSettings(settings)
   authState.currentUser = null
+  showSessionNotice('Signed out. Guest mode active.')
 }
 
 export function isAdminUser() {

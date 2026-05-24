@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { ApiRequestError } from '@/lib/api'
 import { authenticate, authState } from '@/lib/auth'
 import type { AuthCredentialsRequest } from '@/types'
 
@@ -16,27 +17,99 @@ const form = reactive<AuthCredentialsRequest>({
 const busy = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const showPassword = ref(false)
+const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]{4,}$/
+const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/
 
 const title = computed(() => (props.mode === 'login' ? 'Sign in' : 'Sign up'))
 const submitLabel = computed(() => (props.mode === 'login' ? 'Sign in' : 'Create account'))
-const switchLabel = computed(() => (props.mode === 'login'
-  ? 'Need an account? Sign up'
-  : 'Already have an account? Sign in'))
 const switchPath = computed(() => (props.mode === 'login' ? '/auth/signup' : '/auth/signin'))
+
+function resetMessages() {
+  errorMessage.value = ''
+  successMessage.value = ''
+  showPassword.value = false
+}
+
+watch(() => props.mode, () => {
+  resetMessages()
+}, { immediate: true })
+
+function validateForm(): string {
+  const username = form.username.trim()
+  const password = form.password.trim()
+
+  if (!username && !password) {
+    return 'Enter both username and password.'
+  }
+
+  if (props.mode === 'register') {
+    if (!username) {
+      return 'Username must use at least 4 symbols.'
+    }
+
+    if (!usernamePattern.test(username)) {
+      return 'Username must use at least 4 symbols.'
+    }
+
+    if (!password) {
+      return 'Password must use at least 6 characters, including 1 letter and 1 number.'
+    }
+
+    if (!passwordPattern.test(password)) {
+      return 'Password must use at least 6 characters, including 1 letter and 1 number.'
+    }
+  } else if (!username || !password) {
+    return 'Enter both username and password.'
+  }
+
+  return ''
+}
+
+function formatAuthError(error: unknown): string {
+  if (error instanceof ApiRequestError) {
+    if (error.status === 401) {
+      return 'Incorrect username or password.'
+    }
+
+    if (error.status === 409) {
+      return 'This username already exists.'
+    }
+
+    if (error.status === 403) {
+      return 'This account is disabled.'
+    }
+
+    if (error.message) {
+      return error.message
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+
+  return 'Authentication failed'
+}
 
 async function submit() {
   busy.value = true
-  errorMessage.value = ''
-  successMessage.value = ''
+  resetMessages()
 
   try {
+    const validationError = validateForm()
+    if (validationError) {
+      errorMessage.value = validationError
+      return
+    }
+
     await authenticate(props.mode, form)
     successMessage.value = props.mode === 'login'
       ? `Signed in as ${authState.currentUser?.username}`
       : `Created ${authState.currentUser?.username} and signed in`
     await router.push('/')
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Authentication failed'
+    errorMessage.value = formatAuthError(error)
   } finally {
     busy.value = false
   }
@@ -44,54 +117,59 @@ async function submit() {
 </script>
 
 <template>
-  <section class="page-grid two-col">
-    <article class="card">
+  <section class="auth-layout">
+    <article class="card auth-card">
       <div class="card-inner stack">
-        <div>
+        <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
-        </div>
-
-        <p class="hero-note">
-          Use an account to keep links owned, track private history, and unlock admin monitoring if your role is ADMIN.
-          Guest links still work from the home page.
-        </p>
-
-        <div class="grid-2">
-          <div class="metric">
-            <span class="value">Guest</span>
-            <span class="label">Quick link creation without an account</span>
-          </div>
-          <div class="metric">
-            <span class="value">JWT</span>
-            <span class="label">Signed-in ownership and role checks</span>
-          </div>
-        </div>
-
-        <div class="list-item">
-          <strong>Current mode</strong>
-          <p>{{ props.mode === 'login' ? 'Sign in' : 'Sign up' }}</p>
-        </div>
-      </div>
-    </article>
-
-    <article class="card">
-      <div class="card-inner stack">
-        <div class="section-row">
-          <div>
-            <p class="eyebrow">{{ title }}</p>
-            <h3 class="panel-title">Continue to your workspace</h3>
-          </div>
         </div>
 
         <form class="form-grid" @submit.prevent="submit">
           <label class="form-field">
             <span class="field-label">Username</span>
-            <input v-model="form.username" class="input" type="text" placeholder="user" autocomplete="username" />
+            <input v-model="form.username" class="input" type="text" placeholder="Your username" autocomplete="username" />
           </label>
           <label class="form-field">
             <span class="field-label">Password</span>
-            <input v-model="form.password" class="input" type="password" placeholder="user123" autocomplete="current-password" />
+            <div class="input-row">
+              <input
+                v-model="form.password"
+                class="input"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <button
+                class="password-toggle"
+                type="button"
+                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :title="showPassword ? 'Hide password' : 'Show password'"
+                @click="showPassword = !showPassword"
+              >
+                <svg v-if="showPassword" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M3 3l18 18M10.5 10.62a2 2 0 1 0 2.88 2.76m-4.21-4.17A4.5 4.5 0 0 1 16.5 12c0 .88-.24 1.7-.66 2.4m-2.02 2.02A4.5 4.5 0 0 1 7.5 12c0-.88.24-1.7.66-2.4M9.9 5.23A10.96 10.96 0 0 1 12 4.5c5.5 0 9.5 7.5 9.5 7.5a19.58 19.58 0 0 1-4.1 5.12M6.84 6.84A19.83 19.83 0 0 0 2.5 12s4 7.5 9.5 7.5c1.26 0 2.47-.23 3.56-.64"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                  />
+                </svg>
+                <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M2.5 12S6.4 4.5 12 4.5 21.5 12 21.5 12 17.6 19.5 12 19.5 2.5 12 2.5 12Z"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.7"
+                  />
+                  <circle cx="12" cy="12" r="2.75" fill="none" stroke="currentColor" stroke-width="1.7" />
+                </svg>
+              </button>
+            </div>
           </label>
 
           <div class="actions">
@@ -108,11 +186,6 @@ async function submit() {
             <span class="status-dot"></span>
             {{ successMessage }}
           </p>
-          <p v-else class="help-text">
-            The demo users are pre-seeded in local and dev: <strong>admin / admin123</strong> and <strong>user / user123</strong>.
-            Deployed demo instances can seed the same accounts when the bootstrap env vars are set.
-          </p>
-
           <div class="auth-switch">
             <span class="footnote">
               {{ props.mode === 'login' ? 'Need an account?' : 'Already have an account?' }}

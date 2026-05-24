@@ -60,5 +60,5 @@ Guest users can create anonymous demo links immediately. If you sign in with the
 
 Default demo credentials for the current backend:
 
-- username: `admin`
-- password: `admin123`
+- `admin / admin123`
+- `user / user123`
