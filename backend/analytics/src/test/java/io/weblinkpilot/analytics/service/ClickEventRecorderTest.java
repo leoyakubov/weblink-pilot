@@ -27,6 +27,9 @@ class ClickEventRecorderTest {
     @Mock
     private UserAgentParser userAgentParser;
 
+    @Mock
+    private AnalyticsCacheService analyticsCacheService;
+
     @InjectMocks
     private ClickEventRecorder recorder;
 
@@ -48,6 +51,7 @@ class ClickEventRecorderTest {
 
         ArgumentCaptor<ClickEvent> captor = ArgumentCaptor.forClass(ClickEvent.class);
         verify(repository).save(captor.capture());
+        verify(analyticsCacheService).evict("demo");
         ClickEvent saved = captor.getValue();
         assertThat(saved.getShortCode()).isEqualTo("demo");
         assertThat(saved.getEventSource()).isEqualTo(LinkTrackingSource.REDIRECT);

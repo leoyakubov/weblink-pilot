@@ -28,7 +28,8 @@ public class UrlCacheService {
                 value.getCode(),
                 value.getOriginalUrl(),
                 value.getCreatedAt(),
-                value.getExpiresAt()
+                value.getExpiresAt(),
+                value.getClickCount()
         )).orElse(null);
     }
 

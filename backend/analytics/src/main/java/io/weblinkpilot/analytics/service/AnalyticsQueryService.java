@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class AnalyticsQueryService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "analyticsCounts", key = "#code")
     public long countClicks(String code) {
         long count = repository.countByShortCode(code);
         log.info("analytics.count.code={} count={}", code, count);
@@ -32,6 +34,7 @@ public class AnalyticsQueryService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "analyticsSummaries", key = "#code")
     public AnalyticsSummaryResponse summarize(String code) {
         long totalClicks = repository.countByShortCode(code);
         long redirectClicks = repository.countByShortCodeAndEventSource(code, LinkTrackingSource.REDIRECT);

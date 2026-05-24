@@ -14,6 +14,17 @@ services:
       timeout: 5s
       retries: 10
 
+  redis:
+    image: redis:7-alpine
+    container_name: weblink-pilot-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     container_name: weblink-pilot-backend
     build:
@@ -27,13 +38,17 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       APP_PUBLIC_BASE_URL: http://localhost:8080
       APP_CORS_ALLOWED_ORIGIN_PATTERNS: http://localhost:8081,http://127.0.0.1:8081
-      APP_CACHE_PROVIDER: local
+      APP_CACHE_PROVIDER: redis
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       APP_RATE_LIMIT_ENABLED: "true"
       APP_RATE_LIMIT_API_PER_MINUTE: "120"
       APP_RATE_LIMIT_REDIRECT_PER_MINUTE: "300"
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "8080:8080"

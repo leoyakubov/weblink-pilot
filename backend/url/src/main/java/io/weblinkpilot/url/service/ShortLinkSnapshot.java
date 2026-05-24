@@ -6,6 +6,7 @@ public record ShortLinkSnapshot(
         String code,
         String originalUrl,
         OffsetDateTime createdAt,
-        OffsetDateTime expiresAt
+        OffsetDateTime expiresAt,
+        long clickCount
 ) {
 }

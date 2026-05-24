@@ -37,15 +37,14 @@ public class UrlLookupService {
             throw new UrlNotFoundException(code);
         }
 
-        ShortLink link = repository.findByCode(code).orElseThrow(() -> new UrlNotFoundException(code));
         log.info(
                 "link.read.success code={} clickCount={} originalHost={} expiresAt={}",
-                link.getCode(),
-                link.getClickCount(),
-                hostOf(link.getOriginalUrl()),
-                link.getExpiresAt()
+                snapshot.code(),
+                snapshot.clickCount(),
+                hostOf(snapshot.originalUrl()),
+                snapshot.expiresAt()
         );
-        return toResponse(link);
+        return toResponse(snapshot);
     }
 
     @Transactional(readOnly = true)
@@ -62,15 +61,39 @@ public class UrlLookupService {
         return links;
     }
 
+    private LinkResponse toResponse(ShortLinkSnapshot snapshot) {
+        return toResponse(
+                snapshot.code(),
+                snapshot.originalUrl(),
+                snapshot.createdAt(),
+                snapshot.expiresAt(),
+                snapshot.clickCount()
+        );
+    }
+
     private LinkResponse toResponse(ShortLink link) {
-        return new LinkResponse(
+        return toResponse(
                 link.getCode(),
-                publicUrlBuilder.buildShortUrl(link.getCode()),
-                publicUrlBuilder.buildQrCodeUrl(link.getCode()),
                 link.getOriginalUrl(),
                 link.getCreatedAt(),
                 link.getExpiresAt(),
                 link.getClickCount()
+        );
+    }
+
+    private LinkResponse toResponse(String code,
+                                    String originalUrl,
+                                    java.time.OffsetDateTime createdAt,
+                                    java.time.OffsetDateTime expiresAt,
+                                    long clickCount) {
+        return new LinkResponse(
+                code,
+                publicUrlBuilder.buildShortUrl(code),
+                publicUrlBuilder.buildQrCodeUrl(code),
+                originalUrl,
+                createdAt,
+                expiresAt,
+                clickCount
         );
     }
 

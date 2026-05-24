@@ -2,7 +2,10 @@ package io.weblinkpilot.url.repository;
 
 import io.weblinkpilot.url.domain.ShortLink;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
     Optional<ShortLink> findByCode(String code);
@@ -12,4 +15,8 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
     boolean existsByCode(String code);
 
     boolean existsByCustomAlias(String customAlias);
+
+    @Modifying
+    @Query("update ShortLink s set s.clickCount = s.clickCount + 1 where s.code = :code")
+    int incrementClickCountByCode(@Param("code") String code);
 }

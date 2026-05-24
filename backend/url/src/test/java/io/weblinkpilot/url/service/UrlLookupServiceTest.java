@@ -41,23 +41,16 @@ class UrlLookupServiceTest {
     private UrlLookupService service;
 
     @Test
-    void returnsLinkWhenCacheAndRepositoryHit() {
+    void returnsLinkWhenCacheHit() {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "abc123",
                 "https://example.com",
                 OffsetDateTime.now(ZoneOffset.UTC),
-                null
-        );
-        ShortLink link = new ShortLink(
-                "abc123",
-                "https://example.com",
                 null,
-                snapshot.createdAt(),
-                null
+                2L
         );
 
         when(cacheService.findByCode("abc123")).thenReturn(snapshot);
-        when(repository.findByCode("abc123")).thenReturn(java.util.Optional.of(link));
         when(publicUrlBuilder.buildShortUrl("abc123")).thenReturn("http://localhost:8080/r/abc123");
         when(publicUrlBuilder.buildQrCodeUrl("abc123")).thenReturn("http://localhost:8080/api/v1/urls/abc123/qr");
 
@@ -66,8 +59,8 @@ class UrlLookupServiceTest {
         assertThat(response.code()).isEqualTo("abc123");
         assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/abc123");
         assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/abc123/qr");
+        assertThat(response.clickCount()).isEqualTo(2L);
         verify(cacheService).findByCode("abc123");
-        verify(repository).findByCode("abc123");
     }
 
     @Test

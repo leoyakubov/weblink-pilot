@@ -5,7 +5,6 @@ import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
-import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import io.weblinkpilot.url.web.RedirectRequestContext;
 import java.time.OffsetDateTime;
@@ -15,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class RedirectService {
@@ -44,15 +45,18 @@ public class RedirectService {
             throw new UrlNotFoundException(code);
         }
 
-        ShortLink link = repository.findByCode(code).orElseThrow(() -> new UrlNotFoundException(code));
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        if (link.isExpired(now)) {
-            log.warn("link.redirect.expired code={} expiredAt={}", code, link.getExpiresAt());
+        if (snapshot.expiresAt() != null && snapshot.expiresAt().isBefore(now)) {
+            log.warn("link.redirect.expired code={} expiredAt={}", code, snapshot.expiresAt());
             throw new UrlExpiredException(code);
         }
 
-        link.incrementClickCount();
-        repository.save(link);
+        int updated = repository.incrementClickCountByCode(code);
+        if (updated == 0) {
+            evictAfterCommit(code);
+            throw new UrlNotFoundException(code);
+        }
+        evictAfterCommit(code);
 
         linkPublisher.publish(new LinkClickedEvent(
                 code,
@@ -68,20 +72,34 @@ public class RedirectService {
                 "link.redirect.success code={} source={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
                 code,
                 source,
-                hostOf(link.getOriginalUrl()),
-                link.getClickCount(),
+                hostOf(snapshot.originalUrl()),
+                snapshot.clickCount() + 1,
                 maskIp(context.clientIp()),
                 context.country(),
                 context.referrer() != null && !context.referrer().isBlank(),
                 context.userAgent() != null && !context.userAgent().isBlank()
         );
 
-        return link.getOriginalUrl();
+        return snapshot.originalUrl();
     }
 
     private String hostOf(String url) {
         String host = URI.create(url).getHost();
         return host == null ? url : host;
+    }
+
+    private void evictAfterCommit(String code) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            cacheService.evict(code);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                cacheService.evict(code);
+            }
+        });
     }
 
     private String maskIp(String ipAddress) {

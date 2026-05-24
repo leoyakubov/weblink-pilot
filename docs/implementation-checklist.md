@@ -20,8 +20,8 @@ It helps us build the project in small, verifiable slices without jumping too ea
 | Done | Phase 7 baseline | Tests, observability, Docker, Sonar, ArchUnit, and Testcontainers are in place. |
 | Done | Phase 7 follow-up | Deployment setup for Netlify and Render plus the live demo path. |
 | Nice to do | Phase 8 | Environment profiles if and when they simplify the runtime story. |
-| Next | Phase 9 | Redis-backed caching for URL hot lookups, analytics caching, and production-grade rate limiting support. |
-| Later | Phase 10 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
+| Done | Phase 9 | Redis-backed caching for URL hot lookups and analytics cache invalidation are implemented. |
+| Next | Phase 10 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
 | Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
 
 ## Phase 0 - Repo readiness
@@ -163,6 +163,8 @@ Exit criteria:
 - local, container, and demo workflows stay simple
 
 ## Phase 9 - Redis caching
+
+Status: done.
 
 Goals:
 

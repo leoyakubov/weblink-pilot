@@ -149,6 +149,7 @@ The repo also includes a containerized local stack:
 - backend image built from [`backend/Dockerfile`](backend/Dockerfile)
 - frontend image built from [`frontend/Dockerfile`](frontend/Dockerfile)
 - Postgres 17 for persistence
+- Redis 7 for hot-cache lookups and analytics cache invalidation
 
 Start it from the repo root:
 
@@ -162,7 +163,7 @@ Services:
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
 
-The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. Local development uses the `local` Spring profile with in-memory H2, while demo deployments use the `demo` profile with PostgreSQL and environment-driven public URL / CORS settings.
+The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `demo` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped deployment, while direct local development still uses the `local` profile with in-memory H2.
 
 ### Backend Profiles
 

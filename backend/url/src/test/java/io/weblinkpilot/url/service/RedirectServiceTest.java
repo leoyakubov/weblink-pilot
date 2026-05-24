@@ -5,13 +5,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import io.weblinkpilot.url.web.RedirectRequestContext;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,10 +32,9 @@ class RedirectServiceTest {
     void resolvesTargetAndIncrementsClickCount() {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
-        ShortLink link = new ShortLink("abc123", "https://example.com", null, createdAt, null);
 
-        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", createdAt, null));
-        when(repository.findByCode("abc123")).thenReturn(Optional.of(link));
+        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", createdAt, null, 5L));
+        when(repository.incrementClickCountByCode("abc123")).thenReturn(1);
 
         String target = service.resolveTarget(
                 "abc123",
@@ -45,8 +42,8 @@ class RedirectServiceTest {
         );
 
         assertThat(target).isEqualTo("https://example.com");
-        assertThat(link.getClickCount()).isEqualTo(1);
-        verify(repository).save(link);
+        verify(repository).incrementClickCountByCode("abc123");
+        verify(cacheService).evict("abc123");
 
         ArgumentCaptor<LinkClickedEvent> captor = ArgumentCaptor.forClass(LinkClickedEvent.class);
         verify(linkPublisher).publish(captor.capture());
