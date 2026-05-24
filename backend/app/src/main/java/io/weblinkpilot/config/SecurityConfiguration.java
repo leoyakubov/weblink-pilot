@@ -1,6 +1,7 @@
 package io.weblinkpilot.config;
 
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.web.JwtAuthenticationFilter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/r/**", "/q/**").permitAll()
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/me").authenticated()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**").hasRole(RoleNames.ADMIN)
                         .requestMatchers(HttpMethod.GET, "/api/v1/urls/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
                         .requestMatchers("/api/v1/urls/*/preview").permitAll()

@@ -67,7 +67,7 @@ class UrlControllerStandaloneTest {
                 "github-org",
                 "http://localhost:8080/r/github-org",
                 "http://localhost:8080/api/v1/urls/github-org/qr",
-                "https://github.com/docs",
+                "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 0,
@@ -79,7 +79,7 @@ class UrlControllerStandaloneTest {
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://github.com/docs",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs",
                                   "customAlias": "github-org"
                                 }
                                 """))
@@ -95,7 +95,7 @@ class UrlControllerStandaloneTest {
                 "two",
                 "http://localhost:8080/r/two",
                 "http://localhost:8080/api/v1/urls/two/qr",
-                "https://example.com/two",
+                "https://github.com/weblinkpilot/weblink-pilot/two",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 0,
@@ -105,7 +105,7 @@ class UrlControllerStandaloneTest {
                 "one",
                 "http://localhost:8080/r/one",
                 "http://localhost:8080/api/v1/urls/one/qr",
-                "https://example.com/one",
+                "https://github.com/weblinkpilot/weblink-pilot/one",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 0,
@@ -125,7 +125,7 @@ class UrlControllerStandaloneTest {
                 "demo",
                 "http://localhost:8080/r/demo",
                 "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 2,
@@ -145,7 +145,7 @@ class UrlControllerStandaloneTest {
                 "demo",
                 "http://localhost:8080/r/demo",
                 "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 2,
@@ -156,7 +156,7 @@ class UrlControllerStandaloneTest {
         mockMvc.perform(get("/api/v1/urls/demo/preview"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(302))
-                .andExpect(jsonPath("$.locationHeader").value("https://example.com"));
+                .andExpect(jsonPath("$.locationHeader").value("https://github.com/weblinkpilot/weblink-pilot"));
     }
 
     @Test

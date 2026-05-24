@@ -15,6 +15,12 @@ Create a local env file if needed:
 copy .env.example .env.local
 ```
 
+If you run the backend from the repo root with the helper scripts, also put the shared repo-level secret in the repo root `.env.local`:
+
+```bash
+JWT_SECRET=your-local-jwt-secret
+```
+
 ## Run
 
 ```bash

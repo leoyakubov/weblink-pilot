@@ -29,10 +29,10 @@ public class BootstrapLinkRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        seedLink("welcome", "https://example.com/welcome", null, null, now);
-        seedLink("docs", "https://example.com/docs", null, null, now);
-        seedLink("user-home", "https://example.com/user-home", null, normalizeUsername(authProperties.getBootstrapUserUsername()), now);
-        seedLink("admin-home", "https://example.com/admin-home", null, normalizeUsername(authProperties.getBootstrapAdminUsername()), now);
+        seedLink("welcome", "https://github.com/weblinkpilot/weblink-pilot", null, null, now);
+        seedLink("docs", "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs", null, null, now);
+        seedLink("user-home", "https://github.com/weblinkpilot/weblink-pilot/issues", null, normalizeUsername(authProperties.getBootstrapUserUsername()), now);
+        seedLink("admin-home", "https://github.com/weblinkpilot/weblink-pilot/actions", null, normalizeUsername(authProperties.getBootstrapAdminUsername()), now);
     }
 
     private void seedLink(String code,

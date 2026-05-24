@@ -37,7 +37,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", null, createdAt, null, 5L));
+        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://github.com/weblinkpilot/weblink-pilot", null, createdAt, null, 5L));
         when(repository.incrementClickCountByCode("abc123")).thenReturn(1);
 
         String target = service.resolveTarget(
@@ -45,7 +45,7 @@ class RedirectServiceTest {
                 new RedirectRequestContext("127.0.0.1", "JUnit", "https://referrer.example", "US")
         );
 
-        assertThat(target).isEqualTo("https://example.com");
+        assertThat(target).isEqualTo("https://github.com/weblinkpilot/weblink-pilot");
         verify(repository).incrementClickCountByCode("abc123");
         verify(cacheService).evict("abc123");
 
@@ -60,7 +60,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("ipv6")).thenReturn(new ShortLinkSnapshot("ipv6", "https://example.com/path", null, createdAt, null, 1L));
+        when(cacheService.findByCode("ipv6")).thenReturn(new ShortLinkSnapshot("ipv6", "https://github.com/weblinkpilot/weblink-pilot/path", null, createdAt, null, 1L));
         when(repository.incrementClickCountByCode("ipv6")).thenReturn(1);
 
         String target = service.resolveTarget(
@@ -68,7 +68,7 @@ class RedirectServiceTest {
                 new RedirectRequestContext("2001:db8::1", "JUnit", "  ", "UNKNOWN")
         );
 
-        assertThat(target).isEqualTo("https://example.com/path");
+        assertThat(target).isEqualTo("https://github.com/weblinkpilot/weblink-pilot/path");
         verify(cacheService).evict("ipv6");
         verify(linkPublisher).publish(org.mockito.ArgumentMatchers.any(LinkClickedEvent.class));
     }
@@ -94,7 +94,7 @@ class RedirectServiceTest {
 
         when(cacheService.findByCode("expired")).thenReturn(new ShortLinkSnapshot(
                 "expired",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(2),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
@@ -115,7 +115,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("missing-db")).thenReturn(new ShortLinkSnapshot("missing-db", "https://example.com", null, createdAt, null, 1L));
+        when(cacheService.findByCode("missing-db")).thenReturn(new ShortLinkSnapshot("missing-db", "https://github.com/weblinkpilot/weblink-pilot", null, createdAt, null, 1L));
         when(repository.incrementClickCountByCode("missing-db")).thenReturn(0);
 
         assertThatThrownBy(() -> service.resolveTarget(

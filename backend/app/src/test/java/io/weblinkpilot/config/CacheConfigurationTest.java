@@ -39,7 +39,7 @@ class CacheConfigurationTest {
     void redisObjectMapperCanRoundTripShortLinkSnapshots() {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "github-org",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 OffsetDateTime.of(2026, 5, 24, 10, 0, 0, 0, ZoneOffset.UTC),
                 null,

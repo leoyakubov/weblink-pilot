@@ -5,15 +5,15 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.auth")
 public class AuthProperties {
 
-    private String issuer = "weblink-pilot";
-    private String jwtSecret = "weblink-pilot-demo-secret-change-me-0123456789";
-    private long tokenTtlMinutes = 240;
-    private String bootstrapAdminUsername = "admin";
-    private String bootstrapAdminPassword = "admin123";
-    private String bootstrapAdminRole = "ADMIN";
-    private String bootstrapUserUsername = "";
-    private String bootstrapUserPassword = "";
-    private String bootstrapUserRole = "USER";
+    private String issuer = AuthDefaults.ISSUER;
+    private String jwtSecret;
+    private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
+    private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
+    private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
+    private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;
+    private String bootstrapUserUsername = BootstrapDefaults.USER_USERNAME;
+    private String bootstrapUserPassword = BootstrapDefaults.USER_PASSWORD;
+    private String bootstrapUserRole = BootstrapDefaults.USER_ROLE;
 
     public String getIssuer() {
         return issuer;

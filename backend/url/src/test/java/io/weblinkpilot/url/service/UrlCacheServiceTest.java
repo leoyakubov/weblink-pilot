@@ -27,7 +27,7 @@ class UrlCacheServiceTest {
     void mapsRepositoryEntityToSnapshot() {
         ShortLink link = new ShortLink(
                 "abc123",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
@@ -38,6 +38,6 @@ class UrlCacheServiceTest {
         ShortLinkSnapshot snapshot = service.findByCode("abc123");
 
         assertThat(snapshot.code()).isEqualTo("abc123");
-        assertThat(snapshot.originalUrl()).isEqualTo("https://example.com");
+        assertThat(snapshot.originalUrl()).isEqualTo("https://github.com/weblinkpilot/weblink-pilot");
     }
 }

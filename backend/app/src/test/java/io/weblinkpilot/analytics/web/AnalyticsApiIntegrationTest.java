@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import io.weblinkpilot.auth.config.BootstrapDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,8 +28,8 @@ import org.springframework.web.context.WebApplicationContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AnalyticsApiIntegrationTest {
 
-    private static final String AUTH_USER = "admin";
-    private static final String AUTH_PASSWORD = "admin123";
+    private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
+    private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
 
     @Autowired
     private WebApplicationContext webApplicationContext;

@@ -9,7 +9,7 @@ import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types'
 
 const settings = reactive<ApiSettings>(loadSettings())
 const form = reactive<CreateLinkRequest>({
-  originalUrl: 'https://example.com/docs/getting-started',
+  originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
   customAlias: '',
   expiresAt: '',
 })
@@ -148,7 +148,7 @@ watch(
                 v-model="form.originalUrl"
                 class="input"
                 type="url"
-                placeholder="https://example.com/docs/getting-started"
+                placeholder="https://github.com/weblinkpilot/weblink-pilot/tree/main/docs"
                 required
               />
             </label>

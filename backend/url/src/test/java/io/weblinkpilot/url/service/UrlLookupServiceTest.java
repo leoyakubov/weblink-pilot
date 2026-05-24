@@ -44,7 +44,7 @@ class UrlLookupServiceTest {
     void returnsLinkWhenCacheHit() {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "abc123",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
@@ -79,7 +79,7 @@ class UrlLookupServiceTest {
     void listsRecentLinksWithClampedLimitAndNewestSort() {
         ShortLink first = new ShortLink(
                 "one",
-                "https://example.com/one",
+                "https://github.com/weblinkpilot/weblink-pilot/one",
                 null,
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
@@ -87,7 +87,7 @@ class UrlLookupServiceTest {
         );
         ShortLink second = new ShortLink(
                 "two",
-                "https://example.com/two",
+                "https://github.com/weblinkpilot/weblink-pilot/two",
                 null,
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),

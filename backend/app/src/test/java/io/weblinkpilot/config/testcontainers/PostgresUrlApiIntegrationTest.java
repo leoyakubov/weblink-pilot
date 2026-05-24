@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import org.junit.jupiter.api.BeforeEach;
+import io.weblinkpilot.auth.config.BootstrapDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,8 +24,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 class PostgresUrlApiIntegrationTest {
 
-    private static final String AUTH_USER = "admin";
-    private static final String AUTH_PASSWORD = "admin123";
+    private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
+    private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine")

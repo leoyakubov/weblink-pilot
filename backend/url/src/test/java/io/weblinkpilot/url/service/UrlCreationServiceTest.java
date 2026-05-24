@@ -52,7 +52,7 @@ class UrlCreationServiceTest {
         when(publicUrlBuilder.buildQrCodeUrl("github-org")).thenReturn("http://localhost:8080/api/v1/urls/github-org/qr");
 
         CreateLinkRequest request = new CreateLinkRequest(
-                "https://github.com/docs",
+                "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs",
                 "github-org",
                 OffsetDateTime.now(ZoneOffset.UTC).plusDays(1)
         );
@@ -62,7 +62,7 @@ class UrlCreationServiceTest {
         assertThat(response.code()).isEqualTo("github-org");
         assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/github-org");
         assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/github-org/qr");
-        assertThat(response.originalUrl()).isEqualTo("https://github.com/docs");
+        assertThat(response.originalUrl()).isEqualTo("https://github.com/weblinkpilot/weblink-pilot/tree/main/docs");
         verify(repository).existsByCustomAlias("github-org");
         verify(cacheService).evict("github-org");
         verify(linkPublisher).publish(org.mockito.ArgumentMatchers.any(LinkCreatedEvent.class));
@@ -77,7 +77,7 @@ class UrlCreationServiceTest {
         when(publicUrlBuilder.buildQrCodeUrl("abc1234")).thenReturn("http://localhost:8080/api/v1/urls/abc1234/qr");
 
         LinkResponse response = service.create(new CreateLinkRequest(
-                "https://google.com/about",
+                "https://github.com/weblinkpilot/weblink-pilot/about",
                 null,
                 null
         ));
@@ -94,7 +94,7 @@ class UrlCreationServiceTest {
     @Test
     void rejectsExpiredRequests() {
         assertThatThrownBy(() -> service.create(new CreateLinkRequest(
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 "expired",
                 OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1)
         ))).isInstanceOf(IllegalArgumentException.class)
@@ -106,7 +106,7 @@ class UrlCreationServiceTest {
         when(repository.existsByCustomAlias("dup")).thenReturn(true);
 
         assertThatThrownBy(() -> service.create(new CreateLinkRequest(
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 "dup",
                 null
         ))).isInstanceOf(DuplicateAliasException.class)
@@ -116,7 +116,7 @@ class UrlCreationServiceTest {
     @Test
     void rejectsInvalidAliasFormat() {
         assertThatThrownBy(() -> service.create(new CreateLinkRequest(
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 "bad alias!",
                 null
         ))).isInstanceOf(IllegalArgumentException.class)

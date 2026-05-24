@@ -29,7 +29,7 @@ class UrlServiceTest {
                 "my-link",
                 "http://localhost:8080/r/my-link",
                 "http://localhost:8080/api/v1/urls/my-link/qr",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 null,
                 0,
@@ -39,7 +39,7 @@ class UrlServiceTest {
         when(creationService.create(org.mockito.ArgumentMatchers.any())).thenReturn(response);
 
         LinkResponse result = service.create(new io.weblinkpilot.shared.contracts.CreateLinkRequest(
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 "my-link",
                 null
         ));
@@ -54,7 +54,7 @@ class UrlServiceTest {
                 "abc123",
                 "http://localhost:8080/r/abc123",
                 "http://localhost:8080/api/v1/urls/abc123/qr",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 null,
                 3,

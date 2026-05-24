@@ -30,6 +30,9 @@ public class JwtService {
     public JwtService(ObjectMapper objectMapper, AuthProperties authProperties) {
         this.objectMapper = objectMapper;
         this.authProperties = authProperties;
+        if (authProperties.getJwtSecret() == null || authProperties.getJwtSecret().isBlank()) {
+            throw new IllegalStateException("JWT secret must be configured via JWT_SECRET");
+        }
     }
 
     public String issueToken(String username, String role) {

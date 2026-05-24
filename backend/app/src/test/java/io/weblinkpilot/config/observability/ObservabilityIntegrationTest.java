@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
+import io.weblinkpilot.auth.config.BootstrapDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,8 +22,8 @@ import org.springframework.web.context.WebApplicationContext;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ObservabilityIntegrationTest {
 
-    private static final String AUTH_USER = "admin";
-    private static final String AUTH_PASSWORD = "admin123";
+    private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
+    private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -41,7 +42,7 @@ class ObservabilityIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
                                   "customAlias": "metrics-demo"
                                 }
                                 """))

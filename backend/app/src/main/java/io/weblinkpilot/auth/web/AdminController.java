@@ -1,6 +1,7 @@
 package io.weblinkpilot.auth.web;
 
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.shared.contracts.AdminOverviewResponse;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +27,7 @@ public class AdminController {
     @SecurityRequirement(name = "bearerAuth")
     public AdminOverviewResponse overview() {
         long totalUsers = userAccountRepository.count();
-        long adminUsers = userAccountRepository.countByRole_Name("ADMIN");
+        long adminUsers = userAccountRepository.countByRole_Name(RoleNames.ADMIN);
         long totalLinks = shortLinkRepository.count();
         long anonymousLinks = shortLinkRepository.countByOwnerUsernameIsNull();
         long ownedLinks = shortLinkRepository.countByOwnerUsernameIsNotNull();

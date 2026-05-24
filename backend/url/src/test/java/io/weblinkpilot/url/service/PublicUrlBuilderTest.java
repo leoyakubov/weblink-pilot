@@ -18,9 +18,9 @@ class PublicUrlBuilderTest {
 
     @Test
     void preservesBaseUrlWithoutTrailingSlash() {
-        PublicUrlBuilder builder = new PublicUrlBuilder("https://example.com");
+        PublicUrlBuilder builder = new PublicUrlBuilder("https://github.com/weblinkpilot/weblink-pilot");
 
-        assertThat(builder.buildShortUrl("demo")).isEqualTo("https://example.com/r/demo");
+        assertThat(builder.buildShortUrl("demo")).isEqualTo("https://github.com/weblinkpilot/weblink-pilot/r/demo");
     }
 
     @Test

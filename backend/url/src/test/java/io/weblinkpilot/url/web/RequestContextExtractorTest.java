@@ -19,14 +19,14 @@ class RequestContextExtractorTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("X-Forwarded-For", "203.0.113.10, 198.51.100.2");
         request.addHeader("User-Agent", "Mozilla/5.0");
-        request.addHeader("Referer", "https://example.com/page");
+        request.addHeader("Referer", "https://github.com/weblinkpilot/weblink-pilot/page");
         request.setRemoteAddr("127.0.0.1");
 
         RedirectRequestContext context = extractor.extract(request);
 
         assertThat(context.clientIp()).isEqualTo("203.0.113.10");
         assertThat(context.userAgent()).isEqualTo("Mozilla/5.0");
-        assertThat(context.referrer()).isEqualTo("https://example.com/page");
+        assertThat(context.referrer()).isEqualTo("https://github.com/weblinkpilot/weblink-pilot/page");
         assertThat(context.country()).isEqualTo("US");
     }
 

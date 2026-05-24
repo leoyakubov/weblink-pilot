@@ -39,10 +39,10 @@ class QrRedirectControllerStandaloneTest {
         when(requestContextExtractor.extract(org.mockito.ArgumentMatchers.any(HttpServletRequest.class)))
                 .thenReturn(context);
         when(redirectService.resolveTarget("demo", context, LinkTrackingSource.QR_SCAN))
-                .thenReturn("https://example.com");
+                .thenReturn("https://github.com/weblinkpilot/weblink-pilot");
 
         mockMvc.perform(get("/q/demo"))
                 .andExpect(status().isFound())
-                .andExpect(header().string("Location", "https://example.com"));
+                .andExpect(header().string("Location", "https://github.com/weblinkpilot/weblink-pilot"));
     }
 }

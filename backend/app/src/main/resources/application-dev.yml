@@ -9,13 +9,6 @@ spring:
       url: ${REDIS_URL:redis://localhost:6379}
 
 app:
-  auth:
-    bootstrap-admin-username: admin
-    bootstrap-admin-password: admin123
-    bootstrap-admin-role: ADMIN
-    bootstrap-user-username: user
-    bootstrap-user-password: user123
-    bootstrap-user-role: USER
   cache:
     provider: redis
   public-base-url: http://localhost:8080

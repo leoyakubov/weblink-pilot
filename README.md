@@ -118,6 +118,7 @@ For a local-only convenience file, create `.env.local` at the repo root with:
 
 ```bash
 SONAR_TOKEN=your-token-here
+JWT_SECRET=your-local-jwt-secret
 ```
 
 ## Run Scripts

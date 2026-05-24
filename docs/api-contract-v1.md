@@ -26,7 +26,7 @@ Request:
 
 ```json
 {
-  "originalUrl": "https://example.com/some/long/link",
+  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
   "customAlias": "my-link",
   "expiresAt": "2026-12-31T23:59:59Z"
 }
@@ -38,7 +38,7 @@ Response:
 {
   "code": "my-link",
   "shortUrl": "https://weblink-pilot.io/r/my-link",
-  "originalUrl": "https://example.com/some/long/link",
+  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
   "expiresAt": "2026-12-31T23:59:59Z",
   "createdAt": "2026-05-22T11:00:00Z",
   "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr"
@@ -65,9 +65,9 @@ Response:
 {
   "code": "my-link",
   "shortUrl": "https://weblink-pilot.io/r/my-link",
-  "targetUrl": "https://example.com/some/long/link",
+  "targetUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
   "status": 302,
-  "locationHeader": "https://example.com/some/long/link"
+  "locationHeader": "https://github.com/weblinkpilot/weblink-pilot/some/long/link"
 }
 ```
 
@@ -85,7 +85,7 @@ Response:
 ```json
 {
   "code": "my-link",
-  "originalUrl": "https://example.com/some/long/link",
+  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
   "shortUrl": "https://weblink-pilot.io/r/my-link",
   "createdAt": "2026-05-22T11:00:00Z",
   "expiresAt": "2026-12-31T23:59:59Z",
@@ -106,7 +106,7 @@ Response:
     "code": "my-link",
     "shortUrl": "https://weblink-pilot.io/r/my-link",
     "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr",
-    "originalUrl": "https://example.com/some/long/link",
+    "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
     "createdAt": "2026-05-22T11:00:00Z",
     "expiresAt": "2026-12-31T23:59:59Z",
     "clickCount": 128

@@ -29,7 +29,7 @@ class ShortLinkRepositoryTest {
     void findsByCodeAndAliasAndExistsChecks() {
         ShortLink link = repository.save(new ShortLink(
                 "abc123",
-                "https://example.com",
+                "https://github.com/weblinkpilot/weblink-pilot",
                 "demo-alias",
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC),

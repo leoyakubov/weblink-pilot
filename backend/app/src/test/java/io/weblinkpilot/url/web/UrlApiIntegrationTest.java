@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.lang.reflect.Field;
 import org.junit.jupiter.api.BeforeEach;
+import io.weblinkpilot.auth.config.BootstrapDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,8 +34,8 @@ import io.weblinkpilot.url.service.UrlCacheService;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UrlApiIntegrationTest {
 
-    private static final String AUTH_USER = "admin";
-    private static final String AUTH_PASSWORD = "admin123";
+    private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
+    private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -59,7 +60,7 @@ class UrlApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
                                   "customAlias": "demo-it"
                                 }
                                 """))
@@ -67,21 +68,21 @@ class UrlApiIntegrationTest {
                 .andExpect(jsonPath("$.code").value("demo-it"))
                 .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
                 .andExpect(jsonPath("$.qrCodeUrl").value("http://localhost:8080/api/v1/urls/demo-it/qr"))
-                .andExpect(jsonPath("$.originalUrl").value("https://example.com"));
+                .andExpect(jsonPath("$.originalUrl").value("https://github.com/weblinkpilot/weblink-pilot"));
 
         mockMvc.perform(get("/r/demo-it")
                         .header("Accept-Language", "en-US,en;q=0.9"))
                 .andExpect(status().isFound())
-                .andExpect(header().string("Location", "https://example.com"));
+                .andExpect(header().string("Location", "https://github.com/weblinkpilot/weblink-pilot"));
 
         mockMvc.perform(get("/api/v1/urls/demo-it/preview")
                         .with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("demo-it"))
                 .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
-                .andExpect(jsonPath("$.targetUrl").value("https://example.com"))
+                .andExpect(jsonPath("$.targetUrl").value("https://github.com/weblinkpilot/weblink-pilot"))
                 .andExpect(jsonPath("$.status").value(302))
-                .andExpect(jsonPath("$.locationHeader").value("https://example.com"));
+                .andExpect(jsonPath("$.locationHeader").value("https://github.com/weblinkpilot/weblink-pilot"));
 
         mockMvc.perform(get("/api/v1/analytics/demo-it")
                         .with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
@@ -109,7 +110,7 @@ class UrlApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com/one",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/one",
                                   "customAlias": "one"
                                 }
                                 """))
@@ -120,7 +121,7 @@ class UrlApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com/two",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/two",
                                   "customAlias": "two"
                                 }
                                 """))
@@ -140,7 +141,7 @@ class UrlApiIntegrationTest {
     void returnsConflictForDuplicateAlias() throws Exception {
         String payload = """
                 {
-                  "originalUrl": "https://example.com",
+                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
                   "customAlias": "demo-duplicate"
                 }
                 """;
@@ -183,14 +184,14 @@ class UrlApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com/random-code"
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/random-code"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(org.hamcrest.Matchers.matchesPattern("^[A-Za-z0-9]{7}$")))
                 .andExpect(jsonPath("$.shortUrl").value(org.hamcrest.Matchers.matchesPattern("http://localhost:8080/r/[A-Za-z0-9]{7}")))
                 .andExpect(jsonPath("$.qrCodeUrl").value(org.hamcrest.Matchers.matchesPattern("http://localhost:8080/api/v1/urls/[A-Za-z0-9]{7}/qr")))
-                .andExpect(jsonPath("$.originalUrl").value("https://example.com/random-code"));
+                .andExpect(jsonPath("$.originalUrl").value("https://github.com/weblinkpilot/weblink-pilot/random-code"));
     }
     @Test
     void returnsGoneForExpiredRedirects() throws Exception {
@@ -199,7 +200,7 @@ class UrlApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "originalUrl": "https://example.com",
+                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
                                   "customAlias": "expired-it"
                                 }
                                 """))

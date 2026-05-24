@@ -39,10 +39,10 @@ class RedirectControllerStandaloneTest {
         when(requestContextExtractor.extract(org.mockito.ArgumentMatchers.any(HttpServletRequest.class)))
                 .thenReturn(context);
         when(redirectService.resolveTarget("demo", new RedirectRequestContext("127.0.0.1", "Mozilla/5.0", "https://github.com", "US")))
-                .thenReturn("https://example.com");
+                .thenReturn("https://github.com/weblinkpilot/weblink-pilot");
 
         mockMvc.perform(get("/r/demo"))
                 .andExpect(status().isFound())
-                .andExpect(header().string("Location", "https://example.com"));
+                .andExpect(header().string("Location", "https://github.com/weblinkpilot/weblink-pilot"));
     }
 }

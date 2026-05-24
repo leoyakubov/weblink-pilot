@@ -10,13 +10,6 @@ spring:
       path: /h2-console
 
 app:
-  auth:
-    bootstrap-admin-username: admin
-    bootstrap-admin-password: admin123
-    bootstrap-admin-role: ADMIN
-    bootstrap-user-username: user
-    bootstrap-user-password: user123
-    bootstrap-user-role: USER
   public-base-url: http://localhost:8080
   cors:
     allowed-origin-patterns:

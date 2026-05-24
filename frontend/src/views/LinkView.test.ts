@@ -48,7 +48,7 @@ describe('LinkView', () => {
       code: 'github-org',
       shortUrl: 'http://localhost:8080/r/github-org',
       qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-      originalUrl: 'https://github.com/docs',
+      originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
       createdAt: '2026-05-23T11:00:00Z',
       expiresAt: null,
       clickCount: 3,
@@ -58,9 +58,9 @@ describe('LinkView', () => {
     mocks.getRedirectPreviewMock.mockResolvedValue({
       code: 'github-org',
       shortUrl: 'http://localhost:8080/r/github-org',
-      targetUrl: 'https://github.com/docs',
+      targetUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
       status: 302,
-      locationHeader: 'https://github.com/docs',
+      locationHeader: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
     })
 
     mocks.getAnalyticsSummaryMock.mockResolvedValue({
@@ -95,7 +95,7 @@ describe('LinkView', () => {
 
     expect(wrapper.text()).toContain('Code: github-org')
     expect(wrapper.text()).toContain('3')
-    expect(wrapper.text()).toContain('https://github.com/docs')
+    expect(wrapper.text()).toContain('https://github.com/weblinkpilot/weblink-pilot/tree/main/docs')
     expect(wrapper.text()).toContain('Copy QR URL')
     expect(wrapper.text()).toContain('US')
     expect(wrapper.text()).toContain('https://news.ycombinator.com')

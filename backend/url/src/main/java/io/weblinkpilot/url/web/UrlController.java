@@ -82,7 +82,7 @@ public class UrlController {
                                             name = "Random default code",
                                             value = """
                                                     {
-                                                      "originalUrl": "https://google.com/about",
+                                                      "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/about",
                                                       "expiresAt": "2026-08-31T23:59:59Z"
                                                     }
                                                     """
@@ -91,7 +91,7 @@ public class UrlController {
                                             name = "Custom alias",
                                             value = """
                                                     {
-                                                      "originalUrl": "https://github.com/docs",
+                                                      "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs",
                                                       "customAlias": "docs-team",
                                                       "expiresAt": "2026-12-31T23:59:59Z"
                                                     }

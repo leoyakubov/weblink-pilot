@@ -1,6 +1,7 @@
 package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
@@ -40,7 +41,7 @@ public class UserAccountService {
             throw new UsernameAlreadyExistsException(normalizedUsername);
         }
 
-        Role userRole = roleCatalogService.getRequiredRole("USER");
+        Role userRole = roleCatalogService.getRequiredRole(RoleNames.USER);
         UserAccount account = new UserAccount(
                 normalizedUsername,
                 passwordEncoder.encode(rawPassword),
@@ -80,11 +81,10 @@ public class UserAccountService {
                 .orElseGet(() -> repository.save(new UserAccount(
                         username,
                         passwordEncoder.encode(password),
-                        roleCatalogService.getRequiredRole(
-                                authProperties.getBootstrapAdminRole() == null || authProperties.getBootstrapAdminRole().isBlank()
-                                        ? "ADMIN"
-                                        : authProperties.getBootstrapAdminRole().trim().toUpperCase(Locale.ROOT)
-                        ),
+                        roleCatalogService.getRequiredRole(normalizeBootstrapRole(
+                                authProperties.getBootstrapAdminRole(),
+                                RoleNames.ADMIN
+                        )),
                         true,
                         OffsetDateTime.now(ZoneOffset.UTC)
                 )));
@@ -102,11 +102,10 @@ public class UserAccountService {
                 .orElseGet(() -> repository.save(new UserAccount(
                         username,
                         passwordEncoder.encode(password),
-                        roleCatalogService.getRequiredRole(
-                                authProperties.getBootstrapUserRole() == null || authProperties.getBootstrapUserRole().isBlank()
-                                        ? "USER"
-                                        : authProperties.getBootstrapUserRole().trim().toUpperCase(Locale.ROOT)
-                        ),
+                        roleCatalogService.getRequiredRole(normalizeBootstrapRole(
+                                authProperties.getBootstrapUserRole(),
+                                RoleNames.USER
+                        )),
                         true,
                         OffsetDateTime.now(ZoneOffset.UTC)
                 )));
@@ -130,5 +129,12 @@ public class UserAccountService {
             return "";
         }
         return username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeBootstrapRole(String configuredRole, String defaultRole) {
+        if (configuredRole == null || configuredRole.isBlank()) {
+            return defaultRole;
+        }
+        return configuredRole.trim().toUpperCase(Locale.ROOT);
     }
 }
