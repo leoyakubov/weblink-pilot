@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import CopyActionButton from '@/components/CopyActionButton.vue'
+import { isAdminUser } from '@/lib/auth'
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api'
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
 import { loadSettings } from '@/lib/settings'
@@ -20,10 +21,13 @@ const summary = ref<AnalyticsSummaryResponse | null>(null)
 const loading = ref(false)
 const errorMessage = ref('')
 const recentLinks = ref<LinkResponse[]>([])
+const qrModalUrl = ref('')
+const qrModalTitle = ref('')
 
 const selectedCode = computed(() => form.code.trim())
 const hasData = computed(() => Boolean(link.value && summary.value))
 const hasRecent = computed(() => recentLinks.value.length > 0)
+const canSeePreview = computed(() => isAdminUser())
 
 const chartWidth = 320
 const chartHeight = 132
@@ -113,6 +117,16 @@ function loadRecent(code: string) {
 
 function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
+}
+
+function openQrModal(url: string, title: string) {
+  qrModalUrl.value = url
+  qrModalTitle.value = title
+}
+
+function closeQrModal() {
+  qrModalUrl.value = ''
+  qrModalTitle.value = ''
 }
 
 function formatDate(value: string | null) {
@@ -285,6 +299,10 @@ watch(
             <strong>Owner</strong>
             <p>{{ link.ownerUsername ?? 'Anonymous demo' }}</p>
           </div>
+          <div class="list-item-meta">
+            <span>Created: {{ formatDate(link.createdAt) }}</span>
+            <span>Expires: {{ formatDate(link.expiresAt) }}</span>
+          </div>
           <div class="actions">
             <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: link.code } }">
               Open details page
@@ -294,6 +312,7 @@ watch(
               Open redirect
             </button>
             <button
+              v-if="canSeePreview"
               class="button button-secondary"
               type="button"
               @click="openExternal(buildApiBaseUrl(`/urls/${link.code}/preview`, settings))"
@@ -304,12 +323,17 @@ watch(
 
           <figure class="stack" style="margin: 0;">
             <img class="qr-image" :src="link.qrCodeUrl" :alt="`QR code for ${link.code}`" />
-            <CopyActionButton
-              :value="link.qrCodeUrl"
-              label="Copy QR URL"
-              copied-label="QR URL copied"
-              variant="primary"
-            />
+            <div class="actions">
+              <CopyActionButton
+                :value="link.qrCodeUrl"
+                label="Copy QR URL"
+                copied-label="QR URL copied"
+                variant="primary"
+              />
+              <button class="button button-secondary" type="button" @click="openQrModal(link.qrCodeUrl, link.code)">
+                Open QR
+              </button>
+            </div>
           </figure>
         </template>
 
@@ -355,4 +379,24 @@ watch(
       </div>
     </article>
   </section>
+
+  <teleport to="body">
+    <Transition name="session-notice">
+      <div v-if="qrModalUrl" class="modal-backdrop" @click.self="closeQrModal">
+        <div class="modal-card card">
+          <div class="card-inner stack">
+            <div class="section-row">
+              <div>
+                <p class="eyebrow">QR code</p>
+                <h3 class="panel-title">{{ qrModalTitle }}</h3>
+              </div>
+              <button class="button button-secondary button-small" type="button" @click="closeQrModal">Close</button>
+            </div>
+
+            <img class="qr-image qr-image--compact modal-qr" :src="qrModalUrl" :alt="`QR code for ${qrModalTitle}`" />
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </teleport>
 </template>

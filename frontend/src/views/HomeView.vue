@@ -21,10 +21,14 @@ const recentError = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 const submitting = ref(false)
+const qrModalUrl = ref('')
+const qrModalTitle = ref('')
 
 const userStatus = computed(() => authState.currentUser
   ? `Signed in as ${authState.currentUser.username} (${authState.currentUser.role})`
   : 'Guest mode ready for demo links')
+
+const canSeePreview = computed(() => authState.currentUser?.role === 'ADMIN')
 
 const recentTitle = computed(() => authState.currentUser ? 'Your Recent Links' : 'Recent Links')
 
@@ -85,6 +89,27 @@ function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
+function openQrModal(url: string, title: string) {
+  qrModalUrl.value = url
+  qrModalTitle.value = title
+}
+
+function closeQrModal() {
+  qrModalUrl.value = ''
+  qrModalTitle.value = ''
+}
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return 'Never'
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+
 onMounted(() => {
   refreshRecent()
 })
@@ -99,11 +124,11 @@ watch(
 
 <template>
   <section class="landing-layout stack">
-    <article class="card hero-card">
-      <div class="card-inner hero-grid">
-        <div class="hero-copy">
+    <div class="hero-split">
+      <article class="card hero-card">
+        <div class="card-inner hero-copy">
           <p class="eyebrow">Link management</p>
-          <h2 class="hero-title">Short links, QR codes, and analytics in one clean workspace.</h2>
+          <h2 class="hero-title">Short links, QR, analytics.</h2>
           <p class="hero-note">
             WebLinkPilot is built for fast sharing. Create a demo link instantly, or sign in to keep ownership and
             private history. Redirects, QR scans, and analytics stay public and fast.
@@ -112,7 +137,8 @@ watch(
           <div class="hero-badges">
             <span class="badge"><strong>Guest</strong> demo links</span>
             <span class="badge"><strong>Owned</strong> user links</span>
-            <span class="badge"><strong>QR</strong> and analytics</span>
+            <span class="badge"><strong>QR</strong> scans</span>
+            <span class="badge"><strong>Analytics</strong> insights</span>
           </div>
 
           <div class="hero-points">
@@ -125,14 +151,16 @@ watch(
               <p>Keep your links owned and revisit them later.</p>
             </div>
           </div>
+        </div>
+      </article>
 
+      <article class="card hero-card">
+        <div class="card-inner stack">
           <p class="status warning">
             <span class="status-dot"></span>
             {{ userStatus }}
           </p>
-        </div>
 
-        <div class="stack">
           <div>
             <p class="eyebrow">Quick create</p>
             <h3 class="panel-title">Shorten a URL</h3>
@@ -182,8 +210,8 @@ watch(
             </p>
           </form>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
 
     <article class="card">
       <div class="card-inner stack">
@@ -220,9 +248,13 @@ watch(
                 Analytics
               </RouterLink>
               <CopyActionButton :value="item.shortUrl" label="Copy short URL" copied-label="Short URL copied" />
-              <button class="button button-secondary" type="button" @click="openExternal(item.qrCodeUrl)">
+              <button class="button button-secondary" type="button" @click="openQrModal(item.qrCodeUrl, item.code)">
                 Open QR
               </button>
+            </div>
+            <div class="list-item-meta">
+              <span>Created: {{ formatDate(item.createdAt) }}</span>
+              <span>Expires: {{ formatDate(item.expiresAt) }}</span>
             </div>
           </div>
         </div>
@@ -253,6 +285,10 @@ watch(
             <strong>{{ createdLink.ownerUsername ?? 'Anonymous demo' }}</strong>
             <p>Ownership for this link.</p>
           </div>
+          <div class="list-item-meta">
+            <span>Created: {{ formatDate(createdLink.createdAt) }}</span>
+            <span>Expires: {{ formatDate(createdLink.expiresAt) }}</span>
+          </div>
           <div class="actions">
             <RouterLink
               class="button button-primary"
@@ -273,6 +309,7 @@ watch(
               Open redirect
             </button>
             <CopyActionButton
+              v-if="canSeePreview"
               :value="linkPreviewUrl"
               label="Copy preview URL"
               copied-label="Preview URL copied"
@@ -288,7 +325,7 @@ watch(
             <h3 class="panel-title">Mobile scan ready</h3>
           </div>
 
-          <figure>
+          <figure class="compact-figure">
             <img class="qr-image" :src="createdLink.qrCodeUrl" :alt="`QR code for ${createdLink.code}`" />
           </figure>
 
@@ -299,8 +336,8 @@ watch(
               copied-label="QR URL copied"
               variant="primary"
             />
-            <button class="button button-secondary" type="button" @click="openExternal(createdLink.qrCodeUrl)">
-              Open QR image
+            <button class="button button-secondary" type="button" @click="openQrModal(createdLink.qrCodeUrl, createdLink.code)">
+              Open QR
             </button>
           </div>
 
@@ -310,5 +347,25 @@ watch(
         </div>
       </article>
     </section>
+
+    <teleport to="body">
+      <Transition name="session-notice">
+        <div v-if="qrModalUrl" class="modal-backdrop" @click.self="closeQrModal">
+          <div class="modal-card card">
+            <div class="card-inner stack">
+              <div class="section-row">
+                <div>
+                  <p class="eyebrow">QR code</p>
+                  <h3 class="panel-title">{{ qrModalTitle }}</h3>
+                </div>
+                <button class="button button-secondary button-small" type="button" @click="closeQrModal">Close</button>
+              </div>
+
+              <img class="qr-image qr-image--compact modal-qr" :src="qrModalUrl" :alt="`QR code for ${qrModalTitle}`" />
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </teleport>
   </section>
 </template>
