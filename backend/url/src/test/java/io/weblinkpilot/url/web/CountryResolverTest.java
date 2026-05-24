@@ -18,6 +18,15 @@ class CountryResolverTest {
     }
 
     @Test
+    void skipsBlankTrustedHeaderAndUsesNextTrustedHeader() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("CF-IPCountry", " ");
+        request.addHeader("CloudFront-Viewer-Country", "fr");
+
+        assertThat(resolver.resolve(request, "198.51.100.10")).isEqualTo("FR");
+    }
+
+    @Test
     void fallsBackToAcceptLanguageCountry() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Accept-Language", "en-US,en;q=0.9");
@@ -26,9 +35,24 @@ class CountryResolverTest {
     }
 
     @Test
+    void fallsBackToLocalForPrivateAddressWhenNoCountrySignalsExist() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("Accept-Language", "not-a-real-value");
+
+        assertThat(resolver.resolve(request, "10.0.0.1")).isEqualTo("LOCAL");
+    }
+
+    @Test
     void marksLocalLoopbackAsLocalWhenNoCountrySignalsExist() {
         MockHttpServletRequest request = new MockHttpServletRequest();
 
         assertThat(resolver.resolve(request, "127.0.0.1")).isEqualTo("LOCAL");
+    }
+
+    @Test
+    void marksPublicIpAsUnknownWhenNoCountrySignalsExist() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        assertThat(resolver.resolve(request, "198.51.100.10")).isEqualTo("UNKNOWN");
     }
 }

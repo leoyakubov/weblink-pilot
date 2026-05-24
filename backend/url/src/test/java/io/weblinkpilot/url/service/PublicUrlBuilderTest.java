@@ -22,4 +22,11 @@ class PublicUrlBuilderTest {
 
         assertThat(builder.buildShortUrl("demo")).isEqualTo("https://example.com/r/demo");
     }
+
+    @Test
+    void toleratesMissingBaseUrl() {
+        PublicUrlBuilder builder = new PublicUrlBuilder(null);
+
+        assertThat(builder.buildShortUrl("demo")).isEqualTo("/r/demo");
+    }
 }
