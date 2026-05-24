@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Create', to: '/' },
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'History', to: '/history' },
+  { label: 'Monitoring', to: '/monitoring' },
 ]
 
 const currentSection = computed(() => {
@@ -21,6 +22,10 @@ const currentSection = computed(() => {
 
   if (route.name === 'history') {
     return 'Link history'
+  }
+
+  if (route.name === 'monitoring') {
+    return 'Admin monitoring'
   }
 
   return 'Create link'

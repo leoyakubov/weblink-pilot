@@ -7,8 +7,7 @@ const defaultApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost
 export function defaultSettings(): ApiSettings {
   return {
     apiBaseUrl: normalizeBaseUrl(defaultApiBaseUrl),
-    username: 'admin',
-    password: 'admin123',
+    authToken: '',
   }
 }
 
@@ -27,8 +26,7 @@ export function loadSettings(): ApiSettings {
     const parsed = JSON.parse(raw) as Partial<ApiSettings>
     return {
       apiBaseUrl: normalizeBaseUrl(parsed.apiBaseUrl ?? fallback.apiBaseUrl),
-      username: parsed.username ?? fallback.username,
-      password: parsed.password ?? fallback.password,
+      authToken: parsed.authToken ?? fallback.authToken,
     }
   } catch {
     return fallback
@@ -42,8 +40,7 @@ export function saveSettings(settings: ApiSettings) {
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
     apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
-    username: settings.username,
-    password: settings.password,
+    authToken: settings.authToken,
   }))
 }
 

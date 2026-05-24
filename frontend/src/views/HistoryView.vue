@@ -75,6 +75,7 @@ function formatDate(value: string) {
               </div>
               <span class="footnote">{{ formatDate(item.createdAt) }}</span>
             </div>
+            <p class="footnote">Owner: {{ item.ownerUsername ?? 'Anonymous demo' }}</p>
             <p class="footnote">{{ item.clickCount }} clicks</p>
             <div class="actions">
               <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: item.code } }">

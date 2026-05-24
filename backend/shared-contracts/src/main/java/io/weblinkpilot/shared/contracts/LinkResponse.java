@@ -9,6 +9,7 @@ public record LinkResponse(
         String originalUrl,
         OffsetDateTime createdAt,
         OffsetDateTime expiresAt,
-        long clickCount
+        long clickCount,
+        String ownerUsername
 ) {
 }

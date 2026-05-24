@@ -1,7 +1,6 @@
 export interface ApiSettings {
   apiBaseUrl: string
-  username: string
-  password: string
+  authToken: string
 }
 
 export interface CreateLinkRequest {
@@ -18,6 +17,32 @@ export interface LinkResponse {
   createdAt: string
   expiresAt: string | null
   clickCount: number
+  ownerUsername: string | null
+}
+
+export interface AuthCredentialsRequest {
+  username: string
+  password: string
+}
+
+export interface AuthResponse {
+  token: string
+  username: string
+  role: string
+}
+
+export interface UserProfileResponse {
+  username: string
+  role: string
+}
+
+export interface AdminOverviewResponse {
+  totalUsers: number
+  adminUsers: number
+  totalLinks: number
+  anonymousLinks: number
+  ownedLinks: number
+  totalClicks: number
 }
 
 export interface RedirectPreviewResponse {

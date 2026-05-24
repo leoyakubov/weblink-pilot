@@ -37,7 +37,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", createdAt, null, 5L));
+        when(cacheService.findByCode("abc123")).thenReturn(new ShortLinkSnapshot("abc123", "https://example.com", null, createdAt, null, 5L));
         when(repository.incrementClickCountByCode("abc123")).thenReturn(1);
 
         String target = service.resolveTarget(
@@ -60,7 +60,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("ipv6")).thenReturn(new ShortLinkSnapshot("ipv6", "https://example.com/path", createdAt, null, 1L));
+        when(cacheService.findByCode("ipv6")).thenReturn(new ShortLinkSnapshot("ipv6", "https://example.com/path", null, createdAt, null, 1L));
         when(repository.incrementClickCountByCode("ipv6")).thenReturn(1);
 
         String target = service.resolveTarget(
@@ -95,6 +95,7 @@ class RedirectServiceTest {
         when(cacheService.findByCode("expired")).thenReturn(new ShortLinkSnapshot(
                 "expired",
                 "https://example.com",
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(2),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
                 3L
@@ -114,7 +115,7 @@ class RedirectServiceTest {
         RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
         OffsetDateTime createdAt = OffsetDateTime.now(ZoneOffset.UTC);
 
-        when(cacheService.findByCode("missing-db")).thenReturn(new ShortLinkSnapshot("missing-db", "https://example.com", createdAt, null, 1L));
+        when(cacheService.findByCode("missing-db")).thenReturn(new ShortLinkSnapshot("missing-db", "https://example.com", null, createdAt, null, 1L));
         when(repository.incrementClickCountByCode("missing-db")).thenReturn(0);
 
         assertThatThrownBy(() -> service.resolveTarget(

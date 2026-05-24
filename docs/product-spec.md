@@ -68,6 +68,13 @@ The product is designed to look and feel like a real production service rather t
 - bulk link generation
 - API keys
 - webhook delivery for click events
+- richer auth/account management:
+  - refresh tokens
+  - password reset
+  - email verification
+  - OAuth/social login
+  - multiple auth providers
+  - account management UI/API
 
 ## 5. Frontend Scope
 

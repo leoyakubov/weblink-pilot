@@ -15,6 +15,7 @@
 | Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | Next | Monitoring admin page | Add an internal monitoring page plus Prometheus/Grafana links and local monitoring stack now that the app is deployed. |
 | Later | Monitoring auth | Optionally protect monitoring endpoints with JWT after the admin page is in place. |
+| Later | Auth expansion | Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes. |
 | Done | Environment profiles | Local, dev, and demo Spring profiles are in place, with Maven convenience profiles for direct backend runs. |
 | Nice to do | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
 
@@ -61,4 +62,5 @@
 - introduce broker if needed
 - extract analytics if it becomes valuable
 - split services only when the boundaries prove themselves
+- expand auth into refresh tokens, password reset, email verification, OAuth/social login, multiple providers, and deeper account management when the current JWT/user model proves its shape
 - refine Maven profiles only if they reduce complexity further

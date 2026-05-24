@@ -34,8 +34,7 @@ vi.mock('@/lib/clipboard', () => ({
 vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
-    username: 'admin',
-    password: 'admin123',
+    authToken: '',
   }),
 }))
 
@@ -53,6 +52,7 @@ describe('LinkView', () => {
       createdAt: '2026-05-23T11:00:00Z',
       expiresAt: null,
       clickCount: 3,
+      ownerUsername: null,
     })
 
     mocks.getRedirectPreviewMock.mockResolvedValue({
@@ -82,18 +82,15 @@ describe('LinkView', () => {
 
     expect(mocks.getLinkMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
-      username: 'admin',
-      password: 'admin123',
+      authToken: '',
     })
     expect(mocks.getRedirectPreviewMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
-      username: 'admin',
-      password: 'admin123',
+      authToken: '',
     })
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
-      username: 'admin',
-      password: 'admin123',
+      authToken: '',
     })
 
     expect(wrapper.text()).toContain('Code: github-org')

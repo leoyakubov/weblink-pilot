@@ -6,6 +6,7 @@ public record LinkCreatedEvent(
         String code,
         String originalUrl,
         String customAlias,
+        String ownerUsername,
         OffsetDateTime createdAt,
         OffsetDateTime expiresAt
 ) {

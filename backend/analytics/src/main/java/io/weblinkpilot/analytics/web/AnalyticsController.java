@@ -1,30 +1,35 @@
 package io.weblinkpilot.analytics.web;
 
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
+import io.weblinkpilot.url.service.UrlLookupService;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@SecurityRequirement(name = "basicAuth")
 @RequestMapping("/api/v1/analytics")
 public class AnalyticsController {
 
     private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
     private final AnalyticsQueryService analyticsQueryService;
+    private final UrlLookupService urlLookupService;
     private final Counter countCounter;
     private final Counter summaryCounter;
 
-    public AnalyticsController(AnalyticsQueryService analyticsQueryService, MeterRegistry meterRegistry) {
+    public AnalyticsController(AnalyticsQueryService analyticsQueryService, UrlLookupService urlLookupService, MeterRegistry meterRegistry) {
         this.analyticsQueryService = analyticsQueryService;
+        this.urlLookupService = urlLookupService;
         this.countCounter = Counter.builder("weblinkpilot.analytics.count.requests")
                 .description("Number of analytics count requests")
                 .register(meterRegistry);
@@ -34,16 +39,36 @@ public class AnalyticsController {
     }
 
     @GetMapping("/{code}/count")
-    public long count(@PathVariable("code") String code) {
+    public long count(Authentication authentication, @PathVariable("code") String code) {
+        assertCanReadAnalytics(authentication, code);
         countCounter.increment();
         return analyticsQueryService.countClicks(code);
     }
 
     @GetMapping("/{code}")
-    public AnalyticsSummaryResponse summary(@PathVariable("code") String code) {
+    public AnalyticsSummaryResponse summary(Authentication authentication, @PathVariable("code") String code) {
+        assertCanReadAnalytics(authentication, code);
         summaryCounter.increment();
         AnalyticsSummaryResponse response = analyticsQueryService.summarize(code);
         log.info("analytics.summary.code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
         return response;
+    }
+
+    private void assertCanReadAnalytics(Authentication authentication, String code) {
+        String ownerUsername = urlLookupService.getByCode(code).ownerUsername();
+        if (ownerUsername == null || ownerUsername.isBlank()) {
+            return;
+        }
+
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in to view analytics for this link");
+        }
+
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        if (isAdmin || ownerUsername.equalsIgnoreCase(authentication.getName())) {
+            return;
+        }
+
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only view analytics for your own links");
     }
 }

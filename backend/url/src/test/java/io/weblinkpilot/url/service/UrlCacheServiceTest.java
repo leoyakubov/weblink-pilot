@@ -29,6 +29,7 @@ class UrlCacheServiceTest {
                 "abc123",
                 "https://example.com",
                 null,
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );

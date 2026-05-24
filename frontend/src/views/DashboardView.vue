@@ -281,6 +281,10 @@ watch(
             <strong>{{ link.originalUrl }}</strong>
             <p>Target URL</p>
           </div>
+          <div class="list-item">
+            <strong>Owner</strong>
+            <p>{{ link.ownerUsername ?? 'Anonymous demo' }}</p>
+          </div>
           <div class="actions">
             <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: link.code } }">
               Open details page

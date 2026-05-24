@@ -22,6 +22,12 @@ management:
         include: health,info,metrics,prometheus
 
 app:
+  auth:
+    issuer: weblink-pilot
+    jwt-secret: ${JWT_SECRET:weblink-pilot-demo-secret-change-me-0123456789}
+    token-ttl-minutes: 240
+    bootstrap-admin-username: ${ADMIN_USERNAME:admin}
+    bootstrap-admin-password: ${ADMIN_PASSWORD:admin123}
   cache:
     provider: local
   rate-limit:

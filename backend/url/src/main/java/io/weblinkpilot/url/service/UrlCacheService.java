@@ -27,6 +27,7 @@ public class UrlCacheService {
         return link.map(value -> new ShortLinkSnapshot(
                 value.getCode(),
                 value.getOriginalUrl(),
+                value.getOwnerUsername(),
                 value.getCreatedAt(),
                 value.getExpiresAt(),
                 value.getClickCount()

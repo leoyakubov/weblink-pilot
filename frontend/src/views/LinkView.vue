@@ -109,6 +109,10 @@ function formatDate(value: string | null) {
             <p>{{ link.originalUrl }}</p>
           </div>
           <div class="list-item">
+            <strong>Owner</strong>
+            <p>{{ link.ownerUsername ?? 'Anonymous demo' }}</p>
+          </div>
+          <div class="list-item">
             <strong>Preview</strong>
             <p>{{ preview?.locationHeader ?? 'Preview not loaded yet' }}</p>
           </div>

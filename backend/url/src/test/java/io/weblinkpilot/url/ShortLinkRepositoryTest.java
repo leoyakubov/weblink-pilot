@@ -31,6 +31,7 @@ class ShortLinkRepositoryTest {
                 "abc123",
                 "https://example.com",
                 "demo-alias",
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         ));

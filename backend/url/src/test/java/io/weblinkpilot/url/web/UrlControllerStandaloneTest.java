@@ -70,7 +70,8 @@ class UrlControllerStandaloneTest {
                 "https://github.com/docs",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                0
+                0,
+                null
         );
         when(urlService.create(any(CreateLinkRequest.class))).thenReturn(response);
 
@@ -97,7 +98,8 @@ class UrlControllerStandaloneTest {
                 "https://example.com/two",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                0
+                0,
+                null
         );
         LinkResponse second = new LinkResponse(
                 "one",
@@ -106,7 +108,8 @@ class UrlControllerStandaloneTest {
                 "https://example.com/one",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                0
+                0,
+                null
         );
         when(urlLookupService.listRecentLinks(10)).thenReturn(List.of(first, second));
 
@@ -125,7 +128,8 @@ class UrlControllerStandaloneTest {
                 "https://example.com",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                2
+                2,
+                null
         );
         when(urlLookupService.getByCode("demo")).thenReturn(response);
 
@@ -144,7 +148,8 @@ class UrlControllerStandaloneTest {
                 "https://example.com",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                2
+                2,
+                null
         );
         when(urlLookupService.getByCode("demo")).thenReturn(response);
 

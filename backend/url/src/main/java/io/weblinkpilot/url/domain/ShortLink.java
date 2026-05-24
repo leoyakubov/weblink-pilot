@@ -34,13 +34,17 @@ public class ShortLink {
     @Column(name = "click_count", nullable = false)
     private long clickCount;
 
+    @Column(name = "owner_username", length = 128)
+    private String ownerUsername;
+
     protected ShortLink() {
     }
 
-    public ShortLink(String code, String originalUrl, String customAlias, OffsetDateTime createdAt, OffsetDateTime expiresAt) {
+    public ShortLink(String code, String originalUrl, String customAlias, String ownerUsername, OffsetDateTime createdAt, OffsetDateTime expiresAt) {
         this.code = code;
         this.originalUrl = originalUrl;
         this.customAlias = customAlias;
+        this.ownerUsername = ownerUsername;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.clickCount = 0L;
@@ -76,6 +80,10 @@ public class ShortLink {
 
     public long getClickCount() {
         return clickCount;
+    }
+
+    public String getOwnerUsername() {
+        return ownerUsername;
     }
 
     public void incrementClickCount() {

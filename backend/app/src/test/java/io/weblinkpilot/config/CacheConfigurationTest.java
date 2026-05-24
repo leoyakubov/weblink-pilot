@@ -40,6 +40,7 @@ class CacheConfigurationTest {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "github-org",
                 "https://example.com",
+                null,
                 OffsetDateTime.of(2026, 5, 24, 10, 0, 0, 0, ZoneOffset.UTC),
                 null,
                 7L

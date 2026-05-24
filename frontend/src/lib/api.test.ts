@@ -1,11 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { buildApiBaseUrl, createLink, getAnalyticsSummary, getRedirectPreview, listLinks } from './api'
+import { buildApiBaseUrl, createLink, getAdminOverview, getAnalyticsSummary, getCurrentUser, getRedirectPreview, listLinks, login, register } from './api'
 import type { ApiSettings } from '@/types'
 
 const settings: ApiSettings = {
   apiBaseUrl: 'http://localhost:8080/api/v1/',
-  username: 'admin',
-  password: 'admin123',
+  authToken: 'jwt-token',
 }
 
 beforeEach(() => {
@@ -22,14 +21,14 @@ describe('api helpers', () => {
     expect(buildApiBaseUrl('/urls/demo4/qr', settings)).toBe('http://localhost:8080/api/v1/urls/demo4/qr')
   })
 
-  it('sends basic auth and serializes create link payload', async () => {
+  it('sends bearer auth and serializes create link payload', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       expect(String(input)).toBe('http://localhost:8080/api/v1/urls')
 
       const headers = new Headers(init?.headers)
       expect(headers.get('Accept')).toBe('application/json')
       expect(headers.get('Content-Type')).toBe('application/json')
-      expect(headers.get('Authorization')).toBe(`Basic ${Buffer.from('admin:admin123').toString('base64')}`)
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token')
       expect(init?.body).toBe(JSON.stringify({
         originalUrl: 'https://github.com',
         customAlias: 'github-org',
@@ -44,6 +43,7 @@ describe('api helpers', () => {
         createdAt: '2026-05-22T14:00:00Z',
         expiresAt: null,
         clickCount: 0,
+        ownerUsername: null,
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -64,6 +64,7 @@ describe('api helpers', () => {
       createdAt: '2026-05-22T14:00:00Z',
       expiresAt: null,
       clickCount: 0,
+      ownerUsername: null,
     })
   })
 
@@ -141,6 +142,7 @@ describe('api helpers', () => {
           createdAt: '2026-05-22T15:00:00Z',
           expiresAt: null,
           clickCount: 2,
+          ownerUsername: null,
         },
       ]), {
         status: 200,
@@ -159,7 +161,126 @@ describe('api helpers', () => {
         createdAt: '2026-05-22T15:00:00Z',
         expiresAt: null,
         clickCount: 2,
+        ownerUsername: null,
       },
     ])
+  })
+
+  it('serializes login payload and reads auth response', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/login')
+
+      const headers = new Headers(init?.headers)
+      expect(headers.get('Authorization')).toBeNull()
+      expect(init?.body).toBe(JSON.stringify({
+        username: 'alice',
+        password: 'secret',
+      }))
+
+      return new Response(JSON.stringify({
+        token: 'new-token',
+        username: 'alice',
+        role: 'USER',
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(login({
+      username: 'alice',
+      password: 'secret',
+    }, settings)).resolves.toEqual({
+      token: 'new-token',
+      username: 'alice',
+      role: 'USER',
+    })
+  })
+
+  it('serializes register payload and reads profile response', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/register')
+
+      const headers = new Headers(init?.headers)
+      expect(headers.get('Authorization')).toBeNull()
+      expect(init?.body).toBe(JSON.stringify({
+        username: 'alice',
+        password: 'secret',
+      }))
+
+      return new Response(JSON.stringify({
+        token: 'new-token',
+        username: 'alice',
+        role: 'USER',
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(register({
+      username: 'alice',
+      password: 'secret',
+    }, settings)).resolves.toEqual({
+      token: 'new-token',
+      username: 'alice',
+      role: 'USER',
+    })
+  })
+
+  it('loads current user profile', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/me')
+      const headers = new Headers(init?.headers)
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token')
+      return new Response(JSON.stringify({
+        username: 'alice',
+        role: 'USER',
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(getCurrentUser(settings)).resolves.toEqual({
+      username: 'alice',
+      role: 'USER',
+    })
+  })
+
+  it('loads admin overview from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/overview')
+      const headers = new Headers(init?.headers)
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token')
+      return new Response(JSON.stringify({
+        totalUsers: 5,
+        adminUsers: 1,
+        totalLinks: 12,
+        anonymousLinks: 7,
+        ownedLinks: 5,
+        totalClicks: 99,
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(getAdminOverview(settings)).resolves.toEqual({
+      totalUsers: 5,
+      adminUsers: 1,
+      totalLinks: 12,
+      anonymousLinks: 7,
+      ownedLinks: 5,
+      totalClicks: 99,
+    })
   })
 })

@@ -45,6 +45,7 @@ class UrlLookupServiceTest {
         ShortLinkSnapshot snapshot = new ShortLinkSnapshot(
                 "abc123",
                 "https://example.com",
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null,
                 2L
@@ -80,6 +81,7 @@ class UrlLookupServiceTest {
                 "one",
                 "https://example.com/one",
                 null,
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
                 null
         );
@@ -87,11 +89,12 @@ class UrlLookupServiceTest {
                 "two",
                 "https://example.com/two",
                 null,
+                null,
                 OffsetDateTime.now(ZoneOffset.UTC),
                 null
         );
 
-        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(second, first)));
+        when(repository.findAllByOwnerUsernameIsNull(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(second, first)));
         when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
         when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
         when(publicUrlBuilder.buildQrCodeUrl("two")).thenReturn("http://localhost:8080/api/v1/urls/two/qr");
@@ -101,7 +104,7 @@ class UrlLookupServiceTest {
 
         assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(repository).findAll(pageableCaptor.capture());
+        verify(repository).findAllByOwnerUsernameIsNull(pageableCaptor.capture());
         Pageable pageable = pageableCaptor.getValue();
         assertThat(pageable.getPageSize()).isEqualTo(50);
         assertThat(pageable.getSort()).isEqualTo(Sort.by(Sort.Direction.DESC, "createdAt")

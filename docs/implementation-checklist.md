@@ -22,6 +22,7 @@ It helps us build the project in small, verifiable slices without jumping too ea
 | Done | Phase 8 | Environment profiles with local, dev, and demo splits. |
 | Done | Phase 9 | Redis-backed caching for URL hot lookups and analytics cache invalidation are implemented. |
 | Next | Phase 10 | Monitoring admin page, Prometheus/Grafana stack, and optional JWT protection for monitoring endpoints. |
+| Later | Phase 11 | Auth expansion for refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and account management UI/API. |
 | Nice to do | Future evolution | Broker extraction only if async/event needs justify it. |
 
 ## Phase 0 - Repo readiness
@@ -192,6 +193,24 @@ Exit criteria:
 - monitoring is visible from the app
 - the deploy path stays simple
 - the monitoring stack can be enabled after the app is live
+
+## Phase 11 - Auth expansion
+
+Goals:
+
+- add refresh tokens for longer-lived sessions
+- add password reset flows
+- add email verification
+- support OAuth or social login providers
+- support multiple auth providers if the product needs them
+- add account management UI and API with dedicated tests and migrations
+
+Exit criteria:
+
+- users can recover access without manual intervention
+- the app can support more than one identity provider
+- account lifecycle flows are explicit and testable
+- admin and user account management remain separated cleanly
 
 ## Suggested build order
 

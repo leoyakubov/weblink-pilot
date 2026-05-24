@@ -15,11 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@SecurityRequirement(name = "basicAuth")
 @RequestMapping("/api/v1/urls")
 public class UrlController {
 
@@ -55,10 +55,10 @@ public class UrlController {
         this.qrCodeService = qrCodeService;
         this.publicUrlBuilder = publicUrlBuilder;
         this.browseCounter = Counter.builder("weblinkpilot.urls.browse.requests")
-                .description("Number of authenticated browse requests for recent links")
+                .description("Number of recent link browse requests")
                 .register(meterRegistry);
         this.detailsCounter = Counter.builder("weblinkpilot.urls.details.requests")
-                .description("Number of authenticated detail lookups")
+                .description("Number of link detail lookups")
                 .register(meterRegistry);
         this.previewCounter = Counter.builder("weblinkpilot.urls.preview.requests")
                 .description("Number of redirect preview requests")
@@ -101,13 +101,20 @@ public class UrlController {
                     )
             )
     )
-    public ResponseEntity<LinkResponse> create(@Valid @RequestBody CreateLinkRequest request) {
+    public ResponseEntity<LinkResponse> create(Authentication authentication, @Valid @RequestBody CreateLinkRequest request) {
+        if (isAuthenticated(authentication)) {
+            return ResponseEntity.ok(urlService.create(request, currentUsername(authentication)));
+        }
         return ResponseEntity.ok(urlService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<LinkResponse>> list(@RequestParam(name = "limit", defaultValue = "10") int limit) {
+    public ResponseEntity<List<LinkResponse>> list(Authentication authentication,
+                                                   @RequestParam(name = "limit", defaultValue = "10") int limit) {
         browseCounter.increment();
+        if (isAuthenticated(authentication)) {
+            return ResponseEntity.ok(urlLookupService.listRecentLinks(currentUsername(authentication), isAdmin(authentication), limit));
+        }
         return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
     }
 
@@ -153,5 +160,23 @@ public class UrlController {
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(png);
+    }
+
+    private String currentUsername(Authentication authentication) {
+        if (!isAuthenticated(authentication)) {
+            return null;
+        }
+        return authentication.getName();
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return isAuthenticated(authentication)
+                && authentication.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean isAuthenticated(Authentication authentication) {
+        return authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
     }
 }

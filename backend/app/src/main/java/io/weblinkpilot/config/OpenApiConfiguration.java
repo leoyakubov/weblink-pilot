@@ -5,12 +5,13 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @SecurityScheme(
-        name = OpenApiConfiguration.BASIC_AUTH_SCHEME,
+        name = OpenApiConfiguration.BEARER_AUTH_SCHEME,
         type = SecuritySchemeType.HTTP,
-        scheme = "basic",
+        scheme = "bearer",
+        bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER
 )
 public class OpenApiConfiguration {
 
-    public static final String BASIC_AUTH_SCHEME = "basicAuth";
+    public static final String BEARER_AUTH_SCHEME = "bearerAuth";
 }

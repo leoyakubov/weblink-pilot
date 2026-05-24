@@ -4,6 +4,8 @@ Modern URL shortening platform with QR codes, separate redirect vs QR analytics,
 
 Live demo: Netlify frontend and Render backend with Render Postgres and Render Key Value Redis.
 
+The app supports both anonymous demo links and signed-in user-owned links. Guests can shorten URLs immediately, while authenticated users get owned links, private history, and admin-only monitoring if they have the admin role.
+
 ## Docs
 
 - [Architecture Plan](docs/architecture-plan.md)
@@ -211,7 +213,9 @@ The app expects the backend at `http://localhost:8080/api/v1` by default. You ca
 VITE_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
-Default dev credentials for the current backend:
+Default demo credentials for the current backend:
 
 - username: `admin`
 - password: `admin123`
+
+Guest mode does not require signing in and is the fastest way to create a demo link.

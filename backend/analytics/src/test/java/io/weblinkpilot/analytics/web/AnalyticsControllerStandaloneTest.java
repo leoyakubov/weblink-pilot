@@ -9,6 +9,8 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
 import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.url.service.UrlLookupService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -26,16 +28,29 @@ class AnalyticsControllerStandaloneTest {
     @Mock
     private AnalyticsQueryService analyticsQueryService;
 
+    @Mock
+    private UrlLookupService urlLookupService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        AnalyticsController controller = new AnalyticsController(analyticsQueryService, new SimpleMeterRegistry());
+        AnalyticsController controller = new AnalyticsController(analyticsQueryService, urlLookupService, new SimpleMeterRegistry());
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
     void returnsClickCount() throws Exception {
+        when(urlLookupService.getByCode("demo")).thenReturn(new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://example.com",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0,
+                null
+        ));
         when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
 
         mockMvc.perform(get("/api/v1/analytics/demo/count"))
@@ -45,6 +60,16 @@ class AnalyticsControllerStandaloneTest {
 
     @Test
     void returnsSummary() throws Exception {
+        when(urlLookupService.getByCode("demo")).thenReturn(new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://example.com",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0,
+                null
+        ));
         AnalyticsSummaryResponse summary = new AnalyticsSummaryResponse(
                 "demo",
                 12L,

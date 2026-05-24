@@ -19,14 +19,12 @@ describe('settings storage', () => {
   it('round-trips saved values', () => {
     saveSettings({
       apiBaseUrl: 'http://localhost:8080/api/v1/',
-      username: 'alice',
-      password: 'secret',
+      authToken: 'jwt-token',
     })
 
     expect(loadSettings()).toEqual({
       apiBaseUrl: 'http://localhost:8080/api/v1',
-      username: 'alice',
-      password: 'secret',
+      authToken: 'jwt-token',
     })
   })
 

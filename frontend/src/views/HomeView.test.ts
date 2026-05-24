@@ -5,6 +5,9 @@ import HomeView from './HomeView.vue'
 const mocks = vi.hoisted(() => ({
   createLinkMock: vi.fn(),
   copyTextMock: vi.fn(),
+  getCurrentUserMock: vi.fn(),
+  loginMock: vi.fn(),
+  registerMock: vi.fn(),
   saveSettingsMock: vi.fn(),
   buildApiBaseUrlMock: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
 }))
@@ -12,6 +15,9 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/api', () => ({
   buildApiBaseUrl: mocks.buildApiBaseUrlMock,
   createLink: mocks.createLinkMock,
+  getCurrentUser: mocks.getCurrentUserMock,
+  login: mocks.loginMock,
+  register: mocks.registerMock,
 }))
 
 vi.mock('@/lib/clipboard', () => ({
@@ -21,13 +27,11 @@ vi.mock('@/lib/clipboard', () => ({
 vi.mock('@/lib/settings', () => ({
   defaultSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
-    username: 'admin',
-    password: 'admin123',
+    authToken: '',
   }),
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
-    username: 'admin',
-    password: 'admin123',
+    authToken: '',
   }),
   saveSettings: mocks.saveSettingsMock,
 }))
@@ -46,6 +50,7 @@ describe('HomeView', () => {
       createdAt: '2026-05-23T11:00:00Z',
       expiresAt: null,
       clickCount: 0,
+      ownerUsername: null,
     })
 
     const wrapper = mount(HomeView, {
@@ -60,8 +65,7 @@ describe('HomeView', () => {
     })
 
     const urlInputs = wrapper.findAll('input[type="url"]')
-    const textInputs = wrapper.findAll('input[type="text"]')
-    expect((textInputs[1].element as HTMLInputElement).value).toBe('')
+    expect((wrapper.get('input[placeholder="github-org"]').element as HTMLInputElement).value).toBe('')
     await urlInputs[1].setValue(' https://github.com/docs/getting-started ')
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
@@ -74,8 +78,7 @@ describe('HomeView', () => {
       },
       {
         apiBaseUrl: 'http://localhost:8080/api/v1',
-        username: 'admin',
-        password: 'admin123',
+        authToken: '',
       },
     )
     expect(mocks.saveSettingsMock).toHaveBeenCalled()
@@ -94,6 +97,7 @@ describe('HomeView', () => {
       createdAt: '2026-05-23T11:00:00Z',
       expiresAt: null,
       clickCount: 0,
+      ownerUsername: 'admin',
     })
 
     const wrapper = mount(HomeView, {
@@ -108,9 +112,8 @@ describe('HomeView', () => {
     })
 
     const urlInputs = wrapper.findAll('input[type="url"]')
-    const textInputs = wrapper.findAll('input[type="text"]')
     await urlInputs[1].setValue(' https://github.com/docs/getting-started ')
-    await textInputs[1].setValue(' github-org ')
+    await wrapper.get('input[placeholder="github-org"]').setValue(' github-org ')
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
@@ -122,8 +125,7 @@ describe('HomeView', () => {
       },
       {
         apiBaseUrl: 'http://localhost:8080/api/v1',
-        username: 'admin',
-        password: 'admin123',
+        authToken: '',
       },
     )
     expect(mocks.saveSettingsMock).toHaveBeenCalled()

@@ -12,6 +12,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.regex.Pattern;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,8 +46,14 @@ public class UrlCreationService {
 
     @Transactional
     public LinkResponse create(CreateLinkRequest request) {
+        return create(request, null);
+    }
+
+    @Transactional
+    public LinkResponse create(CreateLinkRequest request, String ownerUsername) {
         String normalizedUrl = normalizeUrl(request.originalUrl());
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        String normalizedOwnerUsername = normalizeOwnerUsername(ownerUsername);
         if (request.expiresAt() != null && request.expiresAt().isBefore(now)) {
             log.warn("link.create.rejected reason=expired_request expiresAt={}", request.expiresAt());
             throw new IllegalArgumentException("Expiration time must be in the future");
@@ -54,14 +61,15 @@ public class UrlCreationService {
 
         String alias = normalizeAlias(request.customAlias());
         ShortLink link = alias != null
-                ? createWithCustomAlias(alias, normalizedUrl, now, request.expiresAt())
-                : createWithGeneratedCode(normalizedUrl, now, request.expiresAt());
+                ? createWithCustomAlias(alias, normalizedUrl, normalizedOwnerUsername, now, request.expiresAt())
+                : createWithGeneratedCode(normalizedUrl, normalizedOwnerUsername, now, request.expiresAt());
 
         cacheService.evict(link.getCode());
         linkPublisher.publish(new LinkCreatedEvent(
                 link.getCode(),
                 link.getOriginalUrl(),
                 link.getCustomAlias(),
+                link.getOwnerUsername(),
                 link.getCreatedAt(),
                 link.getExpiresAt()
         ));
@@ -82,17 +90,22 @@ public class UrlCreationService {
                 link.getOriginalUrl(),
                 link.getCreatedAt(),
                 link.getExpiresAt(),
-                link.getClickCount()
+                link.getClickCount(),
+                link.getOwnerUsername()
         );
     }
 
     private ShortLink createWithCustomAlias(String alias, String normalizedUrl, OffsetDateTime now, OffsetDateTime expiresAt) {
+        return createWithCustomAlias(alias, normalizedUrl, null, now, expiresAt);
+    }
+
+    private ShortLink createWithCustomAlias(String alias, String normalizedUrl, String ownerUsername, OffsetDateTime now, OffsetDateTime expiresAt) {
         if (repository.existsByCustomAlias(alias)) {
             log.warn("link.create.rejected reason=duplicate_alias alias={}", alias);
             throw new DuplicateAliasException(alias);
         }
 
-        ShortLink link = new ShortLink(alias, normalizedUrl, alias, now, expiresAt);
+        ShortLink link = new ShortLink(alias, normalizedUrl, alias, ownerUsername, now, expiresAt);
         try {
             return repository.saveAndFlush(link);
         } catch (DataIntegrityViolationException ex) {
@@ -100,7 +113,7 @@ public class UrlCreationService {
         }
     }
 
-    private ShortLink createWithGeneratedCode(String normalizedUrl, OffsetDateTime now, OffsetDateTime expiresAt) {
+    private ShortLink createWithGeneratedCode(String normalizedUrl, String ownerUsername, OffsetDateTime now, OffsetDateTime expiresAt) {
         for (int attempt = 1; attempt <= MAX_GENERATION_ATTEMPTS; attempt++) {
             String code = shortCodeGenerator.generate();
             if (repository.existsByCode(code)) {
@@ -108,7 +121,7 @@ public class UrlCreationService {
             }
 
             try {
-                return repository.saveAndFlush(new ShortLink(code, normalizedUrl, null, now, expiresAt));
+                return repository.saveAndFlush(new ShortLink(code, normalizedUrl, null, ownerUsername, now, expiresAt));
             } catch (DataIntegrityViolationException exception) {
                 if (attempt == MAX_GENERATION_ATTEMPTS) {
                     throw exception;
@@ -141,6 +154,13 @@ public class UrlCreationService {
             throw new IllegalArgumentException("Original URL must be absolute and include scheme and host");
         }
         return uri.toString();
+    }
+
+    private String normalizeOwnerUsername(String ownerUsername) {
+        if (ownerUsername == null || ownerUsername.isBlank()) {
+            return null;
+        }
+        return ownerUsername.trim().toLowerCase(Locale.ROOT);
     }
 
     private String hostOf(String url) {

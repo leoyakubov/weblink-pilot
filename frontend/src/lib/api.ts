@@ -1,17 +1,21 @@
 import type {
+  AdminOverviewResponse,
+  AuthCredentialsRequest,
+  AuthResponse,
   ApiSettings,
   AnalyticsSummaryResponse,
   CreateLinkRequest,
   LinkResponse,
   RedirectPreviewResponse,
+  UserProfileResponse,
 } from '@/types'
 import { loadSettings, normalizeBaseUrl } from '@/lib/settings'
 
-function basicAuthHeader(username: string, password: string) {
-  if (!username || !password) {
+function bearerAuthHeader(token: string) {
+  if (!token) {
     return undefined
   }
-  return `Basic ${btoa(`${username}:${password}`)}`
+  return `Bearer ${token}`
 }
 
 async function parseError(response: Response) {
@@ -24,7 +28,12 @@ async function parseError(response: Response) {
   }
 }
 
-async function requestJson<T>(path: string, init: RequestInit = {}, settings: ApiSettings = loadSettings()): Promise<T> {
+async function requestJson<T>(
+  path: string,
+  init: RequestInit = {},
+  settings: ApiSettings = loadSettings(),
+  includeAuth = true,
+): Promise<T> {
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
 
@@ -32,9 +41,11 @@ async function requestJson<T>(path: string, init: RequestInit = {}, settings: Ap
     headers.set('Content-Type', 'application/json')
   }
 
-  const authorization = basicAuthHeader(settings.username, settings.password)
-  if (authorization) {
-    headers.set('Authorization', authorization)
+  if (includeAuth) {
+    const authorization = bearerAuthHeader(settings.authToken)
+    if (authorization) {
+      headers.set('Authorization', authorization)
+    }
   }
 
   const response = await fetch(`${normalizeBaseUrl(settings.apiBaseUrl)}${path}`, {
@@ -57,6 +68,32 @@ export function createLink(request: CreateLinkRequest, settings: ApiSettings = l
   return requestJson<LinkResponse>('/urls', {
     method: 'POST',
     body: JSON.stringify(request),
+  }, settings)
+}
+
+export function register(request: AuthCredentialsRequest, settings: ApiSettings = loadSettings()) {
+  return requestJson<AuthResponse>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  }, settings, false)
+}
+
+export function login(request: AuthCredentialsRequest, settings: ApiSettings = loadSettings()) {
+  return requestJson<AuthResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  }, settings, false)
+}
+
+export function getCurrentUser(settings: ApiSettings = loadSettings()) {
+  return requestJson<UserProfileResponse>('/auth/me', {
+    method: 'GET',
+  }, settings)
+}
+
+export function getAdminOverview(settings: ApiSettings = loadSettings()) {
+  return requestJson<AdminOverviewResponse>('/admin/overview', {
+    method: 'GET',
   }, settings)
 }
 

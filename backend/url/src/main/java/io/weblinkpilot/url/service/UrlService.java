@@ -19,7 +19,19 @@ public class UrlService {
         return creationService.create(request);
     }
 
+    public LinkResponse create(CreateLinkRequest request, String ownerUsername) {
+        return creationService.create(request, ownerUsername);
+    }
+
     public LinkResponse getByCode(String code) {
         return lookupService.getByCode(code);
+    }
+
+    public java.util.List<LinkResponse> listRecentLinks(int limit) {
+        return lookupService.listRecentLinks(limit);
+    }
+
+    public java.util.List<LinkResponse> listRecentLinks(String ownerUsername, boolean admin, int limit) {
+        return lookupService.listRecentLinks(ownerUsername, admin, limit);
     }
 }

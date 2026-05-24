@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import CopyActionButton from '@/components/CopyActionButton.vue'
-import { buildApiBaseUrl, createLink } from '@/lib/api'
+import { buildApiBaseUrl, createLink, getCurrentUser, login, register } from '@/lib/api'
 import { defaultSettings, loadSettings, saveSettings } from '@/lib/settings'
-import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types'
+import type { ApiSettings, AuthCredentialsRequest, CreateLinkRequest, LinkResponse, UserProfileResponse } from '@/types'
 
 const settings = reactive<ApiSettings>(loadSettings())
 const form = reactive<CreateLinkRequest>({
@@ -12,23 +12,34 @@ const form = reactive<CreateLinkRequest>({
   customAlias: '',
   expiresAt: '',
 })
+const authForm = reactive<AuthCredentialsRequest>({
+  username: '',
+  password: '',
+})
 
 const createdLink = ref<LinkResponse | null>(null)
+const currentUser = ref<UserProfileResponse | null>(null)
 const errorMessage = ref('')
 const successMessage = ref('')
+const authError = ref('')
+const authSuccess = ref('')
 const submitting = ref(false)
+const authBusy = ref(false)
 
 const connectionStatus = computed(() => {
   if (!settings.apiBaseUrl) {
     return 'API base URL missing'
   }
-  return `${settings.apiBaseUrl} - ready for create requests`
+  if (currentUser.value) {
+    return `Signed in as ${currentUser.value.username} (${currentUser.value.role})`
+  }
+  return `${settings.apiBaseUrl} - guest mode ready for demo links`
 })
 
 const quickStats = computed(() => [
   { value: 'QR', label: 'PNG preview endpoint' },
   { value: '302', label: 'Redirect response' },
-  { value: 'Auth', label: 'Basic auth create flow' },
+  { value: 'JWT', label: 'Guest or signed-in create flow' },
   { value: 'Vue 3', label: 'Mobile-first frontend' },
 ])
 
@@ -43,9 +54,56 @@ const dashboardUrl = computed(() =>
 function syncSettings() {
   saveSettings({
     apiBaseUrl: settings.apiBaseUrl || defaultSettings().apiBaseUrl,
-    username: settings.username,
-    password: settings.password,
+    authToken: settings.authToken,
   })
+}
+
+async function refreshSession() {
+  if (!settings.authToken) {
+    currentUser.value = null
+    return
+  }
+
+  try {
+    currentUser.value = await getCurrentUser(settings)
+  } catch {
+    settings.authToken = ''
+    saveSettings(settings)
+    currentUser.value = null
+  }
+}
+
+async function authenticate(mode: 'login' | 'register') {
+  authBusy.value = true
+  authError.value = ''
+  authSuccess.value = ''
+
+  try {
+    const response = mode === 'login'
+      ? await login(authForm, settings)
+      : await register(authForm, settings)
+
+    settings.authToken = response.token
+    saveSettings(settings)
+    currentUser.value = {
+      username: response.username,
+      role: response.role,
+    }
+    authSuccess.value = mode === 'login'
+      ? `Signed in as ${response.username}`
+      : `Registered ${response.username} and signed in`
+  } catch (error) {
+    authError.value = error instanceof Error ? error.message : 'Authentication failed'
+  } finally {
+    authBusy.value = false
+  }
+}
+
+function signOut() {
+  settings.authToken = ''
+  saveSettings(settings)
+  currentUser.value = null
+  authSuccess.value = 'Signed out'
 }
 
 async function submit() {
@@ -77,6 +135,10 @@ async function submit() {
 function openExternal(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
+
+onMounted(() => {
+  refreshSession()
+})
 </script>
 
 <template>
@@ -87,13 +149,14 @@ function openExternal(url: string) {
           <p class="eyebrow">Create flow</p>
           <h2 class="hero-title">Short links that feel like a product, not a toy.</h2>
           <p class="hero-note">
-            This shell is wired for link creation, preview, and QR output. It is designed to be comfortable on a phone and still read well on a bigger screen.
+            This shell is wired for link creation, preview, QR output, guest demo links, and signed-in user ownership.
+            It is designed to be comfortable on a phone and still read well on a bigger screen.
           </p>
 
           <div class="hero-badges">
             <span class="badge"><strong>Mobile-first</strong> layout</span>
             <span class="badge"><strong>Vue 3</strong> + Vite</span>
-            <span class="badge"><strong>Backend</strong> on Spring Boot</span>
+            <span class="badge"><strong>JWT</strong> guest or owned links</span>
           </div>
 
           <div class="metrics-grid">
@@ -108,34 +171,54 @@ function openExternal(url: string) {
       <article class="card">
         <div class="card-inner stack">
           <div>
-            <p class="eyebrow">Current connection</p>
-            <h3 class="panel-title">Backend settings</h3>
-          </div>
-
-          <div class="grid-2">
-            <label class="form-field">
-              <span class="field-label">API base URL</span>
-              <input
-                v-model="settings.apiBaseUrl"
-                class="input"
-                type="url"
-                placeholder="http://localhost:8080/api/v1"
-                @blur="syncSettings"
-              />
-            </label>
-            <label class="form-field">
-              <span class="field-label">Username</span>
-              <input v-model="settings.username" class="input" type="text" placeholder="admin" @blur="syncSettings" />
-            </label>
+            <p class="eyebrow">Account</p>
+            <h3 class="panel-title">Guest or signed-in mode</h3>
           </div>
 
           <label class="form-field">
-            <span class="field-label">Password</span>
-            <input v-model="settings.password" class="input" type="password" placeholder="admin123" @blur="syncSettings" />
+            <span class="field-label">API base URL</span>
+            <input
+              v-model="settings.apiBaseUrl"
+              class="input"
+              type="url"
+              placeholder="http://localhost:8080/api/v1"
+              @blur="syncSettings"
+            />
           </label>
 
-          <p class="help-text">
-            These values are stored locally in the browser so the create form can talk to the Spring Boot backend without retyping credentials every time.
+          <div class="grid-2">
+            <label class="form-field">
+              <span class="field-label">Username</span>
+              <input v-model="authForm.username" class="input" type="text" placeholder="admin" />
+            </label>
+            <label class="form-field">
+              <span class="field-label">Password</span>
+              <input v-model="authForm.password" class="input" type="password" placeholder="admin123" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="button button-primary" type="button" :disabled="authBusy" @click="authenticate('login')">
+              {{ authBusy ? 'Signing in...' : 'Sign in' }}
+            </button>
+            <button class="button button-secondary" type="button" :disabled="authBusy" @click="authenticate('register')">
+              Register
+            </button>
+            <button class="button button-secondary" type="button" @click="signOut">
+              Sign out
+            </button>
+          </div>
+
+          <p v-if="authError" class="status error">
+            <span class="status-dot"></span>
+            {{ authError }}
+          </p>
+          <p v-else-if="authSuccess" class="status">
+            <span class="status-dot"></span>
+            {{ authSuccess }}
+          </p>
+          <p v-else class="help-text">
+            Guests can create anonymous demo links. Signing in makes new links owned by your account and unlocks your private history and analytics.
           </p>
         </div>
       </article>
@@ -147,7 +230,8 @@ function openExternal(url: string) {
           <p class="eyebrow">Create short link</p>
           <h3 class="panel-title">URL shortener form</h3>
           <p class="help-text">
-            The backend currently expects HTTP Basic auth for create requests. The preview and QR URLs are public.
+            Anonymous demo links still work. If you are signed in, the link will belong to your account.
+            Preview and QR URLs stay public.
           </p>
         </div>
 
@@ -212,6 +296,10 @@ function openExternal(url: string) {
           <div class="list-item">
             <strong>{{ createdLink.shortUrl }}</strong>
             <p>Short URL ready to copy, open, or share.</p>
+          </div>
+          <div class="list-item">
+            <strong>{{ createdLink.ownerUsername ?? 'Anonymous demo' }}</strong>
+            <p>Ownership for this link.</p>
           </div>
           <div class="list-item">
             <strong>{{ createdLink.originalUrl }}</strong>

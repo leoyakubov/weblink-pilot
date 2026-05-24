@@ -32,7 +32,8 @@ class UrlServiceTest {
                 "https://example.com",
                 null,
                 null,
-                0
+                0,
+                null
         );
 
         when(creationService.create(org.mockito.ArgumentMatchers.any())).thenReturn(response);
@@ -56,7 +57,8 @@ class UrlServiceTest {
                 "https://example.com",
                 null,
                 null,
-                3
+                3,
+                null
         );
 
         when(lookupService.getByCode("abc123")).thenReturn(response);

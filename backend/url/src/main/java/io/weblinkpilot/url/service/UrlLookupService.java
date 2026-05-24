@@ -49,12 +49,23 @@ public class UrlLookupService {
 
     @Transactional(readOnly = true)
     public List<LinkResponse> listRecentLinks(int limit) {
+        return listRecentLinks(null, false, limit);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LinkResponse> listRecentLinks(String ownerUsername, boolean admin, int limit) {
         int size = Math.max(1, Math.min(limit, 50));
         Sort newestFirst = Sort.by(Sort.Direction.DESC, "createdAt")
                 .and(Sort.by(Sort.Direction.DESC, "id"));
-        List<LinkResponse> links = repository.findAll(PageRequest.of(0, size, newestFirst))
-                .getContent()
-                .stream()
+        List<ShortLink> content;
+        if (admin) {
+            content = repository.findAll(PageRequest.of(0, size, newestFirst)).getContent();
+        } else if (ownerUsername == null || ownerUsername.isBlank()) {
+            content = repository.findAllByOwnerUsernameIsNull(PageRequest.of(0, size, newestFirst)).getContent();
+        } else {
+            content = repository.findAllByOwnerUsername(ownerUsername.trim().toLowerCase(java.util.Locale.ROOT), PageRequest.of(0, size, newestFirst)).getContent();
+        }
+        List<LinkResponse> links = content.stream()
                 .map(this::toResponse)
                 .toList();
         log.info("link.list.success limit={} returned={}", size, links.size());
@@ -65,6 +76,7 @@ public class UrlLookupService {
         return toResponse(
                 snapshot.code(),
                 snapshot.originalUrl(),
+                snapshot.ownerUsername(),
                 snapshot.createdAt(),
                 snapshot.expiresAt(),
                 snapshot.clickCount()
@@ -75,6 +87,7 @@ public class UrlLookupService {
         return toResponse(
                 link.getCode(),
                 link.getOriginalUrl(),
+                link.getOwnerUsername(),
                 link.getCreatedAt(),
                 link.getExpiresAt(),
                 link.getClickCount()
@@ -83,6 +96,7 @@ public class UrlLookupService {
 
     private LinkResponse toResponse(String code,
                                     String originalUrl,
+                                    String ownerUsername,
                                     java.time.OffsetDateTime createdAt,
                                     java.time.OffsetDateTime expiresAt,
                                     long clickCount) {
@@ -93,7 +107,8 @@ public class UrlLookupService {
                 originalUrl,
                 createdAt,
                 expiresAt,
-                clickCount
+                clickCount,
+                ownerUsername
         );
     }
 
