@@ -118,7 +118,7 @@ Run the coverage build from the repo root:
 Run the aggregate coverage build from `backend/`:
 
 ```powershell
-.\mvnw.cmd -pl coverage -am verify
+.\mvnw.cmd clean verify
 ```
 
 The HTML report is generated under:

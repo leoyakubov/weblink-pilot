@@ -12,6 +12,17 @@ frontend_build_log="$(mktemp)"
 cleanup() { rm -f "$backend_style_log" "$backend_tests_log" "$backend_coverage_log" "$frontend_style_log" "$frontend_tests_log" "$frontend_coverage_log" "$frontend_build_log"; }
 trap cleanup EXIT
 
+print_box() {
+  local title="$1"
+  local width=62
+  local inner_width=$((width - 4))
+  local border
+  border="||$(printf '%0.s=' $(seq 1 $((width - 4))))||"
+  printf '\n%s\n' "$border"
+  printf '|| %-*s ||\n' "$inner_width" "$title"
+  printf '%s\n\n' "$border"
+}
+
 backend_style_status="SKIPPED"
 backend_coverage_status="SKIPPED"
 frontend_style_status="SKIPPED"
@@ -24,7 +35,7 @@ backend_coverage_summary=""
 frontend_tests_summary=""
 frontend_coverage_summary=""
 
-printf '\n========== Running backend style checks... ==========\n\n'
+print_box "Running backend style checks..."
 if "$repo_root/scripts/backend/check-style.sh" 2>&1 | tee "$backend_style_log"; then
   backend_style_status="PASS"
 else
@@ -32,7 +43,7 @@ else
 fi
 
 if [ "$backend_style_status" = "PASS" ]; then
-  printf '\n========== Running backend tests and coverage... ==========\n\n'
+  print_box "Running backend tests and coverage..."
   if "$repo_root/scripts/backend/check-coverage.sh" 2>&1 | tee "$backend_coverage_log"; then
     backend_coverage_status="PASS"
   else
@@ -41,7 +52,7 @@ if [ "$backend_style_status" = "PASS" ]; then
 fi
 
 if [ "$backend_coverage_status" = "PASS" ]; then
-  printf '\n========== Running frontend style checks... ==========\n\n'
+  print_box "Running frontend style checks..."
   if "$repo_root/scripts/frontend/check-style.sh" 2>&1 | tee "$frontend_style_log"; then
     frontend_style_status="PASS"
   else
@@ -50,7 +61,7 @@ if [ "$backend_coverage_status" = "PASS" ]; then
 fi
 
 if [ "$frontend_style_status" = "PASS" ]; then
-  printf '\n========== Running frontend tests... ==========\n\n'
+  print_box "Running frontend tests..."
   if "$repo_root/scripts/frontend/test-frontend.sh" 2>&1 | tee "$frontend_tests_log"; then
     frontend_tests_status="PASS"
   else
@@ -59,7 +70,7 @@ if [ "$frontend_style_status" = "PASS" ]; then
 fi
 
 if [ "$frontend_tests_status" = "PASS" ]; then
-  printf '\n========== Running frontend coverage... ==========\n\n'
+  print_box "Running frontend coverage..."
   if "$repo_root/scripts/frontend/check-coverage.sh" 2>&1 | tee "$frontend_coverage_log"; then
     frontend_coverage_status="PASS"
   else
@@ -69,7 +80,7 @@ fi
 
 if [ "$frontend_coverage_status" = "PASS" ]; then
   pushd "$repo_root/frontend" >/dev/null
-  printf '\n========== Building frontend... ==========\n\n'
+  print_box "Building frontend..."
   if npm run build 2>&1 | tee "$frontend_build_log"; then
     frontend_build_status="PASS"
   else
@@ -91,7 +102,7 @@ if [ -f "$repo_root/frontend/coverage/coverage-summary.json" ]; then
   frontend_coverage_summary="$(node -e 'const fs=require("fs"); const p=process.argv[1]; if (fs.existsSync(p)) { const s=JSON.parse(fs.readFileSync(p, "utf8")).total; console.log(`lines ${s.lines.pct}%, branches ${s.branches.pct}%`); }' "$repo_root/frontend/coverage/coverage-summary.json" 2>/dev/null || true)"
 fi
 
-printf '\nSummary:\n\n'
+print_box "Summary"
 printf -- '  [%-7s] backend style\n' "$backend_style_status"
 printf -- '\n  [%-7s] backend quality %s %s\n' "$backend_coverage_status" "${backend_tests_summary:-}" "${backend_coverage_summary:-}"
 printf -- '\n  [%-7s] frontend style\n' "$frontend_style_status"

@@ -62,13 +62,13 @@ Useful API endpoints after startup:
 To run the backend verification gate from `backend/`:
 
 ```powershell
-.\mvnw.cmd -pl coverage -am verify
+.\mvnw.cmd clean verify
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw -pl coverage -am verify
+./mvnw clean verify
 ```
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.

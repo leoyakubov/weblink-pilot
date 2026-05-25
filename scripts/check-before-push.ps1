@@ -20,9 +20,7 @@ function Invoke-Check {
         [scriptblock]$ScriptBlock
     )
 
-    Write-Host ''
-    Write-Host ('========== {0} ==========' -f $Label) -ForegroundColor Cyan
-    Write-Host ''
+    Write-BoxHeader $Label
     $logFile = [System.IO.Path]::GetTempFileName()
     try {
         & $ScriptBlock 2>&1 | Tee-Object -FilePath $logFile | Out-Host
@@ -44,6 +42,28 @@ function Invoke-Check {
         Succeeded = ($exitCode -eq 0)
         Output = $capturedText
     }
+}
+
+function Write-BoxHeader {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Title
+    )
+
+    $width = 62
+    $innerWidth = $width - 4
+    $titleText = " $Title "
+    if ($titleText.Length -gt $innerWidth) {
+        $titleText = $titleText.Substring(0, $innerWidth)
+    }
+    $titleLine = ('||{0}||' -f $titleText.PadRight($innerWidth))
+    $borderLine = '||' + ('=' * ($width - 4)) + '||'
+
+    Write-Host ''
+    Write-Host $borderLine -ForegroundColor Cyan
+    Write-Host $titleLine -ForegroundColor Cyan
+    Write-Host $borderLine -ForegroundColor Cyan
+    Write-Host ''
 }
 
 function Invoke-PowerShellScript {
@@ -200,9 +220,7 @@ $backendCoverageSummary = if ($results['backend quality']) { Get-BackendCoverage
 $frontendTestSummary = if ($results['frontend tests']) { Get-TestSummary -Output $results['frontend tests'].Output } else { [ordered]@{} }
 $frontendCoverageSummaryValues = if ($results['frontend coverage']) { Get-FrontendCoverageSummary } else { [ordered]@{} }
 
-Write-Host ''
-Write-Host 'Summary:'
-Write-Host ''
+Write-BoxHeader 'Summary'
 
 if ($results['backend style']) {
     Write-SummaryLine -Label 'backend style' -Status ($(if ($results['backend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
@@ -210,7 +228,6 @@ if ($results['backend style']) {
     Write-SummaryLine -Label 'backend style' -Status 'SKIPPED'
 }
 
-Write-Host ''
 if ($results['backend quality']) {
     $backendQualityDetails = ''
     if ($backendQualitySummary.Count -gt 0 -or $backendCoverageSummary.Count -gt 0) {
@@ -236,7 +253,6 @@ if ($results['backend quality']) {
     Write-SummaryLine -Label 'backend quality' -Status 'SKIPPED'
 }
 
-Write-Host ''
 if ($results['frontend style']) {
     Write-SummaryLine -Label 'frontend style' -Status ($(if ($results['frontend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
 } else {
