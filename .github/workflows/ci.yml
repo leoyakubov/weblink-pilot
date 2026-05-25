@@ -106,3 +106,14 @@ jobs:
 
       - name: Run dependency vulnerability checks
         run: ./scripts/check-dependencies.sh
+
+  secrets:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run secret scan
+        run: ./scripts/check-secrets.sh

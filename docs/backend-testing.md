@@ -173,6 +173,22 @@ On macOS/Linux:
 
 You can also run the backend and frontend checks separately with the helper scripts listed in the README.
 
+## Secret Scanning
+
+The repo also runs a Gitleaks-based secret scan to catch hardcoded credentials and tokens before they leave the machine or reach CI.
+
+Run it from the repo root:
+
+```powershell
+.\scripts\check-secrets.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/check-secrets.sh
+```
+
 ## Current Rule of Thumb
 
 The goal is not to test every line equally.

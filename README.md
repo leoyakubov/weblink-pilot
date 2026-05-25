@@ -106,6 +106,22 @@ Frontend-only check:
 - Windows: [`scripts/frontend/check-vulnerabilities.ps1`](scripts/frontend/check-vulnerabilities.ps1)
 - Unix: [`scripts/frontend/check-vulnerabilities.sh`](scripts/frontend/check-vulnerabilities.sh)
 
+## Secret Scanning
+
+Run the repo-wide secret scan from the repo root:
+
+```powershell
+.\scripts\check-secrets.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/check-secrets.sh
+```
+
+The scan uses the official Gitleaks Docker image and the repo-level [`gitleaks`](.gitleaks.toml) configuration.
+
 ## SonarQube / Code Quality
 
 Local SonarQube support is available through the Docker stack in `infra/sonar/`.
@@ -172,6 +188,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend vulnerability check: [`scripts/frontend/check-vulnerabilities.ps1`](scripts/frontend/check-vulnerabilities.ps1)
 - Frontend coverage gate: `npm run test:coverage` from `frontend/`
 - Dependency security: [`scripts/check-dependencies.ps1`](scripts/check-dependencies.ps1)
+- Secret scanning: [`scripts/check-secrets.ps1`](scripts/check-secrets.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)

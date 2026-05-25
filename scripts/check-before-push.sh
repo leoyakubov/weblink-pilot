@@ -5,11 +5,12 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 backend_tests_log="$(mktemp)"
 backend_coverage_log="$(mktemp)"
 backend_style_log="$(mktemp)"
+secret_scan_log="$(mktemp)"
 frontend_tests_log="$(mktemp)"
 frontend_coverage_log="$(mktemp)"
 frontend_style_log="$(mktemp)"
 frontend_build_log="$(mktemp)"
-cleanup() { rm -f "$backend_style_log" "$backend_tests_log" "$backend_coverage_log" "$frontend_style_log" "$frontend_tests_log" "$frontend_coverage_log" "$frontend_build_log"; }
+cleanup() { rm -f "$backend_style_log" "$backend_tests_log" "$backend_coverage_log" "$secret_scan_log" "$frontend_style_log" "$frontend_tests_log" "$frontend_coverage_log" "$frontend_build_log"; }
 trap cleanup EXIT
 
 print_box() {
@@ -25,6 +26,7 @@ print_box() {
 
 backend_style_status="SKIPPED"
 backend_coverage_status="SKIPPED"
+secret_scan_status="SKIPPED"
 frontend_style_status="SKIPPED"
 frontend_tests_status="SKIPPED"
 frontend_coverage_status="SKIPPED"
@@ -52,6 +54,15 @@ if [ "$backend_style_status" = "PASS" ]; then
 fi
 
 if [ "$backend_coverage_status" = "PASS" ]; then
+  print_box "Running secret scan..."
+  if "$repo_root/scripts/check-secrets.sh" 2>&1 | tee "$secret_scan_log"; then
+    secret_scan_status="PASS"
+  else
+    secret_scan_status="FAIL"
+  fi
+fi
+
+if [ "$secret_scan_status" = "PASS" ]; then
   print_box "Running frontend style checks..."
   if "$repo_root/scripts/frontend/check-style.sh" 2>&1 | tee "$frontend_style_log"; then
     frontend_style_status="PASS"
@@ -105,11 +116,12 @@ fi
 print_box "Summary"
 printf -- '  [%-7s] backend style\n' "$backend_style_status"
 printf -- '\n  [%-7s] backend quality %s %s\n' "$backend_coverage_status" "${backend_tests_summary:-}" "${backend_coverage_summary:-}"
+printf -- '\n  [%-7s] secret scan\n' "$secret_scan_status"
 printf -- '\n  [%-7s] frontend style\n' "$frontend_style_status"
 printf -- '\n  [%-7s] frontend tests %s\n' "$frontend_tests_status" "${frontend_tests_summary:-}"
 printf -- '\n  [%-7s] frontend coverage %s\n' "$frontend_coverage_status" "${frontend_coverage_summary:-}"
 printf -- '\n  [%-7s] frontend build\n' "$frontend_build_status"
 
-if [ "$backend_style_status" != "PASS" ] || [ "$backend_coverage_status" != "PASS" ] || [ "$frontend_style_status" != "PASS" ] || [ "$frontend_tests_status" != "PASS" ] || [ "$frontend_coverage_status" != "PASS" ] || [ "$frontend_build_status" != "PASS" ]; then
+if [ "$backend_style_status" != "PASS" ] || [ "$backend_coverage_status" != "PASS" ] || [ "$secret_scan_status" != "PASS" ] || [ "$frontend_style_status" != "PASS" ] || [ "$frontend_tests_status" != "PASS" ] || [ "$frontend_coverage_status" != "PASS" ] || [ "$frontend_build_status" != "PASS" ]; then
   exit 1
 fi

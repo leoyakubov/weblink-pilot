@@ -4,6 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $backendStyleScript = Join-Path $repoRoot 'scripts\backend\check-style.ps1'
 $backendCoverageScript = Join-Path $repoRoot 'scripts\backend\check-coverage.ps1'
+$secretScanScript = Join-Path $repoRoot 'scripts\check-secrets.ps1'
 $frontendStyleScript = Join-Path $repoRoot 'scripts\frontend\check-style.ps1'
 $frontendTestScript = Join-Path $repoRoot 'scripts\frontend\test-frontend.ps1'
 $frontendCoverageScript = Join-Path $repoRoot 'scripts\frontend\check-coverage.ps1'
@@ -182,6 +183,7 @@ function Write-SummaryLine {
 $results = [ordered]@{
     'backend style' = $null
     'backend quality' = $null
+    'secret scan' = $null
     'frontend style' = $null
     'frontend tests' = $null
     'frontend coverage' = $null
@@ -194,6 +196,10 @@ if ($results['backend style'].ExitCode -eq 0) {
 }
 
 if ($results['backend quality'] -and $results['backend quality'].ExitCode -eq 0) {
+    $results['secret scan'] = Invoke-Check 'Running secret scan...' { Invoke-PowerShellScript -ScriptPath $secretScanScript }
+}
+
+if ($results['secret scan'] -and $results['secret scan'].ExitCode -eq 0) {
     $results['frontend style'] = Invoke-Check 'Running frontend style checks...' { Invoke-PowerShellScript -ScriptPath $frontendStyleScript }
 }
 
@@ -251,6 +257,12 @@ if ($results['backend quality']) {
     )
 } else {
     Write-SummaryLine -Label 'backend quality' -Status 'SKIPPED'
+}
+
+if ($results['secret scan']) {
+    Write-SummaryLine -Label 'secret scan' -Status ($(if ($results['secret scan'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
+} else {
+    Write-SummaryLine -Label 'secret scan' -Status 'SKIPPED'
 }
 
 if ($results['frontend style']) {

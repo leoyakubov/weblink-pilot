@@ -14,6 +14,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - CI that runs the same checks as local quality gates.
 - Pre-push checks for fast feedback before code leaves the machine.
 - Centralized config and secret handling.
+- Secret scanning for hardcoded credentials and tokens.
 - Clear module boundaries.
 
 ## Should Have
@@ -39,8 +40,9 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 2. Run tests.
 3. Run coverage checks.
 4. Run build checks.
-5. Run static analysis.
-6. Push only if the pre-push gate passes.
+5. Run secret scans.
+6. Run static analysis.
+7. Push only if the pre-push gate passes.
 
 ## Tooling Plan
 
@@ -57,6 +59,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
   - pre-push wrapper
   - CI job parity
   - dependency vulnerability scanning
+  - secret scanning
 
 ## Notes
 
