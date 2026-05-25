@@ -2,8 +2,10 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$backendStyleScript = Join-Path $repoRoot 'scripts\backend\check-style.ps1'
 $backendTestScript = Join-Path $repoRoot 'scripts\backend\test-backend.ps1'
 $backendCoverageScript = Join-Path $repoRoot 'scripts\backend\check-coverage.ps1'
+$frontendStyleScript = Join-Path $repoRoot 'scripts\frontend\check-style.ps1'
 $frontendTestScript = Join-Path $repoRoot 'scripts\frontend\test-frontend.ps1'
 $frontendCoverageScript = Join-Path $repoRoot 'scripts\frontend\check-coverage.ps1'
 $frontendDir = Join-Path $repoRoot 'frontend'
@@ -127,27 +129,37 @@ function Write-SummaryLine {
 }
 
 $results = [ordered]@{
+    'backend style' = $null
     'backend tests' = $null
     'backend coverage' = $null
+    'frontend style' = $null
     'frontend tests' = $null
     'frontend coverage' = $null
     'frontend build' = $null
 }
 
-$results['backend tests'] = Invoke-Check 'Running backend tests...' { & $backendTestScript }
-if ($results['backend tests'].ExitCode -eq 0) {
+$results['backend style'] = Invoke-Check 'Running backend style checks...' { & $backendStyleScript }
+if ($results['backend style'].ExitCode -eq 0) {
+    $results['backend tests'] = Invoke-Check 'Running backend tests...' { & $backendTestScript }
+}
+
+if ($results['backend tests'] -and $results['backend tests'].ExitCode -eq 0) {
     $results['backend coverage'] = Invoke-Check 'Running backend coverage gate...' { & $backendCoverageScript }
 }
 
-if ($results['backend coverage'].ExitCode -eq 0) {
+if ($results['backend coverage'] -and $results['backend coverage'].ExitCode -eq 0) {
+    $results['frontend style'] = Invoke-Check 'Running frontend style checks...' { & $frontendStyleScript }
+}
+
+if ($results['frontend style'] -and $results['frontend style'].ExitCode -eq 0) {
     $results['frontend tests'] = Invoke-Check 'Running frontend tests...' { & $frontendTestScript }
 }
 
-if ($results['frontend tests'].ExitCode -eq 0) {
+if ($results['frontend tests'] -and $results['frontend tests'].ExitCode -eq 0) {
     $results['frontend coverage'] = Invoke-Check 'Running frontend coverage gate...' { & $frontendCoverageScript }
 }
 
-if ($results['frontend coverage'].ExitCode -eq 0) {
+if ($results['frontend coverage'] -and $results['frontend coverage'].ExitCode -eq 0) {
     Push-Location $frontendDir
     try {
         $results['frontend build'] = Invoke-Check 'Building frontend...' { npm run build }
@@ -164,6 +176,12 @@ $frontendCoverageSummaryValues = if ($results['frontend coverage']) { Get-Fronte
 
 Write-Host ''
 Write-Host 'Summary:'
+
+if ($results['backend style']) {
+    Write-SummaryLine -Label 'backend style' -Status ($(if ($results['backend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
+} else {
+    Write-SummaryLine -Label 'backend style' -Status 'SKIPPED'
+}
 
 if ($results['backend tests']) {
     $backendTestsDetails = ''
@@ -187,6 +205,12 @@ if ($results['backend coverage']) {
     )
 } else {
     Write-SummaryLine -Label 'backend coverage' -Status 'SKIPPED'
+}
+
+if ($results['frontend style']) {
+    Write-SummaryLine -Label 'frontend style' -Status ($(if ($results['frontend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
+} else {
+    Write-SummaryLine -Label 'frontend style' -Status 'SKIPPED'
 }
 
 if ($results['frontend tests']) {

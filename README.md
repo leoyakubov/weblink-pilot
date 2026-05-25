@@ -128,9 +128,13 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 
 - Backend local: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
 - Backend dev only: [`scripts/backend/dev-run-backend-only.ps1`](scripts/backend/dev-run-backend-only.ps1)
+- Backend format: [`scripts/backend/format-backend.ps1`](scripts/backend/format-backend.ps1)
+- Backend style check: [`scripts/backend/check-style.ps1`](scripts/backend/check-style.ps1)
 - Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
 - Backend coverage: [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
+- Frontend format: [`scripts/frontend/format-frontend.ps1`](scripts/frontend/format-frontend.ps1)
+- Frontend style check: [`scripts/frontend/check-style.ps1`](scripts/frontend/check-style.ps1)
 - Frontend tests and coverage: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
 - Frontend coverage gate: `npm run test:coverage` from `frontend/`
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)

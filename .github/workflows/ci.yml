@@ -21,6 +21,9 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Run backend style checks
+        run: ./scripts/backend/check-style.sh
+
       - name: Build and test backend
         working-directory: backend
         run: ./mvnw -B -ntp -pl coverage -am verify
@@ -71,6 +74,9 @@ jobs:
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Run frontend style checks
+        run: ./scripts/frontend/check-style.sh
 
       - name: Run frontend coverage gate
         working-directory: frontend
