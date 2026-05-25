@@ -121,6 +121,7 @@ On macOS/Linux:
 ```
 
 The scan uses the official Gitleaks Docker image and the repo-level [`gitleaks`](.gitleaks.toml) configuration.
+It scans Git-tracked content, so your local `.env.local` stays private to your machine and does not block the repo gate.
 
 ## SonarQube / Code Quality
 

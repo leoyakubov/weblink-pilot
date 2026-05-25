@@ -13,4 +13,4 @@ docker run --rm \
   -v "$repo_root:/repo" \
   -w /repo \
   "$gitleaks_image" \
-  dir --no-banner --redact .
+  git --no-banner --redact .

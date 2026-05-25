@@ -9,7 +9,7 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 }
 
 & docker run --rm `
-    -v "$repoRoot:/repo" `
+    -v "${repoRoot}:/repo" `
     -w /repo `
     $gitleaksImage `
-    dir --no-banner --redact .
+    git --no-banner --redact .
