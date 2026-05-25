@@ -21,4 +21,4 @@ if [[ -z "${SONAR_TOKEN:-}" ]]; then
   exit 1
 fi
 
-./mvnw -Pci -ntp clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN"

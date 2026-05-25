@@ -23,6 +23,6 @@ if [[ ! -f "$mvnw" ]]; then
 fi
 
 cd "$backend_dir"
-"$mvnw" -ntp -pl app -am package -DskipTests
+"$mvnw" -pl app -am package -DskipTests
 export SPRING_PROFILES_ACTIVE=local
 exec java -jar "$backend_dir/app/target/app-0.1.0-SNAPSHOT.jar"

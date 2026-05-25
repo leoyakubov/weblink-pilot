@@ -51,7 +51,7 @@ if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
 
 $sonarArg = "-Dsonar.token=$($env:SONAR_TOKEN)"
 try {
-    & .\mvnw.cmd -Pci -ntp clean install sonar:sonar $sonarArg
+    & .\mvnw.cmd -Pci clean install sonar:sonar $sonarArg 2>&1 | Out-Host
 }
 finally {
     Pop-Location

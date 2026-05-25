@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd -Pci -ntp clean install 2>&1 | Out-Host
+        & .\mvnw.cmd -Pci clean install spotbugs:check 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
