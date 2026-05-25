@@ -18,6 +18,7 @@ Local/dev startup also seeds the shared `admin` and `user` accounts plus a small
 - [Tech Stack](docs/tech-stack.md)
 - [API Contract v1](docs/api-contract-v1.md)
 - [Backend Testing Strategy](docs/backend-testing.md)
+- [Development Standards](docs/development-standards.md)
 - [Deployment](docs/deployment.md)
 - [Roadmap](docs/roadmap.md)
 
@@ -140,6 +141,18 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Before push check: [`scripts/check-before-push.ps1`](scripts/check-before-push.ps1)
 
 Unix versions live beside them with the same names ending in `.sh`.
+
+To disable the pre-push hook in the current clone, run:
+
+```powershell
+git config --unset core.hooksPath
+```
+
+To enable it again:
+
+```powershell
+.\scripts\setup-git-hooks.ps1
+```
 
 The original flat scripts still exist for compatibility, but the grouped ones are easier to scan and tab-complete.
 
