@@ -1,6 +1,6 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import DashboardView from './DashboardView.vue'
+import { flushPromises, mount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import DashboardView from './DashboardView.vue';
 
 const mocks = vi.hoisted(() => ({
   listLinksMock: vi.fn(),
@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
     params: {},
     query: {},
   },
-}))
+}));
 
 vi.mock('vue-router', () => ({
   RouterLink: {
@@ -25,33 +25,33 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     replace: vi.fn(),
   }),
-}))
+}));
 
 vi.mock('@/lib/auth', () => ({
   isAdminUser: () => mocks.authState.currentUser?.role === 'ADMIN',
-}))
+}));
 
 vi.mock('@/lib/api', () => ({
   buildApiBaseUrl: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
   getLink: mocks.getLinkMock,
   listLinks: mocks.listLinksMock,
-}))
+}));
 
 vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
   }),
-}))
+}));
 
 describe('DashboardView', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' }
-    mocks.routeState.params = {}
-    mocks.routeState.query = {}
-    vi.stubGlobal('open', mocks.openMock)
+    vi.clearAllMocks();
+    mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
+    mocks.routeState.params = {};
+    mocks.routeState.query = {};
+    vi.stubGlobal('open', mocks.openMock);
     mocks.listLinksMock.mockResolvedValue([
       {
         code: 'github-org',
@@ -63,7 +63,7 @@ describe('DashboardView', () => {
         clickCount: 3,
         ownerUsername: 'admin',
       },
-    ])
+    ]);
     mocks.getLinkMock.mockResolvedValue({
       code: 'github-org',
       shortUrl: 'http://localhost:8080/r/github-org',
@@ -73,7 +73,7 @@ describe('DashboardView', () => {
       expiresAt: null,
       clickCount: 3,
       ownerUsername: 'admin',
-    })
+    });
     mocks.getAnalyticsSummaryMock.mockResolvedValue({
       code: 'github-org',
       totalClicks: 3,
@@ -85,8 +85,8 @@ describe('DashboardView', () => {
       lastBrowserFamily: 'CHROME',
       lastDeviceType: 'DESKTOP',
       topCountries: [{ country: 'US', clicks: 3 }],
-    })
-  })
+    });
+  });
 
   it('loads analytics and opens the QR modal', async () => {
     const wrapper = mount(DashboardView, {
@@ -98,21 +98,21 @@ describe('DashboardView', () => {
           },
         },
       },
-    })
-    await flushPromises()
+    });
+    await flushPromises();
 
-    expect(wrapper.text()).toContain('Inspect clicks for any short code.')
-    expect(wrapper.text()).toContain('Open preview JSON')
-    expect(wrapper.text()).toContain('github-org')
-    expect(wrapper.text()).toContain('US')
+    expect(wrapper.text()).toContain('Inspect clicks for any short code.');
+    expect(wrapper.text()).toContain('Open preview JSON');
+    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('US');
 
-    const buttons = wrapper.findAll('button')
-    await buttons.find(button => button.text().includes('Open QR'))?.trigger('click')
-    await flushPromises()
-    expect(document.body.textContent).toContain('QR code')
-    expect(document.body.textContent).toContain('github-org')
+    const buttons = wrapper.findAll('button');
+    await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
+    await flushPromises();
+    expect(document.body.textContent).toContain('QR code');
+    expect(document.body.textContent).toContain('github-org');
 
-    await buttons.find(button => button.text().includes('preview JSON'))?.trigger('click')
-    expect(mocks.openMock).toHaveBeenCalled()
-  })
-})
+    await buttons.find((button) => button.text().includes('preview JSON'))?.trigger('click');
+    expect(mocks.openMock).toHaveBeenCalled();
+  });
+});

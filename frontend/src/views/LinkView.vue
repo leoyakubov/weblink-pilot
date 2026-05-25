@@ -1,80 +1,80 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import CopyActionButton from '@/components/CopyActionButton.vue'
-import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api'
-import { isAdminUser } from '@/lib/auth'
-import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
-import { loadSettings } from '@/lib/settings'
-import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types'
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import CopyActionButton from '@/components/CopyActionButton.vue';
+import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api';
+import { isAdminUser } from '@/lib/auth';
+import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
+import { loadSettings } from '@/lib/settings';
+import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types';
 
-const route = useRoute()
-const settings = loadSettings()
+const route = useRoute();
+const settings = loadSettings();
 
-const link = ref<LinkResponse | null>(null)
-const preview = ref<RedirectPreviewResponse | null>(null)
-const analytics = ref<AnalyticsSummaryResponse | null>(null)
-const loading = ref(false)
-const errorMessage = ref('')
-const qrModalUrl = ref('')
-const qrModalTitle = ref('')
+const link = ref<LinkResponse | null>(null);
+const preview = ref<RedirectPreviewResponse | null>(null);
+const analytics = ref<AnalyticsSummaryResponse | null>(null);
+const loading = ref(false);
+const errorMessage = ref('');
+const qrModalUrl = ref('');
+const qrModalTitle = ref('');
 
-const code = computed(() => String(route.params.code ?? ''))
-const canSeePreview = computed(() => isAdminUser())
+const code = computed(() => String(route.params.code ?? ''));
+const canSeePreview = computed(() => isAdminUser());
 
 async function load(codeValue: string) {
   if (!codeValue) {
-    return
+    return;
   }
 
-  loading.value = true
-  errorMessage.value = ''
+  loading.value = true;
+  errorMessage.value = '';
 
   try {
     const [details, redirectPreview, analyticsSummary] = await Promise.all([
       getLink(codeValue, settings),
       getRedirectPreview(codeValue, settings),
       getAnalyticsSummary(codeValue, settings),
-    ])
+    ]);
 
-    link.value = details
-    preview.value = redirectPreview
-    analytics.value = analyticsSummary
+    link.value = details;
+    preview.value = redirectPreview;
+    analytics.value = analyticsSummary;
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Could not load link details'
+    errorMessage.value = error instanceof Error ? error.message : 'Could not load link details';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-onMounted(() => load(code.value))
-watch(code, value => load(value))
+onMounted(() => load(code.value));
+watch(code, (value) => load(value));
 
 function openExternal(url: string) {
-  window.open(url, '_blank', 'noopener,noreferrer')
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function openQrModal(url: string, title: string) {
-  qrModalUrl.value = url
-  qrModalTitle.value = title
+  qrModalUrl.value = url;
+  qrModalTitle.value = title;
 }
 
 function closeQrModal() {
-  qrModalUrl.value = ''
-  qrModalTitle.value = ''
+  qrModalUrl.value = '';
+  qrModalTitle.value = '';
 }
 
-const qrImage = computed(() => link.value?.qrCodeUrl ?? '')
+const qrImage = computed(() => link.value?.qrCodeUrl ?? '');
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'Never'
+    return 'Never';
   }
 
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(new Date(value));
 }
 </script>
 
@@ -116,7 +116,9 @@ function formatDate(value: string | null) {
           <div class="list-item">
             <strong>Short URL</strong>
             <p>{{ link.shortUrl }}</p>
-            <p class="help-text">Short URLs are generated randomly unless you choose a custom alias.</p>
+            <p class="help-text">
+              Short URLs are generated randomly unless you choose a custom alias.
+            </p>
           </div>
           <div class="list-item">
             <strong>Target URL</strong>
@@ -142,7 +144,11 @@ function formatDate(value: string | null) {
               copied-label="Short URL copied"
               variant="primary"
             />
-            <button class="button button-secondary" type="button" @click="openExternal(link.shortUrl)">
+            <button
+              class="button button-secondary"
+              type="button"
+              @click="openExternal(link.shortUrl)"
+            >
               Open redirect
             </button>
             <button
@@ -167,7 +173,11 @@ function formatDate(value: string | null) {
           </div>
 
           <figure v-if="link" class="compact-figure">
-            <img class="qr-image qr-image--compact" :src="qrImage" :alt="`QR code for ${link.code}`" />
+            <img
+              class="qr-image qr-image--compact"
+              :src="qrImage"
+              :alt="`QR code for ${link.code}`"
+            />
           </figure>
 
           <div class="actions" v-if="link">
@@ -177,7 +187,11 @@ function formatDate(value: string | null) {
               copied-label="QR URL copied"
               variant="primary"
             />
-            <button class="button button-secondary" type="button" @click="openQrModal(link.qrCodeUrl, link.code)">
+            <button
+              class="button button-secondary"
+              type="button"
+              @click="openQrModal(link.qrCodeUrl, link.code)"
+            >
               Open QR
             </button>
           </div>
@@ -222,7 +236,8 @@ function formatDate(value: string | null) {
             <div class="list-item">
               <strong>Browser / device</strong>
               <p>
-                {{ analytics.lastBrowserFamily ?? 'Unknown browser' }} - {{ analytics.lastDeviceType ?? 'Unknown device' }}
+                {{ analytics.lastBrowserFamily ?? 'Unknown browser' }} -
+                {{ analytics.lastDeviceType ?? 'Unknown device' }}
               </p>
             </div>
 
@@ -232,7 +247,11 @@ function formatDate(value: string | null) {
                 <h4 class="card-title">Where clicks are coming from</h4>
               </div>
               <div class="list">
-                <div v-for="country in analytics.topCountries" :key="country.country" class="list-item">
+                <div
+                  v-for="country in analytics.topCountries"
+                  :key="country.country"
+                  class="list-item"
+                >
                   <strong class="country-label">
                     <img
                       v-if="countryFlagUrl(country.country)"
@@ -261,10 +280,20 @@ function formatDate(value: string | null) {
                   <p class="eyebrow">QR code</p>
                   <h3 class="panel-title">{{ qrModalTitle }}</h3>
                 </div>
-                <button class="button button-secondary button-small" type="button" @click="closeQrModal">Close</button>
+                <button
+                  class="button button-secondary button-small"
+                  type="button"
+                  @click="closeQrModal"
+                >
+                  Close
+                </button>
               </div>
 
-              <img class="qr-image qr-image--compact modal-qr" :src="qrModalUrl" :alt="`QR code for ${qrModalTitle}`" />
+              <img
+                class="qr-image qr-image--compact modal-qr"
+                :src="qrModalUrl"
+                :alt="`QR code for ${qrModalTitle}`"
+              />
             </div>
           </div>
         </div>

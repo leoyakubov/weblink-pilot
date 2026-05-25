@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { loadSettings, saveSettings } from '@/lib/settings'
-import type { ApiSettings } from '@/types'
+import { reactive, ref } from 'vue';
+import { loadSettings, saveSettings } from '@/lib/settings';
+import type { ApiSettings } from '@/types';
 
-const settings = reactive<ApiSettings>(loadSettings())
-const saved = ref(false)
+const settings = reactive<ApiSettings>(loadSettings());
+const saved = ref(false);
 
 function saveBaseUrl() {
-  saveSettings(settings)
-  saved.value = true
+  saveSettings(settings);
+  saved.value = true;
   window.setTimeout(() => {
-    saved.value = false
-  }, 1500)
+    saved.value = false;
+  }, 1500);
 }
 </script>
 
@@ -25,8 +25,8 @@ function saveBaseUrl() {
         </div>
 
         <p class="hero-note">
-          WebLinkPilot combines guest demo links, signed-in ownership, QR codes, redirect analytics, Redis caching,
-          and a production-shaped deployment flow on Netlify and Render.
+          WebLinkPilot combines guest demo links, signed-in ownership, QR codes, redirect analytics,
+          Redis caching, and a production-shaped deployment flow on Netlify and Render.
         </p>
 
         <div class="grid-2">
@@ -67,7 +67,8 @@ function saveBaseUrl() {
           <p class="eyebrow">Developer settings</p>
           <h3 class="panel-title">Backend base URL</h3>
           <p class="help-text">
-            Update this if you want the frontend to point at a different local, dev, or demo backend.
+            Update this if you want the frontend to point at a different local, dev, or demo
+            backend.
           </p>
         </div>
 
@@ -110,7 +111,10 @@ function saveBaseUrl() {
 
         <div class="list-item">
           <strong>What stays public</strong>
-          <p>Short URL redirects, QR URLs, and preview endpoints remain public. Sign-in only controls ownership and admin views.</p>
+          <p>
+            Short URL redirects, QR URLs, and preview endpoints remain public. Sign-in only controls
+            ownership and admin views.
+          </p>
         </div>
       </div>
     </article>

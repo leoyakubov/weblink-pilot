@@ -19,8 +19,8 @@
   --radius-sm: 12px;
   --border: 1px solid var(--surface-border);
   --max-width: 1160px;
-  --body-font: "Aptos", "Segoe UI", "Helvetica Neue", sans-serif;
-  --heading-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --body-font: 'Aptos', 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --heading-font: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
 }
 
 *,
@@ -162,7 +162,11 @@ button {
   border: var(--border);
   background: rgba(15, 23, 42, 0.45);
   color: var(--muted);
-  transition: transform 160ms ease, border-color 160ms ease, color 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
 }
 
 .nav-link:hover,
@@ -285,7 +289,9 @@ button {
 
 .session-notice-enter-active,
 .session-notice-leave-active {
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
 }
 
 .session-notice-enter-from,
@@ -385,13 +391,20 @@ button {
 }
 
 .card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(34, 197, 94, 0.12), transparent 70%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.24),
+    rgba(34, 197, 94, 0.12),
+    transparent 70%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -517,7 +530,10 @@ button {
   background: rgba(4, 10, 20, 0.55);
   color: var(--text);
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .input-row {
@@ -549,7 +565,11 @@ button {
   display: grid;
   place-items: center;
   transform: translateY(-50%);
-  transition: transform 160ms ease, color 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition:
+    transform 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
 .password-toggle:hover,
@@ -594,7 +614,10 @@ button {
   padding: 0.58rem 0.82rem;
   font-weight: 700;
   text-align: center;
-  transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .button-small {
@@ -831,7 +854,10 @@ button {
   padding: 0.7rem 1rem;
   color: var(--muted);
   background: transparent;
-  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
 }
 
 .segmented-control__button.active {
@@ -886,7 +912,7 @@ button {
 
 .inline-code,
 .code-block {
-  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-family: 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
 }
 
 .inline-code {

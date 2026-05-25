@@ -1,86 +1,88 @@
-import { reactive } from 'vue'
-import { getCurrentUser, login, register } from '@/lib/api'
-import { loadSettings, saveSettings } from '@/lib/settings'
-import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/types'
+import { reactive } from 'vue';
+import { getCurrentUser, login, register } from '@/lib/api';
+import { loadSettings, saveSettings } from '@/lib/settings';
+import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/types';
 
 export const authState = reactive({
   currentUser: null as UserProfileResponse | null,
   ready: false,
   loading: false,
   sessionNotice: '',
-})
+});
 
-let bootstrapPromise: Promise<void> | null = null
-let noticeTimer: ReturnType<typeof globalThis.setTimeout> | null = null
+let bootstrapPromise: Promise<void> | null = null;
+let noticeTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
 
 function showSessionNotice(message: string) {
-  authState.sessionNotice = message
+  authState.sessionNotice = message;
   if (noticeTimer) {
-    globalThis.clearTimeout(noticeTimer)
+    globalThis.clearTimeout(noticeTimer);
   }
   noticeTimer = globalThis.setTimeout(() => {
-    authState.sessionNotice = ''
-    noticeTimer = null
-  }, 2400)
+    authState.sessionNotice = '';
+    noticeTimer = null;
+  }, 2400);
 }
 
 export async function bootstrapAuth() {
   if (bootstrapPromise) {
-    return bootstrapPromise
+    return bootstrapPromise;
   }
 
   bootstrapPromise = (async () => {
-    authState.loading = true
-    const settings = loadSettings()
+    authState.loading = true;
+    const settings = loadSettings();
 
     try {
       if (settings.authToken) {
-        authState.currentUser = await getCurrentUser(settings)
+        authState.currentUser = await getCurrentUser(settings);
       } else {
-        authState.currentUser = null
+        authState.currentUser = null;
       }
     } catch {
-      settings.authToken = ''
-      saveSettings(settings)
-      authState.currentUser = null
+      settings.authToken = '';
+      saveSettings(settings);
+      authState.currentUser = null;
     } finally {
-      authState.loading = false
-      authState.ready = true
+      authState.loading = false;
+      authState.ready = true;
     }
-  })()
+  })();
 
-  return bootstrapPromise
+  return bootstrapPromise;
 }
 
-export async function authenticate(mode: 'login' | 'register', request: AuthCredentialsRequest): Promise<AuthResponse> {
-  const settings = loadSettings()
-  const response = mode === 'login'
-    ? await login(request, settings)
-    : await register(request, settings)
+export async function authenticate(
+  mode: 'login' | 'register',
+  request: AuthCredentialsRequest,
+): Promise<AuthResponse> {
+  const settings = loadSettings();
+  const response =
+    mode === 'login' ? await login(request, settings) : await register(request, settings);
 
-  settings.authToken = response.token
-  saveSettings(settings)
+  settings.authToken = response.token;
+  saveSettings(settings);
   authState.currentUser = {
     username: response.username,
     role: response.role,
-  }
+  };
   showSessionNotice(
     mode === 'login'
       ? `Signed in as ${response.username}`
       : `Created ${response.username} and signed in`,
-  )
+  );
 
-  return response
+  return response;
 }
 
 export function signOut() {
-  const settings = loadSettings()
-  settings.authToken = ''
-  saveSettings(settings)
-  authState.currentUser = null
-  showSessionNotice('Signed out. Guest mode active.')
+  const settings = loadSettings();
+  settings.authToken = '';
+  saveSettings(settings);
+  authState.currentUser = null;
+  showSessionNotice('Signed out. Guest mode active.');
 }
 
 export function isAdminUser() {
-  return authState.currentUser?.role === 'ADMIN'
+  return authState.currentUser?.role === 'ADMIN';
 }

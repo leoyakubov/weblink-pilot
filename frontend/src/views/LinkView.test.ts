@@ -1,6 +1,6 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import LinkView from './LinkView.vue'
+import { flushPromises, mount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import LinkView from './LinkView.vue';
 
 const mocks = vi.hoisted(() => ({
   getLinkMock: vi.fn(),
@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   buildApiBaseUrlMock: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   copyTextMock: vi.fn(),
   replaceMock: vi.fn(),
-}))
+}));
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
@@ -18,30 +18,30 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     replace: mocks.replaceMock,
   }),
-}))
+}));
 
 vi.mock('@/lib/api', () => ({
   buildApiBaseUrl: mocks.buildApiBaseUrlMock,
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
   getLink: mocks.getLinkMock,
   getRedirectPreview: mocks.getRedirectPreviewMock,
-}))
+}));
 
 vi.mock('@/lib/clipboard', () => ({
   copyText: mocks.copyTextMock,
-}))
+}));
 
 vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
   }),
-}))
+}));
 
 describe('LinkView', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('loads details, preview, and analytics for the selected code', async () => {
     mocks.getLinkMock.mockResolvedValue({
@@ -53,7 +53,7 @@ describe('LinkView', () => {
       expiresAt: null,
       clickCount: 3,
       ownerUsername: null,
-    })
+    });
 
     mocks.getRedirectPreviewMock.mockResolvedValue({
       code: 'github-org',
@@ -61,7 +61,7 @@ describe('LinkView', () => {
       targetUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
       status: 302,
       locationHeader: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
-    })
+    });
 
     mocks.getAnalyticsSummaryMock.mockResolvedValue({
       code: 'github-org',
@@ -74,30 +74,32 @@ describe('LinkView', () => {
       lastBrowserFamily: 'CHROME',
       lastDeviceType: 'DESKTOP',
       topCountries: [{ country: 'US', clicks: 3 }],
-    })
+    });
 
-    const wrapper = mount(LinkView)
+    const wrapper = mount(LinkView);
 
-    await flushPromises()
+    await flushPromises();
 
     expect(mocks.getLinkMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
-    })
+    });
     expect(mocks.getRedirectPreviewMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
-    })
+    });
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
-    })
+    });
 
-    expect(wrapper.text()).toContain('Code: github-org')
-    expect(wrapper.text()).toContain('3')
-    expect(wrapper.text()).toContain('https://github.com/weblinkpilot/weblink-pilot/tree/main/docs')
-    expect(wrapper.text()).toContain('Copy QR URL')
-    expect(wrapper.text()).toContain('US')
-    expect(wrapper.text()).toContain('https://news.ycombinator.com')
-  })
-})
+    expect(wrapper.text()).toContain('Code: github-org');
+    expect(wrapper.text()).toContain('3');
+    expect(wrapper.text()).toContain(
+      'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+    );
+    expect(wrapper.text()).toContain('Copy QR URL');
+    expect(wrapper.text()).toContain('US');
+    expect(wrapper.text()).toContain('https://news.ycombinator.com');
+  });
+});

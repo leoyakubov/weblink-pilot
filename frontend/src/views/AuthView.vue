@@ -1,117 +1,122 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
-import { ApiRequestError } from '@/lib/api'
-import { authenticate, authState } from '@/lib/auth'
-import type { AuthCredentialsRequest } from '@/types'
+import { computed, reactive, ref, watch } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
+import { ApiRequestError } from '@/lib/api';
+import { authenticate, authState } from '@/lib/auth';
+import type { AuthCredentialsRequest } from '@/types';
 
 const props = defineProps<{
-  mode: 'login' | 'register'
-}>()
+  mode: 'login' | 'register';
+}>();
 
-const router = useRouter()
+const router = useRouter();
 const form = reactive<AuthCredentialsRequest>({
   username: '',
   password: '',
-})
-const busy = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
-const showPassword = ref(false)
-const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]{4,}$/
-const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/
+});
+const busy = ref(false);
+const errorMessage = ref('');
+const successMessage = ref('');
+const showPassword = ref(false);
+const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]{4,}$/;
+const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/;
 
-const title = computed(() => (props.mode === 'login' ? 'Sign in' : 'Sign up'))
-const submitLabel = computed(() => (props.mode === 'login' ? 'Sign in' : 'Create account'))
-const switchPath = computed(() => (props.mode === 'login' ? '/auth/signup' : '/auth/signin'))
+const title = computed(() => (props.mode === 'login' ? 'Sign in' : 'Sign up'));
+const submitLabel = computed(() => (props.mode === 'login' ? 'Sign in' : 'Create account'));
+const switchPath = computed(() => (props.mode === 'login' ? '/auth/signup' : '/auth/signin'));
 
 function resetMessages() {
-  errorMessage.value = ''
-  successMessage.value = ''
-  showPassword.value = false
+  errorMessage.value = '';
+  successMessage.value = '';
+  showPassword.value = false;
 }
 
-watch(() => props.mode, () => {
-  resetMessages()
-}, { immediate: true })
+watch(
+  () => props.mode,
+  () => {
+    resetMessages();
+  },
+  { immediate: true },
+);
 
 function validateForm(): string {
-  const username = form.username.trim()
-  const password = form.password.trim()
+  const username = form.username.trim();
+  const password = form.password.trim();
 
   if (!username && !password) {
-    return 'Enter both username and password.'
+    return 'Enter both username and password.';
   }
 
   if (props.mode === 'register') {
     if (!username) {
-      return 'Username must use at least 4 symbols.'
+      return 'Username must use at least 4 symbols.';
     }
 
     if (!usernamePattern.test(username)) {
-      return 'Username must use at least 4 symbols.'
+      return 'Username must use at least 4 symbols.';
     }
 
     if (!password) {
-      return 'Password must use at least 6 characters, including 1 letter and 1 number.'
+      return 'Password must use at least 6 characters, including 1 letter and 1 number.';
     }
 
     if (!passwordPattern.test(password)) {
-      return 'Password must use at least 6 characters, including 1 letter and 1 number.'
+      return 'Password must use at least 6 characters, including 1 letter and 1 number.';
     }
   } else if (!username || !password) {
-    return 'Enter both username and password.'
+    return 'Enter both username and password.';
   }
 
-  return ''
+  return '';
 }
 
 function formatAuthError(error: unknown): string {
   if (error instanceof ApiRequestError) {
     if (error.status === 401) {
-      return 'Incorrect username or password.'
+      return 'Incorrect username or password.';
     }
 
     if (error.status === 409) {
-      return 'This username already exists.'
+      return 'This username already exists.';
     }
 
     if (error.status === 403) {
-      return 'This account is disabled.'
+      return 'This account is disabled.';
     }
 
     if (error.message) {
-      return error.message
+      return error.message;
     }
   }
 
   if (error instanceof Error && error.message) {
-    return error.message
+    return error.message;
   }
 
-  return 'Authentication failed'
+  return 'Authentication failed';
 }
 
 async function submit() {
-  busy.value = true
-  resetMessages()
+  busy.value = true;
+  resetMessages();
 
   try {
-    const validationError = validateForm()
+    const validationError = validateForm();
     if (validationError) {
-      errorMessage.value = validationError
-      return
+      errorMessage.value = validationError;
+      return;
     }
 
-    await authenticate(props.mode, form)
-    successMessage.value = props.mode === 'login'
-      ? `Signed in as ${authState.currentUser?.username}`
-      : `Created ${authState.currentUser?.username} and signed in`
-    await router.push('/')
+    await authenticate(props.mode, form);
+    successMessage.value =
+      props.mode === 'login'
+        ? `Signed in as ${authState.currentUser?.username}`
+        : `Created ${authState.currentUser?.username} and signed in`;
+    await router.push('/');
   } catch (error) {
-    errorMessage.value = formatAuthError(error)
+    errorMessage.value = formatAuthError(error);
   } finally {
-    busy.value = false
+    busy.value = false;
   }
 }
 </script>
@@ -128,7 +133,13 @@ async function submit() {
         <form class="form-grid" @submit.prevent="submit">
           <label class="form-field">
             <span class="field-label">Username</span>
-            <input v-model="form.username" class="input" type="text" placeholder="Your username" autocomplete="username" />
+            <input
+              v-model="form.username"
+              class="input"
+              type="text"
+              placeholder="Your username"
+              autocomplete="username"
+            />
           </label>
           <label class="form-field">
             <span class="field-label">Password</span>
@@ -166,7 +177,14 @@ async function submit() {
                     stroke-linejoin="round"
                     stroke-width="1.7"
                   />
-                  <circle cx="12" cy="12" r="2.75" fill="none" stroke="currentColor" stroke-width="1.7" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="2.75"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                  />
                 </svg>
               </button>
             </div>
@@ -190,7 +208,10 @@ async function submit() {
             <span class="footnote">
               {{ props.mode === 'login' ? 'Need an account?' : 'Already have an account?' }}
             </span>
-            <RouterLink class="button button-secondary button-small auth-link-button" :to="switchPath">
+            <RouterLink
+              class="button button-secondary button-small auth-link-button"
+              :to="switchPath"
+            >
               {{ props.mode === 'login' ? 'Sign up' : 'Sign in' }}
             </RouterLink>
           </div>

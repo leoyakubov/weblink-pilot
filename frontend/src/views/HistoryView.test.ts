@@ -1,36 +1,36 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import HistoryView from './HistoryView.vue'
+import { flushPromises, mount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import HistoryView from './HistoryView.vue';
 
 const mocks = vi.hoisted(() => ({
   listLinksMock: vi.fn(),
   openMock: vi.fn(),
-}))
+}));
 
 vi.mock('vue-router', () => ({
   RouterLink: {
     props: ['to'],
     template: '<a><slot /></a>',
   },
-}))
+}));
 
 vi.mock('@/lib/api', () => ({
   buildApiBaseUrl: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   listLinks: mocks.listLinksMock,
-}))
+}));
 
 vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
   }),
-}))
+}));
 
 describe('HistoryView', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.stubGlobal('open', mocks.openMock)
-  })
+    vi.clearAllMocks();
+    vi.stubGlobal('open', mocks.openMock);
+  });
 
   it('renders recent links and opens quick actions', async () => {
     mocks.listLinksMock.mockResolvedValue([
@@ -44,7 +44,7 @@ describe('HistoryView', () => {
         clickCount: 3,
         ownerUsername: 'admin',
       },
-    ])
+    ]);
 
     const wrapper = mount(HistoryView, {
       global: {
@@ -55,15 +55,15 @@ describe('HistoryView', () => {
           },
         },
       },
-    })
-    await flushPromises()
+    });
+    await flushPromises();
 
-    expect(wrapper.text()).toContain('Recent links from the backend.')
-    expect(wrapper.text()).toContain('github-org')
-    expect(wrapper.text()).toContain('3 clicks')
+    expect(wrapper.text()).toContain('Recent links from the backend.');
+    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('3 clicks');
 
-    const buttons = wrapper.findAll('button')
-    await buttons.find(button => button.text().includes('Open QR'))?.trigger('click')
-    expect(mocks.openMock).toHaveBeenCalled()
-  })
-})
+    const buttons = wrapper.findAll('button');
+    await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
+    expect(mocks.openMock).toHaveBeenCalled();
+  });
+});

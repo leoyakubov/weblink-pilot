@@ -1,162 +1,162 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
-import CopyActionButton from '@/components/CopyActionButton.vue'
-import { isAdminUser } from '@/lib/auth'
-import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api'
-import { countryCodeLabel, countryFlagUrl } from '@/lib/countries'
-import { loadSettings } from '@/lib/settings'
-import type { AnalyticsSummaryResponse, LinkResponse } from '@/types'
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
+import CopyActionButton from '@/components/CopyActionButton.vue';
+import { isAdminUser } from '@/lib/auth';
+import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
+import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
+import { loadSettings } from '@/lib/settings';
+import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
 
-const route = useRoute()
-const router = useRouter()
-const settings = loadSettings()
+const route = useRoute();
+const router = useRouter();
+const settings = loadSettings();
 
 const form = reactive({
   code: String(route.query.code ?? ''),
-})
+});
 
-const link = ref<LinkResponse | null>(null)
-const summary = ref<AnalyticsSummaryResponse | null>(null)
-const loading = ref(false)
-const errorMessage = ref('')
-const recentLinks = ref<LinkResponse[]>([])
-const qrModalUrl = ref('')
-const qrModalTitle = ref('')
+const link = ref<LinkResponse | null>(null);
+const summary = ref<AnalyticsSummaryResponse | null>(null);
+const loading = ref(false);
+const errorMessage = ref('');
+const recentLinks = ref<LinkResponse[]>([]);
+const qrModalUrl = ref('');
+const qrModalTitle = ref('');
 
-const selectedCode = computed(() => form.code.trim())
-const hasData = computed(() => Boolean(link.value && summary.value))
-const hasRecent = computed(() => recentLinks.value.length > 0)
-const canSeePreview = computed(() => isAdminUser())
+const selectedCode = computed(() => form.code.trim());
+const hasData = computed(() => Boolean(link.value && summary.value));
+const hasRecent = computed(() => recentLinks.value.length > 0);
+const canSeePreview = computed(() => isAdminUser());
 
-const chartWidth = 320
-const chartHeight = 132
+const chartWidth = 320;
+const chartHeight = 132;
 
 const topCountryBars = computed(() => {
-  const countries = summary.value?.topCountries ?? []
-  const max = Math.max(...countries.map(item => item.clicks), 1)
-  return countries.map(item => ({
+  const countries = summary.value?.topCountries ?? [];
+  const max = Math.max(...countries.map((item) => item.clicks), 1);
+  return countries.map((item) => ({
     country: item.country,
     code: countryCodeLabel(item.country),
     flagUrl: countryFlagUrl(item.country),
     clicks: item.clicks,
     width: Math.max(8, Math.round((item.clicks / max) * 100)),
-  }))
-})
+  }));
+});
 
 const sparklinePoints = computed(() => {
-  const values = summary.value?.topCountries.map(item => item.clicks) ?? []
+  const values = summary.value?.topCountries.map((item) => item.clicks) ?? [];
   if (!values.length) {
-    return '0,100 100,100'
+    return '0,100 100,100';
   }
 
-  const max = Math.max(...values, 1)
-  const step = values.length === 1 ? chartWidth / 2 : chartWidth / (values.length - 1)
+  const max = Math.max(...values, 1);
+  const step = values.length === 1 ? chartWidth / 2 : chartWidth / (values.length - 1);
   return values
     .map((value, index) => {
-      const x = Math.round(index * step)
-      const y = Math.round(chartHeight - 24 - ((value / max) * (chartHeight - 36)))
-      return `${x},${y}`
+      const x = Math.round(index * step);
+      const y = Math.round(chartHeight - 24 - (value / max) * (chartHeight - 36));
+      return `${x},${y}`;
     })
-    .join(' ')
-})
+    .join(' ');
+});
 
 function pickDefaultCode() {
   if (selectedCode.value) {
-    return selectedCode.value
+    return selectedCode.value;
   }
 
   if (recentLinks.value.length > 0) {
-    form.code = recentLinks.value[0].code
-    return form.code
+    form.code = recentLinks.value[0].code;
+    return form.code;
   }
 
-  return ''
+  return '';
 }
 
 async function refreshRecent() {
-  recentLinks.value = await listLinks(8, settings)
+  recentLinks.value = await listLinks(8, settings);
   if (!selectedCode.value && recentLinks.value.length > 0) {
-    form.code = recentLinks.value[0].code
+    form.code = recentLinks.value[0].code;
   }
 }
 
 async function load(codeValue: string) {
-  const trimmed = codeValue.trim()
+  const trimmed = codeValue.trim();
   if (!trimmed) {
-    errorMessage.value = 'Enter a short code to load analytics.'
-    link.value = null
-    summary.value = null
-    return
+    errorMessage.value = 'Enter a short code to load analytics.';
+    link.value = null;
+    summary.value = null;
+    return;
   }
 
-  loading.value = true
-  errorMessage.value = ''
+  loading.value = true;
+  errorMessage.value = '';
 
   try {
-    router.replace({ query: { code: trimmed } })
+    router.replace({ query: { code: trimmed } });
     const [details, analytics] = await Promise.all([
       getLink(trimmed, settings),
       getAnalyticsSummary(trimmed, settings),
-    ])
-    link.value = details
-    summary.value = analytics
+    ]);
+    link.value = details;
+    summary.value = analytics;
   } catch (error) {
-    link.value = null
-    summary.value = null
-    errorMessage.value = error instanceof Error ? error.message : 'Could not load analytics'
+    link.value = null;
+    summary.value = null;
+    errorMessage.value = error instanceof Error ? error.message : 'Could not load analytics';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 function loadRecent(code: string) {
-  form.code = code
-  load(code)
+  form.code = code;
+  load(code);
 }
 
 function openExternal(url: string) {
-  window.open(url, '_blank', 'noopener,noreferrer')
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function openQrModal(url: string, title: string) {
-  qrModalUrl.value = url
-  qrModalTitle.value = title
+  qrModalUrl.value = url;
+  qrModalTitle.value = title;
 }
 
 function closeQrModal() {
-  qrModalUrl.value = ''
-  qrModalTitle.value = ''
+  qrModalUrl.value = '';
+  qrModalTitle.value = '';
 }
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'No clicks yet'
+    return 'No clicks yet';
   }
 
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(new Date(value));
 }
 
 onMounted(async () => {
-  await refreshRecent()
-  const initialCode = pickDefaultCode()
+  await refreshRecent();
+  const initialCode = pickDefaultCode();
   if (initialCode) {
-    load(initialCode)
+    load(initialCode);
   }
-})
+});
 
 watch(
   () => route.query.code,
-  value => {
+  (value) => {
     if (typeof value === 'string' && value && value !== form.code) {
-      form.code = value
-      load(value)
+      form.code = value;
+      load(value);
     }
   },
-)
+);
 </script>
 
 <template>
@@ -184,9 +184,7 @@ watch(
             <button class="button button-primary" type="submit" :disabled="loading">
               {{ loading ? 'Loading...' : 'Load analytics' }}
             </button>
-            <RouterLink class="button button-secondary" to="/">
-              Create new link
-            </RouterLink>
+            <RouterLink class="button button-secondary" to="/"> Create new link </RouterLink>
           </div>
         </form>
 
@@ -195,7 +193,8 @@ watch(
           {{ errorMessage }}
         </p>
         <p v-else class="help-text">
-          Dashboard reads the summary API and the link details endpoint, so you can inspect analytics and open actions from one place.
+          Dashboard reads the summary API and the link details endpoint, so you can inspect
+          analytics and open actions from one place.
         </p>
 
         <div class="chart-card" v-if="summary">
@@ -204,14 +203,21 @@ watch(
               <p class="eyebrow">Country distribution</p>
               <h4 class="card-title">Clicks by country</h4>
             </div>
-            <span class="badge"><strong>{{ summary.totalClicks }}</strong> total interactions</span>
+            <span class="badge"
+              ><strong>{{ summary.totalClicks }}</strong> total interactions</span
+            >
           </div>
 
           <div class="bar-chart" v-if="topCountryBars.length">
             <div v-for="bar in topCountryBars" :key="bar.country" class="bar-row">
               <div class="bar-labels">
                 <strong class="country-label">
-                  <img v-if="bar.flagUrl" class="country-flag" :src="bar.flagUrl" :alt="`${bar.code} flag`" />
+                  <img
+                    v-if="bar.flagUrl"
+                    class="country-flag"
+                    :src="bar.flagUrl"
+                    :alt="`${bar.code} flag`"
+                  />
                   <span>{{ bar.code }}</span>
                 </strong>
                 <span>{{ bar.clicks }}</span>
@@ -222,14 +228,26 @@ watch(
             </div>
           </div>
 
-          <svg class="sparkline" :viewBox="`0 0 ${chartWidth} ${chartHeight}`" preserveAspectRatio="none" aria-hidden="true">
+          <svg
+            class="sparkline"
+            :viewBox="`0 0 ${chartWidth} ${chartHeight}`"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             <defs>
               <linearGradient id="sparklineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#38bdf8" />
                 <stop offset="100%" stop-color="#22c55e" />
               </linearGradient>
             </defs>
-            <polyline :points="sparklinePoints" fill="none" stroke="url(#sparklineGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            <polyline
+              :points="sparklinePoints"
+              fill="none"
+              stroke="url(#sparklineGradient)"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
 
@@ -237,7 +255,8 @@ watch(
           <p class="eyebrow">No data loaded</p>
           <h4 class="card-title">Pick a code from recent links or enter one manually.</h4>
           <p class="muted">
-            The dashboard will show total clicks, unique visitors, last click metadata, and top countries once a code is loaded.
+            The dashboard will show total clicks, unique visitors, last click metadata, and top
+            countries once a code is loaded.
           </p>
         </div>
 
@@ -272,7 +291,8 @@ watch(
           <div class="list-item">
             <strong>Browser / device</strong>
             <p>
-              {{ summary?.lastBrowserFamily ?? 'Unknown browser' }} - {{ summary?.lastDeviceType ?? 'Unknown device' }}
+              {{ summary?.lastBrowserFamily ?? 'Unknown browser' }} -
+              {{ summary?.lastDeviceType ?? 'Unknown device' }}
             </p>
           </div>
         </div>
@@ -304,11 +324,22 @@ watch(
             <span>Expires: {{ formatDate(link.expiresAt) }}</span>
           </div>
           <div class="actions">
-            <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: link.code } }">
+            <RouterLink
+              class="button button-primary"
+              :to="{ name: 'link', params: { code: link.code } }"
+            >
               Open details page
             </RouterLink>
-            <CopyActionButton :value="link.shortUrl" label="Copy short URL" copied-label="Short URL copied" />
-            <button class="button button-secondary" type="button" @click="openExternal(link.shortUrl)">
+            <CopyActionButton
+              :value="link.shortUrl"
+              label="Copy short URL"
+              copied-label="Short URL copied"
+            />
+            <button
+              class="button button-secondary"
+              type="button"
+              @click="openExternal(link.shortUrl)"
+            >
               Open redirect
             </button>
             <button
@@ -321,7 +352,7 @@ watch(
             </button>
           </div>
 
-          <figure class="stack" style="margin: 0;">
+          <figure class="stack" style="margin: 0">
             <img class="qr-image" :src="link.qrCodeUrl" :alt="`QR code for ${link.code}`" />
             <div class="actions">
               <CopyActionButton
@@ -330,7 +361,11 @@ watch(
                 copied-label="QR URL copied"
                 variant="primary"
               />
-              <button class="button button-secondary" type="button" @click="openQrModal(link.qrCodeUrl, link.code)">
+              <button
+                class="button button-secondary"
+                type="button"
+                @click="openQrModal(link.qrCodeUrl, link.code)"
+              >
                 Open QR
               </button>
             </div>
@@ -390,10 +425,20 @@ watch(
                 <p class="eyebrow">QR code</p>
                 <h3 class="panel-title">{{ qrModalTitle }}</h3>
               </div>
-              <button class="button button-secondary button-small" type="button" @click="closeQrModal">Close</button>
+              <button
+                class="button button-secondary button-small"
+                type="button"
+                @click="closeQrModal"
+              >
+                Close
+              </button>
             </div>
 
-            <img class="qr-image qr-image--compact modal-qr" :src="qrModalUrl" :alt="`QR code for ${qrModalTitle}`" />
+            <img
+              class="qr-image qr-image--compact modal-qr"
+              :src="qrModalUrl"
+              :alt="`QR code for ${qrModalTitle}`"
+            />
           </div>
         </div>
       </div>

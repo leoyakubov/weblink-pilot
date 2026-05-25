@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { onMounted } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth'
+import { computed } from 'vue';
+import { onMounted } from 'vue';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
+import { authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth';
 
-const route = useRoute()
+const route = useRoute();
 
 const navItems = computed(() => {
   const items = [
@@ -12,49 +12,49 @@ const navItems = computed(() => {
     { label: 'Dashboard', to: '/dashboard' },
     { label: 'History', to: '/history' },
     { label: 'About', to: '/about' },
-  ]
+  ];
 
   if (isAdminUser()) {
-    items.push({ label: 'Monitoring', to: '/monitoring' })
+    items.push({ label: 'Monitoring', to: '/monitoring' });
   }
 
-  return items
-})
+  return items;
+});
 
-const accountLabel = computed(() => authState.currentUser?.username ?? '')
-const isLoggedIn = computed(() => Boolean(authState.currentUser))
+const accountLabel = computed(() => authState.currentUser?.username ?? '');
+const isLoggedIn = computed(() => Boolean(authState.currentUser));
 
 const currentSection = computed(() => {
   if (route.name === 'link') {
-    return 'Link details'
+    return 'Link details';
   }
 
   if (route.name === 'dashboard') {
-    return 'Analytics shell'
+    return 'Analytics shell';
   }
 
   if (route.name === 'history') {
-    return 'Link history'
+    return 'Link history';
   }
 
   if (route.name === 'monitoring') {
-    return 'Admin monitoring'
+    return 'Admin monitoring';
   }
 
   if (route.name === 'about') {
-    return 'About this product'
+    return 'About this product';
   }
 
-  return 'Home'
-})
+  return 'Home';
+});
 
-const showSectionHeader = computed(() =>
-  !['home', 'about', 'signin', 'signup'].includes(String(route.name ?? '')),
-)
+const showSectionHeader = computed(
+  () => !['home', 'about', 'signin', 'signup'].includes(String(route.name ?? '')),
+);
 
 onMounted(() => {
-  bootstrapAuth()
-})
+  bootstrapAuth();
+});
 </script>
 
 <template>
@@ -138,7 +138,8 @@ onMounted(() => {
         <p class="eyebrow">Frontend foundation</p>
         <h1>{{ currentSection }}</h1>
         <p class="lede">
-          Vue 3 app wired for short links, QR previews, and future analytics. Built to feel good on a phone first.
+          Vue 3 app wired for short links, QR previews, and future analytics. Built to feel good on
+          a phone first.
         </p>
       </section>
 

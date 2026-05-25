@@ -1,125 +1,127 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
-import CopyActionButton from '@/components/CopyActionButton.vue'
-import { authState } from '@/lib/auth'
-import { buildApiBaseUrl, createLink, listLinks } from '@/lib/api'
-import { loadSettings, saveSettings } from '@/lib/settings'
-import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types'
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { RouterLink } from 'vue-router';
+import CopyActionButton from '@/components/CopyActionButton.vue';
+import { authState } from '@/lib/auth';
+import { buildApiBaseUrl, createLink, listLinks } from '@/lib/api';
+import { loadSettings, saveSettings } from '@/lib/settings';
+import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types';
 
-const settings = reactive<ApiSettings>(loadSettings())
+const settings = reactive<ApiSettings>(loadSettings());
 const form = reactive<CreateLinkRequest>({
   originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
   customAlias: '',
   expiresAt: '',
-})
+});
 
-const createdLink = ref<LinkResponse | null>(null)
-const recentLinks = ref<LinkResponse[]>([])
-const loadingRecent = ref(false)
-const recentError = ref('')
-const errorMessage = ref('')
-const successMessage = ref('')
-const submitting = ref(false)
-const qrModalUrl = ref('')
-const qrModalTitle = ref('')
+const createdLink = ref<LinkResponse | null>(null);
+const recentLinks = ref<LinkResponse[]>([]);
+const loadingRecent = ref(false);
+const recentError = ref('');
+const errorMessage = ref('');
+const successMessage = ref('');
+const submitting = ref(false);
+const qrModalUrl = ref('');
+const qrModalTitle = ref('');
 
-const userStatus = computed(() => authState.currentUser
-  ? `Signed in as ${authState.currentUser.username} (${authState.currentUser.role})`
-  : 'Guest mode ready for demo links')
+const userStatus = computed(() =>
+  authState.currentUser
+    ? `Signed in as ${authState.currentUser.username} (${authState.currentUser.role})`
+    : 'Guest mode ready for demo links',
+);
 
-const canSeePreview = computed(() => authState.currentUser?.role === 'ADMIN')
+const canSeePreview = computed(() => authState.currentUser?.role === 'ADMIN');
 
-const recentTitle = computed(() => authState.currentUser ? 'Your Recent Links' : 'Recent Links')
+const recentTitle = computed(() => (authState.currentUser ? 'Your Recent Links' : 'Recent Links'));
 
 const linkPreviewUrl = computed(() =>
   createdLink.value ? buildApiBaseUrl(`/urls/${createdLink.value.code}/preview`, settings) : '',
-)
+);
 
 const dashboardUrl = computed(() =>
   createdLink.value ? { name: 'dashboard', query: { code: createdLink.value.code } } : '/',
-)
+);
 
 function syncSettings() {
-  saveSettings(settings)
+  saveSettings(settings);
 }
 
 async function refreshRecent() {
-  loadingRecent.value = true
-  recentError.value = ''
+  loadingRecent.value = true;
+  recentError.value = '';
 
   try {
-    recentLinks.value = await listLinks(5, settings)
+    recentLinks.value = await listLinks(5, settings);
   } catch (error) {
-    recentLinks.value = []
-    recentError.value = error instanceof Error ? error.message : 'Could not load recent links'
+    recentLinks.value = [];
+    recentError.value = error instanceof Error ? error.message : 'Could not load recent links';
   } finally {
-    loadingRecent.value = false
+    loadingRecent.value = false;
   }
 }
 
 async function submit() {
-  errorMessage.value = ''
-  successMessage.value = ''
-  submitting.value = true
+  errorMessage.value = '';
+  successMessage.value = '';
+  submitting.value = true;
 
   try {
-    syncSettings()
+    syncSettings();
 
-    const originalUrl = form.originalUrl.trim()
-    new URL(originalUrl)
+    const originalUrl = form.originalUrl.trim();
+    new URL(originalUrl);
 
     const payload: CreateLinkRequest = {
       originalUrl,
       customAlias: form.customAlias?.trim() || undefined,
       expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-    }
+    };
 
-    createdLink.value = await createLink(payload, settings)
-    successMessage.value = `Created ${createdLink.value.code} successfully`
-    await refreshRecent()
+    createdLink.value = await createLink(payload, settings);
+    successMessage.value = `Created ${createdLink.value.code} successfully`;
+    await refreshRecent();
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Something went wrong'
+    errorMessage.value = error instanceof Error ? error.message : 'Something went wrong';
   } finally {
-    submitting.value = false
+    submitting.value = false;
   }
 }
 
 function openExternal(url: string) {
-  window.open(url, '_blank', 'noopener,noreferrer')
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function openQrModal(url: string, title: string) {
-  qrModalUrl.value = url
-  qrModalTitle.value = title
+  qrModalUrl.value = url;
+  qrModalTitle.value = title;
 }
 
 function closeQrModal() {
-  qrModalUrl.value = ''
-  qrModalTitle.value = ''
+  qrModalUrl.value = '';
+  qrModalTitle.value = '';
 }
 
 function formatDate(value: string | null) {
   if (!value) {
-    return 'Never'
+    return 'Never';
   }
 
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  }).format(new Date(value))
+  }).format(new Date(value));
 }
 
 onMounted(() => {
-  refreshRecent()
-})
+  refreshRecent();
+});
 
 watch(
   () => authState.currentUser?.username,
   () => {
-    refreshRecent()
+    refreshRecent();
   },
-)
+);
 </script>
 
 <template>
@@ -130,8 +132,8 @@ watch(
           <p class="eyebrow">Link management</p>
           <h2 class="hero-title">Short links, QR, analytics.</h2>
           <p class="hero-note">
-            WebLinkPilot is built for fast sharing. Create a demo link instantly, or sign in to keep ownership and
-            private history. Redirects, QR scans, and analytics stay public and fast.
+            WebLinkPilot is built for fast sharing. Create a demo link instantly, or sign in to keep
+            ownership and private history. Redirects, QR scans, and analytics stay public and fast.
           </p>
 
           <div class="hero-badges">
@@ -183,7 +185,12 @@ watch(
 
             <label class="form-field">
               <span class="field-label">Custom alias (optional)</span>
-              <input v-model="form.customAlias" class="input" type="text" placeholder="github-org" />
+              <input
+                v-model="form.customAlias"
+                class="input"
+                type="text"
+                placeholder="github-org"
+              />
             </label>
 
             <label class="form-field">
@@ -195,9 +202,7 @@ watch(
               <button class="button button-primary" type="submit" :disabled="submitting">
                 {{ submitting ? 'Creating...' : 'Create short link' }}
               </button>
-              <RouterLink class="button button-secondary" to="/about">
-                About
-              </RouterLink>
+              <RouterLink class="button button-secondary" to="/about"> About </RouterLink>
             </div>
 
             <p v-if="errorMessage" class="status error">
@@ -220,7 +225,12 @@ watch(
             <p class="eyebrow">Recent links</p>
             <h3 class="panel-title">{{ recentTitle }}</h3>
           </div>
-          <button class="button button-secondary" type="button" :disabled="loadingRecent" @click="refreshRecent">
+          <button
+            class="button button-secondary"
+            type="button"
+            :disabled="loadingRecent"
+            @click="refreshRecent"
+          >
             {{ loadingRecent ? 'Refreshing...' : 'Refresh' }}
           </button>
         </div>
@@ -241,14 +251,28 @@ watch(
             </div>
             <p class="footnote">{{ item.clickCount }} clicks</p>
             <div class="actions">
-              <RouterLink class="button button-primary" :to="{ name: 'link', params: { code: item.code } }">
+              <RouterLink
+                class="button button-primary"
+                :to="{ name: 'link', params: { code: item.code } }"
+              >
                 Details
               </RouterLink>
-              <RouterLink class="button button-secondary" :to="{ name: 'dashboard', query: { code: item.code } }">
+              <RouterLink
+                class="button button-secondary"
+                :to="{ name: 'dashboard', query: { code: item.code } }"
+              >
                 Analytics
               </RouterLink>
-              <CopyActionButton :value="item.shortUrl" label="Copy short URL" copied-label="Short URL copied" />
-              <button class="button button-secondary" type="button" @click="openQrModal(item.qrCodeUrl, item.code)">
+              <CopyActionButton
+                :value="item.shortUrl"
+                label="Copy short URL"
+                copied-label="Short URL copied"
+              />
+              <button
+                class="button button-secondary"
+                type="button"
+                @click="openQrModal(item.qrCodeUrl, item.code)"
+              >
                 Open QR
               </button>
             </div>
@@ -263,7 +287,8 @@ watch(
           <p class="eyebrow">No history yet</p>
           <h4 class="card-title">Create your first short link and it will appear here.</h4>
           <p class="muted">
-            Recent links come from the backend, so this section always reflects the latest saved data.
+            Recent links come from the backend, so this section always reflects the latest saved
+            data.
           </p>
         </div>
       </div>
@@ -305,7 +330,11 @@ watch(
               copied-label="Short URL copied"
               variant="primary"
             />
-            <button class="button button-secondary" type="button" @click="openExternal(createdLink.shortUrl)">
+            <button
+              class="button button-secondary"
+              type="button"
+              @click="openExternal(createdLink.shortUrl)"
+            >
               Open redirect
             </button>
             <CopyActionButton
@@ -326,7 +355,11 @@ watch(
           </div>
 
           <figure class="compact-figure">
-            <img class="qr-image" :src="createdLink.qrCodeUrl" :alt="`QR code for ${createdLink.code}`" />
+            <img
+              class="qr-image"
+              :src="createdLink.qrCodeUrl"
+              :alt="`QR code for ${createdLink.code}`"
+            />
           </figure>
 
           <div class="grid-2">
@@ -336,7 +369,11 @@ watch(
               copied-label="QR URL copied"
               variant="primary"
             />
-            <button class="button button-secondary" type="button" @click="openQrModal(createdLink.qrCodeUrl, createdLink.code)">
+            <button
+              class="button button-secondary"
+              type="button"
+              @click="openQrModal(createdLink.qrCodeUrl, createdLink.code)"
+            >
               Open QR
             </button>
           </div>
@@ -358,10 +395,20 @@ watch(
                   <p class="eyebrow">QR code</p>
                   <h3 class="panel-title">{{ qrModalTitle }}</h3>
                 </div>
-                <button class="button button-secondary button-small" type="button" @click="closeQrModal">Close</button>
+                <button
+                  class="button button-secondary button-small"
+                  type="button"
+                  @click="closeQrModal"
+                >
+                  Close
+                </button>
               </div>
 
-              <img class="qr-image qr-image--compact modal-qr" :src="qrModalUrl" :alt="`QR code for ${qrModalTitle}`" />
+              <img
+                class="qr-image qr-image--compact modal-qr"
+                :src="qrModalUrl"
+                :alt="`QR code for ${qrModalTitle}`"
+              />
             </div>
           </div>
         </div>
