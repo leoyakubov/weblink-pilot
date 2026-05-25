@@ -1,7 +1,8 @@
 package io.weblinkpilot.url.codegen;
 
-import java.security.SecureRandom;
 import org.springframework.stereotype.Component;
+
+import java.security.SecureRandom;
 
 @Component
 public class ShortCodeGenerator {

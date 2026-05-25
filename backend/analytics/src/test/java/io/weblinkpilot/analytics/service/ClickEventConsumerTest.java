@@ -1,16 +1,17 @@
 package io.weblinkpilot.analytics.service;
 
-import static org.mockito.Mockito.verify;
-
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ClickEventConsumerTest {

@@ -7,15 +7,16 @@ import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import io.weblinkpilot.url.web.RedirectRequestContext;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.net.URI;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class RedirectService {

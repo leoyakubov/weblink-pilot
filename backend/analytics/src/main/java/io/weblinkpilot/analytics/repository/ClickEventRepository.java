@@ -2,11 +2,12 @@ package io.weblinkpilot.analytics.repository;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface ClickEventRepository extends JpaRepository<ClickEvent, Long> {
     long countByShortCode(String shortCode);

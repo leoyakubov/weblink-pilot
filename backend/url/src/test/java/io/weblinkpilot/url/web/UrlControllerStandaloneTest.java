@@ -1,6 +1,25 @@
 package io.weblinkpilot.url.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.shared.contracts.CreateLinkRequest;
+import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.url.exception.UrlNotFoundException;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
+import io.weblinkpilot.url.service.QrCodeService;
+import io.weblinkpilot.url.service.UrlLookupService;
+import io.weblinkpilot.url.service.UrlService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -8,33 +27,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
-import io.weblinkpilot.url.service.QrCodeService;
-import io.weblinkpilot.url.service.PublicUrlBuilder;
-import io.weblinkpilot.url.service.UrlLookupService;
-import io.weblinkpilot.url.service.UrlService;
-import io.weblinkpilot.url.exception.UrlNotFoundException;
-import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-import io.weblinkpilot.url.service.PublicUrlBuilder;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class UrlControllerStandaloneTest {

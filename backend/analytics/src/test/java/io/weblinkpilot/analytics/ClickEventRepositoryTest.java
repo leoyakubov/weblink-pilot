@@ -1,20 +1,21 @@
 package io.weblinkpilot.analytics;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = ClickEventRepositoryTest.TestConfig.class)
 @Transactional

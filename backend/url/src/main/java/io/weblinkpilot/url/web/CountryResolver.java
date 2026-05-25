@@ -1,11 +1,12 @@
 package io.weblinkpilot.url.web;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CountryResolver {

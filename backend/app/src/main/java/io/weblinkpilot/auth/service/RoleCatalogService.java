@@ -1,16 +1,17 @@
 package io.weblinkpilot.auth.service;
 
+import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.repository.RoleRepository;
-import io.weblinkpilot.auth.config.RoleNames;
 import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.stereotype.Service;
 
 @Service
 public class RoleCatalogService {

@@ -2,19 +2,20 @@ package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.config.RoleNames;
-import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.domain.Role;
+import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Locale;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Locale;
 
 @Service
 public class UserAccountService {

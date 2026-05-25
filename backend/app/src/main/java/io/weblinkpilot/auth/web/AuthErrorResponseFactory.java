@@ -1,8 +1,9 @@
 package io.weblinkpilot.auth.web;
 
 import io.weblinkpilot.shared.contracts.ApiErrorResponse;
-import java.time.OffsetDateTime;
 import org.springframework.http.HttpStatus;
+
+import java.time.OffsetDateTime;
 
 public final class AuthErrorResponseFactory {
 

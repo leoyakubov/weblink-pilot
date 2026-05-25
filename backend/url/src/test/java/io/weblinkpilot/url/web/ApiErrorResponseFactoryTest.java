@@ -1,10 +1,10 @@
 package io.weblinkpilot.url.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.weblinkpilot.shared.contracts.ApiErrorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ApiErrorResponseFactoryTest {
 

@@ -1,16 +1,16 @@
 package io.weblinkpilot.auth.web;
 
-import io.weblinkpilot.auth.service.AuthService;
-import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
-import io.weblinkpilot.shared.contracts.AuthResponse;
-import io.weblinkpilot.shared.contracts.UserProfileResponse;
-import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.weblinkpilot.auth.service.AuthService;
+import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
+import io.weblinkpilot.shared.contracts.AuthResponse;
+import io.weblinkpilot.shared.contracts.UserProfileResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;

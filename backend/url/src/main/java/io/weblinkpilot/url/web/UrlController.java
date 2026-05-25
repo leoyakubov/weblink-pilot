@@ -1,33 +1,28 @@
 package io.weblinkpilot.url.web;
 
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
-import io.weblinkpilot.url.service.UrlService;
-import io.weblinkpilot.url.service.UrlLookupService;
-import io.weblinkpilot.url.service.QrCodeService;
-import io.weblinkpilot.url.service.PublicUrlBuilder;
-import jakarta.validation.Valid;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.security.core.Authentication;
+import io.weblinkpilot.shared.contracts.CreateLinkRequest;
+import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
+import io.weblinkpilot.url.service.QrCodeService;
+import io.weblinkpilot.url.service.UrlLookupService;
+import io.weblinkpilot.url.service.UrlService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController

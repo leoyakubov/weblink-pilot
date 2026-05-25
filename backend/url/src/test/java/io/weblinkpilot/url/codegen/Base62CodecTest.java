@@ -1,8 +1,8 @@
 package io.weblinkpilot.url.codegen;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class Base62CodecTest {
 

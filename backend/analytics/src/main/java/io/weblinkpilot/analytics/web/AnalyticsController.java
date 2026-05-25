@@ -1,20 +1,20 @@
 package io.weblinkpilot.analytics.web;
 
-import io.weblinkpilot.analytics.service.AnalyticsQueryService;
-import io.weblinkpilot.url.service.UrlLookupService;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.weblinkpilot.analytics.service.AnalyticsQueryService;
+import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.url.service.UrlLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/v1/analytics")

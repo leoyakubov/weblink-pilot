@@ -1,15 +1,9 @@
 package io.weblinkpilot.analytics.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import jakarta.persistence.*;
+
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "click_events")
