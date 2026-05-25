@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:weblinkpilot_test_${random.uuid};MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+app:
+  cache:
+    provider: local
+  public-base-url: http://localhost:8080
+  cors:
+    allowed-origin-patterns:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+      - http://localhost:4173
+      - http://127.0.0.1:4173
+      - http://localhost:8081
+      - http://127.0.0.1:8081
+
+management:
+  endpoint:
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

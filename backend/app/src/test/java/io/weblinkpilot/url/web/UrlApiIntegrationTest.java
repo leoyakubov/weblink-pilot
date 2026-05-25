@@ -29,7 +29,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import io.weblinkpilot.url.service.UrlCacheService;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "app.auth.jwt-secret=test-jwt-secret-for-tests-only"
+})
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UrlApiIntegrationTest {

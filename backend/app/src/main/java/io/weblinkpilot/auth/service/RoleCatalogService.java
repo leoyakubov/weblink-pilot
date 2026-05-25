@@ -2,12 +2,14 @@ package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.repository.RoleRepository;
+import io.weblinkpilot.auth.config.RoleNames;
 import jakarta.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +23,11 @@ public class RoleCatalogService {
     }
 
     @PostConstruct
+    @Transactional
     public void loadRoles() {
+        ensureRolePresent(RoleNames.ADMIN);
+        ensureRolePresent(RoleNames.USER);
+
         Map<String, Role> loaded = roleRepository.findAll().stream()
                 .collect(Collectors.toUnmodifiableMap(
                         role -> normalize(role.getName()),
@@ -56,5 +62,13 @@ public class RoleCatalogService {
             return "";
         }
         return roleName.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private void ensureRolePresent(String roleName) {
+        String normalized = normalize(roleName);
+        if (roleRepository.findByName(normalized).isPresent()) {
+            return;
+        }
+        roleRepository.save(new Role(normalized));
     }
 }

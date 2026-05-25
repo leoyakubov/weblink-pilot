@@ -3,26 +3,25 @@ create table if not exists app_roles (
     name varchar(32) not null unique
 );
 
-insert into app_roles (name)
-select 'ADMIN'
-where not exists (
-    select 1 from app_roles where name = 'ADMIN'
-);
-
-insert into app_roles (name)
-select 'USER'
-where not exists (
-    select 1 from app_roles where name = 'USER'
-);
+insert into app_roles (name) values ('ADMIN');
+insert into app_roles (name) values ('USER');
 
 alter table app_users
     add column if not exists role_id bigint;
 
-update app_users u
-set role_id = r.id
-from app_roles r
-where upper(u.role) = r.name
-  and u.role_id is null;
+update app_users
+set role_id = (
+    select id from app_roles where name = 'ADMIN'
+)
+where upper(role) = 'ADMIN'
+  and role_id is null;
+
+update app_users
+set role_id = (
+    select id from app_roles where name = 'USER'
+)
+where upper(role) = 'USER'
+  and role_id is null;
 
 alter table app_users
     alter column role_id set not null;

@@ -7,12 +7,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
+import io.weblinkpilot.auth.config.BootstrapDefaults;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.url.domain.ShortLink;
+import io.weblinkpilot.url.repository.ShortLinkRepository;
+import io.weblinkpilot.url.service.UrlCacheService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import io.weblinkpilot.auth.config.BootstrapDefaults;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,11 +40,30 @@ class AnalyticsApiIntegrationTest {
     @Autowired
     private ClickEventRepository clickEventRepository;
 
+    @Autowired
+    private ShortLinkRepository shortLinkRepository;
+
+    @Autowired
+    private UrlCacheService urlCacheService;
+
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         clickEventRepository.deleteAllInBatch();
+        shortLinkRepository.deleteAllInBatch();
+
+        OffsetDateTime createdAt = OffsetDateTime.of(2026, 5, 22, 11, 45, 0, 0, ZoneOffset.UTC);
+        shortLinkRepository.save(new ShortLink(
+                "demo-it",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                null,
+                null,
+                createdAt,
+                null
+        ));
+        urlCacheService.findByCode("demo-it");
+
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
