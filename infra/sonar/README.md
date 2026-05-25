@@ -33,14 +33,16 @@ From `backend/`, after the SonarQube stack is up:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+$env:SONAR_HOST_URL = "http://localhost:9001"
+.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
 ```
 
 On macOS/Linux:
 
 ```bash
 export SONAR_TOKEN="<your-token>"
-./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+export SONAR_HOST_URL="http://localhost:9001"
+./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL"
 ```
 
 The Maven build already knows where the aggregate JaCoCo XML report lives:
@@ -56,9 +58,11 @@ You can also put the token in a local-only `.env.local` file at the repo root:
 
 ```bash
 SONAR_TOKEN=your-token-here
+SONAR_HOST_URL=http://localhost:9001
 ```
 
 ## Notes
 
 - This is a local-dev Sonar setup, not a hosted SonarCloud configuration.
 - If you run into Docker memory or Elasticsearch bootstrap warnings, restart Docker Desktop first.
+- GitHub Actions Sonar is currently disabled; run the local analysis script instead.

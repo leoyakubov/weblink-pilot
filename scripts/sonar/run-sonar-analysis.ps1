@@ -36,6 +36,10 @@ function Import-LocalEnvFile {
         if ($name -eq 'SONAR_TOKEN' -and -not [string]::IsNullOrWhiteSpace($value)) {
             $env:SONAR_TOKEN = $value
         }
+
+        if ($name -eq 'SONAR_HOST_URL' -and -not [string]::IsNullOrWhiteSpace($value)) {
+            $env:SONAR_HOST_URL = $value
+        }
     }
 }
 
@@ -49,9 +53,14 @@ if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
     throw 'SONAR_TOKEN is required.'
 }
 
+if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL)) {
+    $env:SONAR_HOST_URL = 'http://localhost:9001'
+}
+
 $sonarArg = "-Dsonar.token=$($env:SONAR_TOKEN)"
+$sonarHostArg = "-Dsonar.host.url=$($env:SONAR_HOST_URL)"
 try {
-    & .\mvnw.cmd -Pci clean install sonar:sonar $sonarArg 2>&1 | Out-Host
+    & .\mvnw.cmd -Pci clean install sonar:sonar $sonarArg $sonarHostArg 2>&1 | Out-Host
 }
 finally {
     Pop-Location

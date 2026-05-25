@@ -21,4 +21,6 @@ if [[ -z "${SONAR_TOKEN:-}" ]]; then
   exit 1
 fi
 
-./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+SONAR_HOST_URL="${SONAR_HOST_URL:-http://localhost:9001}"
+
+./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL"

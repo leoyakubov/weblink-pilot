@@ -25,7 +25,6 @@
         <archunit.version>1.4.2</archunit.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
-        <sonar.host.url>http://localhost:9001</sonar.host.url>
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
         <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>

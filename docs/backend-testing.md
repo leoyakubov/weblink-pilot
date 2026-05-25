@@ -129,6 +129,7 @@ The HTML report is generated under:
 ## SonarQube
 
 The repo also has a local SonarQube stack under `infra/sonar/`.
+GitHub Actions Sonar is temporarily disabled for now; use the local stack and helper script below.
 
 Start it from the repo root:
 
@@ -140,12 +141,16 @@ Then run the analysis from `backend/` with a Sonar token:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+$env:SONAR_HOST_URL = "http://localhost:9001"
+.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
 ```
 
 The backend POM points Sonar at the aggregate JaCoCo XML report:
 
 - `coverage/target/site/jacoco-aggregate/jacoco.xml`
+
+For local SonarQube, the scripts and docs default the host URL to `http://localhost:9001`.
+For GitHub Actions, set `SONAR_HOST_URL` as a repository secret or environment secret that points at the hosted SonarQube server.
 
 ## Current Rule of Thumb
 

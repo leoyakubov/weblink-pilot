@@ -32,9 +32,10 @@ jobs:
     name: Sonar
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ false }}
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
     steps:
       - name: Checkout
@@ -47,14 +48,8 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - name: Run Sonar analysis
-        if: env.SONAR_TOKEN != ''
-        working-directory: backend
-        run: ./mvnw -B -Pci clean install sonar:sonar -Dsonar.token=$SONAR_TOKEN
-
       - name: Skip Sonar analysis
-        if: env.SONAR_TOKEN == ''
-        run: echo "SONAR_TOKEN is not configured; skipping Sonar analysis."
+        run: echo "Sonar analysis is temporarily disabled; run it locally with scripts/sonar/run-sonar-analysis.ps1 or .sh."
 
   frontend:
     name: Frontend

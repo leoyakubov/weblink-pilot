@@ -1,8 +1,8 @@
 # WebLinkPilot
 
 [![CI](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml)
-[![Backend Deploy](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml)
-[![Frontend Deploy](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml)
+[![Frontend Deploy](https://api.netlify.com/api/v1/badges/96caf667-74c1-4b10-829d-f9af82d694d5/deploy-status)](https://app.netlify.com/sites/96caf667-74c1-4b10-829d-f9af82d694d5/deploys)
+[![Backend Deploy](https://img.shields.io/badge/Render-backend-46E3B7?logo=render&logoColor=white)](https://dashboard.render.com/)
 
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
@@ -85,6 +85,7 @@ Helper script:
 ## SonarQube / Code Quality
 
 Local SonarQube support is available through the Docker stack in `infra/sonar/`.
+GitHub Actions Sonar is currently disabled for now; run Sonar locally with the helper scripts below.
 
 Start it from the repo root:
 
@@ -102,14 +103,16 @@ Then run analysis from `backend/`:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+$env:SONAR_HOST_URL = "http://localhost:9001"
+.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
 ```
 
 On macOS/Linux:
 
 ```bash
 export SONAR_TOKEN="<your-token>"
-./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+export SONAR_HOST_URL="http://localhost:9001"
+./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL"
 ```
 
 The default local SonarQube UI is available at `http://localhost:9001`.
@@ -123,6 +126,7 @@ For a local-only convenience file, create `.env.local` at the repo root with:
 
 ```bash
 SONAR_TOKEN=your-token-here
+SONAR_HOST_URL=http://localhost:9001
 JWT_SECRET=your-local-jwt-secret
 ```
 
