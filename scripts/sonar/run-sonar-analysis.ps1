@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $backendDir = Join-Path $repoRoot 'backend'
 $envFile = Join-Path $repoRoot '.env.local'
-Set-Location $backendDir
+Push-Location $backendDir
 
 function Import-LocalEnvFile {
     param(
@@ -50,4 +50,9 @@ if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
 }
 
 $sonarArg = "-Dsonar.token=$($env:SONAR_TOKEN)"
-& .\mvnw.cmd clean verify sonar:sonar $sonarArg
+try {
+    & .\mvnw.cmd clean verify sonar:sonar $sonarArg
+}
+finally {
+    Pop-Location
+}

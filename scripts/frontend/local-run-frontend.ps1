@@ -12,9 +12,14 @@ if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
     throw 'npm is not available on PATH. Install Node.js 22+ before running this script.'
 }
 
-Set-Location $frontendDir
-if (-not (Test-Path (Join-Path $frontendDir 'node_modules'))) {
-    npm install
-}
+Push-Location $frontendDir
+try {
+    if (-not (Test-Path (Join-Path $frontendDir 'node_modules'))) {
+        npm install
+    }
 
-npm run dev
+    npm run dev
+}
+finally {
+    Pop-Location
+}

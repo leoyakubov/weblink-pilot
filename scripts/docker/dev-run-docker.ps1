@@ -12,5 +12,10 @@ if (-not (Test-Path $composeFile)) {
     throw "Docker Compose file not found at $composeFile"
 }
 
-Set-Location $repoRoot
-docker compose -f $composeFile up --build
+Push-Location $repoRoot
+try {
+    docker compose -f $composeFile up --build
+}
+finally {
+    Pop-Location
+}

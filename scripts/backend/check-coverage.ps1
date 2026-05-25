@@ -9,7 +9,7 @@ try {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        & .\mvnw.cmd -pl app -am test 2>&1 | Out-Host
+        & .\mvnw.cmd -pl coverage -am clean verify 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference

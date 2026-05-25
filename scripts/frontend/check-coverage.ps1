@@ -2,11 +2,11 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$backendDir = Join-Path $repoRoot 'backend'
+$frontendDir = Join-Path $repoRoot 'frontend'
 
-Push-Location $backendDir
+Push-Location $frontendDir
 try {
-    & .\mvnw.cmd -pl coverage -am verify
+    npm run test:coverage
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }

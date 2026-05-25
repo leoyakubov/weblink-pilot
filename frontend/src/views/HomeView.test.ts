@@ -54,7 +54,7 @@ describe('HomeView', () => {
     const wrapper = mountHome()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Short links, QR codes, and analytics in one clean workspace.')
+    expect(wrapper.text()).toContain('Short links, QR, analytics.')
     expect(wrapper.text()).toContain('Quick create')
     expect(wrapper.text()).toContain('Recent links')
     expect(wrapper.text()).toContain('Guest mode ready for demo links')

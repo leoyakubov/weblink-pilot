@@ -42,10 +42,15 @@ function Import-DotEnv {
 
 Import-DotEnv (Join-Path $repoRoot '.env.local')
 
-Set-Location $backendDir
-& $mvnw -Pdev -pl shared-contracts,url,analytics,app -am install -DskipTests
-if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
-}
+Push-Location $backendDir
+try {
+    & $mvnw -Pdev -pl shared-contracts,url,analytics,app -am install -DskipTests
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
 
-& $mvnw -Pdev -f (Join-Path $backendDir 'app/pom.xml') spring-boot:run
+    & $mvnw -Pdev -f (Join-Path $backendDir 'app/pom.xml') spring-boot:run
+}
+finally {
+    Pop-Location
+}

@@ -74,8 +74,8 @@ The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/ind
 
 Helper script:
 
-- Windows: [`scripts/backend/coverage.ps1`](scripts/backend/coverage.ps1)
-- Unix: [`scripts/backend/coverage.sh`](scripts/backend/coverage.sh)
+- Windows: [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
+- Unix: [`scripts/backend/check-coverage.sh`](scripts/backend/check-coverage.sh)
 
 ## SonarQube / Code Quality
 
@@ -126,13 +126,18 @@ JWT_SECRET=your-local-jwt-secret
 From the repo root, the preferred quick-run entrypoints are grouped by area:
 
 - Backend local: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
-- Backend dev: [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1)
+- Backend dev only: [`scripts/backend/dev-run-backend-only.ps1`](scripts/backend/dev-run-backend-only.ps1)
 - Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
+- Backend coverage: [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
+- Frontend tests and coverage: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
+- Frontend coverage gate: `npm run test:coverage` from `frontend/`
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
 - Sonar analysis: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)
+- Git hook setup: [`scripts/setup-git-hooks.ps1`](scripts/setup-git-hooks.ps1)
+- Before push check: [`scripts/check-before-push.ps1`](scripts/check-before-push.ps1)
 
 Unix versions live beside them with the same names ending in `.sh`.
 
@@ -144,6 +149,7 @@ If you want the exact test/build shortcuts the project uses day to day:
 
 - Frontend tests: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
 - Frontend build: [`scripts/frontend/build-frontend.ps1`](scripts/frontend/build-frontend.ps1)
+- Frontend coverage: [`scripts/frontend/check-coverage.ps1`](scripts/frontend/check-coverage.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 
 ## Docker Stack
@@ -189,7 +195,7 @@ You can also select the Maven convenience profiles when running the backend dire
 Quick guide:
 
 - `local`: [`scripts/backend/local-run-backend.ps1`](scripts/backend/local-run-backend.ps1)
-- `dev`: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1) for the full stack, or [`scripts/backend/dev-run-backend.ps1`](scripts/backend/dev-run-backend.ps1) after Postgres and Redis are up locally
+- `dev`: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1) for the full stack, or [`scripts/backend/dev-run-backend-only.ps1`](scripts/backend/dev-run-backend-only.ps1) after Postgres and Redis are up locally
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:
