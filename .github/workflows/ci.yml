@@ -26,7 +26,7 @@ jobs:
 
       - name: Build and test backend
         working-directory: backend
-        run: ./mvnw -B -ntp clean verify
+        run: ./mvnw -B -ntp -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
 
   sonar:
     name: Sonar
@@ -50,7 +50,7 @@ jobs:
       - name: Run Sonar analysis
         if: env.SONAR_TOKEN != ''
         working-directory: backend
-        run: ./mvnw -B -ntp clean verify sonar:sonar -Dsonar.token=$SONAR_TOKEN
+        run: ./mvnw -B -ntp -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token=$SONAR_TOKEN
 
       - name: Skip Sonar analysis
         if: env.SONAR_TOKEN == ''

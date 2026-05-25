@@ -33,14 +33,14 @@ From `backend/`, after the SonarQube stack is up:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
 ```
 
 On macOS/Linux:
 
 ```bash
 export SONAR_TOKEN="<your-token>"
-./mvnw clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
 ```
 
 The Maven build already knows where the aggregate JaCoCo XML report lives:

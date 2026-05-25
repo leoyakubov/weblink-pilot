@@ -6,5 +6,5 @@ backend_dir="$repo_root/backend"
 
 (
   cd "$backend_dir"
-  ./mvnw -pl app,url,analytics -am spotless:check checkstyle:check spotbugs:check
+./mvnw -Pci -pl app,url,analytics -am spotless:check checkstyle:check spotbugs:check
 )

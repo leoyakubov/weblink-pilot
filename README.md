@@ -62,13 +62,13 @@ Useful API endpoints after startup:
 To run the backend verification gate from `backend/`:
 
 ```powershell
-.\mvnw.cmd clean verify
+.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw clean verify
+./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
 ```
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
@@ -98,14 +98,14 @@ Then run analysis from `backend/`:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
 ```
 
 On macOS/Linux:
 
 ```bash
 export SONAR_TOKEN="<your-token>"
-./mvnw clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
 ```
 
 The default local SonarQube UI is available at `http://localhost:9001`.
@@ -198,6 +198,7 @@ The frontend container serves the Vue app through nginx and proxies API and redi
 - `local`: default for developer workflows, uses H2 and localhost origins
 - `dev`: Docker stack profile, uses PostgreSQL, Redis, and localhost deployment wiring
 - `demo`: use for deployed demo instances, uses PostgreSQL, Redis, and runtime secrets
+- `ci`: verification profile for automated builds, tests, coverage, and static analysis
 
 When running `local`, the H2 console is available at `http://localhost:8080/h2-console`.
 

@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd clean verify 2>&1 | Out-Host
+        & .\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference

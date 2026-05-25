@@ -21,4 +21,4 @@ if [[ -z "${SONAR_TOKEN:-}" ]]; then
   exit 1
 fi
 
-./mvnw clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"

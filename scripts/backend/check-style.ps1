@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd -pl app,url,analytics -am spotless:check checkstyle:check spotbugs:check 2>&1 | Out-Host
+        & .\mvnw.cmd -Pci -pl app,url,analytics -am spotless:check checkstyle:check spotbugs:check 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference

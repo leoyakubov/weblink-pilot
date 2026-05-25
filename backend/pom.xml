@@ -156,6 +156,13 @@
 
     <profiles>
         <profile>
+            <id>ci</id>
+            <properties>
+                <spring-boot.run.profiles>ci</spring-boot.run.profiles>
+                <ci.build>true</ci.build>
+            </properties>
+        </profile>
+        <profile>
             <id>local</id>
             <properties>
                 <spring-boot.run.profiles>local</spring-boot.run.profiles>
