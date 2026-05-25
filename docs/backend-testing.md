@@ -134,7 +134,7 @@ GitHub Actions Sonar is temporarily disabled for now; use the local stack and he
 Start it from the repo root:
 
 ```powershell
-.\scripts\sonar\run-sonar-stack.ps1
+.\scripts\quality\sonar-stack.ps1
 ```
 
 Then run the analysis from `backend/` with a Sonar token:
@@ -162,13 +162,13 @@ The repo now provides dependency vulnerability checks for both the backend and f
 Run the combined security gate from the repo root when you want to check dependencies manually:
 
 ```powershell
-.\scripts\check-dependencies.ps1
+.\scripts\security\check-dependencies.ps1
 ```
 
 On macOS/Linux:
 
 ```bash
-./scripts/check-dependencies.sh
+./scripts/security/check-dependencies.sh
 ```
 
 You can also run the backend and frontend checks separately with the helper scripts listed in the README.
@@ -180,13 +180,13 @@ The repo also runs a Gitleaks-based secret scan to catch hardcoded credentials a
 Run it from the repo root:
 
 ```powershell
-.\scripts\check-secrets.ps1
+.\scripts\git\scan-secrets.ps1
 ```
 
 On macOS/Linux:
 
 ```bash
-./scripts/check-secrets.sh
+./scripts/git/scan-secrets.sh
 ```
 
 ## Current Rule of Thumb

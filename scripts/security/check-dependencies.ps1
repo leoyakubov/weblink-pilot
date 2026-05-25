@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$backendScript = Join-Path $repoRoot 'scripts\backend\check-vulnerabilities.ps1'
-$frontendScript = Join-Path $repoRoot 'scripts\frontend\check-vulnerabilities.ps1'
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$backendScript = Join-Path $repoRoot 'scripts\security\backend-vulnerabilities.ps1'
+$frontendScript = Join-Path $repoRoot 'scripts\security\frontend-vulnerabilities.ps1'
 
 function Write-BoxHeader {
     param([Parameter(Mandatory = $true)][string]$Title)

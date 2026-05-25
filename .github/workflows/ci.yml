@@ -22,7 +22,7 @@ jobs:
           cache: maven
 
       - name: Run backend style checks
-        run: ./scripts/backend/check-style.sh
+        run: ./scripts/quality/backend-style.sh
 
       - name: Build and test backend
         working-directory: backend
@@ -49,7 +49,7 @@ jobs:
           cache: maven
 
       - name: Skip Sonar analysis
-        run: echo "Sonar analysis is temporarily disabled; run it locally with scripts/sonar/run-sonar-analysis.ps1 or .sh."
+        run: echo "Sonar analysis is temporarily disabled; run it locally with scripts/quality/sonar-analysis.ps1 or .sh."
 
   frontend:
     name: Frontend
@@ -71,7 +71,7 @@ jobs:
         run: npm ci
 
       - name: Run frontend style checks
-        run: ./scripts/frontend/check-style.sh
+        run: ./scripts/quality/frontend-style.sh
 
       - name: Run frontend coverage gate
         working-directory: frontend
@@ -90,4 +90,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run secret scan
-        run: ./scripts/check-secrets.sh
+        run: ./scripts/git/scan-secrets.sh

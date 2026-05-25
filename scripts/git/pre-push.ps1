@@ -1,13 +1,13 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$backendStyleScript = Join-Path $repoRoot 'scripts\backend\check-style.ps1'
-$backendCoverageScript = Join-Path $repoRoot 'scripts\backend\check-coverage.ps1'
-$secretScanScript = Join-Path $repoRoot 'scripts\check-secrets.ps1'
-$frontendStyleScript = Join-Path $repoRoot 'scripts\frontend\check-style.ps1'
-$frontendTestScript = Join-Path $repoRoot 'scripts\frontend\test-frontend.ps1'
-$frontendCoverageScript = Join-Path $repoRoot 'scripts\frontend\check-coverage.ps1'
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$backendStyleScript = Join-Path $repoRoot 'scripts\quality\backend-style.ps1'
+$backendCoverageScript = Join-Path $repoRoot 'scripts\quality\backend-coverage.ps1'
+$secretScanScript = Join-Path $repoRoot 'scripts\git\scan-secrets.ps1'
+$frontendStyleScript = Join-Path $repoRoot 'scripts\quality\frontend-style.ps1'
+$frontendTestScript = Join-Path $repoRoot 'scripts\quality\frontend-tests.ps1'
+$frontendCoverageScript = Join-Path $repoRoot 'scripts\quality\frontend-coverage.ps1'
 $frontendDir = Join-Path $repoRoot 'frontend'
 $backendCoverageCsv = Join-Path $repoRoot 'backend\coverage\target\site\jacoco-aggregate\jacoco.csv'
 $frontendCoverageSummary = Join-Path $frontendDir 'coverage\coverage-summary.json'
@@ -22,21 +22,21 @@ function Invoke-Check {
     )
 
     Write-BoxHeader $Label
-    $logFile = [System.IO.Path]::GetTempFileName()
     try {
-        & $ScriptBlock 2>&1 | Tee-Object -FilePath $logFile | Out-Host
-        $pipelineSucceeded = $?
-        $capturedText = Get-Content -Raw -LiteralPath $logFile
-        $exitCode = $LASTEXITCODE
-        if (-not $pipelineSucceeded -and $exitCode -eq 0) {
-            $exitCode = 1
+        $scriptResult = & $ScriptBlock
+        if ($null -ne $scriptResult -and $scriptResult.PSObject.Properties.Match('ExitCode').Count -gt 0) {
+            $exitCode = [int]$scriptResult.ExitCode
+            $capturedText = [string]$scriptResult.Output
+        } else {
+            $capturedText = [string]$scriptResult
+            $exitCode = $LASTEXITCODE
         }
+
         if ($exitCode -eq 0 -and $capturedText -match 'BUILD FAILURE|Coverage checks have not been met|Failed to execute goal') {
             $exitCode = 1
         }
     }
     finally {
-        Remove-Item -LiteralPath $logFile -ErrorAction SilentlyContinue
     }
     return [pscustomobject]@{
         ExitCode = $exitCode
@@ -83,7 +83,63 @@ function Invoke-PowerShellScript {
         $ScriptPath
     ) + $Arguments
 
-    & powershell.exe @argumentList
+    $stdoutFile = [System.IO.Path]::GetTempFileName()
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    $capturedOutput = [System.Text.StringBuilder]::new()
+    $stdoutLength = 0
+    $stderrLength = 0
+
+    function Write-NewText {
+        param(
+            [Parameter(Mandatory = $true)]
+            [string]$Path,
+
+            [Parameter(Mandatory = $true)]
+            [ref]$KnownLength
+        )
+
+        if (-not (Test-Path -LiteralPath $Path)) {
+            return
+        }
+
+        $text = Get-Content -Raw -LiteralPath $Path -ErrorAction SilentlyContinue
+        if ([string]::IsNullOrEmpty($text)) {
+            return
+        }
+
+        if ($text.Length -le $KnownLength.Value) {
+            return
+        }
+
+        $chunk = $text.Substring($KnownLength.Value)
+        if ($chunk) {
+            Write-Host $chunk -NoNewline
+            [void]$capturedOutput.Append($chunk)
+            $KnownLength.Value = $text.Length
+        }
+    }
+
+    try {
+        $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+
+        while (-not $process.HasExited) {
+            Write-NewText -Path $stdoutFile -KnownLength ([ref]$stdoutLength)
+            Write-NewText -Path $stderrFile -KnownLength ([ref]$stderrLength)
+            Start-Sleep -Milliseconds 200
+        }
+
+        Write-NewText -Path $stdoutFile -KnownLength ([ref]$stdoutLength)
+        Write-NewText -Path $stderrFile -KnownLength ([ref]$stderrLength)
+        $global:LASTEXITCODE = $process.ExitCode
+    }
+    finally {
+        Remove-Item -LiteralPath $stdoutFile, $stderrFile -ErrorAction SilentlyContinue
+    }
+
+    return [pscustomobject]@{
+        ExitCode = $process.ExitCode
+        Output = $capturedOutput.ToString()
+    }
 }
 
 function Get-TestSummary {

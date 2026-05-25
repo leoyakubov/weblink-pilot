@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 backend_tests_log="$(mktemp)"
 backend_coverage_log="$(mktemp)"
 backend_style_log="$(mktemp)"
@@ -38,7 +38,7 @@ frontend_tests_summary=""
 frontend_coverage_summary=""
 
 print_box "Running backend style checks..."
-if "$repo_root/scripts/backend/check-style.sh" 2>&1 | tee "$backend_style_log"; then
+if "$repo_root/scripts/quality/backend-style.sh" 2>&1 | tee "$backend_style_log"; then
   backend_style_status="PASS"
 else
   backend_style_status="FAIL"
@@ -46,7 +46,7 @@ fi
 
 if [ "$backend_style_status" = "PASS" ]; then
   print_box "Running backend tests and coverage..."
-  if "$repo_root/scripts/backend/check-coverage.sh" 2>&1 | tee "$backend_coverage_log"; then
+  if "$repo_root/scripts/quality/backend-coverage.sh" 2>&1 | tee "$backend_coverage_log"; then
     backend_coverage_status="PASS"
   else
     backend_coverage_status="FAIL"
@@ -55,7 +55,7 @@ fi
 
 if [ "$backend_coverage_status" = "PASS" ]; then
   print_box "Running secret scan..."
-  if "$repo_root/scripts/check-secrets.sh" 2>&1 | tee "$secret_scan_log"; then
+  if "$repo_root/scripts/git/scan-secrets.sh" 2>&1 | tee "$secret_scan_log"; then
     secret_scan_status="PASS"
   else
     secret_scan_status="FAIL"
@@ -64,7 +64,7 @@ fi
 
 if [ "$secret_scan_status" = "PASS" ]; then
   print_box "Running frontend style checks..."
-  if "$repo_root/scripts/frontend/check-style.sh" 2>&1 | tee "$frontend_style_log"; then
+  if "$repo_root/scripts/quality/frontend-style.sh" 2>&1 | tee "$frontend_style_log"; then
     frontend_style_status="PASS"
   else
     frontend_style_status="FAIL"
@@ -73,7 +73,7 @@ fi
 
 if [ "$frontend_style_status" = "PASS" ]; then
   print_box "Running frontend tests..."
-  if "$repo_root/scripts/frontend/test-frontend.sh" 2>&1 | tee "$frontend_tests_log"; then
+  if "$repo_root/scripts/quality/frontend-tests.sh" 2>&1 | tee "$frontend_tests_log"; then
     frontend_tests_status="PASS"
   else
     frontend_tests_status="FAIL"
@@ -82,7 +82,7 @@ fi
 
 if [ "$frontend_tests_status" = "PASS" ]; then
   print_box "Running frontend coverage..."
-  if "$repo_root/scripts/frontend/check-coverage.sh" 2>&1 | tee "$frontend_coverage_log"; then
+  if "$repo_root/scripts/quality/frontend-coverage.sh" 2>&1 | tee "$frontend_coverage_log"; then
     frontend_coverage_status="PASS"
   else
     frontend_coverage_status="FAIL"

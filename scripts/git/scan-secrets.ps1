@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $gitleaksImage = if ($env:GITLEAKS_IMAGE) { $env:GITLEAKS_IMAGE } else { 'ghcr.io/gitleaks/gitleaks:v8.30.1' }
 
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {

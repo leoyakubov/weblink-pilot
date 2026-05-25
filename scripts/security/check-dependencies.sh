@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 print_box() {
   local title="$1"
@@ -31,7 +31,7 @@ backend_status='SKIPPED'
 frontend_status='SKIPPED'
 
 print_box "Running backend dependency checks..."
-if "$repo_root/scripts/backend/check-vulnerabilities.sh"; then
+if "$repo_root/scripts/security/backend-vulnerabilities.sh"; then
   backend_status='PASS'
 else
   backend_status='FAIL'
@@ -39,7 +39,7 @@ fi
 
 if [ "$backend_status" = 'PASS' ]; then
   print_box "Running frontend dependency checks..."
-  if "$repo_root/scripts/frontend/check-vulnerabilities.sh"; then
+  if "$repo_root/scripts/security/frontend-vulnerabilities.sh"; then
     frontend_status='PASS'
   else
     frontend_status='FAIL'
