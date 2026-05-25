@@ -279,7 +279,9 @@ For a lightweight browser smoke check against the Docker stack, use:
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 
-For a deployment smoke check against the live demo, set `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`, then run:
+For a deployment smoke check against the live demo, the script will read `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` from the repo root `.env.local` automatically. You can still override them in your shell if needed.
+
+Then run:
 
 ```powershell
 .\scripts\quality\deployment-smoke.ps1

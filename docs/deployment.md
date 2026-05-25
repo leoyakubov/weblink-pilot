@@ -64,6 +64,7 @@ If you use Render free and want to reduce cold starts, add a GitHub repository v
 Then let the scheduled GitHub workflow ping that URL every 10 minutes.
 
 If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
+For local manual smoke runs, the helper script also reads those values from the repo root `.env.local` automatically.
 
 ## How it works
 

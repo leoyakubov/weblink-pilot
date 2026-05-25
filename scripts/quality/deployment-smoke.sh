@@ -1,6 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [[ -f "$repo_root/.env.local" ]]; then
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    trimmed="${line#"${line%%[![:space:]]*}"}"
+    trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+    if [[ -z "$trimmed" || "$trimmed" == \#* ]]; then
+      continue
+    fi
+
+    name="${trimmed%%=*}"
+    value="${trimmed#*=}"
+    if [[ -z "$name" || "$name" == "$value" ]]; then
+      continue
+    fi
+
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    if [[ ( "$value" == \"*\" && "$value" == *\" ) || ( "$value" == \'*\' && "$value" == *\' ) ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+
+    if [[ -z "${!name:-}" ]]; then
+      export "$name=$value"
+    fi
+  done < "$repo_root/.env.local"
+fi
+
 backend_health_url="${RENDER_HEALTH_URL:-}"
 frontend_smoke_url="${FRONTEND_SMOKE_URL:-}"
 

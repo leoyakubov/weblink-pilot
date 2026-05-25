@@ -1,6 +1,50 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$envFile = Join-Path $repoRoot '.env.local'
+$backendHealthUrl = $env:RENDER_HEALTH_URL
+$frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
+
+function Import-LocalEnvFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    foreach ($line in Get-Content -LiteralPath $Path) {
+        $trimmed = $line.Trim()
+        if ($trimmed.Length -eq 0 -or $trimmed.StartsWith('#')) {
+            continue
+        }
+
+        $separatorIndex = $trimmed.IndexOf('=')
+        if ($separatorIndex -lt 1) {
+            continue
+        }
+
+        $name = $trimmed.Substring(0, $separatorIndex).Trim()
+        $value = $trimmed.Substring($separatorIndex + 1).Trim()
+        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+
+        if ($name -eq 'RENDER_HEALTH_URL' -and [string]::IsNullOrWhiteSpace($env:RENDER_HEALTH_URL)) {
+            $env:RENDER_HEALTH_URL = $value
+        }
+
+        if ($name -eq 'FRONTEND_SMOKE_URL' -and [string]::IsNullOrWhiteSpace($env:FRONTEND_SMOKE_URL)) {
+            $env:FRONTEND_SMOKE_URL = $value
+        }
+    }
+}
+
+Import-LocalEnvFile -Path $envFile
+
 $backendHealthUrl = $env:RENDER_HEALTH_URL
 $frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
 
