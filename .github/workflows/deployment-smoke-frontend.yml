@@ -1,9 +1,9 @@
-name: Deployment Smoke
+name: Deployment Smoke Frontend
 
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: [Deploy backend, Deploy frontend]
+    workflows: [Deploy frontend]
     types: [completed]
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
 
     env:
       SMOKE_TARGET: demo
-      RENDER_HEALTH_URL: ${{ vars.RENDER_HEALTH_URL || secrets.RENDER_HEALTH_URL }}
+      SMOKE_CHECK: frontend
       FRONTEND_SMOKE_URL: ${{ vars.FRONTEND_SMOKE_URL || secrets.FRONTEND_SMOKE_URL }}
 
     steps:
@@ -24,5 +24,5 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 2
 
-      - name: Run deployment smoke checks
+      - name: Run frontend deployment smoke checks
         run: ./scripts/quality/deployment-smoke.sh

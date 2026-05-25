@@ -4,6 +4,8 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $envFile = Join-Path $repoRoot '.env.local'
 $smokeTarget = if ([string]::IsNullOrWhiteSpace($env:SMOKE_TARGET)) { 'local' } else { $env:SMOKE_TARGET.Trim().ToLowerInvariant() }
+$smokeCheck = if ([string]::IsNullOrWhiteSpace($env:SMOKE_CHECK)) { 'all' } else { $env:SMOKE_CHECK.Trim().ToLowerInvariant() }
+$checksToRun = if ($smokeCheck -eq 'all') { @('backend', 'frontend') } else { @($smokeCheck) }
 $backendHealthUrl = ''
 $frontendSmokeUrl = ''
 
@@ -46,28 +48,54 @@ function Import-LocalEnvFile {
 
 if ($smokeTarget -eq 'demo') {
     Import-LocalEnvFile -Path $envFile
-    $backendHealthUrl = $env:RENDER_HEALTH_URL
-    $frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
+    if ($checksToRun -contains 'backend') {
+        $backendHealthUrl = $env:RENDER_HEALTH_URL
+    }
+    if ($checksToRun -contains 'frontend') {
+        $frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
+    }
 } else {
     $backendHealthUrl = 'http://localhost:8080/actuator/health'
     $frontendSmokeUrl = 'http://localhost:8081'
 }
 
 if ($smokeTarget -eq 'demo') {
-    if ([string]::IsNullOrWhiteSpace($backendHealthUrl)) {
+    if ($checksToRun -contains 'backend' -and [string]::IsNullOrWhiteSpace($backendHealthUrl)) {
         throw 'RENDER_HEALTH_URL is not set.'
     }
 
-    if ([string]::IsNullOrWhiteSpace($frontendSmokeUrl)) {
+    if ($checksToRun -contains 'frontend' -and [string]::IsNullOrWhiteSpace($frontendSmokeUrl)) {
         throw 'FRONTEND_SMOKE_URL is not set.'
     }
 }
 
+if ($smokeCheck -notin @('all', 'backend', 'frontend')) {
+    throw "SMOKE_CHECK must be one of: all, backend, frontend. Got '$smokeCheck'."
+}
+
 Write-Host ''
-if ($smokeTarget -eq 'demo') {
-    Write-Host '=== Deployment smoke tests starting ===' -ForegroundColor Magenta
-} else {
-    Write-Host '=== Local smoke tests starting ===' -ForegroundColor Magenta
+switch ($smokeCheck) {
+    'backend' {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Backend deployment smoke tests starting ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Backend local smoke tests starting ===' -ForegroundColor Magenta
+        }
+    }
+    'frontend' {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Frontend deployment smoke tests starting ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Frontend local smoke tests starting ===' -ForegroundColor Magenta
+        }
+    }
+    Default {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Deployment smoke tests starting ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Local smoke tests starting ===' -ForegroundColor Magenta
+        }
+    }
 }
 Write-Host ''
 
@@ -134,14 +162,40 @@ function Invoke-SmokeCheck {
     }
 }
 
-Invoke-SmokeCheck -Name 'backend health' -Url $backendHealthUrl -ExpectedPattern ''
-Write-Host ''
-Write-Host ''
-Invoke-SmokeCheck -Name 'frontend home' -Url $frontendSmokeUrl -ExpectedPattern 'id="app"'
+if ($checksToRun -contains 'backend') {
+    Invoke-SmokeCheck -Name 'backend health' -Url $backendHealthUrl -ExpectedPattern ''
+}
+
+if ($smokeCheck -eq 'all') {
+    Write-Host ''
+    Write-Host ''
+}
+
+if ($checksToRun -contains 'frontend') {
+    Invoke-SmokeCheck -Name 'frontend home' -Url $frontendSmokeUrl -ExpectedPattern 'id="app"'
+}
 
 Write-Host ''
-if ($smokeTarget -eq 'demo') {
-    Write-Host '=== Deployment smoke tests passed ===' -ForegroundColor Magenta
-} else {
-    Write-Host '=== Local smoke tests passed ===' -ForegroundColor Magenta
+switch ($smokeCheck) {
+    'backend' {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Backend deployment smoke tests passed ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Backend local smoke tests passed ===' -ForegroundColor Magenta
+        }
+    }
+    'frontend' {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Frontend deployment smoke tests passed ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Frontend local smoke tests passed ===' -ForegroundColor Magenta
+        }
+    }
+    Default {
+        if ($smokeTarget -eq 'demo') {
+            Write-Host '=== Deployment smoke tests passed ===' -ForegroundColor Magenta
+        } else {
+            Write-Host '=== Local smoke tests passed ===' -ForegroundColor Magenta
+        }
+    }
 }

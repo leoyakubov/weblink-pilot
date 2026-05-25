@@ -14,7 +14,7 @@
 | Backend CI | Done | GitHub Actions runs Maven and frontend validation on push and PR. |
 | Backend deploy workflow | Done | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`. |
 | Frontend deploy workflow | Done | GitHub Actions builds the Vue app and deploys it to Netlify. |
-| Deployment smoke tests | Done | GitHub Actions checks the live backend health endpoint and frontend home page after deploys. |
+| Deployment smoke tests | Done | GitHub Actions checks the live backend health endpoint and frontend home page after deploys with separate backend and frontend smoke workflows. |
 | Render runtime | Done | The backend runs on Render with Postgres and the demo profile. |
 | Redis cache | Next | Add a Render Key Value instance and point the demo profile at its internal Redis URL. |
 | Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
@@ -27,7 +27,8 @@
 - CI: [`.github/workflows/ci.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/ci.yml)
 - Render deploy: [`.github/workflows/deploy-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-backend.yml)
 - Netlify deploy: [`.github/workflows/deploy-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-frontend.yml)
-- Deployment smoke: [`.github/workflows/deployment-smoke.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke.yml)
+- Deployment smoke backend: [`.github/workflows/deployment-smoke-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke-backend.yml)
+- Deployment smoke frontend: [`.github/workflows/deployment-smoke-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke-frontend.yml)
 
 ## Backend deploy secret
 
@@ -146,5 +147,5 @@ Notes:
 1. push to `main` or run the CI workflow
 2. let the backend deploy workflow trigger the Render redeploy
 3. let the frontend deploy workflow publish the Vue app to Netlify
-4. let the deployment smoke workflow verify the live backend and frontend
+4. let the backend and frontend deployment smoke workflows verify the live backend and frontend
 5. open the live site and verify create-link, redirect, analytics, and QR flows

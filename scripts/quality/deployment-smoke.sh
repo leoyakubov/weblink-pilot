@@ -4,6 +4,22 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 smoke_target="${SMOKE_TARGET:-local}"
 smoke_target="${smoke_target,,}"
+smoke_check="${SMOKE_CHECK:-all}"
+smoke_check="${smoke_check,,}"
+checks_to_run=()
+
+case "$smoke_check" in
+  all)
+    checks_to_run=('backend' 'frontend')
+    ;;
+  backend|frontend)
+    checks_to_run=("$smoke_check")
+    ;;
+  *)
+    echo "SMOKE_CHECK must be one of: all, backend, frontend. Got '$smoke_check'."
+    exit 1
+    ;;
+esac
 
 if [[ "$smoke_target" == demo && -f "$repo_root/.env.local" ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
@@ -34,33 +50,50 @@ fi
 backend_health_url="${RENDER_HEALTH_URL:-}"
 frontend_smoke_url="${FRONTEND_SMOKE_URL:-}"
 
-if [ "$smoke_target" = 'demo' ]; then
-  printf '\n=== Deployment smoke tests starting ===\n\n'
-else
-  printf '\n=== Local smoke tests starting ===\n\n'
-fi
+case "$smoke_check" in
+  all)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Deployment smoke tests starting ===\n\n'
+    else
+      printf '\n=== Local smoke tests starting ===\n\n'
+    fi
+    ;;
+  backend)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Backend deployment smoke tests starting ===\n\n'
+    else
+      printf '\n=== Backend local smoke tests starting ===\n\n'
+    fi
+    ;;
+  frontend)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Frontend deployment smoke tests starting ===\n\n'
+    else
+      printf '\n=== Frontend local smoke tests starting ===\n\n'
+    fi
+    ;;
+esac
 
-if [ -z "$backend_health_url" ]; then
+if [[ " ${checks_to_run[*]} " == *" backend "* ]]; then
   if [ "$smoke_target" = 'demo' ]; then
-    echo 'RENDER_HEALTH_URL is not set.'
-    exit 1
+    if [ -z "$backend_health_url" ]; then
+      echo 'RENDER_HEALTH_URL is not set.'
+      exit 1
+    fi
+  else
+    backend_health_url='http://localhost:8080/actuator/health'
   fi
-
-  backend_health_url='http://localhost:8080/actuator/health'
 fi
 
-if [ -z "$frontend_smoke_url" ]; then
+if [[ " ${checks_to_run[*]} " == *" frontend "* ]]; then
   if [ "$smoke_target" = 'demo' ]; then
-    echo 'FRONTEND_SMOKE_URL is not set.'
-    exit 1
+    if [ -z "$frontend_smoke_url" ]; then
+      echo 'FRONTEND_SMOKE_URL is not set.'
+      exit 1
+    fi
+  else
+    frontend_smoke_url='http://localhost:8081'
   fi
-
-  frontend_smoke_url='http://localhost:8081'
-fi
-
-if [ "$smoke_target" != 'demo' ]; then
-  backend_health_url='http://localhost:8080/actuator/health'
-  frontend_smoke_url='http://localhost:8081'
 fi
 
 check_smoke() {
@@ -109,12 +142,38 @@ check_smoke() {
   printf '\033[32m%s HTTP %s app shell present\033[0m\n' "$name" "$status_code"
 }
 
-check_smoke 'backend health' "$backend_health_url" '"status"[[:space:]]*:[[:space:]]*"UP"'
-printf '\n\n'
-check_smoke 'frontend home' "$frontend_smoke_url" 'id="app"'
-
-if [ "$smoke_target" = 'demo' ]; then
-  printf '\n=== Deployment smoke tests passed ===\n'
-else
-  printf '\n=== Local smoke tests passed ===\n'
+if [[ " ${checks_to_run[*]} " == *" backend "* ]]; then
+  check_smoke 'backend health' "$backend_health_url" '"status"[[:space:]]*:[[:space:]]*"UP"'
 fi
+
+if [ "$smoke_check" = 'all' ]; then
+  printf '\n\n'
+fi
+
+if [[ " ${checks_to_run[*]} " == *" frontend "* ]]; then
+  check_smoke 'frontend home' "$frontend_smoke_url" 'id="app"'
+fi
+
+case "$smoke_check" in
+  backend)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Backend deployment smoke tests passed ===\n'
+    else
+      printf '\n=== Backend local smoke tests passed ===\n'
+    fi
+    ;;
+  frontend)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Frontend deployment smoke tests passed ===\n'
+    else
+      printf '\n=== Frontend local smoke tests passed ===\n'
+    fi
+    ;;
+  *)
+    if [ "$smoke_target" = 'demo' ]; then
+      printf '\n=== Deployment smoke tests passed ===\n'
+    else
+      printf '\n=== Local smoke tests passed ===\n'
+    fi
+    ;;
+esac

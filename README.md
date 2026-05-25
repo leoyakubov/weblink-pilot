@@ -3,8 +3,8 @@
 [![CI](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml)
 [![Frontend Deploy](https://api.netlify.com/api/v1/badges/96caf667-74c1-4b10-829d-f9af82d694d5/deploy-status)](https://app.netlify.com/sites/96caf667-74c1-4b10-829d-f9af82d694d5/deploys)
 [![Backend Deploy](https://img.shields.io/badge/Render-backend-46E3B7?logo=render&logoColor=white)](https://dashboard.render.com/)
-[![Backend Smoke](https://img.shields.io/github/actions/workflow/status/leoyakubov/weblink-pilot/deployment-smoke.yml?branch=main&label=Backend%20Smoke)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke.yml)
-[![Frontend Smoke](https://img.shields.io/github/actions/workflow/status/leoyakubov/weblink-pilot/deployment-smoke.yml?branch=main&label=Frontend%20Smoke)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke.yml)
+[![Backend Smoke](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke-backend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke-backend.yml)
+[![Frontend Smoke](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke-frontend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke-frontend.yml)
 
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
