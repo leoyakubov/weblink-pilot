@@ -37,6 +37,26 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>shared-contracts</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>url</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>analytics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
