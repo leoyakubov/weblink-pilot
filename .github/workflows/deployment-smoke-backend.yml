@@ -1,4 +1,4 @@
-name: BE Smoke
+name: Deployment Smoke Backend
 
 on:
   workflow_dispatch:
