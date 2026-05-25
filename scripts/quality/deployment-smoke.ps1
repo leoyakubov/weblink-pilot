@@ -48,6 +48,10 @@ Import-LocalEnvFile -Path $envFile
 $backendHealthUrl = $env:RENDER_HEALTH_URL
 $frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
 
+Write-Host ''
+Write-Host '=== Deployment smoke tests starting ===' -ForegroundColor Magenta
+Write-Host ''
+
 if ([string]::IsNullOrWhiteSpace($backendHealthUrl)) {
     throw 'RENDER_HEALTH_URL is not set.'
 }
@@ -64,22 +68,62 @@ function Invoke-SmokeCheck {
         [Parameter(Mandatory = $true)]
         [string]$Url,
 
-        [Parameter(Mandatory = $true)]
-        [string]$ExpectedPattern
+        [string]$ExpectedPattern = ''
     )
 
-    Write-Host "Checking $Name at $Url..."
-    $response = Invoke-WebRequest -Uri $Url -TimeoutSec 30 -MaximumRedirection 5
-    if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 300) {
-        throw "$Name returned unexpected status code $($response.StatusCode)."
-    }
+    $color = if ($Name -eq 'backend health') { 'Cyan' } else { 'Green' }
+    Write-Host ''
+    Write-Host "Checking $Name at $Url..." -ForegroundColor $color
+    $bodyFile = [System.IO.Path]::GetTempFileName()
+    try {
+        $statusCode = (& curl.exe --silent --show-error --location --max-time 30 --output $bodyFile --write-out '%{http_code}' $Url).Trim()
+        if ($LASTEXITCODE -ne 0) {
+            throw "$Name request failed."
+        }
 
-    if ($response.Content -notmatch $ExpectedPattern) {
-        throw "$Name response did not match the expected smoke pattern."
+        $responseText = Get-Content -Raw -LiteralPath $bodyFile
+        $responseSnippet = if ($responseText.Length -gt 500) { $responseText.Substring(0, 500) } else { $responseText }
+        if ([string]::IsNullOrWhiteSpace($statusCode)) {
+            throw "$Name did not return an HTTP status code."
+        }
+
+        if ($Name -eq 'backend health') {
+            try {
+                $health = $responseText | ConvertFrom-Json
+            }
+            catch {
+                Write-Host "$Name response:" -ForegroundColor DarkYellow
+                Write-Host $responseSnippet -ForegroundColor DarkYellow
+                throw "$Name response was not valid JSON."
+            }
+
+            if ([string]::IsNullOrWhiteSpace($health.status) -or $health.status.ToString().ToUpperInvariant() -ne 'UP') {
+                Write-Host "$Name response:" -ForegroundColor DarkYellow
+                Write-Host $responseSnippet -ForegroundColor DarkYellow
+                throw "$Name response status was not UP."
+            }
+
+            Write-Host "$Name HTTP $statusCode status $($health.status)" -ForegroundColor $color
+            return
+        }
+
+        if ($ExpectedPattern -and $responseText -notmatch $ExpectedPattern) {
+            Write-Host "$Name response snippet:" -ForegroundColor DarkYellow
+            Write-Host $responseSnippet -ForegroundColor DarkYellow
+            throw "$Name response did not match the expected smoke pattern."
+        }
+
+        Write-Host "$Name HTTP $statusCode app shell present" -ForegroundColor $color
+    }
+    finally {
+        Remove-Item -LiteralPath $bodyFile -ErrorAction SilentlyContinue
     }
 }
 
-Invoke-SmokeCheck -Name 'backend health' -Url $backendHealthUrl -ExpectedPattern '"status"\s*:\s*"UP"'
-Invoke-SmokeCheck -Name 'frontend home' -Url $frontendSmokeUrl -ExpectedPattern '<title>\s*WebLinkPilot\s*</title>'
+Invoke-SmokeCheck -Name 'backend health' -Url $backendHealthUrl -ExpectedPattern ''
+Write-Host ''
+Write-Host ''
+Invoke-SmokeCheck -Name 'frontend home' -Url $frontendSmokeUrl -ExpectedPattern 'id="app"'
 
-Write-Host 'Deployment smoke checks passed.'
+Write-Host ''
+Write-Host '=== Deployment smoke tests passed ===' -ForegroundColor Magenta

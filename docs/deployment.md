@@ -65,6 +65,7 @@ Then let the scheduled GitHub workflow ping those URLs every 5 minutes.
 
 If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
 For local manual smoke runs, the helper script also reads those values from the repo root `.env.local` automatically.
+The smoke output prints the backend HTTP status plus `status=UP`, and the frontend HTTP status plus the app shell marker (`id="app"`). The PowerShell and Bash scripts also add spacing, color, and start/end banners so the backend and frontend checks are easy to scan separately.
 
 ## How it works
 
