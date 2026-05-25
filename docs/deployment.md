@@ -14,6 +14,7 @@
 | Backend CI | Done | GitHub Actions runs Maven and frontend validation on push and PR. |
 | Backend deploy workflow | Done | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`. |
 | Frontend deploy workflow | Done | GitHub Actions builds the Vue app and deploys it to Netlify. |
+| Deployment smoke tests | Done | GitHub Actions checks the live backend health endpoint and frontend home page after deploys. |
 | Render runtime | Done | The backend runs on Render with Postgres and the demo profile. |
 | Redis cache | Next | Add a Render Key Value instance and point the demo profile at its internal Redis URL. |
 | Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
@@ -26,6 +27,7 @@
 - CI: [`.github/workflows/ci.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/ci.yml)
 - Render deploy: [`.github/workflows/deploy-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-backend.yml)
 - Netlify deploy: [`.github/workflows/deploy-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-frontend.yml)
+- Deployment smoke: [`.github/workflows/deployment-smoke.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke.yml)
 
 ## Backend deploy secret
 
@@ -50,16 +52,18 @@
 - `NETLIFY_AUTH_TOKEN`
 - `NETLIFY_SITE_ID`
 - `VITE_API_BASE_URL`
+- `FRONTEND_SMOKE_URL`
 
 ## Optional keep-alive
 
 If you use Render free and want to reduce cold starts, add a GitHub repository variable:
 
 - `RENDER_HEALTH_URL=https://<your-render-backend>/actuator/health`
+- `FRONTEND_SMOKE_URL=https://<your-netlify-site>/`
 
 Then let the scheduled GitHub workflow ping that URL every 10 minutes.
 
-If you store it in the `demo` environment instead, the ping workflow will pick it up from that environment too.
+If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
 
 ## How it works
 
@@ -133,10 +137,12 @@ Notes:
 - `REDIS_URL` should use the Render Key Value instance's internal URL from the Connect menu.
 - The bootstrap env vars seed the shared `admin / admin123` and `user / user123` accounts for demo/local/dev. Leave them empty if you want to opt out in a specific environment.
 - The startup seeder also creates two anonymous starter links and one owned link for each seeded account so the first-run UI has real content.
+- `FRONTEND_SMOKE_URL` should point to the live Netlify site root, for example `https://weblink-pilot.netlify.app/`.
 
 ### 4. Deploy in this order
 
 1. push to `main` or run the CI workflow
 2. let the backend deploy workflow trigger the Render redeploy
 3. let the frontend deploy workflow publish the Vue app to Netlify
-4. open the live site and verify create-link, redirect, analytics, and QR flows
+4. let the deployment smoke workflow verify the live backend and frontend
+5. open the live site and verify create-link, redirect, analytics, and QR flows

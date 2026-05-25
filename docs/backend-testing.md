@@ -79,8 +79,10 @@ Use these for very fast end-to-end confidence:
 - create-link flow
 - redirect flow
 - Docker stack boot check
+- live deployment smoke checks
 
 This repo has a browser smoke test for the Docker stack in `frontend/scripts/smoke-docker.mjs`.
+For the deployed demo, use `scripts/quality/deployment-smoke.ps1` or `.sh` with `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
 
 ### Architectural tests
 

@@ -25,13 +25,13 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - Dependency vulnerability checks.
 - Architecture tests for module boundaries.
 - Smoke checks for the full app flow.
+- Deployment smoke tests.
 - Consistent logging format.
 
 ## Nice To Have
 
 - Dependency update automation.
 - Secret scanning.
-- Deployment smoke tests.
 - Release notes or changelog entries.
 
 ## Current Quality Flow

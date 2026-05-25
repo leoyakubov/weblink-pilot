@@ -190,6 +190,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend coverage gate: `npm run test:coverage` from `frontend/`
 - Frontend build: [`scripts/dev/frontend-build.ps1`](scripts/dev/frontend-build.ps1)
 - Frontend smoke test: [`scripts/dev/frontend-smoke.ps1`](scripts/dev/frontend-smoke.ps1)
+- Deployment smoke: [`scripts/quality/deployment-smoke.ps1`](scripts/quality/deployment-smoke.ps1)
 - Dependency security: [`scripts/security/check-dependencies.ps1`](scripts/security/check-dependencies.ps1)
 - Secret scanning: [`scripts/git/scan-secrets.ps1`](scripts/git/scan-secrets.ps1)
 - Dev Docker full stack: [`scripts/dev/docker-full-stack.ps1`](scripts/dev/docker-full-stack.ps1)
@@ -277,6 +278,18 @@ For a lightweight browser smoke check against the Docker stack, use:
 - Unix: [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
+
+For a deployment smoke check against the live demo, set `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`, then run:
+
+```powershell
+.\scripts\quality\deployment-smoke.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/quality/deployment-smoke.sh
+```
 
 ## Frontend Quick Start
 

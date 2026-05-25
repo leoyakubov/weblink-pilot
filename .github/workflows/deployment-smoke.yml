@@ -1,0 +1,27 @@
+name: Deployment Smoke
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Deploy backend, Deploy frontend]
+    types: [completed]
+
+jobs:
+  smoke:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    environment: demo
+
+    env:
+      RENDER_HEALTH_URL: ${{ vars.RENDER_HEALTH_URL || secrets.RENDER_HEALTH_URL }}
+      FRONTEND_SMOKE_URL: ${{ vars.FRONTEND_SMOKE_URL || secrets.FRONTEND_SMOKE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Run deployment smoke checks
+        run: ./scripts/quality/deployment-smoke.sh
