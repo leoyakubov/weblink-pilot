@@ -22,7 +22,7 @@ public class UrlCacheService {
 
     @Cacheable(cacheNames = "shortLinks", key = "#p0", unless = "#result == null")
     public ShortLinkSnapshot findByCode(String code) {
-        log.debug("link.cache.lookup code={}", code);
+        log.debug("url.cache.lookup code={}", code);
         Optional<ShortLink> link = repository.findByCode(code);
         return link.map(value -> new ShortLinkSnapshot(
                 value.getCode(),
@@ -36,6 +36,6 @@ public class UrlCacheService {
 
     @CacheEvict(cacheNames = "shortLinks", key = "#p0")
     public void evict(String code) {
-        log.debug("link.cache.evict code={}", code);
+        log.debug("url.cache.evict code={}", code);
     }
 }

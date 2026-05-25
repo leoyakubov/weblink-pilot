@@ -41,13 +41,13 @@ public class RedirectService {
     public String resolveTarget(String code, RedirectRequestContext context, LinkTrackingSource source) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
-            log.warn("link.redirect.miss code={}", code);
+            log.warn("url.link.redirect.miss code={}", code);
             throw new UrlNotFoundException(code);
         }
 
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (snapshot.expiresAt() != null && snapshot.expiresAt().isBefore(now)) {
-            log.warn("link.redirect.expired code={} expiredAt={}", code, snapshot.expiresAt());
+            log.warn("url.link.redirect.expired code={} expiredAt={}", code, snapshot.expiresAt());
             throw new UrlExpiredException(code);
         }
 
@@ -69,7 +69,7 @@ public class RedirectService {
         ));
 
         log.info(
-                "link.redirect.success code={} source={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
+                "url.link.redirect.success code={} source={} targetHost={} clickCount={} clientIp={} country={} referrerPresent={} userAgentPresent={}",
                 code,
                 source,
                 hostOf(snapshot.originalUrl()),

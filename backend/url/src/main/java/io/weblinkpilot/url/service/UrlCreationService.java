@@ -55,7 +55,7 @@ public class UrlCreationService {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         String normalizedOwnerUsername = normalizeOwnerUsername(ownerUsername);
         if (request.expiresAt() != null && request.expiresAt().isBefore(now)) {
-            log.warn("link.create.rejected reason=expired_request expiresAt={}", request.expiresAt());
+            log.warn("url.link.create.rejected reason=expired_request expiresAt={}", request.expiresAt());
             throw new IllegalArgumentException("Expiration time must be in the future");
         }
 
@@ -75,7 +75,7 @@ public class UrlCreationService {
         ));
 
         log.info(
-                "link.create.success code={} aliasType={} originalHost={} expiresAt={} shortUrl={}",
+                "url.link.created code={} aliasType={} originalHost={} expiresAt={} shortUrl={}",
                 link.getCode(),
                 alias == null ? "generated" : "custom",
                 hostOf(link.getOriginalUrl()),
@@ -101,7 +101,7 @@ public class UrlCreationService {
 
     private ShortLink createWithCustomAlias(String alias, String normalizedUrl, String ownerUsername, OffsetDateTime now, OffsetDateTime expiresAt) {
         if (repository.existsByCustomAlias(alias)) {
-            log.warn("link.create.rejected reason=duplicate_alias alias={}", alias);
+            log.warn("url.link.create.rejected reason=duplicate_alias alias={}", alias);
             throw new DuplicateAliasException(alias);
         }
 

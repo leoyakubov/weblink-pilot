@@ -25,12 +25,12 @@ public class BootstrapAdminRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         var admin = userAccountService.ensureBootstrapAdmin();
         if (admin != null) {
-            log.info("auth.bootstrap.admin username={} role={}", admin.getUsername(), admin.getRoleName());
+            log.info("auth.bootstrap.account.seeded username={} role={}", admin.getUsername(), admin.getRoleName());
         }
 
         var user = userAccountService.ensureBootstrapUser();
         if (user != null) {
-            log.info("auth.bootstrap.user username={} role={}", user.getUsername(), user.getRoleName());
+            log.info("auth.bootstrap.account.seeded username={} role={}", user.getUsername(), user.getRoleName());
         }
     }
 }

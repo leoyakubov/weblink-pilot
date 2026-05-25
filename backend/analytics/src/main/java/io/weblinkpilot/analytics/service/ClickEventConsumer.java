@@ -21,7 +21,7 @@ public class ClickEventConsumer {
     @Async
     @EventListener
     public void handle(LinkClickedEvent event) {
-        log.info("analytics.click.event.received code={} source={} clickedAt={}", event.code(), event.source(), event.clickedAt());
+        log.info("analytics.click.received code={} source={} clickedAt={}", event.code(), event.source(), event.clickedAt());
         clickEventRecorder.record(event);
     }
 }

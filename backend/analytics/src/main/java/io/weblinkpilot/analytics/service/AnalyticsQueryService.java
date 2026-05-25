@@ -29,7 +29,7 @@ public class AnalyticsQueryService {
     @Cacheable(cacheNames = "analyticsCounts", key = "#code")
     public long countClicks(String code) {
         long count = repository.countByShortCode(code);
-        log.info("analytics.count.code={} count={}", code, count);
+        log.info("analytics.query.count code={} count={}", code, count);
         return count;
     }
 
@@ -61,7 +61,7 @@ public class AnalyticsQueryService {
         );
 
         log.info(
-                "analytics.summary.code={} totalClicks={} redirectClicks={} qrScans={} uniqueVisitors={} topCountries={}",
+                "analytics.query.summary code={} totalClicks={} redirectClicks={} qrScans={} uniqueVisitors={} topCountries={}",
                 code,
                 totalClicks,
                 redirectClicks,

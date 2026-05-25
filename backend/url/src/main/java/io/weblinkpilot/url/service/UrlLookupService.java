@@ -33,12 +33,12 @@ public class UrlLookupService {
     public LinkResponse getByCode(String code) {
         ShortLinkSnapshot snapshot = cacheService.findByCode(code);
         if (snapshot == null) {
-            log.warn("link.read.miss code={}", code);
+            log.warn("url.link.read.miss code={}", code);
             throw new UrlNotFoundException(code);
         }
 
         log.info(
-                "link.read.success code={} clickCount={} originalHost={} expiresAt={}",
+                "url.link.read.success code={} clickCount={} originalHost={} expiresAt={}",
                 snapshot.code(),
                 snapshot.clickCount(),
                 hostOf(snapshot.originalUrl()),
@@ -68,7 +68,7 @@ public class UrlLookupService {
         List<LinkResponse> links = content.stream()
                 .map(this::toResponse)
                 .toList();
-        log.info("link.list.success limit={} returned={}", size, links.size());
+        log.info("url.link.list.success limit={} returned={}", size, links.size());
         return links;
     }
 

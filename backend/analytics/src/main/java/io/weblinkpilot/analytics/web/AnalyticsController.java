@@ -50,7 +50,7 @@ public class AnalyticsController {
         assertCanReadAnalytics(authentication, code);
         summaryCounter.increment();
         AnalyticsSummaryResponse response = analyticsQueryService.summarize(code);
-        log.info("analytics.summary.code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
+        log.info("analytics.api.summary code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
         return response;
     }
 

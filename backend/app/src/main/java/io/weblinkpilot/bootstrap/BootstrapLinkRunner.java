@@ -51,7 +51,7 @@ public class BootstrapLinkRunner implements ApplicationRunner {
 
         ShortLink link = new ShortLink(code, originalUrl, customAlias, ownerUsername, createdAt, null);
         shortLinkRepository.save(link);
-        log.info("bootstrap.link code={} owner={}", code, ownerUsername == null ? "anonymous" : ownerUsername);
+        log.info("bootstrap.link.seeded code={} owner={}", code, ownerUsername == null ? "anonymous" : ownerUsername);
     }
 
     private String normalizeUsername(String username) {

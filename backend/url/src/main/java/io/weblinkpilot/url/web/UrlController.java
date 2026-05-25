@@ -156,7 +156,7 @@ public class UrlController {
     public ResponseEntity<byte[]> qr(@PathVariable("code") String code) {
         qrCounter.increment();
         byte[] png = qrCodeService.generatePng(publicUrlBuilder.buildQrScanUrl(code));
-        log.info("link.qr.generated code={} bytes={}", code, png.length);
+        log.info("url.qr.generated code={} bytes={}", code, png.length);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(png);
