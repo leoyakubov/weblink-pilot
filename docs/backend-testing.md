@@ -119,7 +119,7 @@ Run the coverage build from the repo root:
 Run the aggregate coverage build from `backend/`:
 
 ```powershell
-.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
+.\mvnw.cmd -Pci clean verify
 ```
 
 The HTML report is generated under:
@@ -140,7 +140,7 @@ Then run the analysis from `backend/` with a Sonar token:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+.\mvnw.cmd -Pci clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
 ```
 
 The backend POM points Sonar at the aggregate JaCoCo XML report:

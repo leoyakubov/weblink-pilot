@@ -62,13 +62,13 @@ Useful API endpoints after startup:
 To run the backend verification gate from `backend/`:
 
 ```powershell
-.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
+.\mvnw.cmd -Pci clean verify
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify
+./mvnw -Pci clean verify
 ```
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
@@ -98,14 +98,14 @@ Then run analysis from `backend/`:
 
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
-.\mvnw.cmd -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
+.\mvnw.cmd -Pci clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN
 ```
 
 On macOS/Linux:
 
 ```bash
 export SONAR_TOKEN="<your-token>"
-./mvnw -Pci -pl shared-contracts,url,analytics,app,coverage -am clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
+./mvnw -Pci clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN"
 ```
 
 The default local SonarQube UI is available at `http://localhost:9001`.
