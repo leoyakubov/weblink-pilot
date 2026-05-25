@@ -23,45 +23,70 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableConfigurationProperties(AuthProperties.class)
 public class SecurityConfiguration {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http.cors(cors -> { })
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/metrics", "/actuator/metrics/**", "/actuator/prometheus").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/r/**", "/q/**").permitAll()
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/auth/me").authenticated()
-                        .requestMatchers("/api/v1/admin/**").hasRole(RoleNames.ADMIN)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/urls/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
-                        .requestMatchers("/api/v1/urls/*/preview").permitAll()
-                        .requestMatchers("/api/v1/urls/*/qr").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
+  @Bean
+  public SecurityFilterChain securityFilterChain(
+      HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    try {
+      http.cors(cors -> {})
+          .sessionManagement(
+              session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .csrf(csrf -> csrf.disable())
+          .authorizeHttpRequests(
+              auth ->
+                  auth.requestMatchers(
+                          "/actuator/health",
+                          "/actuator/info",
+                          "/actuator/metrics",
+                          "/actuator/metrics/**",
+                          "/actuator/prometheus")
+                      .permitAll()
+                      .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
+                      .permitAll()
+                      .requestMatchers("/r/**", "/q/**")
+                      .permitAll()
+                      .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login")
+                      .permitAll()
+                      .requestMatchers("/api/v1/auth/me")
+                      .authenticated()
+                      .requestMatchers("/api/v1/admin/**")
+                      .hasRole(RoleNames.ADMIN)
+                      .requestMatchers(HttpMethod.GET, "/api/v1/urls/*")
+                      .permitAll()
+                      .requestMatchers(HttpMethod.POST, "/api/v1/urls")
+                      .permitAll()
+                      .requestMatchers("/api/v1/urls/*/preview")
+                      .permitAll()
+                      .requestMatchers("/api/v1/urls/*/qr")
+                      .permitAll()
+                      .requestMatchers(HttpMethod.OPTIONS, "/**")
+                      .permitAll()
+                      .anyRequest()
+                      .permitAll())
+          .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+      return http.build();
+    } catch (Exception exception) {
+      throw new IllegalStateException("Unable to configure security", exception);
     }
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource(CorsProperties corsProperties) {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(corsProperties.getAllowedOriginPatterns());
-        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(java.util.List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
-        configuration.setExposedHeaders(java.util.List.of("Location"));
-        configuration.setAllowCredentials(true);
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource(CorsProperties corsProperties) {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOriginPatterns(corsProperties.getAllowedOriginPatterns());
+    configuration.setAllowedMethods(
+        java.util.List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(
+        java.util.List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+    configuration.setExposedHeaders(java.util.List.of("Location"));
+    configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
+  }
 }

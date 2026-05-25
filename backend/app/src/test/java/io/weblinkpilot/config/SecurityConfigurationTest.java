@@ -1,0 +1,41 @@
+package io.weblinkpilot.config;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+class SecurityConfigurationTest {
+
+  private final SecurityConfiguration configuration = new SecurityConfiguration();
+
+  @Test
+  void passwordEncoderMatchesEncodedPassword() {
+    String encoded = configuration.passwordEncoder().encode("Password1");
+
+    assertThat(configuration.passwordEncoder().matches("Password1", encoded)).isTrue();
+  }
+
+  @Test
+  void corsConfigurationUsesConfiguredOrigins() {
+    CorsProperties corsProperties = new CorsProperties();
+    corsProperties.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+
+    CorsConfigurationSource source = configuration.corsConfigurationSource(corsProperties);
+    CorsConfiguration corsConfiguration =
+        source.getCorsConfiguration(new MockHttpServletRequest("GET", "/api/v1/urls"));
+
+    assertThat(corsConfiguration).isNotNull();
+    assertThat(corsConfiguration.getAllowedOriginPatterns())
+        .containsExactly("http://localhost:5173");
+    assertThat(corsConfiguration.getAllowedMethods())
+        .containsExactly("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
+    assertThat(corsConfiguration.getAllowedHeaders())
+        .containsExactly("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With");
+    assertThat(corsConfiguration.getExposedHeaders()).containsExactly("Location");
+    assertThat(corsConfiguration.getAllowCredentials()).isTrue();
+  }
+}

@@ -13,24 +13,30 @@ import org.springframework.stereotype.Component;
 @Profile("!test")
 public class BootstrapAdminRunner implements ApplicationRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(BootstrapAdminRunner.class);
+  private static final Logger log = LoggerFactory.getLogger(BootstrapAdminRunner.class);
 
-    private final UserAccountService userAccountService;
+  private final UserAccountService userAccountService;
 
-    public BootstrapAdminRunner(UserAccountService userAccountService) {
-        this.userAccountService = userAccountService;
+  public BootstrapAdminRunner(UserAccountService userAccountService) {
+    this.userAccountService = userAccountService;
+  }
+
+  @Override
+  public void run(ApplicationArguments args) {
+    var admin = userAccountService.ensureBootstrapAdmin();
+    if (admin != null) {
+      log.info(
+          "auth.bootstrap.account.seeded username={} role={}",
+          admin.getUsername(),
+          admin.getRoleName());
     }
 
-    @Override
-    public void run(ApplicationArguments args) {
-        var admin = userAccountService.ensureBootstrapAdmin();
-        if (admin != null) {
-            log.info("auth.bootstrap.account.seeded username={} role={}", admin.getUsername(), admin.getRoleName());
-        }
-
-        var user = userAccountService.ensureBootstrapUser();
-        if (user != null) {
-            log.info("auth.bootstrap.account.seeded username={} role={}", user.getUsername(), user.getRoleName());
-        }
+    var user = userAccountService.ensureBootstrapUser();
+    if (user != null) {
+      log.info(
+          "auth.bootstrap.account.seeded username={} role={}",
+          user.getUsername(),
+          user.getRoleName());
     }
+  }
 }

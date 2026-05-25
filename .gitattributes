@@ -1,2 +1,6 @@
+* text=auto eol=lf
+
 backend/mvnw text eol=lf
 backend/mvnw.cmd text eol=crlf
+
+*.cmd text eol=crlf

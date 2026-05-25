@@ -1,84 +1,79 @@
 package io.weblinkpilot.url.web;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Component;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CountryResolver {
 
-    private static final List<String> TRUSTED_COUNTRY_HEADERS = List.of(
-            "CF-IPCountry",
-            "CloudFront-Viewer-Country",
-            "X-App-Country",
-            "X-Geo-Country"
-    );
+  private static final List<String> TRUSTED_COUNTRY_HEADERS =
+      List.of("CF-IPCountry", "CloudFront-Viewer-Country", "X-App-Country", "X-Geo-Country");
 
-    public String resolve(HttpServletRequest request, String clientIp) {
-        for (String header : TRUSTED_COUNTRY_HEADERS) {
-            String country = normalizeCountryCode(request.getHeader(header));
-            if (country != null) {
-                return country;
-            }
-        }
-
-        String countryFromLocale = countryFromAcceptLanguage(request.getHeader("Accept-Language"));
-        if (countryFromLocale != null) {
-            return countryFromLocale;
-        }
-
-        if (isLocalOrPrivateAddress(clientIp)) {
-            return "LOCAL";
-        }
-
-        return "UNKNOWN";
+  public String resolve(HttpServletRequest request, String clientIp) {
+    for (String header : TRUSTED_COUNTRY_HEADERS) {
+      String country = normalizeCountryCode(request.getHeader(header));
+      if (country != null) {
+        return country;
+      }
     }
 
-    private String normalizeCountryCode(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-
-        String normalized = value.trim().toUpperCase(Locale.ROOT);
-        return normalized.length() >= 2 && normalized.length() <= 8 ? normalized : null;
+    String countryFromLocale = countryFromAcceptLanguage(request.getHeader("Accept-Language"));
+    if (countryFromLocale != null) {
+      return countryFromLocale;
     }
 
-    private String countryFromAcceptLanguage(String acceptLanguage) {
-        if (acceptLanguage == null || acceptLanguage.isBlank()) {
-            return null;
-        }
-
-        try {
-            for (Locale.LanguageRange range : Locale.LanguageRange.parse(acceptLanguage)) {
-                Locale locale = Locale.forLanguageTag(range.getRange());
-                if (!locale.getCountry().isBlank()) {
-                    return locale.getCountry().toUpperCase(Locale.ROOT);
-                }
-            }
-        } catch (IllegalArgumentException ignored) {
-            // fall through to LOCAL/UNKNOWN handling
-        }
-
-        return null;
+    if (isLocalOrPrivateAddress(clientIp)) {
+      return "LOCAL";
     }
 
-    private boolean isLocalOrPrivateAddress(String clientIp) {
-        if (clientIp == null || clientIp.isBlank()) {
-            return false;
-        }
+    return "UNKNOWN";
+  }
 
-        try {
-            InetAddress address = InetAddress.getByName(clientIp.trim());
-            return address.isAnyLocalAddress()
-                    || address.isLoopbackAddress()
-                    || address.isSiteLocalAddress()
-                    || address.isLinkLocalAddress();
-        } catch (UnknownHostException ex) {
-            return false;
-        }
+  private String normalizeCountryCode(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
     }
+
+    String normalized = value.trim().toUpperCase(Locale.ROOT);
+    return normalized.length() >= 2 && normalized.length() <= 8 ? normalized : null;
+  }
+
+  private String countryFromAcceptLanguage(String acceptLanguage) {
+    if (acceptLanguage == null || acceptLanguage.isBlank()) {
+      return null;
+    }
+
+    try {
+      for (Locale.LanguageRange range : Locale.LanguageRange.parse(acceptLanguage)) {
+        Locale locale = Locale.forLanguageTag(range.getRange());
+        if (!locale.getCountry().isBlank()) {
+          return locale.getCountry().toUpperCase(Locale.ROOT);
+        }
+      }
+    } catch (IllegalArgumentException ignored) {
+      // fall through to LOCAL/UNKNOWN handling
+    }
+
+    return null;
+  }
+
+  private boolean isLocalOrPrivateAddress(String clientIp) {
+    if (clientIp == null || clientIp.isBlank()) {
+      return false;
+    }
+
+    try {
+      InetAddress address = InetAddress.getByName(clientIp.trim());
+      return address.isAnyLocalAddress()
+          || address.isLoopbackAddress()
+          || address.isSiteLocalAddress()
+          || address.isLinkLocalAddress();
+    } catch (UnknownHostException ex) {
+      return false;
+    }
+  }
 }

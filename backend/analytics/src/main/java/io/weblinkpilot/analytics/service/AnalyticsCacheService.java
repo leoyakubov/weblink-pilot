@@ -9,13 +9,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class AnalyticsCacheService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalyticsCacheService.class);
+  private static final Logger log = LoggerFactory.getLogger(AnalyticsCacheService.class);
 
-    @Caching(evict = {
-            @CacheEvict(cacheNames = "analyticsCounts", key = "#code"),
-            @CacheEvict(cacheNames = "analyticsSummaries", key = "#code")
-    })
-    public void evict(String code) {
-        log.debug("analytics.cache.evict code={}", code);
-    }
+  @Caching(
+      evict = {
+        @CacheEvict(cacheNames = "analyticsCounts", key = "#code"),
+        @CacheEvict(cacheNames = "analyticsSummaries", key = "#code")
+      })
+  public void evict(String code) {
+    log.debug("analytics.cache.evict code={}", code);
+  }
 }

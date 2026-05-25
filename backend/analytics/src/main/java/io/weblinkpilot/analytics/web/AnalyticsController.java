@@ -20,55 +20,71 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1/analytics")
 public class AnalyticsController {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
+  private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
-    private final AnalyticsQueryService analyticsQueryService;
-    private final UrlLookupService urlLookupService;
-    private final Counter countCounter;
-    private final Counter summaryCounter;
+  private final AnalyticsQueryService analyticsQueryService;
+  private final UrlLookupService urlLookupService;
+  private final Counter countCounter;
+  private final Counter summaryCounter;
 
-    public AnalyticsController(AnalyticsQueryService analyticsQueryService, UrlLookupService urlLookupService, MeterRegistry meterRegistry) {
-        this.analyticsQueryService = analyticsQueryService;
-        this.urlLookupService = urlLookupService;
-        this.countCounter = Counter.builder("weblinkpilot.analytics.count.requests")
-                .description("Number of analytics count requests")
-                .register(meterRegistry);
-        this.summaryCounter = Counter.builder("weblinkpilot.analytics.summary.requests")
-                .description("Number of analytics summary requests")
-                .register(meterRegistry);
+  public AnalyticsController(
+      AnalyticsQueryService analyticsQueryService,
+      UrlLookupService urlLookupService,
+      MeterRegistry meterRegistry) {
+    this.analyticsQueryService = analyticsQueryService;
+    this.urlLookupService = urlLookupService;
+    this.countCounter =
+        Counter.builder("weblinkpilot.analytics.count.requests")
+            .description("Number of analytics count requests")
+            .register(meterRegistry);
+    this.summaryCounter =
+        Counter.builder("weblinkpilot.analytics.summary.requests")
+            .description("Number of analytics summary requests")
+            .register(meterRegistry);
+  }
+
+  @GetMapping("/{code}/count")
+  public long count(Authentication authentication, @PathVariable("code") String code) {
+    assertCanReadAnalytics(authentication, code);
+    countCounter.increment();
+    return analyticsQueryService.countClicks(code);
+  }
+
+  @GetMapping("/{code}")
+  public AnalyticsSummaryResponse summary(
+      Authentication authentication, @PathVariable("code") String code) {
+    assertCanReadAnalytics(authentication, code);
+    summaryCounter.increment();
+    AnalyticsSummaryResponse response = analyticsQueryService.summarize(code);
+    log.info(
+        "analytics.api.summary code={} totalClicks={} uniqueVisitors={}",
+        code,
+        response.totalClicks(),
+        response.uniqueVisitors());
+    return response;
+  }
+
+  private void assertCanReadAnalytics(Authentication authentication, String code) {
+    String ownerUsername = urlLookupService.getByCode(code).ownerUsername();
+    if (ownerUsername == null || ownerUsername.isBlank()) {
+      return;
     }
 
-    @GetMapping("/{code}/count")
-    public long count(Authentication authentication, @PathVariable("code") String code) {
-        assertCanReadAnalytics(authentication, code);
-        countCounter.increment();
-        return analyticsQueryService.countClicks(code);
+    if (authentication == null
+        || !authentication.isAuthenticated()
+        || authentication instanceof AnonymousAuthenticationToken) {
+      throw new ResponseStatusException(
+          HttpStatus.UNAUTHORIZED, "Sign in to view analytics for this link");
     }
 
-    @GetMapping("/{code}")
-    public AnalyticsSummaryResponse summary(Authentication authentication, @PathVariable("code") String code) {
-        assertCanReadAnalytics(authentication, code);
-        summaryCounter.increment();
-        AnalyticsSummaryResponse response = analyticsQueryService.summarize(code);
-        log.info("analytics.api.summary code={} totalClicks={} uniqueVisitors={}", code, response.totalClicks(), response.uniqueVisitors());
-        return response;
+    boolean isAdmin =
+        authentication.getAuthorities().stream()
+            .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    if (isAdmin || ownerUsername.equalsIgnoreCase(authentication.getName())) {
+      return;
     }
 
-    private void assertCanReadAnalytics(Authentication authentication, String code) {
-        String ownerUsername = urlLookupService.getByCode(code).ownerUsername();
-        if (ownerUsername == null || ownerUsername.isBlank()) {
-            return;
-        }
-
-        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in to view analytics for this link");
-        }
-
-        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
-        if (isAdmin || ownerUsername.equalsIgnoreCase(authentication.getName())) {
-            return;
-        }
-
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only view analytics for your own links");
-    }
+    throw new ResponseStatusException(
+        HttpStatus.FORBIDDEN, "You can only view analytics for your own links");
+  }
 }

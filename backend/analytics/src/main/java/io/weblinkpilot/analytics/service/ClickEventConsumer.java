@@ -10,18 +10,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClickEventConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(ClickEventConsumer.class);
+  private static final Logger log = LoggerFactory.getLogger(ClickEventConsumer.class);
 
-    private final ClickEventRecorder clickEventRecorder;
+  private final ClickEventRecorder clickEventRecorder;
 
-    public ClickEventConsumer(ClickEventRecorder clickEventRecorder) {
-        this.clickEventRecorder = clickEventRecorder;
-    }
+  public ClickEventConsumer(ClickEventRecorder clickEventRecorder) {
+    this.clickEventRecorder = clickEventRecorder;
+  }
 
-    @Async
-    @EventListener
-    public void handle(LinkClickedEvent event) {
-        log.info("analytics.click.received code={} source={} clickedAt={}", event.code(), event.source(), event.clickedAt());
-        clickEventRecorder.record(event);
-    }
+  @Async
+  @EventListener
+  public void handle(LinkClickedEvent event) {
+    log.info(
+        "analytics.click.received code={} source={} clickedAt={}",
+        event.code(),
+        event.source(),
+        event.clickedAt());
+    clickEventRecorder.record(event);
+  }
 }

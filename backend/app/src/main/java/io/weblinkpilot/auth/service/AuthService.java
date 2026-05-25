@@ -11,31 +11,40 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-    private final UserAccountService userAccountService;
-    private final JwtService jwtService;
+  private final UserAccountService userAccountService;
+  private final JwtService jwtService;
 
-    public AuthService(UserAccountService userAccountService, JwtService jwtService) {
-        this.userAccountService = userAccountService;
-        this.jwtService = jwtService;
-    }
+  public AuthService(UserAccountService userAccountService, JwtService jwtService) {
+    this.userAccountService = userAccountService;
+    this.jwtService = jwtService;
+  }
 
-    @Transactional
-    public AuthResponse register(AuthCredentialsRequest request) {
-        UserAccount account = userAccountService.registerUser(request.username(), request.password());
-        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRoleName()), account.getUsername(), account.getRoleName());
-    }
+  @Transactional
+  public AuthResponse register(AuthCredentialsRequest request) {
+    UserAccount account = userAccountService.registerUser(request.username(), request.password());
+    return new AuthResponse(
+        jwtService.issueToken(account.getUsername(), account.getRoleName()),
+        account.getUsername(),
+        account.getRoleName());
+  }
 
-    @Transactional
-    public AuthResponse login(AuthCredentialsRequest request) {
-        UserAccount account = userAccountService.authenticate(request.username(), request.password());
-        return new AuthResponse(jwtService.issueToken(account.getUsername(), account.getRoleName()), account.getUsername(), account.getRoleName());
-    }
+  @Transactional
+  public AuthResponse login(AuthCredentialsRequest request) {
+    UserAccount account = userAccountService.authenticate(request.username(), request.password());
+    return new AuthResponse(
+        jwtService.issueToken(account.getUsername(), account.getRoleName()),
+        account.getUsername(),
+        account.getRoleName());
+  }
 
-    @Transactional(readOnly = true)
-    public UserProfileResponse profile(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            throw new org.springframework.security.access.AccessDeniedException("Authentication required");
-        }
-        return userAccountService.profile(authentication.getName());
+  @Transactional(readOnly = true)
+  public UserProfileResponse profile(Authentication authentication) {
+    if (authentication == null
+        || !authentication.isAuthenticated()
+        || "anonymousUser".equals(authentication.getName())) {
+      throw new org.springframework.security.access.AccessDeniedException(
+          "Authentication required");
     }
+    return userAccountService.profile(authentication.getName());
+  }
 }

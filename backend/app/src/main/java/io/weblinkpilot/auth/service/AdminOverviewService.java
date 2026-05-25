@@ -9,29 +9,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class AdminOverviewService {
 
-    private final UserAccountRepository userAccountRepository;
-    private final ShortLinkRepository shortLinkRepository;
+  private final UserAccountRepository userAccountRepository;
+  private final ShortLinkRepository shortLinkRepository;
 
-    public AdminOverviewService(UserAccountRepository userAccountRepository,
-                                ShortLinkRepository shortLinkRepository) {
-        this.userAccountRepository = userAccountRepository;
-        this.shortLinkRepository = shortLinkRepository;
-    }
+  public AdminOverviewService(
+      UserAccountRepository userAccountRepository, ShortLinkRepository shortLinkRepository) {
+    this.userAccountRepository = userAccountRepository;
+    this.shortLinkRepository = shortLinkRepository;
+  }
 
-    public AdminOverviewResponse overview() {
-        long totalUsers = userAccountRepository.count();
-        long adminUsers = userAccountRepository.countByRole_Name(RoleNames.ADMIN);
-        long totalLinks = shortLinkRepository.count();
-        long anonymousLinks = shortLinkRepository.countByOwnerUsernameIsNull();
-        long ownedLinks = shortLinkRepository.countByOwnerUsernameIsNotNull();
-        long totalClicks = shortLinkRepository.sumClickCount();
-        return new AdminOverviewResponse(
-                totalUsers,
-                adminUsers,
-                totalLinks,
-                anonymousLinks,
-                ownedLinks,
-                totalClicks
-        );
-    }
+  public AdminOverviewResponse overview() {
+    long totalUsers = userAccountRepository.count();
+    long adminUsers = userAccountRepository.countByRoleName(RoleNames.ADMIN);
+    long totalLinks = shortLinkRepository.count();
+    long anonymousLinks = shortLinkRepository.countByOwnerUsernameIsNull();
+    long ownedLinks = shortLinkRepository.countByOwnerUsernameIsNotNull();
+    long totalClicks = shortLinkRepository.sumClickCount();
+    return new AdminOverviewResponse(
+        totalUsers, adminUsers, totalLinks, anonymousLinks, ownedLinks, totalClicks);
+  }
 }

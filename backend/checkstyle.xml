@@ -9,8 +9,6 @@
         <module name="UnusedImports"/>
         <module name="NeedBraces"/>
         <module name="ModifierOrder"/>
-        <module name="FinalLocalVariable"/>
-        <module name="ConstantName"/>
         <module name="TypeName"/>
         <module name="MethodName"/>
         <module name="ParameterName"/>

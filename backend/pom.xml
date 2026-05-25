@@ -47,6 +47,20 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -86,25 +100,25 @@
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>2.44.2</version>
                     <configuration>
+                        <lineEndings>UNIX</lineEndings>
                         <java>
                             <googleJavaFormat>
                                 <version>1.25.2</version>
                             </googleJavaFormat>
-                            <removeUnusedImports/>
+                            <removeUnusedImports />
                         </java>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.6.0</version>
-                    <configuration>
-                        <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                        <consoleOutput>true</consoleOutput>
-                        <failsOnError>true</failsOnError>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    </configuration>
+                      <version>3.6.0</version>
+                      <configuration>
+                          <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
+                          <consoleOutput>true</consoleOutput>
+                          <failsOnError>true</failsOnError>
+                          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                      </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>

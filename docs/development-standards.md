@@ -21,6 +21,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - Java formatter and import ordering.
 - Frontend linting and formatting.
 - Static analysis for common bugs and risky patterns.
+- Dependency vulnerability checks.
 - Architecture tests for module boundaries.
 - Smoke checks for the full app flow.
 - Consistent logging format.
@@ -46,6 +47,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - Backend:
   - formatter
   - lint/static analysis
+  - dependency vulnerability checks
   - architecture checks
 - Frontend:
   - formatter
@@ -54,6 +56,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - Repo:
   - pre-push wrapper
   - CI job parity
+  - dependency vulnerability scanning
 
 ## Notes
 

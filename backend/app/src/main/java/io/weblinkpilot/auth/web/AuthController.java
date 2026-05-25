@@ -22,41 +22,47 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+  public AuthController(AuthService authService) {
+    this.authService = authService;
+  }
 
-    @PostMapping("/register")
-    @Operation(
-            summary = "Register a user",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AuthCredentialsRequest.class))
-            )
-    )
-    public AuthResponse register(@Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-        return authService.register(request);
-    }
+  @PostMapping("/register")
+  @Operation(
+      summary = "Register a user",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = AuthCredentialsRequest.class))))
+  public AuthResponse register(
+      @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
+    return authService.register(request);
+  }
 
-    @PostMapping("/login")
-    @Operation(
-            summary = "Login and receive a JWT",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AuthCredentialsRequest.class))
-            ),
-            responses = { @ApiResponse(responseCode = "200", description = "JWT issued") }
-    )
-    public AuthResponse login(@Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-        return authService.login(request);
-    }
+  @PostMapping("/login")
+  @Operation(
+      summary = "Login and receive a JWT",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = AuthCredentialsRequest.class))),
+      responses = {@ApiResponse(responseCode = "200", description = "JWT issued")})
+  public AuthResponse login(
+      @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
+    return authService.login(request);
+  }
 
-    @GetMapping("/me")
-    @Operation(summary = "Current signed-in user")
-    @SecurityRequirement(name = "bearerAuth")
-    public UserProfileResponse me(Authentication authentication) {
-        return authService.profile(authentication);
-    }
+  @GetMapping("/me")
+  @Operation(summary = "Current signed-in user")
+  @SecurityRequirement(name = "bearerAuth")
+  public UserProfileResponse me(Authentication authentication) {
+    return authService.profile(authentication);
+  }
 }

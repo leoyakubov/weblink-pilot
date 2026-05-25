@@ -57,9 +57,9 @@ Useful API endpoints after startup:
 - `http://localhost:8080/api/v1/analytics/{code}`
 - `http://localhost:8080/api/v1/analytics/{code}/count`
 
-## Backend Coverage
+## Backend Quality
 
-To generate the aggregate backend coverage report from `backend/`:
+To run the backend verification gate from `backend/`:
 
 ```powershell
 .\mvnw.cmd -pl coverage -am verify
@@ -130,8 +130,8 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Backend dev only: [`scripts/backend/dev-run-backend-only.ps1`](scripts/backend/dev-run-backend-only.ps1)
 - Backend format: [`scripts/backend/format-backend.ps1`](scripts/backend/format-backend.ps1)
 - Backend style check: [`scripts/backend/check-style.ps1`](scripts/backend/check-style.ps1)
-- Backend tests: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
-- Backend coverage: [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
+- Backend tests only: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
+- Backend quality (tests + coverage): [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
 - Frontend format: [`scripts/frontend/format-frontend.ps1`](scripts/frontend/format-frontend.ps1)
 - Frontend style check: [`scripts/frontend/check-style.ps1`](scripts/frontend/check-style.ps1)

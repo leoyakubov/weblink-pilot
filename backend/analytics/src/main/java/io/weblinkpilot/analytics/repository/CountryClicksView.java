@@ -1,7 +1,7 @@
 package io.weblinkpilot.analytics.repository;
 
 public interface CountryClicksView {
-    String getCountry();
+  String getCountry();
 
-    long getClicks();
+  long getClicks();
 }

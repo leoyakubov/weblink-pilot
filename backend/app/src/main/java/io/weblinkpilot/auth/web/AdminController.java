@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin")
 public class AdminController {
 
-    private final AdminOverviewService adminOverviewService;
+  private final AdminOverviewService adminOverviewService;
 
-    public AdminController(AdminOverviewService adminOverviewService) {
-        this.adminOverviewService = adminOverviewService;
-    }
+  public AdminController(AdminOverviewService adminOverviewService) {
+    this.adminOverviewService = adminOverviewService;
+  }
 
-    @GetMapping("/overview")
-    @Operation(summary = "Admin overview")
-    @SecurityRequirement(name = "bearerAuth")
-    public AdminOverviewResponse overview() {
-        return adminOverviewService.overview();
-    }
+  @GetMapping("/overview")
+  @Operation(summary = "Admin overview")
+  @SecurityRequirement(name = "bearerAuth")
+  public AdminOverviewResponse overview() {
+    return adminOverviewService.overview();
+  }
 }

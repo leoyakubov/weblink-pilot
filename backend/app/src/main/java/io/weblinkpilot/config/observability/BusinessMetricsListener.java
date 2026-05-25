@@ -10,25 +10,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class BusinessMetricsListener {
 
-    private final Counter linksCreatedCounter;
-    private final Counter linksClickedCounter;
+  private final Counter linksCreatedCounter;
+  private final Counter linksClickedCounter;
 
-    public BusinessMetricsListener(MeterRegistry meterRegistry) {
-        this.linksCreatedCounter = Counter.builder("weblinkpilot.links.created.events")
-                .description("Total number of short links created")
-                .register(meterRegistry);
-        this.linksClickedCounter = Counter.builder("weblinkpilot.links.clicked.events")
-                .description("Total number of short link redirects")
-                .register(meterRegistry);
-    }
+  public BusinessMetricsListener(MeterRegistry meterRegistry) {
+    this.linksCreatedCounter =
+        Counter.builder("weblinkpilot.links.created.events")
+            .description("Total number of short links created")
+            .register(meterRegistry);
+    this.linksClickedCounter =
+        Counter.builder("weblinkpilot.links.clicked.events")
+            .description("Total number of short link redirects")
+            .register(meterRegistry);
+  }
 
-    @EventListener
-    public void onLinkCreated(LinkCreatedEvent event) {
-        linksCreatedCounter.increment();
-    }
+  @EventListener
+  public void onLinkCreated(LinkCreatedEvent event) {
+    linksCreatedCounter.increment();
+  }
 
-    @EventListener
-    public void onLinkClicked(LinkClickedEvent event) {
-        linksClickedCounter.increment();
-    }
+  @EventListener
+  public void onLinkClicked(LinkClickedEvent event) {
+    linksClickedCounter.increment();
+  }
 }

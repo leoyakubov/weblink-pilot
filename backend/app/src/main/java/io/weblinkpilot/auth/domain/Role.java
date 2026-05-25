@@ -1,30 +1,34 @@
 package io.weblinkpilot.auth.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "app_roles")
 public class Role {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "name", nullable = false, unique = true, length = 32)
-    private String name;
+  @Column(name = "name", nullable = false, unique = true, length = 32)
+  private String name;
 
-    protected Role() {
-    }
+  protected Role() {}
 
-    public Role(String name) {
-        this.name = name;
-    }
+  public Role(String name) {
+    this.name = name;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }
