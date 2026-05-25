@@ -25,6 +25,7 @@
         <archunit.version>1.4.2</archunit.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
+        <dependency-check.version>12.1.0</dependency-check.version>
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
         <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -78,6 +79,10 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -147,6 +152,16 @@
                         <effort>Max</effort>
                         <threshold>Low</threshold>
                         <failOnError>true</failOnError>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.owasp</groupId>
+                    <artifactId>dependency-check-maven</artifactId>
+                    <version>${dependency-check.version}</version>
+                    <configuration>
+                        <failBuildOnCVSS>7.0</failBuildOnCVSS>
+                        <format>HTML</format>
+                        <autoUpdate>true</autoUpdate>
                     </configuration>
                 </plugin>
             </plugins>

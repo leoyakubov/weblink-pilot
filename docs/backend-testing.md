@@ -152,6 +152,27 @@ The backend POM points Sonar at the aggregate JaCoCo XML report:
 For local SonarQube, the scripts and docs default the host URL to `http://localhost:9001`.
 For GitHub Actions, set `SONAR_HOST_URL` as a repository secret or environment secret that points at the hosted SonarQube server.
 
+## Dependency Vulnerability Checks
+
+The repo now runs dependency vulnerability checks for both the backend and frontend:
+
+- Backend: OWASP Dependency-Check on the Maven reactor
+- Frontend: `npm audit --audit-level=high`
+
+Run the combined security gate from the repo root:
+
+```powershell
+.\scripts\check-dependencies.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/check-dependencies.sh
+```
+
+You can also run the backend and frontend checks separately with the helper scripts listed in the README.
+
 ## Current Rule of Thumb
 
 The goal is not to test every line equally.

@@ -82,6 +82,30 @@ Helper script:
 - Windows: [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
 - Unix: [`scripts/backend/check-coverage.sh`](scripts/backend/check-coverage.sh)
 
+## Dependency Security
+
+Run the dependency vulnerability checks from the repo root:
+
+```powershell
+.\scripts\check-dependencies.ps1
+```
+
+On macOS/Linux:
+
+```bash
+./scripts/check-dependencies.sh
+```
+
+Backend-only check:
+
+- Windows: [`scripts/backend/check-vulnerabilities.ps1`](scripts/backend/check-vulnerabilities.ps1)
+- Unix: [`scripts/backend/check-vulnerabilities.sh`](scripts/backend/check-vulnerabilities.sh)
+
+Frontend-only check:
+
+- Windows: [`scripts/frontend/check-vulnerabilities.ps1`](scripts/frontend/check-vulnerabilities.ps1)
+- Unix: [`scripts/frontend/check-vulnerabilities.sh`](scripts/frontend/check-vulnerabilities.sh)
+
 ## SonarQube / Code Quality
 
 Local SonarQube support is available through the Docker stack in `infra/sonar/`.
@@ -140,11 +164,14 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Backend style check: [`scripts/backend/check-style.ps1`](scripts/backend/check-style.ps1)
 - Backend tests only: [`scripts/backend/test-backend.ps1`](scripts/backend/test-backend.ps1)
 - Backend quality (tests + coverage): [`scripts/backend/check-coverage.ps1`](scripts/backend/check-coverage.ps1)
+- Backend vulnerability check: [`scripts/backend/check-vulnerabilities.ps1`](scripts/backend/check-vulnerabilities.ps1)
 - Frontend local: [`scripts/frontend/local-run-frontend.ps1`](scripts/frontend/local-run-frontend.ps1)
 - Frontend format: [`scripts/frontend/format-frontend.ps1`](scripts/frontend/format-frontend.ps1)
 - Frontend style check: [`scripts/frontend/check-style.ps1`](scripts/frontend/check-style.ps1)
 - Frontend tests and coverage: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
+- Frontend vulnerability check: [`scripts/frontend/check-vulnerabilities.ps1`](scripts/frontend/check-vulnerabilities.ps1)
 - Frontend coverage gate: `npm run test:coverage` from `frontend/`
+- Dependency security: [`scripts/check-dependencies.ps1`](scripts/check-dependencies.ps1)
 - Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)

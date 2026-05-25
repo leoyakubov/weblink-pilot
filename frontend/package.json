@@ -10,6 +10,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
+    "audit": "npm audit --audit-level=high",
     "test": "vitest",
     "test:run": "vitest --run",
     "test:coverage": "vitest --run --coverage",
