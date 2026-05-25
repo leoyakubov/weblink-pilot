@@ -9,4 +9,4 @@ docker compose -f infra/sonar/docker-compose.yml up -d
 printf '%s\n' 'SonarQube is starting at http://localhost:9001'
 printf '%s\n' 'Default login: admin / admin'
 printf '%s\n' 'After signing in, create a token and run the analysis from backend/'
-printf '%s\n' '  ./mvnw clean verify sonar:sonar -Dsonar.token=<your-token>'
+printf '%s\n' '  ./mvnw -Pci clean install sonar:sonar -Dsonar.token=<your-token>'

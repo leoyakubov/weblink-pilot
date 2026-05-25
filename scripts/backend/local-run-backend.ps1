@@ -44,7 +44,7 @@ Import-DotEnv (Join-Path $repoRoot '.env.local')
 
 Push-Location $backendDir
 try {
-    & $mvnw -pl app -am package -DskipTests
+    & $mvnw -ntp -pl app -am package -DskipTests
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }

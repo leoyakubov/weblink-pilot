@@ -9,7 +9,7 @@ try {
     Write-Host 'SonarQube is starting at http://localhost:9001'
     Write-Host 'Default login: admin / admin'
     Write-Host 'After signing in, create a token and run the analysis from backend/'
-    Write-Host '  .\mvnw.cmd clean verify sonar:sonar -Dsonar.token=<your-token>'
+    Write-Host '  .\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=<your-token>'
 }
 finally {
     Pop-Location

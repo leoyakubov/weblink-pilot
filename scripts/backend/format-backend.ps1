@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd -pl app,url,analytics -am spotless:apply 2>&1 | Out-Host
+        & .\mvnw.cmd -pl app,url,analytics -am -ntp spotless:apply 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
