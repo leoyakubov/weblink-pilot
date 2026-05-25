@@ -27,8 +27,8 @@
 - CI: [`.github/workflows/ci.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/ci.yml)
 - Render deploy: [`.github/workflows/deploy-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-backend.yml)
 - Netlify deploy: [`.github/workflows/deploy-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-frontend.yml)
-- Deployment smoke backend: [`.github/workflows/deployment-smoke-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke-backend.yml)
-- Deployment smoke frontend: [`.github/workflows/deployment-smoke-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deployment-smoke-frontend.yml)
+- Deployment smoke backend: [`.github/workflows/smoke-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/smoke-backend.yml)
+- Deployment smoke frontend: [`.github/workflows/smoke-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/smoke-frontend.yml)
 
 ## Backend deploy secret
 

@@ -1,4 +1,4 @@
-name: Deployment Smoke Frontend
+name: Smoke Frontend
 
 on:
   workflow_dispatch:
