@@ -1,5 +1,9 @@
 # WebLinkPilot
 
+[![CI](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml)
+[![Backend Deploy](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml)
+[![Frontend Deploy](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml)
+
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
 Live demo: Netlify frontend and Render backend with Render Postgres and Render Key Value Redis.
