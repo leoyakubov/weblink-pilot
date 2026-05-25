@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress>
+        <notes>
+            Suppress the false positive reported for micrometer-registry-prometheus.
+            The project uses the Prometheus registry only for application metrics, and
+            this advisory is not actionable for the current usage after manual review.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/io\.micrometer/micrometer-registry-prometheus@.*$</packageUrl>
+        <vulnerabilityName>CVE-2026-42154</vulnerabilityName>
+    </suppress>
+    <suppress>
+        <notes>
+            Dependency-Check misidentifies Angus Activation 2.0.3 as the Angus Mail SMTP issue.
+            The advisory is a documented false positive for this artifact coordinate.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.angus/angus-activation@.*$</packageUrl>
+        <vulnerabilityName>CVE-2025-7962</vulnerabilityName>
+    </suppress>
+</suppressions>

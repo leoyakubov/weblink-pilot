@@ -84,7 +84,7 @@ Helper script:
 
 ## Dependency Security
 
-Run the dependency vulnerability checks from the repo root:
+Run the dependency vulnerability checks from the repo root when you want the manual security gate:
 
 ```powershell
 .\scripts\check-dependencies.ps1
@@ -188,9 +188,9 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend tests and coverage: [`scripts/frontend/test-frontend.ps1`](scripts/frontend/test-frontend.ps1)
 - Frontend vulnerability check: [`scripts/frontend/check-vulnerabilities.ps1`](scripts/frontend/check-vulnerabilities.ps1)
 - Frontend coverage gate: `npm run test:coverage` from `frontend/`
+- Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dependency security: [`scripts/check-dependencies.ps1`](scripts/check-dependencies.ps1)
 - Secret scanning: [`scripts/check-secrets.ps1`](scripts/check-secrets.ps1)
-- Frontend smoke test: [`scripts/frontend/smoke-frontend.ps1`](scripts/frontend/smoke-frontend.ps1)
 - Dev Docker stack: [`scripts/docker/dev-run-docker.ps1`](scripts/docker/dev-run-docker.ps1)
 - SonarQube stack: [`scripts/sonar/run-sonar-stack.ps1`](scripts/sonar/run-sonar-stack.ps1)
 - Sonar analysis: [`scripts/sonar/run-sonar-analysis.ps1`](scripts/sonar/run-sonar-analysis.ps1)

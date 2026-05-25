@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd -Pci dependency-check:aggregate 2>&1 | Out-Host
+        & .\mvnw.cmd -U -Pci dependency-check:aggregate 2>&1 | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
