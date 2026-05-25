@@ -20,7 +20,7 @@
 | Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
 | Backend public URL | Done | The backend is reachable over HTTPS from the browser. |
 | CORS origin | Done | The exact Netlify origin is allowed by the backend CORS config. |
-| Monitoring | Later | Add the monitoring admin page and stack after the app is live and stable. |
+| Monitoring | Done | The admin page now links to backend health/info/metrics/prometheus and the Docker stack includes Prometheus and Grafana. |
 
 ## GitHub Actions workflows
 
@@ -65,7 +65,7 @@ Then let the scheduled GitHub workflow ping those URLs every 5 minutes.
 
 If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
 For local manual smoke runs, the helper script also reads those values from the repo root `.env.local` automatically.
-The smoke output prints the backend HTTP status plus `status=UP`, and the frontend HTTP status plus the app shell marker (`id="app"`). The PowerShell and Bash scripts also add spacing, color, and start/end banners so the backend and frontend checks are easy to scan separately.
+The smoke output prints the backend HTTP status plus `status=UP`, and the frontend HTTP status plus the app shell marker (`id="app"`). By default, the helper script checks the local Docker stack; set `SMOKE_TARGET=demo` together with `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` to smoke the live demo instead. The PowerShell and Bash scripts also add spacing, color, and start/end banners so the backend and frontend checks are easy to scan separately.
 
 ## How it works
 

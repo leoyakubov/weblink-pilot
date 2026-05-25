@@ -5,93 +5,24 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 ## Status Overview
 
-<table>
-  <tr>
-    <th>Status</th>
-    <th>Area</th>
-    <th>Notes</th>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Project bootstrap</td>
-    <td bgcolor="#dcfce7">Repo layout, baseline docs, naming, and initial tooling are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Backend foundation</td>
-    <td bgcolor="#dcfce7">Modular backend, persistence, security, cache, actuator, logging, and observability are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">URL lifecycle</td>
-    <td bgcolor="#dcfce7">Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Analytics</td>
-    <td bgcolor="#dcfce7">Click events are tracked by source (redirect and QR), with summaries and enrichment.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Frontend foundation</td>
-    <td bgcolor="#dcfce7">Vue app shell and backend integration are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Frontend feature set</td>
-    <td bgcolor="#dcfce7">Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Authentication and access control</td>
-    <td bgcolor="#dcfce7">JWT login/register/me flows, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Tests, code quality, Sonar</td>
-    <td bgcolor="#dcfce7">Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Rate limiting</td>
-    <td bgcolor="#dcfce7">Request throttling is implemented for the public and API paths that need it.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Docker</td>
-    <td bgcolor="#dcfce7">Local and dev Docker workflows are in place for the full stack and backend support services.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Environment profiles and scripts</td>
-    <td bgcolor="#dcfce7">Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Deployment setup</td>
-    <td bgcolor="#dcfce7">CI and deploy workflows are in place for the live Netlify frontend and Render backend.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#dcfce7"><strong>Done</strong></td>
-    <td bgcolor="#dcfce7">Redis cache</td>
-    <td bgcolor="#dcfce7">Redis-backed hot short-code lookup caching and analytics cache invalidation are in place.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#fde68a"><strong>Next</strong></td>
-    <td bgcolor="#fde68a">Monitoring stack integration</td>
-    <td bgcolor="#fde68a">Wire Prometheus/Grafana links and the local monitoring stack into the admin monitoring page now that the app is deployed.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#e5e7eb"><strong>Maybe</strong></td>
-    <td bgcolor="#e5e7eb">Auth expansion</td>
-    <td bgcolor="#e5e7eb">Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes.</td>
-  </tr>
-  <tr>
-    <td bgcolor="#e5e7eb"><strong>Maybe</strong></td>
-    <td bgcolor="#e5e7eb">Async broker</td>
-    <td bgcolor="#e5e7eb">Add RabbitMQ or Kafka only if event volume or service separation warrants it.</td>
-  </tr>
-</table>
+| Status | Area | Notes |
+|---|---|---|
+| ✅ Done | Project bootstrap | Repo layout, baseline docs, naming, and initial tooling are in place. |
+| ✅ Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
+| ✅ Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
+| ✅ Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
+| ✅ Done | Frontend foundation | Vue app shell and backend integration are in place. |
+| ✅ Done | Frontend feature set | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
+| ✅ Done | Authentication and access control | JWT login/register/me flows, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
+| ✅ Done | Tests, code quality, Sonar | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
+| ✅ Done | Rate limiting | Request throttling is implemented for the public and API paths that need it. |
+| ✅ Done | Docker | Local and dev Docker workflows are in place for the full stack and backend support services. |
+| ✅ Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
+| ✅ Done | Deployment setup | CI and deploy workflows are in place for the live Netlify frontend and Render backend. |
+| ✅ Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
+| ✅ Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
+| 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes. |
+| 🟡 Maybe | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
 
 ## Execution Checklist
 

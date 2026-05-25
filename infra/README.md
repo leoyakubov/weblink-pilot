@@ -5,6 +5,8 @@ This folder contains the Docker Compose stack for running the full project local
 - PostgreSQL 17
 - backend service
 - frontend service
+- Prometheus
+- Grafana
 
 ## Requirements
 
@@ -16,11 +18,11 @@ This folder contains the Docker Compose stack for running the full project local
 From the repository root:
 
 ```powershell
-.\scripts\docker\run-docker.ps1
+.\scripts\dev\docker-full-stack.ps1
 ```
 
 ```bash
-./scripts/docker/run-docker.sh
+./scripts/dev/docker-full-stack.sh
 ```
 
 Or run Compose directly:
@@ -40,6 +42,8 @@ docker compose -f infra/docker-compose.yml down
 - Frontend: `http://localhost:8081`
 - Backend API: `http://localhost:8080/api/v1`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3001`
 
 ## Common issues
 
@@ -65,3 +69,4 @@ If you changed the frontend API base URL manually, make sure it still points to 
 
 - The Docker stack uses PostgreSQL, while the local script-based backend run still uses the local development configuration.
 - For day-to-day development, the Docker stack is the closest preview of the deployed setup.
+- The frontend proxy exposes backend actuator endpoints so the admin monitoring page can open live health and metrics links from the same origin.

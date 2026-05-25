@@ -13,6 +13,7 @@ jobs:
     environment: demo
 
     env:
+      SMOKE_TARGET: demo
       RENDER_HEALTH_URL: ${{ vars.RENDER_HEALTH_URL || secrets.RENDER_HEALTH_URL }}
       FRONTEND_SMOKE_URL: ${{ vars.FRONTEND_SMOKE_URL || secrets.FRONTEND_SMOKE_URL }}
 

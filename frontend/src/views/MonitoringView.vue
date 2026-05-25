@@ -1,13 +1,53 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { getAdminOverview } from '@/lib/api';
+import { buildMonitoringLinks } from '@/lib/monitoring';
 import { loadSettings } from '@/lib/settings';
 import type { AdminOverviewResponse } from '@/types';
 
 const settings = loadSettings();
+const monitoringLinks = buildMonitoringLinks(settings);
 const overview = ref<AdminOverviewResponse | null>(null);
 const loading = ref(false);
 const errorMessage = ref('');
+const backendLinks = computed(() => [
+  {
+    label: 'Health',
+    description: 'Health endpoint and readiness state.',
+    href: monitoringLinks.backendHealthUrl,
+  },
+  {
+    label: 'Info',
+    description: 'Build and application info endpoint.',
+    href: monitoringLinks.backendInfoUrl,
+  },
+  {
+    label: 'Metrics',
+    description: 'Raw Spring Boot metrics namespace.',
+    href: monitoringLinks.backendMetricsUrl,
+  },
+  {
+    label: 'Prometheus',
+    description: 'Prometheus scrape endpoint for the backend.',
+    href: monitoringLinks.backendPrometheusUrl,
+  },
+]);
+const localStackLinks = computed(() =>
+  monitoringLinks.showLocalStack
+    ? [
+        {
+          label: 'Prometheus',
+          description: 'Local scrape and query UI for Docker dev.',
+          href: monitoringLinks.prometheusUrl,
+        },
+        {
+          label: 'Grafana',
+          description: 'Local dashboards for the Docker monitoring stack.',
+          href: monitoringLinks.grafanaUrl,
+        },
+      ]
+    : [],
+);
 
 async function refresh() {
   loading.value = true;
@@ -29,7 +69,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="page-grid">
+  <section class="page-grid two-col">
     <article class="card">
       <div class="card-inner stack">
         <div class="section-row">
@@ -59,28 +99,90 @@ onMounted(() => {
 
         <div v-if="overview" class="grid-2">
           <div class="metric">
-            <span class="value">{{ overview.totalUsers }}</span
-            ><span class="label">Total users</span>
+            <span class="label">Total users</span>
+            <span class="value">{{ overview.totalUsers }}</span>
           </div>
           <div class="metric">
-            <span class="value">{{ overview.adminUsers }}</span
-            ><span class="label">Admin users</span>
+            <span class="label">Admin users</span>
+            <span class="value">{{ overview.adminUsers }}</span>
           </div>
           <div class="metric">
-            <span class="value">{{ overview.totalLinks }}</span
-            ><span class="label">Total links</span>
+            <span class="label">Total links</span>
+            <span class="value">{{ overview.totalLinks }}</span>
           </div>
           <div class="metric">
-            <span class="value">{{ overview.totalClicks }}</span
-            ><span class="label">Total clicks</span>
+            <span class="label">Total clicks</span>
+            <span class="value">{{ overview.totalClicks }}</span>
           </div>
           <div class="metric">
-            <span class="value">{{ overview.ownedLinks }}</span
-            ><span class="label">Owned links</span>
+            <span class="label">Owned links</span>
+            <span class="value">{{ overview.ownedLinks }}</span>
           </div>
           <div class="metric">
-            <span class="value">{{ overview.anonymousLinks }}</span
-            ><span class="label">Anonymous links</span>
+            <span class="label">Anonymous links</span>
+            <span class="value">{{ overview.anonymousLinks }}</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-inner stack">
+        <div class="section-row">
+          <div>
+            <p class="eyebrow">Live backend</p>
+            <h3 class="panel-title">Actuator endpoints and metrics.</h3>
+          </div>
+        </div>
+
+        <p class="help-text">
+          These links point at the live backend actuator endpoints for the current environment. In
+          the local Docker stack, the frontend proxy serves them from the same origin.
+        </p>
+
+        <div class="list">
+          <div v-for="link in backendLinks" :key="link.label" class="list-item">
+            <div class="section-row">
+              <div>
+                <strong>{{ link.label }}</strong>
+                <p>{{ link.description }}</p>
+              </div>
+              <a class="button button-secondary" :href="link.href" target="_blank" rel="noreferrer">
+                Open
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section v-if="monitoringLinks.showLocalStack" class="page-grid">
+    <article class="card">
+      <div class="card-inner stack">
+        <div class="section-row">
+          <div>
+            <p class="eyebrow">Local stack</p>
+            <h3 class="panel-title">Prometheus and Grafana for Docker dev.</h3>
+          </div>
+        </div>
+
+        <p class="help-text">
+          When you start the Docker full stack, Prometheus scrapes the backend and Grafana reads
+          from Prometheus without any extra setup.
+        </p>
+
+        <div class="list">
+          <div v-for="link in localStackLinks" :key="link.label" class="list-item">
+            <div class="section-row">
+              <div>
+                <strong>{{ link.label }}</strong>
+                <p>{{ link.description }}</p>
+              </div>
+              <a class="button button-secondary" :href="link.href" target="_blank" rel="noreferrer">
+                Open
+              </a>
+            </div>
           </div>
         </div>
       </div>

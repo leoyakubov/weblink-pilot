@@ -46,6 +46,35 @@ services:
     ports:
       - "8080:8080"
 
+  prometheus:
+    container_name: weblink-pilot-prometheus
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    depends_on:
+      - backend
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+
+  grafana:
+    container_name: weblink-pilot-grafana
+    image: grafana/grafana:11.4.0
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+
   frontend:
     container_name: weblink-pilot-frontend
     build:
@@ -57,3 +86,7 @@ services:
       - backend
     ports:
       - "8081:80"
+
+volumes:
+  prometheus-data:
+  grafana-data:

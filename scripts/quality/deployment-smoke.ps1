@@ -3,8 +3,9 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $envFile = Join-Path $repoRoot '.env.local'
-$backendHealthUrl = $env:RENDER_HEALTH_URL
-$frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
+$smokeTarget = if ([string]::IsNullOrWhiteSpace($env:SMOKE_TARGET)) { 'local' } else { $env:SMOKE_TARGET.Trim().ToLowerInvariant() }
+$backendHealthUrl = ''
+$frontendSmokeUrl = ''
 
 function Import-LocalEnvFile {
     param(
@@ -43,22 +44,32 @@ function Import-LocalEnvFile {
     }
 }
 
-Import-LocalEnvFile -Path $envFile
-
-$backendHealthUrl = $env:RENDER_HEALTH_URL
-$frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
-
-Write-Host ''
-Write-Host '=== Deployment smoke tests starting ===' -ForegroundColor Magenta
-Write-Host ''
-
-if ([string]::IsNullOrWhiteSpace($backendHealthUrl)) {
-    throw 'RENDER_HEALTH_URL is not set.'
+if ($smokeTarget -eq 'demo') {
+    Import-LocalEnvFile -Path $envFile
+    $backendHealthUrl = $env:RENDER_HEALTH_URL
+    $frontendSmokeUrl = $env:FRONTEND_SMOKE_URL
+} else {
+    $backendHealthUrl = 'http://localhost:8080/actuator/health'
+    $frontendSmokeUrl = 'http://localhost:8081'
 }
 
-if ([string]::IsNullOrWhiteSpace($frontendSmokeUrl)) {
-    throw 'FRONTEND_SMOKE_URL is not set.'
+if ($smokeTarget -eq 'demo') {
+    if ([string]::IsNullOrWhiteSpace($backendHealthUrl)) {
+        throw 'RENDER_HEALTH_URL is not set.'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($frontendSmokeUrl)) {
+        throw 'FRONTEND_SMOKE_URL is not set.'
+    }
 }
+
+Write-Host ''
+if ($smokeTarget -eq 'demo') {
+    Write-Host '=== Deployment smoke tests starting ===' -ForegroundColor Magenta
+} else {
+    Write-Host '=== Local smoke tests starting ===' -ForegroundColor Magenta
+}
+Write-Host ''
 
 function Invoke-SmokeCheck {
     param(
@@ -78,6 +89,9 @@ function Invoke-SmokeCheck {
     try {
         $statusCode = (& curl.exe --silent --show-error --location --max-time 30 --output $bodyFile --write-out '%{http_code}' $Url).Trim()
         if ($LASTEXITCODE -ne 0) {
+            if ($smokeTarget -ne 'demo' -and $Url -like 'http://localhost:*') {
+                Write-Host 'Local smoke hint: start the Docker stack first with .\scripts\dev\docker-full-stack.ps1' -ForegroundColor DarkYellow
+            }
             throw "$Name request failed."
         }
 
@@ -126,4 +140,8 @@ Write-Host ''
 Invoke-SmokeCheck -Name 'frontend home' -Url $frontendSmokeUrl -ExpectedPattern 'id="app"'
 
 Write-Host ''
-Write-Host '=== Deployment smoke tests passed ===' -ForegroundColor Magenta
+if ($smokeTarget -eq 'demo') {
+    Write-Host '=== Deployment smoke tests passed ===' -ForegroundColor Magenta
+} else {
+    Write-Host '=== Local smoke tests passed ===' -ForegroundColor Magenta
+}

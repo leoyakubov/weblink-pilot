@@ -3,6 +3,8 @@
 [![CI](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml)
 [![Frontend Deploy](https://api.netlify.com/api/v1/badges/96caf667-74c1-4b10-829d-f9af82d694d5/deploy-status)](https://app.netlify.com/sites/96caf667-74c1-4b10-829d-f9af82d694d5/deploys)
 [![Backend Deploy](https://img.shields.io/badge/Render-backend-46E3B7?logo=render&logoColor=white)](https://dashboard.render.com/)
+[![Backend Smoke](https://img.shields.io/github/actions/workflow/status/leoyakubov/weblink-pilot/deployment-smoke.yml?branch=main&label=Backend%20Smoke)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke.yml)
+[![Frontend Smoke](https://img.shields.io/github/actions/workflow/status/leoyakubov/weblink-pilot/deployment-smoke.yml?branch=main&label=Frontend%20Smoke)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/deployment-smoke.yml)
 
 Modern URL shortening platform with QR codes, separate redirect vs QR analytics, and a mobile-first web UI.
 
@@ -87,7 +89,7 @@ Helper script:
 Run the dependency vulnerability checks from the repo root when you want the manual security gate:
 
 ```powershell
-.\scripts\check-dependencies.ps1
+.\scripts\security\check-dependencies.ps1
 ```
 
 On macOS/Linux:
@@ -111,7 +113,7 @@ Frontend-only check:
 Run the repo-wide secret scan from the repo root:
 
 ```powershell
-.\scripts\check-secrets.ps1
+.\scripts\git\scan-secrets.ps1
 ```
 
 On macOS/Linux:
@@ -131,7 +133,7 @@ GitHub Actions Sonar is currently disabled for now; run Sonar locally with the h
 Start it from the repo root:
 
 ```powershell
-.\scripts\sonar\run-sonar-stack.ps1
+.\scripts\quality\sonar-stack.ps1
 ```
 
 On macOS/Linux:
@@ -211,10 +213,10 @@ git config --unset core.hooksPath
 To enable it again:
 
 ```powershell
-.\scripts\setup-git-hooks.ps1
+.\scripts\git\setup-hooks.ps1
 ```
 
-The original flat scripts still exist for compatibility, but the grouped ones are easier to scan and tab-complete.
+The grouped scripts are the canonical entrypoints, and the root `run-before-push` alias stays available for convenience.
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
 
@@ -234,6 +236,8 @@ The repo also includes a containerized local stack:
 - frontend image built from [`frontend/Dockerfile`](frontend/Dockerfile)
 - Postgres 17 for persistence
 - Redis 7 for hot-cache lookups and analytics cache invalidation
+- Prometheus for backend metrics scraping
+- Grafana for local monitoring dashboards
 
 Start it from the repo root:
 
@@ -246,8 +250,11 @@ Services:
 - frontend: `http://localhost:8081`
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3001`
 
 The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `dev` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped local stack, while direct local development still uses the `local` profile with in-memory H2.
+It also exposes the backend actuator endpoints through the frontend proxy so the admin monitoring page can open health, info, metrics, and Prometheus links from the same origin.
 
 ### Backend Profiles
 
@@ -279,7 +286,12 @@ For a lightweight browser smoke check against the Docker stack, use:
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 
-For a deployment smoke check against the live demo, the script will read `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` from the repo root `.env.local` automatically. You can still override them in your shell if needed.
+For a local smoke check, the script defaults to the Docker stack URLs:
+
+- backend: `http://localhost:8080/actuator/health`
+- frontend: `http://localhost:8081`
+
+To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` in your shell or in the repo root `.env.local`.
 
 Then run:
 

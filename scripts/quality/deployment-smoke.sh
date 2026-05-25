@@ -2,7 +2,10 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-if [[ -f "$repo_root/.env.local" ]]; then
+smoke_target="${SMOKE_TARGET:-local}"
+smoke_target="${smoke_target,,}"
+
+if [[ "$smoke_target" == demo && -f "$repo_root/.env.local" ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
     trimmed="${line#"${line%%[![:space:]]*}"}"
     trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
@@ -31,16 +34,33 @@ fi
 backend_health_url="${RENDER_HEALTH_URL:-}"
 frontend_smoke_url="${FRONTEND_SMOKE_URL:-}"
 
-printf '\n=== Deployment smoke tests starting ===\n\n'
+if [ "$smoke_target" = 'demo' ]; then
+  printf '\n=== Deployment smoke tests starting ===\n\n'
+else
+  printf '\n=== Local smoke tests starting ===\n\n'
+fi
 
 if [ -z "$backend_health_url" ]; then
-  echo 'RENDER_HEALTH_URL is not set.'
-  exit 1
+  if [ "$smoke_target" = 'demo' ]; then
+    echo 'RENDER_HEALTH_URL is not set.'
+    exit 1
+  fi
+
+  backend_health_url='http://localhost:8080/actuator/health'
 fi
 
 if [ -z "$frontend_smoke_url" ]; then
-  echo 'FRONTEND_SMOKE_URL is not set.'
-  exit 1
+  if [ "$smoke_target" = 'demo' ]; then
+    echo 'FRONTEND_SMOKE_URL is not set.'
+    exit 1
+  fi
+
+  frontend_smoke_url='http://localhost:8081'
+fi
+
+if [ "$smoke_target" != 'demo' ]; then
+  backend_health_url='http://localhost:8080/actuator/health'
+  frontend_smoke_url='http://localhost:8081'
 fi
 
 check_smoke() {
@@ -54,6 +74,9 @@ check_smoke() {
   local status_code
   if ! status_code="$(curl --silent --show-error --location --max-time 30 --output "$body_file" --write-out '%{http_code}' "$url")"; then
     rm -f "$body_file"
+    if [ "$smoke_target" != 'demo' ] && [[ "$url" == http://localhost:* ]]; then
+      printf 'Local smoke hint: start the Docker stack first with ./scripts/dev/docker-full-stack.sh\n'
+    fi
     printf 'Smoke check failed for %s.\n' "$name"
     exit 1
   fi
@@ -90,4 +113,8 @@ check_smoke 'backend health' "$backend_health_url" '"status"[[:space:]]*:[[:spac
 printf '\n\n'
 check_smoke 'frontend home' "$frontend_smoke_url" 'id="app"'
 
-printf '\n=== Deployment smoke tests passed ===\n'
+if [ "$smoke_target" = 'demo' ]; then
+  printf '\n=== Deployment smoke tests passed ===\n'
+else
+  printf '\n=== Local smoke tests passed ===\n'
+fi

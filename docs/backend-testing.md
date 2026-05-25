@@ -82,7 +82,8 @@ Use these for very fast end-to-end confidence:
 - live deployment smoke checks
 
 This repo has a browser smoke test for the Docker stack in `frontend/scripts/smoke-docker.mjs`.
-For the deployed demo, use `scripts/quality/deployment-smoke.ps1` or `.sh` with `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
+For local Docker smoke, use `scripts/quality/deployment-smoke.ps1` or `.sh` with the default local targets.
+For the deployed demo, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
 The smoke output prints the backend HTTP status and `status=UP`, plus the frontend HTTP status and the app shell marker (`id="app"`).
 
 ### Architectural tests
