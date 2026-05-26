@@ -13,9 +13,18 @@
 For the first version:
 
 - JWT access tokens are used for API requests
-- refresh tokens rotate access sessions and support logout
+- refresh tokens are stored in an `HttpOnly` cookie and rotate access sessions
+- the API returns the access token, username, and role in JSON
+- the refresh token itself is never returned in JSON
 - management endpoints are protected
 - public create/read endpoints may be open or protected depending on the final product flow
+
+Refresh token endpoints:
+
+- `POST /api/v1/auth/register` sets the refresh cookie on success
+- `POST /api/v1/auth/login` sets the refresh cookie on success
+- `POST /api/v1/auth/refresh` reads the refresh cookie, rotates it, and sets a new cookie
+- `POST /api/v1/auth/logout` reads the refresh cookie and clears it
 
 ## Auth Endpoints
 

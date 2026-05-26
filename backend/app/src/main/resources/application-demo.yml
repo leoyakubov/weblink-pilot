@@ -13,6 +13,8 @@ server:
 
 app:
   auth:
+    refresh-cookie-same-site: None
+    refresh-cookie-secure: true
     bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:}
     bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:}

@@ -2,14 +2,12 @@ package io.weblinkpilot.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
-import io.weblinkpilot.shared.contracts.AuthResponse;
-import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -41,12 +39,13 @@ class AuthServiceTest {
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-1");
     when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-1");
 
-    AuthResponse response = service.register(new AuthCredentialsRequest("alice", "Password1"));
+    AuthService.AuthSession response =
+        service.register(new AuthCredentialsRequest("alice", "Password1"));
 
     assertThat(response.token()).isEqualTo("token-1");
-    assertThat(response.refreshToken()).isEqualTo("refresh-1");
     assertThat(response.username()).isEqualTo("alice");
     assertThat(response.role()).isEqualTo("USER");
+    assertThat(response.refreshToken()).isEqualTo("refresh-1");
   }
 
   @Test
@@ -59,12 +58,13 @@ class AuthServiceTest {
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-2");
     when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-2");
 
-    AuthResponse response = service.login(new AuthCredentialsRequest("alice", "Password1"));
+    AuthService.AuthSession response =
+        service.login(new AuthCredentialsRequest("alice", "Password1"));
 
     assertThat(response.token()).isEqualTo("token-2");
-    assertThat(response.refreshToken()).isEqualTo("refresh-2");
     assertThat(response.username()).isEqualTo("alice");
     assertThat(response.role()).isEqualTo("USER");
+    assertThat(response.refreshToken()).isEqualTo("refresh-2");
   }
 
   @Test
@@ -77,12 +77,12 @@ class AuthServiceTest {
         .thenReturn(new RefreshTokenService.RotationResult(account, "refresh-2"));
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-3");
 
-    AuthResponse response = service.refresh(new RefreshTokenRequest("refresh-1"));
+    AuthService.AuthSession response = service.refresh("refresh-1");
 
     assertThat(response.token()).isEqualTo("token-3");
-    assertThat(response.refreshToken()).isEqualTo("refresh-2");
     assertThat(response.username()).isEqualTo("alice");
     assertThat(response.role()).isEqualTo("USER");
+    assertThat(response.refreshToken()).isEqualTo("refresh-2");
     verify(refreshTokenService).rotateRefreshToken("refresh-1");
   }
 
@@ -90,7 +90,7 @@ class AuthServiceTest {
   void logoutRevokesRefreshToken() {
     AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
 
-    service.logout(new RefreshTokenRequest("refresh-1"));
+    service.logout("refresh-1");
 
     verify(refreshTokenService).revokeRefreshToken("refresh-1");
   }

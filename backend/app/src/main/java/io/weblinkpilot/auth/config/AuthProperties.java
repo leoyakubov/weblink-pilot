@@ -2,6 +2,7 @@ package io.weblinkpilot.auth.config;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,6 +14,11 @@ public class AuthProperties {
   @NotBlank private String jwtSecret;
   @Min(15) private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
   @Min(1) private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
+  @NotBlank private String refreshCookieName = AuthDefaults.REFRESH_COOKIE_NAME;
+  @NotBlank private String refreshCookiePath = AuthDefaults.REFRESH_COOKIE_PATH;
+  @Pattern(regexp = "(?i)STRICT|LAX|NONE")
+  private String refreshCookieSameSite = AuthDefaults.REFRESH_COOKIE_SAME_SITE;
+  private boolean refreshCookieSecure = AuthDefaults.REFRESH_COOKIE_SECURE;
   private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
   private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
   private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;
@@ -50,6 +56,38 @@ public class AuthProperties {
 
   public void setRefreshTokenTtlDays(long refreshTokenTtlDays) {
     this.refreshTokenTtlDays = refreshTokenTtlDays;
+  }
+
+  public String getRefreshCookieName() {
+    return refreshCookieName;
+  }
+
+  public void setRefreshCookieName(String refreshCookieName) {
+    this.refreshCookieName = refreshCookieName;
+  }
+
+  public String getRefreshCookiePath() {
+    return refreshCookiePath;
+  }
+
+  public void setRefreshCookiePath(String refreshCookiePath) {
+    this.refreshCookiePath = refreshCookiePath;
+  }
+
+  public String getRefreshCookieSameSite() {
+    return refreshCookieSameSite;
+  }
+
+  public void setRefreshCookieSameSite(String refreshCookieSameSite) {
+    this.refreshCookieSameSite = refreshCookieSameSite;
+  }
+
+  public boolean isRefreshCookieSecure() {
+    return refreshCookieSecure;
+  }
+
+  public void setRefreshCookieSecure(boolean refreshCookieSecure) {
+    this.refreshCookieSecure = refreshCookieSecure;
   }
 
   public String getBootstrapAdminUsername() {

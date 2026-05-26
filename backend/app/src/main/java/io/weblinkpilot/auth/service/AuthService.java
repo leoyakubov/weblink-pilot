@@ -2,8 +2,6 @@ package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
-import io.weblinkpilot.shared.contracts.AuthResponse;
-import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -11,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
+
+  public record AuthSession(String token, String refreshToken, String username, String role) {}
 
   private final UserAccountService userAccountService;
   private final JwtService jwtService;
@@ -26,22 +26,22 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResponse register(AuthCredentialsRequest request) {
+  public AuthSession register(AuthCredentialsRequest request) {
     UserAccount account = userAccountService.registerUser(request.username(), request.password());
     return issueSession(account);
   }
 
   @Transactional
-  public AuthResponse login(AuthCredentialsRequest request) {
+  public AuthSession login(AuthCredentialsRequest request) {
     UserAccount account = userAccountService.authenticate(request.username(), request.password());
     return issueSession(account);
   }
 
   @Transactional
-  public AuthResponse refresh(RefreshTokenRequest request) {
+  public AuthSession refresh(String refreshToken) {
     RefreshTokenService.RotationResult rotation =
-        refreshTokenService.rotateRefreshToken(request.refreshToken());
-    return new AuthResponse(
+        refreshTokenService.rotateRefreshToken(refreshToken);
+    return new AuthSession(
         jwtService.issueToken(rotation.account().getUsername(), rotation.account().getRoleName()),
         rotation.refreshToken(),
         rotation.account().getUsername(),
@@ -49,8 +49,8 @@ public class AuthService {
   }
 
   @Transactional
-  public void logout(RefreshTokenRequest request) {
-    refreshTokenService.revokeRefreshToken(request.refreshToken());
+  public void logout(String refreshToken) {
+    refreshTokenService.revokeRefreshToken(refreshToken);
   }
 
   @Transactional(readOnly = true)
@@ -64,9 +64,9 @@ public class AuthService {
     return userAccountService.profile(authentication.getName());
   }
 
-  private AuthResponse issueSession(UserAccount account) {
+  private AuthSession issueSession(UserAccount account) {
     String refreshToken = refreshTokenService.issueRefreshToken(account);
-    return new AuthResponse(
+    return new AuthSession(
         jwtService.issueToken(account.getUsername(), account.getRoleName()),
         refreshToken,
         account.getUsername(),

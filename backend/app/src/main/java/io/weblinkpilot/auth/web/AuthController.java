@@ -7,18 +7,20 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.weblinkpilot.auth.service.AuthService;
+import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final AuthCookieService authCookieService;
 
-  public AuthController(AuthService authService) {
+  public AuthController(AuthService authService, AuthCookieService authCookieService) {
     this.authService = authService;
+    this.authCookieService = authCookieService;
   }
 
   @PostMapping("/register")
@@ -41,14 +45,19 @@ public class AuthController {
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = AuthCredentialsRequest.class))))
-  public AuthResponse register(
+  public ResponseEntity<AuthResponse> register(
       @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-    return authService.register(request);
+    AuthSession session = authService.register(request);
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.SET_COOKIE,
+            authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
+        .body(new AuthResponse(session.token(), session.username(), session.role()));
   }
 
   @PostMapping("/login")
   @Operation(
-      summary = "Login and receive access and refresh tokens",
+      summary = "Login and receive an access token plus refresh cookie",
       requestBody =
           @RequestBody(
               required = true,
@@ -57,42 +66,61 @@ public class AuthController {
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = AuthCredentialsRequest.class))),
       responses = {@ApiResponse(responseCode = "200", description = "JWT issued")})
-  public AuthResponse login(
+  public ResponseEntity<AuthResponse> login(
       @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-    return authService.login(request);
+    AuthSession session = authService.login(request);
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.SET_COOKIE,
+            authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
+        .body(new AuthResponse(session.token(), session.username(), session.role()));
   }
 
   @PostMapping("/refresh")
   @Operation(
-      summary = "Rotate an existing refresh token",
+      summary = "Rotate the refresh token cookie",
       requestBody =
           @RequestBody(
-              required = true,
+              required = false,
               content =
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = RefreshTokenRequest.class))),
       responses = {@ApiResponse(responseCode = "200", description = "Tokens rotated")})
-  public AuthResponse refresh(
-      @Valid @org.springframework.web.bind.annotation.RequestBody RefreshTokenRequest request) {
-    return authService.refresh(request);
+  public ResponseEntity<AuthResponse> refresh(
+      @Valid @org.springframework.web.bind.annotation.RequestBody(required = false)
+          RefreshTokenRequest request,
+      HttpServletRequest httpRequest) {
+    String refreshToken = resolveRefreshToken(request, httpRequest);
+    AuthSession session = authService.refresh(refreshToken);
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.SET_COOKIE,
+            authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
+        .body(new AuthResponse(session.token(), session.username(), session.role()));
   }
 
   @PostMapping("/logout")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   @Operation(
-      summary = "Revoke a refresh token",
+      summary = "Revoke the refresh token cookie",
       requestBody =
           @RequestBody(
-              required = true,
+              required = false,
               content =
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = RefreshTokenRequest.class))),
       responses = {@ApiResponse(responseCode = "204", description = "Session revoked")})
-  public void logout(
-      @Valid @org.springframework.web.bind.annotation.RequestBody RefreshTokenRequest request) {
-    authService.logout(request);
+  public ResponseEntity<Void> logout(
+      @Valid @org.springframework.web.bind.annotation.RequestBody(required = false)
+          RefreshTokenRequest request,
+      HttpServletRequest httpRequest) {
+    String refreshToken = resolveRefreshToken(request, httpRequest);
+    authService.logout(refreshToken);
+    return ResponseEntity.noContent()
+        .header(
+            HttpHeaders.SET_COOKIE, authCookieService.clearRefreshTokenCookie().toString())
+        .build();
   }
 
   @GetMapping("/me")
@@ -100,5 +128,24 @@ public class AuthController {
   @SecurityRequirement(name = "bearerAuth")
   public UserProfileResponse me(Authentication authentication) {
     return authService.profile(authentication);
+  }
+
+  private String resolveRefreshToken(
+      RefreshTokenRequest request, HttpServletRequest httpRequest) {
+    if (request != null && request.refreshToken() != null && !request.refreshToken().isBlank()) {
+      return request.refreshToken();
+    }
+    if (httpRequest.getCookies() == null) {
+      throw new IllegalArgumentException("Refresh token is required");
+    }
+    for (var cookie : httpRequest.getCookies()) {
+      if (cookie != null && cookie.getName().equals(authCookieService.getCookieName())) {
+        String value = cookie.getValue();
+        if (value != null && !value.isBlank()) {
+          return value;
+        }
+      }
+    }
+    throw new IllegalArgumentException("Refresh token is required");
   }
 }
