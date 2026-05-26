@@ -3,9 +3,7 @@ package io.weblinkpilot.bootstrap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
-import io.weblinkpilot.url.config.ShortLinkProperties;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import io.weblinkpilot.url.service.UrlCacheService;
@@ -16,7 +14,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,13 +24,12 @@ class ShortLinkCleanupJobTest {
 
   @Mock private UrlCacheService cacheService;
 
-  @Mock private ShortLinkProperties shortLinkProperties;
-
-  @InjectMocks private ShortLinkCleanupJob job;
+  private ShortLinkCleanupJob job;
 
   @Test
   void archivesExpiredLinksOlderThanRetentionWindow() {
-    when(shortLinkProperties.getCleanupRetention()).thenReturn(Duration.ofDays(30));
+    job = new ShortLinkCleanupJob(repository, cacheService, Duration.ofDays(30));
+
     ShortLink first =
         new ShortLink(
             "first",
@@ -50,7 +46,7 @@ class ShortLinkCleanupJobTest {
             null,
             OffsetDateTime.now(ZoneOffset.UTC).minusDays(50),
             OffsetDateTime.now(ZoneOffset.UTC).minusDays(40));
-    when(repository.findExpiredLinksBefore(org.mockito.ArgumentMatchers.any()))
+    org.mockito.Mockito.when(repository.findExpiredLinksBefore(org.mockito.ArgumentMatchers.any()))
         .thenReturn(List.of(first, second));
 
     job.purgeExpiredLinks();
@@ -69,7 +65,7 @@ class ShortLinkCleanupJobTest {
 
   @Test
   void skipsCleanupWhenRetentionIsNegative() {
-    when(shortLinkProperties.getCleanupRetention()).thenReturn(Duration.ofDays(-1));
+    job = new ShortLinkCleanupJob(repository, cacheService, Duration.ofDays(-1));
 
     job.purgeExpiredLinks();
 
