@@ -43,6 +43,7 @@ fi
 print_box "Starting docker full stack:"
 print_service "$red" "postgres" "PostgreSQL database on port 5432"
 print_service "$magenta" "redis" "Redis cache/session store on port 6379"
+print_service "$yellow" "mailpit" "SMTP catcher on port 1025, inbox UI on port 8025"
 print_service "$green" "backend" "Spring Boot API on port 8080"
 print_service "$yellow" "prometheus" "Metrics scraper on port 9090"
 print_service "$blue" "grafana" "Dashboards on port 3001"

@@ -7,6 +7,17 @@ spring:
   data:
     redis:
       url: ${REDIS_URL}
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS:true}
 
 server:
   port: ${PORT:8080}
@@ -15,6 +26,7 @@ app:
   auth:
     refresh-cookie-same-site: None
     refresh-cookie-secure: true
+    frontend-base-url: ${FRONTEND_BASE_URL:${APP_FRONTEND_BASE_URL:https://weblink-pilot.netlify.app}}
     bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:}
     bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:}

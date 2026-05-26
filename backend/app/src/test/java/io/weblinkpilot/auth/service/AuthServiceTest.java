@@ -34,13 +34,20 @@ class AuthServiceTest {
     AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
     UserAccount account =
         new UserAccount(
-            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
-    when(userAccountService.registerUser("alice", "Password1")).thenReturn(account);
+            "alice",
+            "hashed",
+            "alice@example.com",
+            new Role("USER"),
+            true,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
+    when(userAccountService.registerUser("alice", "Password1", "alice@example.com"))
+        .thenReturn(account);
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-1");
     when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-1");
 
     AuthService.AuthSession response =
-        service.register(new AuthCredentialsRequest("alice", "Password1"));
+        service.register(new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
 
     assertThat(response.token()).isEqualTo("token-1");
     assertThat(response.username()).isEqualTo("alice");
@@ -53,7 +60,13 @@ class AuthServiceTest {
     AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
     UserAccount account =
         new UserAccount(
-            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+            "alice",
+            "hashed",
+            "alice@example.com",
+            new Role("USER"),
+            true,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
     when(userAccountService.authenticate("alice", "Password1")).thenReturn(account);
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-2");
     when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-2");
@@ -72,7 +85,13 @@ class AuthServiceTest {
     AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
     UserAccount account =
         new UserAccount(
-            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+            "alice",
+            "hashed",
+            "alice@example.com",
+            new Role("USER"),
+            true,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
     when(refreshTokenService.rotateRefreshToken("refresh-1"))
         .thenReturn(new RefreshTokenService.RotationResult("alice", "USER", "refresh-2"));
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-3");

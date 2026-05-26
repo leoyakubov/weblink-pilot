@@ -19,8 +19,12 @@ public class AuthProperties {
   @Min(1)
   private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
 
+  @Min(1)
+  private long accountActionTokenTtlHours = AuthDefaults.ACCOUNT_ACTION_TOKEN_TTL_HOURS;
+
   @NotBlank private String refreshCookieName = AuthDefaults.REFRESH_COOKIE_NAME;
   @NotBlank private String refreshCookiePath = AuthDefaults.REFRESH_COOKIE_PATH;
+  @NotBlank private String frontendBaseUrl = AuthDefaults.FRONTEND_BASE_URL;
 
   @Pattern(regexp = "(?i)STRICT|LAX|NONE")
   private String refreshCookieSameSite = AuthDefaults.REFRESH_COOKIE_SAME_SITE;
@@ -29,9 +33,11 @@ public class AuthProperties {
   private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
   private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
   private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;
+  private String bootstrapAdminEmail = BootstrapDefaults.ADMIN_EMAIL;
   private String bootstrapUserUsername = BootstrapDefaults.USER_USERNAME;
   private String bootstrapUserPassword = BootstrapDefaults.USER_PASSWORD;
   private String bootstrapUserRole = BootstrapDefaults.USER_ROLE;
+  private String bootstrapUserEmail = BootstrapDefaults.USER_EMAIL;
 
   public String getIssuer() {
     return issuer;
@@ -65,6 +71,14 @@ public class AuthProperties {
     this.refreshTokenTtlDays = refreshTokenTtlDays;
   }
 
+  public long getAccountActionTokenTtlHours() {
+    return accountActionTokenTtlHours;
+  }
+
+  public void setAccountActionTokenTtlHours(long accountActionTokenTtlHours) {
+    this.accountActionTokenTtlHours = accountActionTokenTtlHours;
+  }
+
   public String getRefreshCookieName() {
     return refreshCookieName;
   }
@@ -79,6 +93,14 @@ public class AuthProperties {
 
   public void setRefreshCookiePath(String refreshCookiePath) {
     this.refreshCookiePath = refreshCookiePath;
+  }
+
+  public String getFrontendBaseUrl() {
+    return frontendBaseUrl;
+  }
+
+  public void setFrontendBaseUrl(String frontendBaseUrl) {
+    this.frontendBaseUrl = frontendBaseUrl;
   }
 
   public String getRefreshCookieSameSite() {
@@ -121,6 +143,14 @@ public class AuthProperties {
     this.bootstrapAdminRole = bootstrapAdminRole;
   }
 
+  public String getBootstrapAdminEmail() {
+    return bootstrapAdminEmail;
+  }
+
+  public void setBootstrapAdminEmail(String bootstrapAdminEmail) {
+    this.bootstrapAdminEmail = bootstrapAdminEmail;
+  }
+
   public String getBootstrapUserUsername() {
     return bootstrapUserUsername;
   }
@@ -143,5 +173,13 @@ public class AuthProperties {
 
   public void setBootstrapUserRole(String bootstrapUserRole) {
     this.bootstrapUserRole = bootstrapUserRole;
+  }
+
+  public String getBootstrapUserEmail() {
+    return bootstrapUserEmail;
+  }
+
+  public void setBootstrapUserEmail(String bootstrapUserEmail) {
+    this.bootstrapUserEmail = bootstrapUserEmail;
   }
 }

@@ -6,6 +6,8 @@ import type {
   AnalyticsSummaryResponse,
   CreateLinkRequest,
   LinkResponse,
+  PasswordResetConfirmRequest,
+  PasswordResetRequest,
   RedirectPreviewResponse,
   UserProfileResponse,
 } from '@/types';
@@ -155,6 +157,38 @@ export function createLink(request: CreateLinkRequest, settings: ApiSettings = l
 export function register(request: AuthCredentialsRequest, settings: ApiSettings = loadSettings()) {
   return requestJson<AuthResponse>(
     '/auth/register',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    true,
+  );
+}
+
+export function requestPasswordReset(
+  request: PasswordResetRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/password-reset/request',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    true,
+  );
+}
+
+export function confirmPasswordReset(
+  request: PasswordResetConfirmRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/password-reset/confirm',
     {
       method: 'POST',
       body: JSON.stringify(request),

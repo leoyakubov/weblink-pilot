@@ -5,6 +5,7 @@ import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
+import io.weblinkpilot.auth.exception.EmailAlreadyExistsException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
@@ -27,9 +28,11 @@ public class UserAccountService {
   private final String bootstrapAdminUsername;
   private final String bootstrapAdminPassword;
   private final String bootstrapAdminRole;
+  private final String bootstrapAdminEmail;
   private final String bootstrapUserUsername;
   private final String bootstrapUserPassword;
   private final String bootstrapUserRole;
+  private final String bootstrapUserEmail;
   private final RoleCatalogService roleCatalogService;
 
   public UserAccountService(
@@ -42,18 +45,27 @@ public class UserAccountService {
     this.bootstrapAdminUsername = authProperties.getBootstrapAdminUsername();
     this.bootstrapAdminPassword = authProperties.getBootstrapAdminPassword();
     this.bootstrapAdminRole = authProperties.getBootstrapAdminRole();
+    this.bootstrapAdminEmail = authProperties.getBootstrapAdminEmail();
     this.bootstrapUserUsername = authProperties.getBootstrapUserUsername();
     this.bootstrapUserPassword = authProperties.getBootstrapUserPassword();
     this.bootstrapUserRole = authProperties.getBootstrapUserRole();
+    this.bootstrapUserEmail = authProperties.getBootstrapUserEmail();
     this.roleCatalogService = roleCatalogService;
   }
 
   @Transactional
-  public UserAccount registerUser(String username, String rawPassword) {
+  public UserAccount registerUser(String username, String rawPassword, String email) {
     String normalizedUsername = normalizeUsername(username);
+    String normalizedEmail = normalizeEmail(email);
     validateSignupCredentials(normalizedUsername, rawPassword);
     if (repository.existsByUsername(normalizedUsername)) {
       throw new UsernameAlreadyExistsException(normalizedUsername);
+    }
+    if (normalizedEmail.isBlank()) {
+      throw new IllegalArgumentException("Email is required.");
+    }
+    if (repository.existsByEmailIgnoreCase(normalizedEmail)) {
+      throw new EmailAlreadyExistsException(normalizedEmail);
     }
 
     Role userRole = roleCatalogService.getRequiredRole(RoleNames.USER);
@@ -61,9 +73,11 @@ public class UserAccountService {
         new UserAccount(
             normalizedUsername,
             passwordEncoder.encode(rawPassword),
+            normalizedEmail,
             userRole,
             true,
-            OffsetDateTime.now(ZoneOffset.UTC));
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
     return repository.save(account);
   }
 
@@ -101,10 +115,12 @@ public class UserAccountService {
                     new UserAccount(
                         username,
                         passwordEncoder.encode(password),
+                        normalizeBootstrapEmail(bootstrapAdminEmail),
                         roleCatalogService.getRequiredRole(
                             normalizeBootstrapRole(bootstrapAdminRole, RoleNames.ADMIN)),
                         true,
-                        OffsetDateTime.now(ZoneOffset.UTC))));
+                        OffsetDateTime.now(ZoneOffset.UTC),
+                        null)));
   }
 
   @Transactional
@@ -123,10 +139,12 @@ public class UserAccountService {
                     new UserAccount(
                         username,
                         passwordEncoder.encode(password),
+                        normalizeBootstrapEmail(bootstrapUserEmail),
                         roleCatalogService.getRequiredRole(
                             normalizeBootstrapRole(bootstrapUserRole, RoleNames.USER)),
                         true,
-                        OffsetDateTime.now(ZoneOffset.UTC))));
+                        OffsetDateTime.now(ZoneOffset.UTC),
+                        null)));
   }
 
   @Transactional(readOnly = true)
@@ -145,6 +163,24 @@ public class UserAccountService {
         .orElseThrow(InvalidCredentialsException::new);
   }
 
+  @Transactional(readOnly = true)
+  public UserAccount getRequiredUserByEmail(String email) {
+    return repository
+        .findByEmailIgnoreCase(normalizeEmail(email))
+        .orElseThrow(InvalidCredentialsException::new);
+  }
+
+  public void validatePasswordPolicy(String password) {
+    if (password == null || password.isBlank()) {
+      throw new IllegalArgumentException(
+          "Password must use at least 6 characters, including 1 letter and 1 number.");
+    }
+    if (!password.matches(PASSWORD_PATTERN)) {
+      throw new IllegalArgumentException(
+          "Password must use at least 6 characters, including 1 letter and 1 number.");
+    }
+  }
+
   private String normalizeUsername(String username) {
     if (username == null) {
       return "";
@@ -152,11 +188,25 @@ public class UserAccountService {
     return username.trim().toLowerCase(Locale.ROOT);
   }
 
+  private String normalizeEmail(String email) {
+    if (email == null) {
+      return "";
+    }
+    return email.trim().toLowerCase(Locale.ROOT);
+  }
+
   private String normalizeBootstrapRole(String configuredRole, String defaultRole) {
     if (configuredRole == null || configuredRole.isBlank()) {
       return defaultRole;
     }
     return configuredRole.trim().toUpperCase(Locale.ROOT);
+  }
+
+  private String normalizeBootstrapEmail(String email) {
+    if (email == null || email.isBlank()) {
+      return null;
+    }
+    return normalizeEmail(email);
   }
 
   private void validateSignupCredentials(String username, String password) {
@@ -173,10 +223,7 @@ public class UserAccountService {
     if (!username.matches(USERNAME_PATTERN)) {
       throw new IllegalArgumentException("Username must use at least 4 symbols.");
     }
-    if (!password.matches(PASSWORD_PATTERN)) {
-      throw new IllegalArgumentException(
-          "Password must use at least 6 characters, including 1 letter and 1 number.");
-    }
+    validatePasswordPolicy(password);
   }
 
   private void validateLoginCredentials(String username, String password) {

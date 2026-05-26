@@ -24,6 +24,7 @@ export interface LinkResponse {
 export interface AuthCredentialsRequest {
   username: string;
   password: string;
+  email?: string | null;
 }
 
 export interface AuthResponse {
@@ -34,6 +35,15 @@ export interface AuthResponse {
 
 export interface RefreshTokenRequest {
   refreshToken: string;
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirmRequest {
+  token: string;
+  password: string;
 }
 
 export interface UserProfileResponse {

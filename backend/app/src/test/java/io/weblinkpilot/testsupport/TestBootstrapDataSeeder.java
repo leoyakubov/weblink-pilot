@@ -71,9 +71,11 @@ public class TestBootstrapDataSeeder implements ApplicationRunner {
         new UserAccount(
             username,
             passwordEncoder.encode(password),
+            username + "@weblinkpilot.local",
             roleCatalogService.getRequiredRole(roleName),
             true,
-            OffsetDateTime.now(ZoneOffset.UTC));
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
     userAccountRepository.save(account);
   }
 

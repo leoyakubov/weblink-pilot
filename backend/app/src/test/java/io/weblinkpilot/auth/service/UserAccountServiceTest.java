@@ -52,14 +52,16 @@ class UserAccountServiceTest {
   @Test
   void registerUserStoresEncodedAccount() {
     when(repository.existsByUsername("alice")).thenReturn(false);
+    when(repository.existsByEmailIgnoreCase("alice@example.com")).thenReturn(false);
     when(roleCatalogService.getRequiredRole(RoleNames.USER)).thenReturn(new Role(RoleNames.USER));
     when(passwordEncoder.encode("Password1")).thenReturn("hashed");
     when(repository.save(any(UserAccount.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    UserAccount account = service.registerUser(" Alice ", "Password1");
+    UserAccount account = service.registerUser(" Alice ", "Password1", "alice@example.com");
 
     assertThat(account.getUsername()).isEqualTo("alice");
+    assertThat(account.getEmail()).isEqualTo("alice@example.com");
     assertThat(account.getPasswordHash()).isEqualTo("hashed");
     assertThat(account.getRoleName()).isEqualTo(RoleNames.USER);
     assertThat(account.isEnabled()).isTrue();
@@ -71,8 +73,17 @@ class UserAccountServiceTest {
   void registerUserRejectsDuplicateUsername() {
     when(repository.existsByUsername("alice")).thenReturn(true);
 
-    assertThatThrownBy(() -> service.registerUser("alice", "Password1"))
+    assertThatThrownBy(() -> service.registerUser("alice", "Password1", "alice@example.com"))
         .isInstanceOf(UsernameAlreadyExistsException.class);
+  }
+
+  @Test
+  void registerUserRejectsDuplicateEmail() {
+    when(repository.existsByUsername("alice")).thenReturn(false);
+    when(repository.existsByEmailIgnoreCase("alice@example.com")).thenReturn(true);
+
+    assertThatThrownBy(() -> service.registerUser("alice", "Password1", "alice@example.com"))
+        .isInstanceOf(io.weblinkpilot.auth.exception.EmailAlreadyExistsException.class);
   }
 
   @Test

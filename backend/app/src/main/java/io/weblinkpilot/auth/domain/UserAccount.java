@@ -22,6 +22,9 @@ public class UserAccount {
   @Column(name = "username", nullable = false, unique = true, length = 128)
   private String username;
 
+  @Column(name = "email", unique = true, length = 255)
+  private String email;
+
   @Column(name = "password_hash", nullable = false, length = 255)
   private String passwordHash;
 
@@ -35,6 +38,9 @@ public class UserAccount {
   @Column(name = "created_at", nullable = false)
   private OffsetDateTime createdAt;
 
+  @Column(name = "email_verified_at")
+  private OffsetDateTime emailVerifiedAt;
+
   @Column(name = "last_login_at")
   private OffsetDateTime lastLoginAt;
 
@@ -42,11 +48,24 @@ public class UserAccount {
 
   public UserAccount(
       String username, String passwordHash, Role role, boolean enabled, OffsetDateTime createdAt) {
+    this(username, passwordHash, null, role, enabled, createdAt, null);
+  }
+
+  public UserAccount(
+      String username,
+      String passwordHash,
+      String email,
+      Role role,
+      boolean enabled,
+      OffsetDateTime createdAt,
+      OffsetDateTime emailVerifiedAt) {
     this.username = username;
+    this.email = email;
     this.passwordHash = passwordHash;
     this.role = role;
     this.enabled = enabled;
     this.createdAt = createdAt;
+    this.emailVerifiedAt = emailVerifiedAt;
   }
 
   public Long getId() {
@@ -59,6 +78,14 @@ public class UserAccount {
 
   public String getPasswordHash() {
     return passwordHash;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 
   public void setPasswordHash(String passwordHash) {
@@ -81,11 +108,27 @@ public class UserAccount {
     return createdAt;
   }
 
+  public OffsetDateTime getEmailVerifiedAt() {
+    return emailVerifiedAt;
+  }
+
+  public void setEmailVerifiedAt(OffsetDateTime emailVerifiedAt) {
+    this.emailVerifiedAt = emailVerifiedAt;
+  }
+
+  public boolean isEmailVerified() {
+    return emailVerifiedAt != null;
+  }
+
   public OffsetDateTime getLastLoginAt() {
     return lastLoginAt;
   }
 
   public void markLoggedIn(OffsetDateTime at) {
     this.lastLoginAt = at;
+  }
+
+  public void markEmailVerified(OffsetDateTime at) {
+    this.emailVerifiedAt = at;
   }
 }

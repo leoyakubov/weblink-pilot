@@ -13,6 +13,7 @@ const router = useRouter();
 const form = reactive<AuthCredentialsRequest>({
   username: '',
   password: '',
+  email: '',
 });
 const busy = ref(false);
 const errorMessage = ref('');
@@ -65,6 +66,10 @@ function validateForm(): string {
 
     if (!passwordPattern.test(password)) {
       return 'Password must use at least 6 characters, including 1 letter and 1 number.';
+    }
+
+    if (!form.email?.trim()) {
+      return 'Email is required.';
     }
   } else if (!username || !password) {
     return 'Enter both username and password.';
@@ -142,6 +147,16 @@ async function submit() {
               autocomplete="username"
             />
           </label>
+          <label v-if="props.mode === 'register'" class="form-field">
+            <span class="field-label">Email</span>
+            <input
+              v-model="form.email"
+              class="input"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+            />
+          </label>
           <label class="form-field">
             <span class="field-label">Password</span>
             <div class="input-row">
@@ -214,6 +229,12 @@ async function submit() {
               :to="switchPath"
             >
               {{ props.mode === 'login' ? 'Sign up' : 'Sign in' }}
+            </RouterLink>
+          </div>
+          <div v-if="props.mode === 'login'" class="auth-switch">
+            <span class="footnote">Forgot your password?</span>
+            <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/forgot-password">
+              Reset password
             </RouterLink>
           </div>
         </form>

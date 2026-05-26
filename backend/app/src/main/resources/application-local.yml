@@ -8,9 +8,14 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
 
 app:
   public-base-url: http://localhost:8080
+  auth:
+    frontend-base-url: http://localhost:8081
   cors:
     allowed-origin-patterns:
       - http://localhost:5173

@@ -12,6 +12,8 @@ import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
+import io.weblinkpilot.shared.contracts.PasswordResetConfirmRequest;
+import io.weblinkpilot.shared.contracts.PasswordResetRequest;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +79,41 @@ public class AuthController {
             HttpHeaders.SET_COOKIE,
             authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
         .body(new AuthResponse(session.token(), session.username(), session.role()));
+  }
+
+  @PostMapping("/password-reset/request")
+  @Operation(
+      summary = "Request a password reset link",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = PasswordResetRequest.class))),
+      responses = {@ApiResponse(responseCode = "204", description = "Reset link queued")})
+  public ResponseEntity<Void> requestPasswordReset(
+      @Valid @org.springframework.web.bind.annotation.RequestBody PasswordResetRequest request) {
+    authService.requestPasswordReset(request.email());
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/password-reset/confirm")
+  @Operation(
+      summary = "Confirm a password reset",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = PasswordResetConfirmRequest.class))),
+      responses = {@ApiResponse(responseCode = "204", description = "Password updated")})
+  public ResponseEntity<Void> confirmPasswordReset(
+      @Valid @org.springframework.web.bind.annotation.RequestBody
+          PasswordResetConfirmRequest request) {
+    authService.confirmPasswordReset(request.token(), request.password());
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/refresh")

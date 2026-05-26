@@ -15,19 +15,30 @@ public class AuthService {
   private final UserAccountService userAccountService;
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
+  private final PasswordResetService passwordResetService;
+
+  public AuthService(
+      UserAccountService userAccountService,
+      JwtService jwtService,
+      RefreshTokenService refreshTokenService,
+      PasswordResetService passwordResetService) {
+    this.userAccountService = userAccountService;
+    this.jwtService = jwtService;
+    this.refreshTokenService = refreshTokenService;
+    this.passwordResetService = passwordResetService;
+  }
 
   public AuthService(
       UserAccountService userAccountService,
       JwtService jwtService,
       RefreshTokenService refreshTokenService) {
-    this.userAccountService = userAccountService;
-    this.jwtService = jwtService;
-    this.refreshTokenService = refreshTokenService;
+    this(userAccountService, jwtService, refreshTokenService, null);
   }
 
   @Transactional
   public AuthSession register(AuthCredentialsRequest request) {
-    UserAccount account = userAccountService.registerUser(request.username(), request.password());
+    UserAccount account =
+        userAccountService.registerUser(request.username(), request.password(), request.email());
     return issueSession(account);
   }
 
@@ -51,6 +62,22 @@ public class AuthService {
   @Transactional
   public void logout(String refreshToken) {
     refreshTokenService.revokeRefreshToken(refreshToken);
+  }
+
+  @Transactional
+  public void requestPasswordReset(String email) {
+    if (passwordResetService == null) {
+      throw new IllegalStateException("Password reset service is not configured");
+    }
+    passwordResetService.requestPasswordReset(email);
+  }
+
+  @Transactional
+  public void confirmPasswordReset(String token, String password) {
+    if (passwordResetService == null) {
+      throw new IllegalStateException("Password reset service is not configured");
+    }
+    passwordResetService.confirmPasswordReset(token, password);
   }
 
   @Transactional(readOnly = true)

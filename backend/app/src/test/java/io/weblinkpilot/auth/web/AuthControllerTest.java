@@ -44,7 +44,8 @@ class AuthControllerTest {
 
   @Test
   void registerSetsRefreshCookieAndReturnsAccessTokenOnly() throws Exception {
-    when(authService.register(new AuthCredentialsRequest("alice", "Password1")))
+    when(authService.register(
+            new AuthCredentialsRequest("alice", "Password1", "alice@example.com")))
         .thenReturn(new AuthSession("token-1", "refresh-1", "alice", "USER"));
 
     mockMvc
@@ -53,7 +54,7 @@ class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
-                    {"username":"alice","password":"Password1"}
+                    {"username":"alice","password":"Password1","email":"alice@example.com"}
                     """))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.token").value("token-1"))
@@ -110,5 +111,35 @@ class AuthControllerTest {
                         org.hamcrest.Matchers.containsString("HttpOnly"))));
 
     verify(authService).logout("refresh-1");
+  }
+
+  @Test
+  void requestPasswordResetReturnsNoContent() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/password-reset/request")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"email":"alice@example.com"}
+                    """))
+        .andExpect(status().isNoContent());
+
+    verify(authService).requestPasswordReset("alice@example.com");
+  }
+
+  @Test
+  void confirmPasswordResetReturnsNoContent() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/password-reset/confirm")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"token":"reset-token","password":"Password1"}
+                    """))
+        .andExpect(status().isNoContent());
+
+    verify(authService).confirmPasswordReset("reset-token", "Password1");
   }
 }

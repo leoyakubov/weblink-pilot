@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildApiBaseUrl,
   createLink,
+  confirmPasswordReset,
   getAdminOverview,
   getAnalyticsSummary,
   getCurrentUser,
@@ -9,6 +10,7 @@ import {
   listLinks,
   login,
   logoutSession,
+  requestPasswordReset,
   register,
   refreshTokens,
 } from './api';
@@ -258,6 +260,7 @@ describe('api helpers', () => {
         JSON.stringify({
           username: 'alice',
           password: 'secret',
+          email: 'alice@example.com',
         }),
       );
 
@@ -281,6 +284,7 @@ describe('api helpers', () => {
         {
           username: 'alice',
           password: 'secret',
+          email: 'alice@example.com',
         },
         settings,
       ),
@@ -289,6 +293,42 @@ describe('api helpers', () => {
       username: 'alice',
       role: 'USER',
     });
+  });
+
+  it('serializes password reset request payload', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/password-reset/request');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBeNull();
+      expect(init?.credentials).toBe('include');
+      expect(init?.body).toBe(JSON.stringify({ email: 'alice@example.com' }));
+      return new Response(null, { status: 204 });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      requestPasswordReset({ email: 'alice@example.com' }, settings),
+    ).resolves.toBeUndefined();
+  });
+
+  it('serializes password reset confirm payload', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/password-reset/confirm');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBeNull();
+      expect(init?.credentials).toBe('include');
+      expect(init?.body).toBe(
+        JSON.stringify({ token: 'reset-token', password: 'Password1' }),
+      );
+      return new Response(null, { status: 204 });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      confirmPasswordReset({ token: 'reset-token', password: 'Password1' }, settings),
+    ).resolves.toBeUndefined();
   });
 
   it('serializes refresh payload and reads rotated auth response', async () => {

@@ -3,6 +3,8 @@ import { authState, bootstrapAuth } from '@/lib/auth';
 import HomeView from '@/views/HomeView.vue';
 import AboutView from '@/views/AboutView.vue';
 import AuthView from '@/views/AuthView.vue';
+import PasswordResetRequestView from '@/views/PasswordResetRequestView.vue';
+import PasswordResetConfirmView from '@/views/PasswordResetConfirmView.vue';
 import LinkView from '@/views/LinkView.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import HistoryView from '@/views/HistoryView.vue';
@@ -15,6 +17,8 @@ const router = createRouter({
     { path: '/about', name: 'about', component: AboutView },
     { path: '/auth/signin', name: 'signin', component: AuthView, props: { mode: 'login' } },
     { path: '/auth/signup', name: 'signup', component: AuthView, props: { mode: 'register' } },
+    { path: '/auth/forgot-password', name: 'forgot-password', component: PasswordResetRequestView },
+    { path: '/auth/reset-password', name: 'reset-password', component: PasswordResetConfirmView },
     { path: '/link/:code', name: 'link', component: LinkView, props: true },
     { path: '/dashboard', name: 'dashboard', component: DashboardView },
     { path: '/history', name: 'history', component: HistoryView },

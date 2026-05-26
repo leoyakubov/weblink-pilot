@@ -72,10 +72,22 @@ describe('AuthView', () => {
     );
 
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
+    await wrapper.get('input[placeholder="you@example.com"]').setValue('user1@example.com');
     await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 
     expect(wrapper.text()).toContain('This username already exists.');
+  });
+
+  it('requires email in register mode', async () => {
+    const wrapper = mountAuth('register');
+
+    await wrapper.get('input[placeholder="Your username"]').setValue('user1');
+    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Email is required.');
   });
 });

@@ -14,6 +14,17 @@ spring:
     type: simple
   profiles:
     default: local
+  mail:
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS:false}
 
 management:
   endpoints:
@@ -27,10 +38,12 @@ app:
     jwt-secret: ${JWT_SECRET}
     token-ttl-minutes: 30
     refresh-token-ttl-days: 30
+    account-action-token-ttl-hours: 24
     refresh-cookie-name: weblinkpilot_refresh
     refresh-cookie-path: /api/v1/auth
     refresh-cookie-same-site: Lax
     refresh-cookie-secure: false
+    frontend-base-url: http://localhost:8081
   short-link:
     max-expiration: 365d
     cleanup-retention: 30d
