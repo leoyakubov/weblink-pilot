@@ -201,7 +201,8 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Sonar analysis: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
 - Git hook setup: [`scripts/win/git/setup-hooks.ps1`](scripts/win/git/setup-hooks.ps1)
 - Git hook setup (Unix): [`scripts/unix/git/setup-hooks.sh`](scripts/unix/git/setup-hooks.sh)
-- Before push check: [`scripts/win/git/pre-push.ps1`](scripts/win/git/pre-push.ps1)
+- Before push check: [`scripts/win/run-before-push.ps1`](scripts/win/run-before-push.ps1)
+- Before push check (Unix): [`scripts/unix/run-before-push.sh`](scripts/unix/run-before-push.sh)
 
 Windows scripts live under `scripts/win/{dev,git,quality,security}` and Unix scripts live under `scripts/unix/{dev,git,quality,security}`, with the same names ending in `.ps1` and `.sh`.
 
@@ -217,7 +218,7 @@ To enable it again:
 .\scripts\win\git\setup-hooks.ps1
 ```
 
-The platform-grouped scripts are the canonical entrypoints.
+The platform-grouped scripts are the canonical entrypoints, and `run-before-push` is available as a convenience wrapper in both `scripts/win/` and `scripts/unix/`.
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
 

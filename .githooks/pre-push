@@ -3,4 +3,4 @@ set -eu
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
-"$repo_root/scripts/unix/git/pre-push.sh"
+"$repo_root/scripts/unix/run-before-push.sh"
