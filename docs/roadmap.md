@@ -22,7 +22,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | ✅ Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | ✅ Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
 | 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes. |
-| 🟡 Maybe | Async broker | Add RabbitMQ or Kafka only if event volume or service separation warrants it. |
+| 🟡 Maybe | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 
 ## Execution Checklist
 
@@ -239,7 +239,22 @@ Exit criteria:
 - the deploy path stays simple
 - the monitoring stack can be enabled after the app is live
 
-### Phase 14 - Auth expansion
+### Phase 14 - RabbitMQ async messaging
+
+Goals:
+
+- add RabbitMQ only if the app needs queued work instead of synchronous request handling
+- move click events or other background tasks off the request thread when that improves latency
+- support event fan-out for future notifications, cache invalidation, or integration jobs
+- keep local/dev/demo setup and tests explicit so the broker stays optional until the feature need is clear
+
+Exit criteria:
+
+- async event processing is documented and testable
+- the broker is only used for workloads that benefit from queueing
+- local and CI workflows still work cleanly when RabbitMQ is disabled
+
+### Phase 15 - Auth expansion
 
 Goals:
 
@@ -272,4 +287,5 @@ Exit criteria:
 11. environment profiles and scripts
 12. Redis caching
 13. monitoring
-14. auth expansion
+14. RabbitMQ async messaging
+15. auth expansion
