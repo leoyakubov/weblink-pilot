@@ -48,7 +48,7 @@ public class RedirectService {
     }
 
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    if (snapshot.expiresAt() != null && snapshot.expiresAt().isBefore(now)) {
+    if (snapshot.expiresAt() != null && !snapshot.expiresAt().isAfter(now)) {
       log.warn("url.link.redirect.expired code={} expiredAt={}", code, snapshot.expiresAt());
       throw new UrlExpiredException(code);
     }

@@ -40,4 +40,31 @@ class ShortLinkRepositoryTest {
     assertThat(repository.existsByCode(link.getCode())).isTrue();
     assertThat(repository.existsByCustomAlias("demo-alias")).isTrue();
   }
+
+  @Test
+  void deletesExpiredLinksBeforeCutoff() {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    repository.save(
+        new ShortLink(
+            "expired-1",
+            "https://github.com/weblinkpilot/weblink-pilot",
+            null,
+            null,
+            now.minusDays(50),
+            now.minusDays(40)));
+    repository.save(
+        new ShortLink(
+            "active-1",
+            "https://github.com/weblinkpilot/weblink-pilot/about",
+            null,
+            null,
+            now.minusDays(1),
+            now.plusDays(10)));
+
+    int deleted = repository.deleteExpiredLinksBefore(now.minusDays(30));
+
+    assertThat(deleted).isEqualTo(1);
+    assertThat(repository.findByCode("expired-1")).isNotPresent();
+    assertThat(repository.findByCode("active-1")).isPresent();
+  }
 }

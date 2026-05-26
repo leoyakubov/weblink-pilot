@@ -3,6 +3,7 @@ package io.weblinkpilot.url.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -11,11 +12,14 @@ import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.codegen.ShortCodeGenerator;
+import io.weblinkpilot.url.config.ShortLinkProperties;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +39,14 @@ class UrlCreationServiceTest {
 
   @Mock private PublicUrlBuilder publicUrlBuilder;
 
+  @Mock private ShortLinkProperties shortLinkProperties;
+
   @InjectMocks private UrlCreationService service;
+
+  @BeforeEach
+  void setUp() {
+    lenient().when(shortLinkProperties.getMaxExpiration()).thenReturn(Duration.ofDays(365));
+  }
 
   @Test
   void createsCustomAliasLink() {
@@ -98,6 +109,19 @@ class UrlCreationServiceTest {
                         OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1))))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Expiration time must be in the future");
+  }
+
+  @Test
+  void rejectsRequestsBeyondMaximumLifetime() {
+    assertThatThrownBy(
+            () ->
+                service.create(
+                    new CreateLinkRequest(
+                        "https://github.com/weblinkpilot/weblink-pilot",
+                        null,
+                        OffsetDateTime.now(ZoneOffset.UTC).plusDays(366))))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageContaining("configured maximum lifetime");
   }
 
   @Test

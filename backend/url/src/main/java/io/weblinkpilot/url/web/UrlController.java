@@ -76,7 +76,8 @@ public class UrlController {
   @PostMapping
   @Operation(
       summary = "Create a short link",
-      description = "Creates a short link with an optional custom alias and expiration date.",
+      description =
+          "Creates a short link with an optional custom alias and optional expiration date capped by the configured maximum lifetime.",
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               required = true,
@@ -90,8 +91,7 @@ public class UrlController {
                             value =
                                 """
                                                     {
-                                                      "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/about",
-                                                      "expiresAt": "2026-08-31T23:59:59Z"
+                                                      "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/about"
                                                     }
                                                     """),
                         @ExampleObject(

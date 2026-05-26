@@ -104,6 +104,6 @@ public class ShortLink {
   }
 
   public boolean isExpired(OffsetDateTime now) {
-    return expiresAt != null && expiresAt.isBefore(now);
+    return expiresAt != null && !expiresAt.isAfter(now);
   }
 }

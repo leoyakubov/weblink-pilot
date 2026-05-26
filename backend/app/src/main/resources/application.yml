@@ -26,6 +26,10 @@ app:
     issuer: weblink-pilot
     jwt-secret: ${JWT_SECRET}
     token-ttl-minutes: 240
+  short-link:
+    max-expiration: 365d
+    cleanup-retention: 30d
+    cleanup-cron: "0 15 3 * * *"
   cache:
     provider: local
   rate-limit:

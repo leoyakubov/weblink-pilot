@@ -32,6 +32,12 @@ Request:
 }
 ```
 
+Notes:
+
+- `expiresAt` is optional
+- if provided, it must not be in the past
+- the backend caps it to the configured maximum lifetime from creation time
+
 Response:
 
 ```json
@@ -54,6 +60,8 @@ Behavior:
 - resolves short code
 - returns HTTP redirect
 - publishes click event asynchronously
+- expired links return HTTP `410 Gone`
+- expired link rows are retained for a grace period and cleaned up later
 
 ### 3. Redirect preview
 

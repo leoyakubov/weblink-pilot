@@ -4,11 +4,13 @@ import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.codegen.ShortCodeGenerator;
+import io.weblinkpilot.url.config.ShortLinkProperties;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.net.URI;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
@@ -31,18 +33,21 @@ public class UrlCreationService {
   private final UrlCacheService cacheService;
   private final LinkPublisher linkPublisher;
   private final PublicUrlBuilder publicUrlBuilder;
+  private final ShortLinkProperties shortLinkProperties;
 
   public UrlCreationService(
       ShortLinkRepository repository,
       ShortCodeGenerator shortCodeGenerator,
       UrlCacheService cacheService,
       LinkPublisher linkPublisher,
-      PublicUrlBuilder publicUrlBuilder) {
+      PublicUrlBuilder publicUrlBuilder,
+      ShortLinkProperties shortLinkProperties) {
     this.repository = repository;
     this.shortCodeGenerator = shortCodeGenerator;
     this.cacheService = cacheService;
     this.linkPublisher = linkPublisher;
     this.publicUrlBuilder = publicUrlBuilder;
+    this.shortLinkProperties = shortLinkProperties;
   }
 
   @Transactional
@@ -55,9 +60,8 @@ public class UrlCreationService {
     String normalizedUrl = normalizeUrl(request.originalUrl());
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     String normalizedOwnerUsername = normalizeOwnerUsername(ownerUsername);
-    if (request.expiresAt() != null && request.expiresAt().isBefore(now)) {
-      log.warn("url.link.create.rejected reason=expired_request expiresAt={}", request.expiresAt());
-      throw new IllegalArgumentException("Expiration time must be in the future");
+    if (request.expiresAt() != null) {
+      validateExpirationWindow(request.expiresAt(), now);
     }
 
     String alias = normalizeAlias(request.customAlias());
@@ -95,6 +99,27 @@ public class UrlCreationService {
         link.getExpiresAt(),
         link.getClickCount(),
         link.getOwnerUsername());
+  }
+
+  private void validateExpirationWindow(OffsetDateTime expiresAt, OffsetDateTime now) {
+    if (!expiresAt.isAfter(now)) {
+      log.warn("url.link.create.rejected reason=expired_request expiresAt={}", expiresAt);
+      throw new IllegalArgumentException("Expiration time must be in the future");
+    }
+
+    Duration maxExpiration = shortLinkProperties.getMaxExpiration();
+    if (maxExpiration == null || maxExpiration.isNegative() || maxExpiration.isZero()) {
+      return;
+    }
+
+    OffsetDateTime maxExpiresAt = now.plus(maxExpiration);
+    if (expiresAt.isAfter(maxExpiresAt)) {
+      log.warn(
+          "url.link.create.rejected reason=expiration_too_far expiresAt={} maxExpiresAt={}",
+          expiresAt,
+          maxExpiresAt);
+      throw new IllegalArgumentException("Expiration time exceeds the configured maximum lifetime");
+    }
   }
 
   private ShortLink createWithCustomAlias(
