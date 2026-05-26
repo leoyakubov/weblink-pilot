@@ -196,6 +196,9 @@ watch(
             <label class="form-field">
               <span class="field-label">Expiration</span>
               <input v-model="form.expiresAt" class="input" type="datetime-local" />
+              <p class="help-text">
+                Optional. Expired links stop redirecting, and the backend caps the maximum lifetime.
+              </p>
             </label>
 
             <div class="actions">

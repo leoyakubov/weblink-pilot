@@ -1,9 +1,12 @@
 package io.weblinkpilot.bootstrap;
 
 import io.weblinkpilot.url.config.ShortLinkProperties;
+import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
+import io.weblinkpilot.url.service.UrlCacheService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -18,11 +21,15 @@ public class ShortLinkCleanupJob {
   private static final Logger log = LoggerFactory.getLogger(ShortLinkCleanupJob.class);
 
   private final ShortLinkRepository shortLinkRepository;
+  private final UrlCacheService cacheService;
   private final ShortLinkProperties shortLinkProperties;
 
   public ShortLinkCleanupJob(
-      ShortLinkRepository shortLinkRepository, ShortLinkProperties shortLinkProperties) {
+      ShortLinkRepository shortLinkRepository,
+      UrlCacheService cacheService,
+      ShortLinkProperties shortLinkProperties) {
     this.shortLinkRepository = shortLinkRepository;
+    this.cacheService = cacheService;
     this.shortLinkProperties = shortLinkProperties;
   }
 
@@ -36,7 +43,18 @@ public class ShortLinkCleanupJob {
 
     OffsetDateTime cutoff =
         OffsetDateTime.now(ZoneOffset.UTC).minus(shortLinkProperties.getCleanupRetention());
-    int deleted = shortLinkRepository.deleteExpiredLinksBefore(cutoff);
-    log.info("url.link.cleanup.purged cutoff={} deleted={}", cutoff, deleted);
+    List<ShortLink> expiredLinks = shortLinkRepository.findExpiredLinksBefore(cutoff);
+    if (expiredLinks.isEmpty()) {
+      log.info("url.link.cleanup.archived cutoff={} archived=0", cutoff);
+      return;
+    }
+
+    OffsetDateTime archivedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    for (ShortLink link : expiredLinks) {
+      link.markDeleted(archivedAt);
+      cacheService.evict(link.getCode());
+    }
+    shortLinkRepository.saveAll(expiredLinks);
+    log.info("url.link.cleanup.archived cutoff={} archived={}", cutoff, expiredLinks.size());
   }
 }

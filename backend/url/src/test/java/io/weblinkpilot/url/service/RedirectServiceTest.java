@@ -42,6 +42,7 @@ class RedirectServiceTest {
                 null,
                 createdAt,
                 null,
+                null,
                 5L));
     when(repository.incrementClickCountByCode("abc123")).thenReturn(1);
 
@@ -72,6 +73,7 @@ class RedirectServiceTest {
                 "https://github.com/weblinkpilot/weblink-pilot/path",
                 null,
                 createdAt,
+                null,
                 null,
                 1L));
     when(repository.incrementClickCountByCode("ipv6")).thenReturn(1);
@@ -113,12 +115,38 @@ class RedirectServiceTest {
                 null,
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(2),
                 OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                null,
                 3L));
 
     assertThatThrownBy(
             () ->
                 service.resolveTarget(
                     "expired", new RedirectRequestContext("127.0.0.1", null, null, "LOCAL")))
+        .isInstanceOf(UrlExpiredException.class);
+
+    verifyNoInteractions(repository);
+    verifyNoInteractions(linkPublisher);
+  }
+
+  @Test
+  void throwsWhenLinkIsArchived() {
+    final RedirectService service = new RedirectService(repository, cacheService, linkPublisher);
+
+    when(cacheService.findByCode("archived"))
+        .thenReturn(
+            new ShortLinkSnapshot(
+                "archived",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(10),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(5),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(2),
+                3L));
+
+    assertThatThrownBy(
+            () ->
+                service.resolveTarget(
+                    "archived", new RedirectRequestContext("127.0.0.1", null, null, "LOCAL")))
         .isInstanceOf(UrlExpiredException.class);
 
     verifyNoInteractions(repository);
@@ -137,6 +165,7 @@ class RedirectServiceTest {
                 "https://github.com/weblinkpilot/weblink-pilot",
                 null,
                 createdAt,
+                null,
                 null,
                 1L));
     when(repository.incrementClickCountByCode("missing-db")).thenReturn(0);

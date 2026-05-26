@@ -45,6 +45,7 @@ class CacheConfigurationTest {
             null,
             OffsetDateTime.of(2026, 5, 24, 10, 0, 0, 0, ZoneOffset.UTC),
             null,
+            null,
             7L);
 
     assertThatNoException()

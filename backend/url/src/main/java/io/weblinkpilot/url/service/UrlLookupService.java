@@ -2,6 +2,7 @@ package io.weblinkpilot.url.service;
 
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.domain.ShortLink;
+import io.weblinkpilot.url.exception.UrlExpiredException;
 import io.weblinkpilot.url.exception.UrlNotFoundException;
 import io.weblinkpilot.url.repository.ShortLinkRepository;
 import java.util.List;
@@ -37,6 +38,10 @@ public class UrlLookupService {
       log.warn("url.link.read.miss code={}", code);
       throw new UrlNotFoundException(code);
     }
+    if (snapshot.deletedAt() != null) {
+      log.warn("url.link.read.expired code={} deletedAt={}", code, snapshot.deletedAt());
+      throw new UrlExpiredException(code);
+    }
 
     log.info(
         "url.link.read.success code={} clickCount={} originalHost={} expiresAt={}",
@@ -59,16 +64,17 @@ public class UrlLookupService {
         Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
     List<ShortLink> content;
     if (admin) {
-      content = repository.findAll(PageRequest.of(0, size, newestFirst)).getContent();
+      content =
+          repository.findAllByDeletedAtIsNull(PageRequest.of(0, size, newestFirst)).getContent();
     } else if (ownerUsername == null || ownerUsername.isBlank()) {
       content =
           repository
-              .findAllByOwnerUsernameIsNull(PageRequest.of(0, size, newestFirst))
+              .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(PageRequest.of(0, size, newestFirst))
               .getContent();
     } else {
       content =
           repository
-              .findAllByOwnerUsername(
+              .findAllByOwnerUsernameAndDeletedAtIsNull(
                   ownerUsername.trim().toLowerCase(java.util.Locale.ROOT),
                   PageRequest.of(0, size, newestFirst))
               .getContent();

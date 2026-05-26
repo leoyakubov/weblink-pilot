@@ -32,6 +32,7 @@ public class UrlCacheService {
                     value.getOwnerUsername(),
                     value.getCreatedAt(),
                     value.getExpiresAt(),
+                    value.getDeletedAt(),
                     value.getClickCount()))
         .orElse(null);
   }

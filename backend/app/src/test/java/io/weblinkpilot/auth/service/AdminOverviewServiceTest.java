@@ -30,9 +30,9 @@ class AdminOverviewServiceTest {
   void overviewCombinesRepositoryCounts() {
     when(userAccountRepository.count()).thenReturn(5L);
     when(userAccountRepository.countByRoleName("ADMIN")).thenReturn(1L);
-    when(shortLinkRepository.count()).thenReturn(12L);
-    when(shortLinkRepository.countByOwnerUsernameIsNull()).thenReturn(7L);
-    when(shortLinkRepository.countByOwnerUsernameIsNotNull()).thenReturn(5L);
+    when(shortLinkRepository.countByDeletedAtIsNull()).thenReturn(12L);
+    when(shortLinkRepository.countByOwnerUsernameIsNullAndDeletedAtIsNull()).thenReturn(7L);
+    when(shortLinkRepository.countByOwnerUsernameIsNotNullAndDeletedAtIsNull()).thenReturn(5L);
     when(shortLinkRepository.sumClickCount()).thenReturn(99L);
 
     AdminOverviewResponse response = service.overview();

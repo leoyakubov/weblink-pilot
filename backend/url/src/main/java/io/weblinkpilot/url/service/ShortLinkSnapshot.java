@@ -8,4 +8,5 @@ public record ShortLinkSnapshot(
     String ownerUsername,
     OffsetDateTime createdAt,
     OffsetDateTime expiresAt,
+    OffsetDateTime deletedAt,
     long clickCount) {}

@@ -61,7 +61,8 @@ Behavior:
 - returns HTTP redirect
 - publishes click event asynchronously
 - expired links return HTTP `410 Gone`
-- expired link rows are retained for a grace period and cleaned up later
+- expired link rows are archived after a grace period instead of being hard-deleted
+- archived codes stay reserved and are not reused
 
 ### 3. Redirect preview
 

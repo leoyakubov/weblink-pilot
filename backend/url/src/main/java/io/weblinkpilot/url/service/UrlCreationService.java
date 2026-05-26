@@ -4,7 +4,6 @@ import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import io.weblinkpilot.url.codegen.ShortCodeGenerator;
-import io.weblinkpilot.url.config.ShortLinkProperties;
 import io.weblinkpilot.url.domain.ShortLink;
 import io.weblinkpilot.url.event.LinkPublisher;
 import io.weblinkpilot.url.exception.DuplicateAliasException;
@@ -17,6 +16,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ public class UrlCreationService {
   private final UrlCacheService cacheService;
   private final LinkPublisher linkPublisher;
   private final PublicUrlBuilder publicUrlBuilder;
-  private final ShortLinkProperties shortLinkProperties;
+  private final Duration maxExpiration;
 
   public UrlCreationService(
       ShortLinkRepository repository,
@@ -41,13 +41,13 @@ public class UrlCreationService {
       UrlCacheService cacheService,
       LinkPublisher linkPublisher,
       PublicUrlBuilder publicUrlBuilder,
-      ShortLinkProperties shortLinkProperties) {
+      @Value("${app.short-link.max-expiration:365d}") Duration maxExpiration) {
     this.repository = repository;
     this.shortCodeGenerator = shortCodeGenerator;
     this.cacheService = cacheService;
     this.linkPublisher = linkPublisher;
     this.publicUrlBuilder = publicUrlBuilder;
-    this.shortLinkProperties = shortLinkProperties;
+    this.maxExpiration = maxExpiration;
   }
 
   @Transactional
@@ -107,7 +107,6 @@ public class UrlCreationService {
       throw new IllegalArgumentException("Expiration time must be in the future");
     }
 
-    Duration maxExpiration = shortLinkProperties.getMaxExpiration();
     if (maxExpiration == null || maxExpiration.isNegative() || maxExpiration.isZero()) {
       return;
     }

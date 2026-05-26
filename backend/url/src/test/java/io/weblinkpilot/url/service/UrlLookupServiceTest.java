@@ -44,6 +44,7 @@ class UrlLookupServiceTest {
             null,
             OffsetDateTime.now(ZoneOffset.UTC),
             null,
+            null,
             2L);
 
     when(cacheService.findByCode("abc123")).thenReturn(snapshot);
@@ -71,6 +72,23 @@ class UrlLookupServiceTest {
   }
 
   @Test
+  void throwsGoneWhenSnapshotIsArchived() {
+    when(cacheService.findByCode("archived"))
+        .thenReturn(
+            new ShortLinkSnapshot(
+                "archived",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                null,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(10),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(5),
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(2),
+                2L));
+
+    assertThatThrownBy(() -> service.getByCode("archived"))
+        .isInstanceOf(io.weblinkpilot.url.exception.UrlExpiredException.class);
+  }
+
+  @Test
   void listsRecentLinksWithClampedLimitAndNewestSort() {
     final ShortLink first =
         new ShortLink(
@@ -89,7 +107,7 @@ class UrlLookupServiceTest {
             OffsetDateTime.now(ZoneOffset.UTC),
             null);
 
-    when(repository.findAllByOwnerUsernameIsNull(any(Pageable.class)))
+    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(second, first)));
     when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
     when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
@@ -102,7 +120,7 @@ class UrlLookupServiceTest {
 
     assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
     final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(repository).findAllByOwnerUsernameIsNull(pageableCaptor.capture());
+    verify(repository).findAllByOwnerUsernameIsNullAndDeletedAtIsNull(pageableCaptor.capture());
     final Pageable pageable = pageableCaptor.getValue();
     assertThat(pageable.getPageSize()).isEqualTo(50);
     assertThat(pageable.getSort())

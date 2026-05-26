@@ -34,6 +34,9 @@ public class ShortLink {
   @Column(name = "click_count", nullable = false)
   private long clickCount;
 
+  @Column(name = "deleted_at")
+  private OffsetDateTime deletedAt;
+
   @Column(name = "owner_username", length = 128)
   private String ownerUsername;
 
@@ -53,6 +56,7 @@ public class ShortLink {
     this.createdAt = createdAt;
     this.expiresAt = expiresAt;
     this.clickCount = 0L;
+    this.deletedAt = null;
   }
 
   public Long getId() {
@@ -91,6 +95,10 @@ public class ShortLink {
     return clickCount;
   }
 
+  public OffsetDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
   public String getOwnerUsername() {
     return ownerUsername;
   }
@@ -101,6 +109,14 @@ public class ShortLink {
 
   public void incrementClickCount() {
     this.clickCount++;
+  }
+
+  public void markDeleted(OffsetDateTime deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
+  public boolean isDeleted() {
+    return deletedAt != null;
   }
 
   public boolean isExpired(OffsetDateTime now) {
