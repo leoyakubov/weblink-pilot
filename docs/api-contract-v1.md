@@ -12,9 +12,22 @@
 
 For the first version:
 
+- JWT access tokens are used for API requests
+- refresh tokens rotate access sessions and support logout
 - management endpoints are protected
 - public create/read endpoints may be open or protected depending on the final product flow
-- we can use basic auth initially and upgrade to token-based auth later
+
+## Auth Endpoints
+
+`POST /api/v1/auth/register`
+
+`POST /api/v1/auth/login`
+
+`POST /api/v1/auth/refresh`
+
+`POST /api/v1/auth/logout`
+
+`GET /api/v1/auth/me`
 
 ## Endpoints
 
@@ -213,8 +226,6 @@ Later versions may add:
 - `PATCH /api/v1/urls/{code}`
 - `DELETE /api/v1/urls/{code}`
 - `GET /api/v1/urls`
-- `POST /api/v1/auth/refresh`
-- `POST /api/v1/auth/logout`
 - bulk creation
 - branded domains
 - export endpoints

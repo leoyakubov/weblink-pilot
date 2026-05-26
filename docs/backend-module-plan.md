@@ -265,6 +265,7 @@ Current cache strategy:
 - hot short-link lookups use Redis
 - analytics read paths use cacheable read models where it helps
 - cache invalidation happens on new clicks
+- refresh sessions are persisted in Postgres and mirrored in Redis under hashed token keys with TTL-based cache entries for fast lookup and rotation
 
 Cache keys are versioned and implementation-specific.
 
