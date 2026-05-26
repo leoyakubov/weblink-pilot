@@ -86,6 +86,20 @@ For local Docker smoke, use `scripts/win/quality/deployment-smoke.ps1` or `scrip
 For the deployed demo, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
 The smoke output prints the backend HTTP status and `status=UP`, plus the frontend HTTP status and the app shell marker (`id="app"`).
 
+### Auth session workflow
+
+Use this when you want to verify the access-token and refresh-token flow end to end:
+
+- login and registration
+- token storage in the browser
+- automatic refresh on `401`
+- refresh-token rotation
+- logout revocation
+
+The full local workflow is documented in:
+
+- [`docs/auth-testing.md`](auth-testing.md)
+
 ### Architectural tests
 
 Use these to keep module boundaries healthy:
