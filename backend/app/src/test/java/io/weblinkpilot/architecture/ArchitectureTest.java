@@ -32,7 +32,8 @@ class ArchitectureTest {
                   .or(resideInAPackage("org.springframework.."))
                   .or(resideInAPackage("io.swagger.v3.oas.annotations.."))
                   .or(resideInAPackage("io.micrometer.."))
-                  .or(resideInAPackage("org.slf4j..")));
+                  .or(resideInAPackage("org.slf4j.."))
+                  .or(resideInAPackage("edu.umd.cs.findbugs.annotations..")));
 
   @ArchTest
   static final ArchRule domain_should_stay_pure =

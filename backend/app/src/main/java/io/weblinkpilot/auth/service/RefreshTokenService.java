@@ -1,6 +1,7 @@
 package io.weblinkpilot.auth.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.RefreshToken;
 import io.weblinkpilot.auth.domain.UserAccount;
@@ -23,9 +24,10 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 public class RefreshTokenService {
 
-  public record RotationResult(UserAccount account, String refreshToken) {}
+  public record RotationResult(String username, String role, String refreshToken) {}
 
   public record RefreshSession(
       String username, String role, OffsetDateTime issuedAt, OffsetDateTime expiresAt) {}
@@ -84,8 +86,7 @@ public class RefreshTokenService {
     }
 
     RefreshSession cachedSession = readSession(tokenHash);
-    if (cachedSession != null
-        && !token.getUser().getUsername().equals(cachedSession.username())) {
+    if (cachedSession != null && !token.getUser().getUsername().equals(cachedSession.username())) {
       evictSession(tokenHash);
       throw new InvalidRefreshTokenException();
     }
@@ -97,7 +98,8 @@ public class RefreshTokenService {
     String nextRawToken = generateToken();
     RefreshToken nextToken = persistRefreshToken(token.getUser(), nextRawToken);
     afterCommit(() -> cacheSession(nextToken.getTokenHash(), toSession(nextToken)));
-    return new RotationResult(token.getUser(), nextRawToken);
+    return new RotationResult(
+        token.getUser().getUsername(), token.getUser().getRoleName(), nextRawToken);
   }
 
   @Transactional
@@ -121,8 +123,7 @@ public class RefreshTokenService {
   private RefreshToken persistRefreshToken(UserAccount account, String rawToken) {
     OffsetDateTime issuedAt = nowUtc();
     RefreshToken token =
-        new RefreshToken(
-            hash(rawToken), account, issuedAt, issuedAt.plus(refreshTokenTtl));
+        new RefreshToken(hash(rawToken), account, issuedAt, issuedAt.plus(refreshTokenTtl));
     refreshTokenRepository.save(token);
     return token;
   }
@@ -142,7 +143,7 @@ public class RefreshTokenService {
         return null;
       }
       return objectMapper.readValue(json, RefreshSession.class);
-    } catch (Exception exception) {
+    } catch (java.io.IOException | RuntimeException exception) {
       return null;
     }
   }
@@ -152,7 +153,7 @@ public class RefreshTokenService {
       redisTemplate
           .opsForValue()
           .set(redisKey(tokenHash), objectMapper.writeValueAsString(session), refreshTokenTtl);
-    } catch (Exception exception) {
+    } catch (java.io.IOException | RuntimeException exception) {
       // Cache is best-effort; the database remains the source of truth.
     }
   }
@@ -160,7 +161,7 @@ public class RefreshTokenService {
   private void evictSession(String tokenHash) {
     try {
       redisTemplate.delete(redisKey(tokenHash));
-    } catch (Exception exception) {
+    } catch (RuntimeException exception) {
       // Best-effort cache eviction only.
     }
   }

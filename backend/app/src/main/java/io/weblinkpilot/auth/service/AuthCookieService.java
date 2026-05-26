@@ -1,4 +1,4 @@
-package io.weblinkpilot.auth.web;
+package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.config.AuthProperties;
 import java.time.Duration;

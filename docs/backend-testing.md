@@ -100,6 +100,16 @@ The full local workflow is documented in:
 
 - [`docs/auth-testing.md`](auth-testing.md)
 
+Suggested verification order:
+
+1. log in
+2. confirm the access token is stored in session storage
+3. confirm the `weblinkpilot_refresh` cookie is set
+4. call `GET /api/v1/auth/me`
+5. delete the session token and reload to trigger refresh
+6. set the access token to junk and confirm auto-refresh on `401`
+7. sign out and confirm the cookie is cleared
+
 ### Architectural tests
 
 Use these to keep module boundaries healthy:

@@ -1,19 +1,21 @@
 package io.weblinkpilot.auth.web;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 public class AuthController {
 
   private final AuthService authService;
@@ -118,8 +121,7 @@ public class AuthController {
     String refreshToken = resolveRefreshToken(request, httpRequest);
     authService.logout(refreshToken);
     return ResponseEntity.noContent()
-        .header(
-            HttpHeaders.SET_COOKIE, authCookieService.clearRefreshTokenCookie().toString())
+        .header(HttpHeaders.SET_COOKIE, authCookieService.clearRefreshTokenCookie().toString())
         .build();
   }
 
@@ -130,8 +132,7 @@ public class AuthController {
     return authService.profile(authentication);
   }
 
-  private String resolveRefreshToken(
-      RefreshTokenRequest request, HttpServletRequest httpRequest) {
+  private String resolveRefreshToken(RefreshTokenRequest request, HttpServletRequest httpRequest) {
     if (request != null && request.refreshToken() != null && !request.refreshToken().isBlank()) {
       return request.refreshToken();
     }

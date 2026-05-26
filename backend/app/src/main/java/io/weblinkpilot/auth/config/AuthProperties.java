@@ -12,12 +12,19 @@ public class AuthProperties {
 
   @NotBlank private String issuer = AuthDefaults.ISSUER;
   @NotBlank private String jwtSecret;
-  @Min(15) private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
-  @Min(1) private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
+
+  @Min(15)
+  private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
+
+  @Min(1)
+  private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
+
   @NotBlank private String refreshCookieName = AuthDefaults.REFRESH_COOKIE_NAME;
   @NotBlank private String refreshCookiePath = AuthDefaults.REFRESH_COOKIE_PATH;
+
   @Pattern(regexp = "(?i)STRICT|LAX|NONE")
   private String refreshCookieSameSite = AuthDefaults.REFRESH_COOKIE_SAME_SITE;
+
   private boolean refreshCookieSecure = AuthDefaults.REFRESH_COOKIE_SECURE;
   private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
   private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;

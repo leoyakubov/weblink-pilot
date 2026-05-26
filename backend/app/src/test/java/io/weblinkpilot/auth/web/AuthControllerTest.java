@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;

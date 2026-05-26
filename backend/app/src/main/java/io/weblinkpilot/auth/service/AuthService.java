@@ -42,10 +42,10 @@ public class AuthService {
     RefreshTokenService.RotationResult rotation =
         refreshTokenService.rotateRefreshToken(refreshToken);
     return new AuthSession(
-        jwtService.issueToken(rotation.account().getUsername(), rotation.account().getRoleName()),
+        jwtService.issueToken(rotation.username(), rotation.role()),
         rotation.refreshToken(),
-        rotation.account().getUsername(),
-        rotation.account().getRoleName());
+        rotation.username(),
+        rotation.role());
   }
 
   @Transactional

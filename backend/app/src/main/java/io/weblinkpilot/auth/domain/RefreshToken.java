@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.domain;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,11 +43,9 @@ public class RefreshToken {
 
   protected RefreshToken() {}
 
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
   public RefreshToken(
-      String tokenHash,
-      UserAccount user,
-      OffsetDateTime createdAt,
-      OffsetDateTime expiresAt) {
+      String tokenHash, UserAccount user, OffsetDateTime createdAt, OffsetDateTime expiresAt) {
     this.tokenHash = tokenHash;
     this.user = user;
     this.createdAt = createdAt;
@@ -61,6 +60,7 @@ public class RefreshToken {
     return tokenHash;
   }
 
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP")
   public UserAccount getUser() {
     return user;
   }

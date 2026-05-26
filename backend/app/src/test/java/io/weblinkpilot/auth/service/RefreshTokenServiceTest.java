@@ -57,7 +57,8 @@ class RefreshTokenServiceTest {
   @Test
   void issuesRefreshTokenWithFutureExpiry() throws Exception {
     UserAccount account =
-        new UserAccount("alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
     ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
     ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
@@ -85,18 +86,19 @@ class RefreshTokenServiceTest {
   @Test
   void rotatesActiveRefreshTokenAndUsesCacheIfAvailable() throws Exception {
     UserAccount account =
-        new UserAccount("alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
     OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
     RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
     RefreshTokenService.RefreshSession session =
-        new RefreshTokenService.RefreshSession(
-            "alice", "USER", issuedAt, issuedAt.plusDays(30));
+        new RefreshTokenService.RefreshSession("alice", "USER", issuedAt, issuedAt.plusDays(30));
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
     when(valueOperations.get(anyString())).thenReturn(objectMapper.writeValueAsString(session));
 
     RefreshTokenService.RotationResult result = service.rotateRefreshToken("refresh-token");
 
-    assertThat(result.account()).isSameAs(account);
+    assertThat(result.username()).isEqualTo("alice");
+    assertThat(result.role()).isEqualTo("USER");
     assertThat(result.refreshToken()).isNotBlank();
     verify(valueOperations).get(anyString());
     verify(refreshTokenRepository).save(token);
@@ -115,7 +117,8 @@ class RefreshTokenServiceTest {
   @Test
   void rejectsExpiredRefreshToken() {
     UserAccount account =
-        new UserAccount("alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
     OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(31);
     RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
@@ -128,7 +131,8 @@ class RefreshTokenServiceTest {
   @Test
   void revokeRefreshTokenDeletesRedisKey() {
     UserAccount account =
-        new UserAccount("alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
     OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
     RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
     when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));

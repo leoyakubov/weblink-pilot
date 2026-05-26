@@ -74,7 +74,7 @@ class AuthServiceTest {
         new UserAccount(
             "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
     when(refreshTokenService.rotateRefreshToken("refresh-1"))
-        .thenReturn(new RefreshTokenService.RotationResult(account, "refresh-2"));
+        .thenReturn(new RefreshTokenService.RotationResult("alice", "USER", "refresh-2"));
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-3");
 
     AuthService.AuthSession response = service.refresh("refresh-1");
