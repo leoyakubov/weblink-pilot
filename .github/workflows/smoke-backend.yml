@@ -25,4 +25,4 @@ jobs:
           fetch-depth: 2
 
       - name: Run backend deployment smoke checks
-        run: ./scripts/quality/deployment-smoke.sh
+        run: ./scripts/unix/deployment-smoke.sh

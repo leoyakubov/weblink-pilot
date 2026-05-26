@@ -82,7 +82,7 @@ Use these for very fast end-to-end confidence:
 - live deployment smoke checks
 
 This repo has a browser smoke test for the Docker stack in `frontend/scripts/smoke-docker.mjs`.
-For local Docker smoke, use `scripts/quality/deployment-smoke.ps1` or `.sh` with the default local targets.
+For local Docker smoke, use `scripts/win/deployment-smoke.ps1` or `scripts/unix/deployment-smoke.sh` with the default local targets.
 For the deployed demo, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
 The smoke output prints the backend HTTP status and `status=UP`, plus the frontend HTTP status and the app shell marker (`id="app"`).
 
@@ -172,7 +172,7 @@ Run the combined security gate from the repo root when you want to check depende
 On macOS/Linux:
 
 ```bash
-./scripts/security/check-dependencies.sh
+./scripts/unix/check-dependencies.sh
 ```
 
 You can also run the backend and frontend checks separately with the helper scripts listed in the README.
@@ -190,7 +190,7 @@ Run it from the repo root:
 On macOS/Linux:
 
 ```bash
-./scripts/git/scan-secrets.sh
+./scripts/unix/scan-secrets.sh
 ```
 
 ## Current Rule of Thumb

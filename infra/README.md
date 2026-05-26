@@ -22,7 +22,7 @@ From the repository root:
 ```
 
 ```bash
-./scripts/dev/docker-full-stack.sh
+./scripts/unix/docker-full-stack.sh
 ```
 
 Or run Compose directly:

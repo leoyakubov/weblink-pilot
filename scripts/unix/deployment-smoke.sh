@@ -108,7 +108,7 @@ check_smoke() {
   if ! status_code="$(curl --silent --show-error --location --max-time 30 --output "$body_file" --write-out '%{http_code}' "$url")"; then
     rm -f "$body_file"
     if [ "$smoke_target" != 'demo' ] && [[ "$url" == http://localhost:* ]]; then
-      printf 'Local smoke hint: start the Docker stack first with ./scripts/dev/docker-full-stack.sh\n'
+      printf 'Local smoke hint: start the Docker stack first with ./scripts/unix/docker-full-stack.sh\n'
     fi
     printf 'Smoke check failed for %s.\n' "$name"
     exit 1
