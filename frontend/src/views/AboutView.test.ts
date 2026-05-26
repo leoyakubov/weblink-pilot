@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   settingsState: {
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
+    refreshToken: '',
   },
 }));
 
@@ -38,6 +39,7 @@ describe('AboutView', () => {
     expect(mocks.saveSettingsMock).toHaveBeenCalledWith({
       apiBaseUrl: 'http://localhost:9090/api/v1',
       authToken: '',
+      refreshToken: '',
     });
     expect(wrapper.text()).toContain('Saved for this browser');
   });

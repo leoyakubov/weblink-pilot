@@ -35,6 +35,7 @@ vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
+    refreshToken: '',
   }),
 }));
 
@@ -83,14 +84,17 @@ describe('LinkView', () => {
     expect(mocks.getLinkMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
+      refreshToken: '',
     });
     expect(mocks.getRedirectPreviewMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
+      refreshToken: '',
     });
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('github-org', {
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: '',
+      refreshToken: '',
     });
 
     expect(wrapper.text()).toContain('Code: github-org');

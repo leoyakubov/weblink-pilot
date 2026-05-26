@@ -164,6 +164,7 @@ Input:
 - login credentials
 - registration data
 - JWT token
+- refresh token
 - role checks
 
 Output:
@@ -171,6 +172,7 @@ Output:
 - authenticated principal
 - role-aware access
 - admin-only route authorization
+- rotated access and refresh tokens
 
 ## Public API Shape
 
@@ -186,6 +188,8 @@ Public endpoints:
 - `GET /api/v1/analytics/{code}/count`
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
 - `GET /api/v1/auth/me`
 
 Admin endpoints:
@@ -213,6 +217,17 @@ Fields:
 - `enabled`
 - `created_at`
 - `last_login_at`
+
+### `app_refresh_tokens`
+
+Fields:
+
+- `id`
+- `token_hash`
+- `user_id`
+- `created_at`
+- `expires_at`
+- `revoked_at`
 
 ### `short_links`
 

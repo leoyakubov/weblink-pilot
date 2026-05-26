@@ -8,13 +8,16 @@ import {
   getRedirectPreview,
   listLinks,
   login,
+  logoutSession,
   register,
+  refreshTokens,
 } from './api';
 import type { ApiSettings } from '@/types';
 
 const settings: ApiSettings = {
   apiBaseUrl: 'http://localhost:8080/api/v1/',
   authToken: 'jwt-token',
+  refreshToken: 'refresh-token',
 };
 
 beforeEach(() => {
@@ -213,6 +216,7 @@ describe('api helpers', () => {
       return new Response(
         JSON.stringify({
           token: 'new-token',
+          refreshToken: 'refresh-token',
           username: 'alice',
           role: 'USER',
         }),
@@ -235,6 +239,7 @@ describe('api helpers', () => {
       ),
     ).resolves.toEqual({
       token: 'new-token',
+      refreshToken: 'refresh-token',
       username: 'alice',
       role: 'USER',
     });
@@ -256,6 +261,7 @@ describe('api helpers', () => {
       return new Response(
         JSON.stringify({
           token: 'new-token',
+          refreshToken: 'refresh-token',
           username: 'alice',
           role: 'USER',
         }),
@@ -278,9 +284,82 @@ describe('api helpers', () => {
       ),
     ).resolves.toEqual({
       token: 'new-token',
+      refreshToken: 'refresh-token',
       username: 'alice',
       role: 'USER',
     });
+  });
+
+  it('serializes refresh payload and reads rotated auth response', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/refresh');
+
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBeNull();
+      expect(init?.body).toBe(
+        JSON.stringify({
+          refreshToken: 'refresh-token',
+        }),
+      );
+
+      return new Response(
+        JSON.stringify({
+          token: 'new-token',
+          refreshToken: 'rotated-refresh-token',
+          username: 'alice',
+          role: 'USER',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      refreshTokens(
+        {
+          refreshToken: 'refresh-token',
+        },
+        settings,
+      ),
+    ).resolves.toEqual({
+      token: 'new-token',
+      refreshToken: 'rotated-refresh-token',
+      username: 'alice',
+      role: 'USER',
+    });
+  });
+
+  it('serializes logout payload without auth header', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/logout');
+
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBeNull();
+      expect(init?.body).toBe(
+        JSON.stringify({
+          refreshToken: 'refresh-token',
+        }),
+      );
+
+      return new Response(null, {
+        status: 204,
+      });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      logoutSession(
+        {
+          refreshToken: 'refresh-token',
+        },
+        settings,
+      ),
+    ).resolves.toBeUndefined();
   });
 
   it('loads current user profile', async () => {
@@ -306,6 +385,74 @@ describe('api helpers', () => {
       username: 'alice',
       role: 'USER',
     });
+  });
+
+  it('refreshes and retries an authenticated request after a 401', async () => {
+    let callCount = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      callCount += 1;
+      const url = String(input);
+
+      if (callCount === 1) {
+        expect(url).toBe('http://localhost:8080/api/v1/auth/me');
+        const headers = new Headers(init?.headers);
+        expect(headers.get('Authorization')).toBe('Bearer jwt-token');
+        return new Response(
+          JSON.stringify({
+            status: 401,
+            message: 'expired',
+          }),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      }
+
+      if (callCount === 2) {
+        expect(url).toBe('http://localhost:8080/api/v1/auth/refresh');
+        expect(init?.body).toBe(
+          JSON.stringify({
+            refreshToken: 'refresh-token',
+          }),
+        );
+        return new Response(
+          JSON.stringify({
+            token: 'refreshed-token',
+            refreshToken: 'rotated-refresh-token',
+            username: 'alice',
+            role: 'USER',
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      }
+
+      expect(url).toBe('http://localhost:8080/api/v1/auth/me');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer refreshed-token');
+      return new Response(
+        JSON.stringify({
+          username: 'alice',
+          role: 'USER',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(getCurrentUser(settings)).resolves.toEqual({
+      username: 'alice',
+      role: 'USER',
+    });
+    expect(settings.authToken).toBe('refreshed-token');
+    expect(settings.refreshToken).toBe('rotated-refresh-token');
   });
 
   it('loads admin overview from the backend', async () => {

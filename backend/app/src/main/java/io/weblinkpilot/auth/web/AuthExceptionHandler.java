@@ -2,6 +2,7 @@ package io.weblinkpilot.auth.web;
 
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
+import io.weblinkpilot.auth.exception.InvalidRefreshTokenException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.shared.contracts.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,16 @@ public class AuthExceptionHandler {
     return build(
         HttpStatus.UNAUTHORIZED,
         "INVALID_CREDENTIALS",
+        exception.getMessage(),
+        request.getRequestURI());
+  }
+
+  @ExceptionHandler(InvalidRefreshTokenException.class)
+  public ResponseEntity<ApiErrorResponse> invalidRefreshToken(
+      InvalidRefreshTokenException exception, HttpServletRequest request) {
+    return build(
+        HttpStatus.UNAUTHORIZED,
+        "INVALID_REFRESH_TOKEN",
         exception.getMessage(),
         request.getRequestURI());
   }

@@ -8,6 +8,7 @@ public class AuthProperties {
   private String issuer = AuthDefaults.ISSUER;
   private String jwtSecret;
   private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
+  private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
   private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
   private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
   private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;
@@ -37,6 +38,14 @@ public class AuthProperties {
 
   public void setTokenTtlMinutes(long tokenTtlMinutes) {
     this.tokenTtlMinutes = tokenTtlMinutes;
+  }
+
+  public long getRefreshTokenTtlDays() {
+    return refreshTokenTtlDays;
+  }
+
+  public void setRefreshTokenTtlDays(long refreshTokenTtlDays) {
+    this.refreshTokenTtlDays = refreshTokenTtlDays;
   }
 
   public String getBootstrapAdminUsername() {

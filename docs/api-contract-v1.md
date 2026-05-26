@@ -213,7 +213,8 @@ Later versions may add:
 - `PATCH /api/v1/urls/{code}`
 - `DELETE /api/v1/urls/{code}`
 - `GET /api/v1/urls`
-- auth token login endpoints
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
 - bulk creation
 - branded domains
 - export endpoints

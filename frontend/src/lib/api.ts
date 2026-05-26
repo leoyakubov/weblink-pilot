@@ -7,9 +7,10 @@ import type {
   CreateLinkRequest,
   LinkResponse,
   RedirectPreviewResponse,
+  RefreshTokenRequest,
   UserProfileResponse,
 } from '@/types';
-import { loadSettings, normalizeBaseUrl } from '@/lib/settings';
+import { loadSettings, normalizeBaseUrl, saveSettings } from '@/lib/settings';
 
 export class ApiRequestError extends Error {
   status: number;
@@ -25,11 +26,39 @@ export class ApiRequestError extends Error {
   }
 }
 
+let refreshSessionPromise: Promise<AuthResponse> | null = null;
+
 function bearerAuthHeader(token: string) {
   if (!token) {
     return undefined;
   }
   return `Bearer ${token}`;
+}
+
+async function sendRequest(
+  path: string,
+  init: RequestInit = {},
+  settings: ApiSettings = loadSettings(),
+  includeAuth = true,
+) {
+  const headers = new Headers(init.headers);
+  headers.set('Accept', 'application/json');
+
+  if (init.body && !(init.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  if (includeAuth) {
+    const authorization = bearerAuthHeader(settings.authToken);
+    if (authorization) {
+      headers.set('Authorization', authorization);
+    }
+  }
+
+  return fetch(`${normalizeBaseUrl(settings.apiBaseUrl)}${path}`, {
+    ...init,
+    headers,
+  });
 }
 
 async function parseError(response: Response) {
@@ -49,36 +78,65 @@ async function parseError(response: Response) {
   }
 }
 
+async function refreshSession(settings: ApiSettings) {
+  if (!refreshSessionPromise) {
+    refreshSessionPromise = refreshTokens({ refreshToken: settings.refreshToken }, settings).finally(
+      () => {
+        refreshSessionPromise = null;
+      },
+    );
+  }
+
+  return refreshSessionPromise;
+}
+
 async function requestJson<T>(
   path: string,
   init: RequestInit = {},
   settings: ApiSettings = loadSettings(),
   includeAuth = true,
+  allowRefresh = true,
 ): Promise<T> {
-  const headers = new Headers(init.headers);
-  headers.set('Accept', 'application/json');
-
-  if (init.body && !(init.body instanceof FormData)) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  if (includeAuth) {
-    const authorization = bearerAuthHeader(settings.authToken);
-    if (authorization) {
-      headers.set('Authorization', authorization);
-    }
-  }
-
-  const response = await fetch(`${normalizeBaseUrl(settings.apiBaseUrl)}${path}`, {
-    ...init,
-    headers,
-  });
+  const response = await sendRequest(path, init, settings, includeAuth);
 
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      includeAuth &&
+      allowRefresh &&
+      settings.refreshToken &&
+      path !== '/auth/refresh' &&
+      path !== '/auth/logout'
+    ) {
+      try {
+        const refreshed = await refreshSession(settings);
+        settings.authToken = refreshed.token;
+        settings.refreshToken = refreshed.refreshToken;
+        saveSettings(settings);
+        return requestJson<T>(path, init, settings, includeAuth, false);
+      } catch {
+        settings.authToken = '';
+        settings.refreshToken = '';
+        saveSettings(settings);
+        throw await parseError(response);
+      }
+    }
     throw await parseError(response);
   }
 
   return response.json() as Promise<T>;
+}
+
+async function requestVoid(
+  path: string,
+  init: RequestInit = {},
+  settings: ApiSettings = loadSettings(),
+  includeAuth = true,
+) {
+  const response = await sendRequest(path, init, settings, includeAuth);
+  if (!response.ok) {
+    throw await parseError(response);
+  }
 }
 
 export function buildApiBaseUrl(path: string, settings: ApiSettings = loadSettings()) {
@@ -111,6 +169,37 @@ export function register(request: AuthCredentialsRequest, settings: ApiSettings 
 export function login(request: AuthCredentialsRequest, settings: ApiSettings = loadSettings()) {
   return requestJson<AuthResponse>(
     '/auth/login',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+  );
+}
+
+export function refreshTokens(
+  request: RefreshTokenRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestJson<AuthResponse>(
+    '/auth/refresh',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    false,
+  );
+}
+
+export function logoutSession(
+  request: RefreshTokenRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/logout',
     {
       method: 'POST',
       body: JSON.stringify(request),

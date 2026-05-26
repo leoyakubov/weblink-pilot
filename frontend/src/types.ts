@@ -1,6 +1,7 @@
 export interface ApiSettings {
   apiBaseUrl: string;
   authToken: string;
+  refreshToken: string;
 }
 
 export interface CreateLinkRequest {
@@ -27,8 +28,13 @@ export interface AuthCredentialsRequest {
 
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   username: string;
   role: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
 }
 
 export interface UserProfileResponse {

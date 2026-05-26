@@ -6,6 +6,7 @@ describe('buildMonitoringLinks', () => {
     const links = buildMonitoringLinks({
       apiBaseUrl: '/api/v1/',
       authToken: '',
+      refreshToken: '',
     });
 
     expect(links).toEqual({
@@ -23,6 +24,7 @@ describe('buildMonitoringLinks', () => {
     const links = buildMonitoringLinks({
       apiBaseUrl: 'http://localhost:8080/api/v1/',
       authToken: '',
+      refreshToken: '',
     });
 
     expect(links.backendHealthUrl).toBe('http://localhost:8080/actuator/health');
@@ -38,6 +40,7 @@ describe('buildMonitoringLinks', () => {
     const links = buildMonitoringLinks({
       apiBaseUrl: 'https://weblink-pilot.onrender.com/api/v1',
       authToken: '',
+      refreshToken: '',
     });
 
     expect(links.backendHealthUrl).toBe('https://weblink-pilot.onrender.com/actuator/health');

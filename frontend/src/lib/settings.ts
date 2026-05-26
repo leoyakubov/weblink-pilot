@@ -8,6 +8,7 @@ export function defaultSettings(): ApiSettings {
   return {
     apiBaseUrl: normalizeBaseUrl(defaultApiBaseUrl),
     authToken: '',
+    refreshToken: '',
   };
 }
 
@@ -27,6 +28,7 @@ export function loadSettings(): ApiSettings {
     return {
       apiBaseUrl: normalizeBaseUrl(parsed.apiBaseUrl ?? fallback.apiBaseUrl),
       authToken: parsed.authToken ?? fallback.authToken,
+      refreshToken: parsed.refreshToken ?? fallback.refreshToken,
     };
   } catch {
     return fallback;
@@ -40,10 +42,11 @@ export function saveSettings(settings: ApiSettings) {
 
   window.localStorage.setItem(
     STORAGE_KEY,
-    JSON.stringify({
-      apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
-      authToken: settings.authToken,
-    }),
+      JSON.stringify({
+        apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
+        authToken: settings.authToken,
+        refreshToken: settings.refreshToken,
+      }),
   );
 }
 

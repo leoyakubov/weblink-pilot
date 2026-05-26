@@ -4,7 +4,9 @@ import type { AuthResponse, UserProfileResponse } from '@/types';
 const mocks = vi.hoisted(() => ({
   getCurrentUserMock: vi.fn(),
   loginMock: vi.fn(),
+  logoutSessionMock: vi.fn(),
   registerMock: vi.fn(),
+  refreshTokensMock: vi.fn(),
   loadSettingsMock: vi.fn(),
   saveSettingsMock: vi.fn(),
 }));
@@ -12,12 +14,15 @@ const mocks = vi.hoisted(() => ({
 const settingsState = {
   apiBaseUrl: 'http://localhost:8080/api/v1',
   authToken: '',
+  refreshToken: '',
 };
 
 vi.mock('@/lib/api', () => ({
   getCurrentUser: mocks.getCurrentUserMock,
   login: mocks.loginMock,
+  logoutSession: mocks.logoutSessionMock,
   register: mocks.registerMock,
+  refreshTokens: mocks.refreshTokensMock,
 }));
 
 vi.mock('@/lib/settings', () => ({
@@ -34,10 +39,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   settingsState.apiBaseUrl = 'http://localhost:8080/api/v1';
   settingsState.authToken = '';
+  settingsState.refreshToken = '';
+  mocks.logoutSessionMock.mockResolvedValue(undefined);
   mocks.loadSettingsMock.mockImplementation(() => ({ ...settingsState }));
   mocks.saveSettingsMock.mockImplementation((settings: typeof settingsState) => {
     settingsState.apiBaseUrl = settings.apiBaseUrl;
     settingsState.authToken = settings.authToken;
+    settingsState.refreshToken = settings.refreshToken;
   });
 });
 
@@ -53,6 +61,7 @@ describe('auth helpers', () => {
     expect(mocks.getCurrentUserMock).toHaveBeenCalledWith({
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: 'jwt-token',
+      refreshToken: '',
     });
     expect(auth.authState.currentUser).toEqual(profile);
     expect(auth.authState.ready).toBe(true);
@@ -62,6 +71,7 @@ describe('auth helpers', () => {
   it('authenticates, saves the token, and signs out again', async () => {
     const authResponse: AuthResponse = {
       token: 'new-token',
+      refreshToken: 'new-refresh-token',
       username: 'user',
       role: 'USER',
     };
@@ -75,9 +85,11 @@ describe('auth helpers', () => {
       {
         apiBaseUrl: 'http://localhost:8080/api/v1',
         authToken: 'new-token',
+        refreshToken: '',
       },
     );
     expect(settingsState.authToken).toBe('new-token');
+    expect(settingsState.refreshToken).toBe('new-refresh-token');
     expect(auth.authState.currentUser).toEqual({
       username: 'user',
       role: 'USER',
@@ -85,8 +97,47 @@ describe('auth helpers', () => {
     expect(auth.isAdminUser()).toBe(false);
 
     auth.signOut();
+    expect(mocks.logoutSessionMock).toHaveBeenCalledWith(
+      { refreshToken: 'new-refresh-token' },
+      {
+        apiBaseUrl: 'http://localhost:8080/api/v1',
+        authToken: 'new-token',
+        refreshToken: 'new-refresh-token',
+      },
+    );
     expect(settingsState.authToken).toBe('');
+    expect(settingsState.refreshToken).toBe('');
     expect(auth.authState.currentUser).toBeNull();
     expect(auth.authState.sessionNotice).toContain('Signed out');
+  });
+
+  it('refreshes the session when only a refresh token is available', async () => {
+    const authResponse: AuthResponse = {
+      token: 'refreshed-token',
+      refreshToken: 'refreshed-refresh-token',
+      username: 'user',
+      role: 'USER',
+    };
+    mocks.refreshTokensMock.mockResolvedValue(authResponse);
+
+    const auth = await loadAuthModule();
+    settingsState.refreshToken = 'existing-refresh-token';
+
+    await auth.bootstrapAuth();
+
+    expect(mocks.refreshTokensMock).toHaveBeenCalledWith(
+      { refreshToken: 'existing-refresh-token' },
+      {
+        apiBaseUrl: 'http://localhost:8080/api/v1',
+        authToken: '',
+        refreshToken: 'existing-refresh-token',
+      },
+    );
+    expect(settingsState.authToken).toBe('refreshed-token');
+    expect(settingsState.refreshToken).toBe('refreshed-refresh-token');
+    expect(auth.authState.currentUser).toEqual({
+      username: 'user',
+      role: 'USER',
+    });
   });
 });

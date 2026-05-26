@@ -22,11 +22,13 @@ describe('settings storage', () => {
     saveSettings({
       apiBaseUrl: 'http://localhost:8080/api/v1/',
       authToken: 'jwt-token',
+      refreshToken: 'refresh-token',
     });
 
     expect(loadSettings()).toEqual({
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: 'jwt-token',
+      refreshToken: 'refresh-token',
     });
   });
 

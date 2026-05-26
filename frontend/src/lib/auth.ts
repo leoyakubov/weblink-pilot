@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import { getCurrentUser, login, register } from '@/lib/api';
+import { getCurrentUser, login, logoutSession, register, refreshTokens } from '@/lib/api';
 import { loadSettings, saveSettings } from '@/lib/settings';
 import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/types';
 
@@ -36,11 +36,21 @@ export async function bootstrapAuth() {
     try {
       if (settings.authToken) {
         authState.currentUser = await getCurrentUser(settings);
+      } else if (settings.refreshToken) {
+        const response = await refreshTokens({ refreshToken: settings.refreshToken }, settings);
+        settings.authToken = response.token;
+        settings.refreshToken = response.refreshToken;
+        saveSettings(settings);
+        authState.currentUser = {
+          username: response.username,
+          role: response.role,
+        };
       } else {
         authState.currentUser = null;
       }
     } catch {
       settings.authToken = '';
+      settings.refreshToken = '';
       saveSettings(settings);
       authState.currentUser = null;
     } finally {
@@ -61,6 +71,7 @@ export async function authenticate(
     mode === 'login' ? await login(request, settings) : await register(request, settings);
 
   settings.authToken = response.token;
+  settings.refreshToken = response.refreshToken;
   saveSettings(settings);
   authState.currentUser = {
     username: response.username,
@@ -77,7 +88,11 @@ export async function authenticate(
 
 export function signOut() {
   const settings = loadSettings();
+  if (settings.refreshToken) {
+    void logoutSession({ refreshToken: settings.refreshToken }, settings).catch(() => undefined);
+  }
   settings.authToken = '';
+  settings.refreshToken = '';
   saveSettings(settings);
   authState.currentUser = null;
   showSessionNotice('Signed out. Guest mode active.');

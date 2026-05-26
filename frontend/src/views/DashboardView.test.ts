@@ -42,6 +42,7 @@ vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: 'http://localhost:8080/api/v1',
     authToken: '',
+    refreshToken: '',
   }),
 }));
 

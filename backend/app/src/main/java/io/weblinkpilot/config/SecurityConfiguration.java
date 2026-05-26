@@ -44,7 +44,11 @@ public class SecurityConfiguration {
                       .permitAll()
                       .requestMatchers("/r/**", "/q/**")
                       .permitAll()
-                      .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login")
+                      .requestMatchers(
+                          "/api/v1/auth/register",
+                          "/api/v1/auth/login",
+                          "/api/v1/auth/refresh",
+                          "/api/v1/auth/logout")
                       .permitAll()
                       .requestMatchers("/api/v1/auth/me")
                       .authenticated()

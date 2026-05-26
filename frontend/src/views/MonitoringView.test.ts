@@ -14,6 +14,7 @@ vi.mock('@/lib/settings', () => ({
   loadSettings: () => ({
     apiBaseUrl: '/api/v1',
     authToken: '',
+    refreshToken: '',
   }),
   normalizeBaseUrl: (value: string) => value.trim().replace(/\/+$/, ''),
 }));
