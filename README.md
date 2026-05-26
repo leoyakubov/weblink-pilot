@@ -27,6 +27,7 @@ Local/dev startup also seeds the shared `admin` and `user` accounts plus a small
 - [Development Standards](docs/development-standards.md)
 - [Deployment](docs/deployment.md)
 - [Roadmap](docs/roadmap.md)
+- [Changelog](CHANGELOG.md)
 
 ## Repository Structure
 
