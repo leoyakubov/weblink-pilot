@@ -40,6 +40,14 @@ Log in from the frontend or call the API directly.
 
 API example:
 
+```bash
+curl -s -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}'
+```
+
+PowerShell example:
+
 ```powershell
 Invoke-RestMethod `
   -Method Post `
@@ -66,6 +74,17 @@ Browser checks:
 Use the access token against a protected endpoint such as `GET /api/v1/auth/me`.
 
 API example:
+
+```bash
+curl -s -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' | jq -r '.token'
+
+curl -s -X GET "http://localhost:8080/api/v1/auth/me" \
+  -H "Authorization: Bearer <access-token>"
+```
+
+PowerShell example:
 
 ```powershell
 $session = Invoke-RestMethod `

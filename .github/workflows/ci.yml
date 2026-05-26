@@ -26,7 +26,7 @@ jobs:
 
       - name: Build and test backend
         working-directory: backend
-        run: ./mvnw -B -Pci clean install
+        run: ./mvnw -B -Pci clean verify
 
   sonar:
     name: Sonar

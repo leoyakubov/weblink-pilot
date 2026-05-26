@@ -10,7 +10,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 
 - Automated formatting for Java and frontend code.
 - Tests for backend and frontend logic.
-- Coverage gates for backend and frontend.
+- Coverage checks for backend and frontend in CI or manual runs.
 - CI that runs the same checks as local quality gates.
 - Pre-push checks for fast feedback before code leaves the machine.
 - Centralized config and secret handling.
@@ -38,11 +38,11 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 
 1. Format code.
 2. Run tests.
-3. Run coverage checks.
-4. Run build checks.
-5. Run secret scans.
-6. Run static analysis.
-7. Push only if the pre-push gate passes.
+3. Run build checks.
+4. Run secret scans.
+5. Run static analysis.
+6. Push only if the pre-push gate passes.
+7. Run coverage checks in CI or manually when needed.
 
 ## Tooling Plan
 
@@ -51,10 +51,12 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
   - lint/static analysis
   - dependency vulnerability checks
   - architecture checks
+  - coverage in CI/manual runs
 - Frontend:
   - formatter
   - lint/static analysis
   - TypeScript compile check
+  - coverage in CI/manual runs
 - Repo:
   - pre-push wrapper
   - CI job parity

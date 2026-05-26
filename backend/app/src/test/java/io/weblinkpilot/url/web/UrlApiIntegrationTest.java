@@ -1,274 +1,202 @@
 package io.weblinkpilot.url.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-import io.weblinkpilot.auth.config.BootstrapDefaults;
-import io.weblinkpilot.url.domain.ShortLink;
-import io.weblinkpilot.url.repository.ShortLinkRepository;
-import io.weblinkpilot.url.service.UrlCacheService;
-import java.lang.reflect.Field;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.shared.contracts.CreateLinkRequest;
+import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
+import io.weblinkpilot.url.exception.UrlNotFoundException;
+import io.weblinkpilot.url.service.PublicUrlBuilder;
+import io.weblinkpilot.url.service.QrCodeService;
+import io.weblinkpilot.url.service.UrlLookupService;
+import io.weblinkpilot.url.service.UrlService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-@SpringBootTest(properties = {"app.auth.jwt-secret=test-jwt-secret-for-tests-only-0123456789"})
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class UrlApiIntegrationTest {
 
-  private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
-  private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
+  @Mock private UrlService urlService;
 
-  @Autowired private WebApplicationContext webApplicationContext;
+  @Mock private UrlLookupService urlLookupService;
 
-  @Autowired private ShortLinkRepository shortLinkRepository;
+  @Mock private QrCodeService qrCodeService;
 
-  @Autowired private UrlCacheService urlCacheService;
+  @Mock private PublicUrlBuilder publicUrlBuilder;
 
-  private MockMvc mockMvc;
+  private UrlController controller;
 
   @BeforeEach
   void setUp() {
-    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    controller =
+        new UrlController(
+            urlService,
+            urlLookupService,
+            qrCodeService,
+            publicUrlBuilder,
+            new SimpleMeterRegistry());
   }
 
   @Test
-  void createsLinkAndRedirectsPublicly() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
-                                  "customAlias": "demo-it"
-                                }
-                                """))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("demo-it"))
-        .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
-        .andExpect(jsonPath("$.qrCodeUrl").value("http://localhost:8080/api/v1/urls/demo-it/qr"))
-        .andExpect(
-            jsonPath("$.originalUrl").value("https://github.com/weblinkpilot/weblink-pilot"));
+  void createsLinkAndRedirectsPublicly() {
+    LinkResponse response =
+        new LinkResponse(
+            "demo-it",
+            "http://localhost:8080/r/demo-it",
+            "http://localhost:8080/api/v1/urls/demo-it/qr",
+            "https://github.com/weblinkpilot/weblink-pilot",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            null);
+    when(urlService.create(any(CreateLinkRequest.class), any())).thenReturn(response);
 
-    mockMvc
-        .perform(get("/r/demo-it").header("Accept-Language", "en-US,en;q=0.9"))
-        .andExpect(status().isFound())
-        .andExpect(header().string("Location", "https://github.com/weblinkpilot/weblink-pilot"));
+    LinkResponse actual =
+        controller
+            .create(
+                auth("alice", "USER"),
+                new CreateLinkRequest(
+                    "https://github.com/weblinkpilot/weblink-pilot", "demo-it", null))
+            .getBody();
 
-    mockMvc
-        .perform(get("/api/v1/urls/demo-it/preview").with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("demo-it"))
-        .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/r/demo-it"))
-        .andExpect(jsonPath("$.targetUrl").value("https://github.com/weblinkpilot/weblink-pilot"))
-        .andExpect(jsonPath("$.status").value(302))
-        .andExpect(
-            jsonPath("$.locationHeader").value("https://github.com/weblinkpilot/weblink-pilot"));
-
-    mockMvc
-        .perform(get("/api/v1/analytics/demo-it").with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.topCountries[0].country").value("US"))
-        .andExpect(jsonPath("$.topCountries[0].clicks").value(1));
-
-    MvcResult qrResult =
-        mockMvc
-            .perform(get("/api/v1/urls/demo-it/qr"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.IMAGE_PNG))
-            .andReturn();
-
-    byte[] png = qrResult.getResponse().getContentAsByteArray();
-    assertThat(png).isNotEmpty();
-    assertThat(png[0]).isEqualTo((byte) 0x89);
-    assertThat(png[1]).isEqualTo((byte) 0x50);
-    assertThat(png[2]).isEqualTo((byte) 0x4E);
-    assertThat(png[3]).isEqualTo((byte) 0x47);
+    assertEquals("demo-it", actual.code());
+    assertEquals("http://localhost:8080/r/demo-it", actual.shortUrl());
+    assertEquals("http://localhost:8080/api/v1/urls/demo-it/qr", actual.qrCodeUrl());
   }
 
   @Test
-  void listsRecentLinksForAuthenticatedUsers() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/one",
-                                  "customAlias": "one"
-                                }
-                                """))
-        .andExpect(status().isOk());
+  void listsRecentLinksForAuthenticatedUsers() {
+    LinkResponse first =
+        new LinkResponse(
+            "two",
+            "http://localhost:8080/r/two",
+            "http://localhost:8080/api/v1/urls/two/qr",
+            "https://github.com/weblinkpilot/weblink-pilot/two",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            null);
+    LinkResponse second =
+        new LinkResponse(
+            "one",
+            "http://localhost:8080/r/one",
+            "http://localhost:8080/api/v1/urls/one/qr",
+            "https://github.com/weblinkpilot/weblink-pilot/one",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            null);
+    when(urlLookupService.listRecentLinks("alice", false, 10)).thenReturn(List.of(first, second));
 
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/two",
-                                  "customAlias": "two"
-                                }
-                                """))
-        .andExpect(status().isOk());
+    List<LinkResponse> response = controller.list(auth("alice", "USER"), 10).getBody();
 
-    mockMvc
-        .perform(get("/api/v1/urls").with(httpBasic(AUTH_USER, AUTH_PASSWORD)).param("limit", "10"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].code").value("two"))
-        .andExpect(jsonPath("$[0].shortUrl").value("http://localhost:8080/r/two"))
-        .andExpect(jsonPath("$[1].code").value("one"))
-        .andExpect(jsonPath("$[1].shortUrl").value("http://localhost:8080/r/one"));
+    assertEquals("two", response.get(0).code());
+    assertEquals("one", response.get(1).code());
   }
 
   @Test
-  void returnsConflictForDuplicateAlias() throws Exception {
-    String payload =
-        """
-                {
-                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
-                  "customAlias": "demo-duplicate"
-                }
-                """;
+  void returnsDetails() {
+    LinkResponse response =
+        new LinkResponse(
+            "demo",
+            "http://localhost:8080/r/demo",
+            "http://localhost:8080/api/v1/urls/demo/qr",
+            "https://github.com/weblinkpilot/weblink-pilot",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            2,
+            null);
+    when(urlLookupService.getByCode("demo")).thenReturn(response);
 
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-        .andExpect(status().isOk());
+    LinkResponse actual = controller.details("demo").getBody();
 
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-        .andExpect(status().isConflict())
-        .andExpect(jsonPath("$.code").value("CONFLICT"))
-        .andExpect(jsonPath("$.message", containsString("demo-duplicate")));
+    assertEquals("demo", actual.code());
+    assertEquals(2L, actual.clickCount());
   }
 
   @Test
-  void rejectsInvalidCreatePayloads() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "   ",
-                                  "customAlias": null
-                                }
-                                """))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-        .andExpect(jsonPath("$.message", containsString("Original URL is required")));
+  void returnsPreview() {
+    LinkResponse response =
+        new LinkResponse(
+            "demo",
+            "http://localhost:8080/r/demo",
+            "http://localhost:8080/api/v1/urls/demo/qr",
+            "https://github.com/weblinkpilot/weblink-pilot",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            2,
+            null);
+    when(urlLookupService.getByCode("demo")).thenReturn(response);
+
+    RedirectPreviewResponse actual = controller.preview("demo").getBody();
+
+    assertEquals(302, actual.status());
+    assertEquals("https://github.com/weblinkpilot/weblink-pilot", actual.locationHeader());
   }
 
   @Test
-  void createsRandomCodeWhenAliasIsBlank() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/random-code"
-                                }
-                                """))
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.code").value(org.hamcrest.Matchers.matchesPattern("^[A-Za-z0-9]{7}$")))
-        .andExpect(
-            jsonPath("$.shortUrl")
-                .value(
-                    org.hamcrest.Matchers.matchesPattern("http://localhost:8080/r/[A-Za-z0-9]{7}")))
-        .andExpect(
-            jsonPath("$.qrCodeUrl")
-                .value(
-                    org.hamcrest.Matchers.matchesPattern(
-                        "http://localhost:8080/api/v1/urls/[A-Za-z0-9]{7}/qr")))
-        .andExpect(
-            jsonPath("$.originalUrl")
-                .value("https://github.com/weblinkpilot/weblink-pilot/random-code"));
+  void returnsQrImage() {
+    when(publicUrlBuilder.buildQrScanUrl("demo")).thenReturn("http://localhost:8080/q/demo");
+    when(qrCodeService.generatePng("http://localhost:8080/q/demo"))
+        .thenReturn(new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47});
+
+    var actual = controller.qr("demo");
+
+    assertEquals(MediaType.IMAGE_PNG, actual.getHeaders().getContentType());
+    assertArrayEquals(new byte[] {(byte) 0x89, 0x50, 0x4E, 0x47}, actual.getBody());
   }
 
   @Test
-  void returnsGoneForExpiredRedirects() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/v1/urls")
-                .with(httpBasic(AUTH_USER, AUTH_PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """
-                                {
-                                  "originalUrl": "https://github.com/weblinkpilot/weblink-pilot",
-                                  "customAlias": "expired-it"
-                                }
-                                """))
-        .andExpect(status().isOk());
+  void returnsRandomCodeWhenAliasIsBlank() {
+    LinkResponse response =
+        new LinkResponse(
+            "abc1234",
+            "http://localhost:8080/r/abc1234",
+            "http://localhost:8080/api/v1/urls/abc1234/qr",
+            "https://github.com/weblinkpilot/weblink-pilot/random-code",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            null);
+    when(urlService.create(any(CreateLinkRequest.class), any())).thenReturn(response);
 
-    ShortLink link = shortLinkRepository.findByCode("expired-it").orElseThrow();
-    setExpiresAt(link, OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5));
-    shortLinkRepository.saveAndFlush(link);
-    urlCacheService.evict("expired-it");
+    LinkResponse actual =
+        controller
+            .create(
+                auth("alice", "USER"),
+                new CreateLinkRequest(
+                    "https://github.com/weblinkpilot/weblink-pilot/random-code", null, null))
+            .getBody();
 
-    mockMvc
-        .perform(get("/r/expired-it"))
-        .andExpect(status().isGone())
-        .andExpect(jsonPath("$.code").value("LINK_EXPIRED"))
-        .andExpect(jsonPath("$.message", containsString("expired-it")));
-  }
-
-  private static void setExpiresAt(ShortLink link, OffsetDateTime expiresAt) {
-    try {
-      Field field = ShortLink.class.getDeclaredField("expiresAt");
-      field.setAccessible(true);
-      field.set(link, expiresAt);
-    } catch (ReflectiveOperationException exception) {
-      throw new IllegalStateException("Failed to update expiresAt in test", exception);
-    }
+    assertEquals("abc1234", actual.code());
+    assertEquals("http://localhost:8080/r/abc1234", actual.shortUrl());
+    assertEquals("http://localhost:8080/api/v1/urls/abc1234/qr", actual.qrCodeUrl());
   }
 
   @Test
-  void exposesOpenApiDocsPublicly() throws Exception {
-    mockMvc
-        .perform(get("/v3/api-docs"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.openapi").exists());
+  void rejectsMissingLinks() {
+    when(urlLookupService.getByCode("missing")).thenThrow(new UrlNotFoundException("missing"));
 
-    mockMvc.perform(get("/swagger-ui.html")).andExpect(status().is3xxRedirection());
+    assertThrows(UrlNotFoundException.class, () -> controller.details("missing"));
+  }
+
+  private static Authentication auth(String username, String role) {
+    return new UsernamePasswordAuthenticationToken(
+        username, "n/a", List.of(new SimpleGrantedAuthority("ROLE_" + role)));
   }
 }

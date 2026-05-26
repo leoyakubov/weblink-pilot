@@ -1,6 +1,12 @@
 import { reactive } from 'vue';
 import { getCurrentUser, login, logoutSession, register, refreshTokens } from '@/lib/api';
-import { loadSettings, saveSettings } from '@/lib/settings';
+import {
+  clearSessionActive,
+  hasSessionActiveHint,
+  loadSettings,
+  markSessionActive,
+  saveSettings,
+} from '@/lib/settings';
 import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/types';
 
 export const authState = reactive({
@@ -36,19 +42,42 @@ export async function bootstrapAuth() {
 
     try {
       if (settings.authToken) {
-        authState.currentUser = await getCurrentUser(requestSettings);
-      } else {
+        try {
+          authState.currentUser = await getCurrentUser(requestSettings);
+          markSessionActive();
+        } catch {
+          if (!hasSessionActiveHint()) {
+            settings.authToken = '';
+            saveSettings(settings);
+            authState.currentUser = null;
+            return;
+          }
+
+          const response = await refreshTokens(requestSettings);
+          settings.authToken = response.token;
+          saveSettings(settings);
+          markSessionActive();
+          authState.currentUser = {
+            username: response.username,
+            role: response.role,
+          };
+        }
+      } else if (hasSessionActiveHint()) {
         const response = await refreshTokens(requestSettings);
         settings.authToken = response.token;
         saveSettings(settings);
+        markSessionActive();
         authState.currentUser = {
           username: response.username,
           role: response.role,
         };
+      } else {
+        authState.currentUser = null;
       }
     } catch {
       settings.authToken = '';
       saveSettings(settings);
+      clearSessionActive();
       authState.currentUser = null;
     } finally {
       authState.loading = false;
@@ -70,6 +99,7 @@ export async function authenticate(
 
   settings.authToken = response.token;
   saveSettings(settings);
+  markSessionActive();
   authState.currentUser = {
     username: response.username,
     role: response.role,
@@ -88,6 +118,7 @@ export function signOut() {
   void logoutSession({ ...settings }).catch(() => undefined);
   settings.authToken = '';
   saveSettings(settings);
+  clearSessionActive();
   authState.currentUser = null;
   showSessionNotice('Signed out. Guest mode active.');
 }

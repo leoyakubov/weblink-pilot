@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   refreshTokensMock: vi.fn(),
   loadSettingsMock: vi.fn(),
   saveSettingsMock: vi.fn(),
+  hasSessionActiveHintMock: vi.fn(),
+  markSessionActiveMock: vi.fn(),
+  clearSessionActiveMock: vi.fn(),
 }));
 
 const settingsState = {
@@ -26,7 +29,10 @@ vi.mock('@/lib/api', () => ({
 }));
 
 vi.mock('@/lib/settings', () => ({
+  clearSessionActive: mocks.clearSessionActiveMock,
+  hasSessionActiveHint: mocks.hasSessionActiveHintMock,
   loadSettings: mocks.loadSettingsMock,
+  markSessionActive: mocks.markSessionActiveMock,
   saveSettings: mocks.saveSettingsMock,
 }));
 
@@ -41,6 +47,7 @@ beforeEach(() => {
   settingsState.authToken = '';
   settingsState.refreshToken = '';
   mocks.logoutSessionMock.mockResolvedValue(undefined);
+  mocks.hasSessionActiveHintMock.mockReturnValue(false);
   mocks.loadSettingsMock.mockImplementation(() => ({ ...settingsState }));
   mocks.saveSettingsMock.mockImplementation((settings: typeof settingsState) => {
     settingsState.apiBaseUrl = settings.apiBaseUrl;
@@ -113,6 +120,7 @@ describe('auth helpers', () => {
       role: 'USER',
     };
     mocks.refreshTokensMock.mockResolvedValue(authResponse);
+    mocks.hasSessionActiveHintMock.mockReturnValue(true);
 
     const auth = await loadAuthModule();
 
@@ -128,5 +136,16 @@ describe('auth helpers', () => {
       username: 'user',
       role: 'USER',
     });
+  });
+
+  it('keeps guest mode when no session hint exists', async () => {
+    const auth = await loadAuthModule();
+
+    await auth.bootstrapAuth();
+
+    expect(mocks.getCurrentUserMock).not.toHaveBeenCalled();
+    expect(mocks.refreshTokensMock).not.toHaveBeenCalled();
+    expect(auth.authState.currentUser).toBeNull();
+    expect(auth.authState.ready).toBe(true);
   });
 });

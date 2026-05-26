@@ -2,6 +2,7 @@ import type { ApiSettings } from '@/types';
 
 const STORAGE_KEY = 'weblinkpilot.frontend.settings';
 const SESSION_KEY = 'weblinkpilot.frontend.session';
+const SESSION_HINT_KEY = 'weblinkpilot.frontend.session.active';
 
 const defaultApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 
@@ -55,6 +56,33 @@ export function saveSettings(settings: ApiSettings) {
     }),
   );
   window.sessionStorage.setItem(SESSION_KEY, settings.authToken);
+  if (settings.authToken) {
+    window.sessionStorage.setItem(SESSION_HINT_KEY, '1');
+  }
+}
+
+export function markSessionActive() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.setItem(SESSION_HINT_KEY, '1');
+}
+
+export function clearSessionActive() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.removeItem(SESSION_HINT_KEY);
+}
+
+export function hasSessionActiveHint() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(SESSION_HINT_KEY) === '1';
 }
 
 export function normalizeBaseUrl(value: string) {

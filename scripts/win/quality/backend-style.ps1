@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        & .\mvnw.cmd -Pci spotless:check checkstyle:check 2>&1 | Out-Host
+        $commandOutput = & cmd.exe /c "call .\mvnw.cmd -Pci spotless:check checkstyle:check" 2>&1 | Tee-Object -Variable commandOutput | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
@@ -22,8 +22,13 @@ try {
             $PSNativeCommandUseErrorActionPreference = $previousNativeCommandPreference
         }
     }
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
+    $combinedOutput = ($commandOutput | ForEach-Object { $_.ToString() }) -join "`n"
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -eq 0 -and $combinedOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Non-resolvable import POM|Could not transfer artifact|Could not resolve') {
+        $exitCode = 1
+    }
+    if ($exitCode -ne 0) {
+        exit $exitCode
     }
 }
 finally {

@@ -3,14 +3,11 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendStyleScript = Join-Path $repoRoot 'scripts\win\quality\backend-style.ps1'
-$backendCoverageScript = Join-Path $repoRoot 'scripts\win\quality\backend-coverage.ps1'
+$backendTestsScript = Join-Path $repoRoot 'scripts\win\quality\backend-tests.ps1'
 $secretScanScript = Join-Path $repoRoot 'scripts\win\git\scan-secrets.ps1'
 $frontendStyleScript = Join-Path $repoRoot 'scripts\win\quality\frontend-style.ps1'
 $frontendTestScript = Join-Path $repoRoot 'scripts\win\quality\frontend-tests.ps1'
-$frontendCoverageScript = Join-Path $repoRoot 'scripts\win\quality\frontend-coverage.ps1'
 $frontendDir = Join-Path $repoRoot 'frontend'
-$backendCoverageCsv = Join-Path $repoRoot 'backend\coverage\target\site\jacoco-aggregate\jacoco.csv'
-$frontendCoverageSummary = Join-Path $frontendDir 'coverage\coverage-summary.json'
 
 function Invoke-Check {
     param(
@@ -32,7 +29,7 @@ function Invoke-Check {
             $exitCode = $LASTEXITCODE
         }
 
-        if ($exitCode -eq 0 -and $capturedText -match 'BUILD FAILURE|Coverage checks have not been met|Failed to execute goal') {
+        if ($exitCode -eq 0 -and $capturedText -match '(?m)^\[ERROR\]|BUILD FAILURE|Coverage checks have not been met|Failed to execute goal|Non-resolvable import POM|Could not transfer artifact|Could not resolve|failed to load config|Access is denied') {
             $exitCode = 1
         }
     }
@@ -51,20 +48,61 @@ function Write-BoxHeader {
         [string]$Title
     )
 
-    $width = 62
+    $width = 84
     $innerWidth = $width - 4
-    $titleText = " $Title "
-    if ($titleText.Length -gt $innerWidth) {
-        $titleText = $titleText.Substring(0, $innerWidth)
+    $words = $Title -split '\s+'
+    $titleLines = New-Object System.Collections.Generic.List[string]
+    $current = ''
+    foreach ($word in $words) {
+        if ([string]::IsNullOrWhiteSpace($word)) { continue }
+        if (-not $current) {
+            $current = $word
+            continue
+        }
+        if (($current.Length + 1 + $word.Length) -le $innerWidth) {
+            $current = "$current $word"
+        } else {
+            [void]$titleLines.Add($current)
+            $current = $word
+        }
     }
-    $titleLine = ('||{0}||' -f $titleText.PadRight($innerWidth))
+    if ($current) {
+        [void]$titleLines.Add($current)
+    }
+    if ($titleLines.Count -eq 0) {
+        [void]$titleLines.Add('')
+    }
     $borderLine = '||' + ('=' * ($width - 4)) + '||'
 
     Write-Host ''
     Write-Host $borderLine -ForegroundColor Cyan
-    Write-Host $titleLine -ForegroundColor Cyan
+    foreach ($line in $titleLines) {
+        Write-Host ('|| {0} ||' -f $line.PadRight($innerWidth)) -ForegroundColor Cyan
+    }
     Write-Host $borderLine -ForegroundColor Cyan
     Write-Host ''
+}
+
+function Get-StatusColor {
+    param([Parameter(Mandatory = $true)][string]$Status)
+
+    switch ($Status) {
+        'PASS' { 'Green' }
+        'FAIL' { 'Red' }
+        'SKIPPED' { 'DarkYellow' }
+        default { 'DarkYellow' }
+    }
+}
+
+function Get-StatusBadge {
+    param([Parameter(Mandatory = $true)][string]$Status)
+
+    switch ($Status) {
+        'PASS' { '[PASS]' }
+        'FAIL' { '[FAIL]' }
+        'SKIPPED' { '[SKIP]' }
+        default { "[${Status}]" }
+    }
 }
 
 function Invoke-PowerShellScript {
@@ -88,6 +126,7 @@ function Invoke-PowerShellScript {
     $capturedOutput = [System.Text.StringBuilder]::new()
     $stdoutLength = 0
     $stderrLength = 0
+    $process = $null
 
     function Write-NewText {
         param(
@@ -120,6 +159,12 @@ function Invoke-PowerShellScript {
     }
 
     try {
+        $pathValue = [System.Environment]::GetEnvironmentVariable('Path', 'Process')
+        if ($pathValue) {
+            [System.Environment]::SetEnvironmentVariable('PATH', $null, 'Process')
+            [System.Environment]::SetEnvironmentVariable('Path', $pathValue, 'Process')
+        }
+
         $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
 
         while (-not $process.HasExited) {
@@ -128,6 +173,8 @@ function Invoke-PowerShellScript {
             Start-Sleep -Milliseconds 200
         }
 
+        $process.WaitForExit()
+        $process.Refresh()
         Write-NewText -Path $stdoutFile -KnownLength ([ref]$stdoutLength)
         Write-NewText -Path $stderrFile -KnownLength ([ref]$stderrLength)
         $global:LASTEXITCODE = $process.ExitCode
@@ -146,15 +193,17 @@ function Get-TestSummary {
     param([string]$Output)
 
     $summary = [ordered]@{}
+    $normalizedOutput = [regex]::Replace($Output, "`e\[[0-9;]*[A-Za-z]", '')
+    $normalizedOutput = $normalizedOutput -replace "`r", ''
 
-    if ($Output -match 'Tests run:\s+(?<run>\d+), Failures:\s+(?<failures>\d+), Errors:\s+(?<errors>\d+), Skipped:\s+(?<skipped>\d+)') {
+    if ($normalizedOutput -match '(?s)Tests run:\s+(?<run>\d+), Failures:\s+(?<failures>\d+), Errors:\s+(?<errors>\d+), Skipped:\s+(?<skipped>\d+)') {
         $summary['testsRun'] = [int]$Matches.run
         $summary['testsFailed'] = [int]$Matches.failures
         $summary['testsErrors'] = [int]$Matches.errors
         $summary['testsSkipped'] = [int]$Matches.skipped
     }
 
-    if ($Output -match 'Test Files\s+(?<files>\d+)\s+passed.*?Tests\s+(?<tests>\d+)\s+passed') {
+    if ($normalizedOutput -match '(?s)Test Files\s+(?<files>\d+)\s+passed.*?Tests\s+(?<tests>\d+)\s+passed') {
         $summary['testFiles'] = [int]$Matches.files
         $summary['tests'] = [int]$Matches.tests
     }
@@ -162,47 +211,58 @@ function Get-TestSummary {
     return $summary
 }
 
-function Get-BackendCoverageSummary {
-    if (-not (Test-Path -LiteralPath $backendCoverageCsv)) {
+function Get-BackendTestSummary {
+    $summary = [ordered]@{
+        testsRun = 0
+        testsFailed = 0
+        testsErrors = 0
+        testsSkipped = 0
+    }
+
+    $reportRoot = Join-Path $repoRoot 'backend'
+    $reportFiles = Get-ChildItem -Path $reportRoot -Recurse -File -Filter 'TEST-*.xml' -ErrorAction SilentlyContinue
+    foreach ($reportFile in $reportFiles) {
+        try {
+            [xml]$xml = Get-Content -Raw -LiteralPath $reportFile.FullName
+            $suite = $xml.testsuite
+            if ($null -eq $suite) {
+                continue
+            }
+
+            $summary.testsRun += [int]$suite.tests
+            $summary.testsFailed += [int]$suite.failures
+            $summary.testsErrors += [int]$suite.errors
+            $summary.testsSkipped += [int]$suite.skipped
+        } catch {
+            continue
+        }
+    }
+
+    if (($summary.testsRun + $summary.testsFailed + $summary.testsErrors + $summary.testsSkipped) -eq 0) {
         return [ordered]@{}
     }
 
-    $rows = Import-Csv -LiteralPath $backendCoverageCsv
-    $totals = [ordered]@{
-        instructionMissed = 0
-        instructionCovered = 0
-        branchMissed = 0
-        branchCovered = 0
-        lineMissed = 0
-        lineCovered = 0
-    }
-
-    foreach ($row in $rows) {
-        $totals.instructionMissed += [int]$row.INSTRUCTION_MISSED
-        $totals.instructionCovered += [int]$row.INSTRUCTION_COVERED
-        $totals.branchMissed += [int]$row.BRANCH_MISSED
-        $totals.branchCovered += [int]$row.BRANCH_COVERED
-        $totals.lineMissed += [int]$row.LINE_MISSED
-        $totals.lineCovered += [int]$row.LINE_COVERED
-    }
-
-    $totals['branchPct'] = if (($totals.branchMissed + $totals.branchCovered) -gt 0) { [math]::Round(($totals.branchCovered / ($totals.branchMissed + $totals.branchCovered)) * 100, 2) } else { 0 }
-    $totals['linePct'] = if (($totals.lineMissed + $totals.lineCovered) -gt 0) { [math]::Round(($totals.lineCovered / ($totals.lineMissed + $totals.lineCovered)) * 100, 2) } else { 0 }
-    return $totals
+    return $summary
 }
 
-function Get-FrontendCoverageSummary {
-    if (-not (Test-Path -LiteralPath $frontendCoverageSummary)) {
-        return [ordered]@{}
+function Get-FrontendTestSummary {
+    param([string]$Output)
+
+    $summary = [ordered]@{}
+    $normalizedOutput = [regex]::Replace($Output, "`e\[[0-9;]*[A-Za-z]", '')
+    $normalizedOutput = $normalizedOutput -replace "`r", ''
+
+    if ($normalizedOutput -match '(?s)Test Files\s+(?<filesPassed>\d+)\s+passed(?:\s+\((?<filesTotal>\d+)\))?.*?Tests\s+(?<testsPassed>\d+)\s+passed(?:\s+\((?<testsTotal>\d+)\))?') {
+        $filesTotal = if ($Matches.filesTotal) { $Matches.filesTotal } else { $Matches.filesPassed }
+        $testsTotal = if ($Matches.testsTotal) { $Matches.testsTotal } else { $Matches.testsPassed }
+        $summary['totalTestSuites'] = [int]$filesTotal
+        $summary['passedTestSuites'] = [int]$Matches.filesPassed
+        $summary['totalTests'] = [int]$testsTotal
+        $summary['passedTests'] = [int]$Matches.testsPassed
+        return $summary
     }
 
-    $summary = Get-Content -Raw -LiteralPath $frontendCoverageSummary | ConvertFrom-Json
-    return [ordered]@{
-        statements = [math]::Round([double]$summary.total.statements.pct, 2)
-        branches = [math]::Round([double]$summary.total.branches.pct, 2)
-        functions = [math]::Round([double]$summary.total.functions.pct, 2)
-        lines = [math]::Round([double]$summary.total.lines.pct, 2)
-    }
+    return $summary
 }
 
 function Write-SummaryLine {
@@ -216,18 +276,8 @@ function Write-SummaryLine {
         [string]$Details = ''
     )
 
-    $color = switch ($Status) {
-        'PASS' { 'Green' }
-        'FAIL' { 'Red' }
-        'SKIPPED' { 'DarkYellow' }
-        default { 'DarkYellow' }
-    }
-    $badge = switch ($Status) {
-        'PASS' { '[PASS]' }
-        'FAIL' { '[FAIL]' }
-        'SKIPPED' { '[SKIP]' }
-        default { "[${Status}]" }
-    }
+    $color = Get-StatusColor -Status $Status
+    $badge = Get-StatusBadge -Status $Status
 
     if ($Details) {
         Write-Host ("  {0} {1} {2}" -f $badge, $Label, $Details) -ForegroundColor $color
@@ -236,130 +286,133 @@ function Write-SummaryLine {
     }
 }
 
+function Write-SummaryTable {
+    param(
+        [Parameter(Mandatory = $true)]
+        [array]$Rows,
+
+        [string]$TableColor = 'Cyan'
+    )
+
+    $width = 132
+    $stepWidth = 30
+    $statusWidth = 10
+    $detailsWidth = $width - 15 - $stepWidth - $statusWidth
+    $borderLine = '||' + ('=' * ($width - 4)) + '||'
+    $dividerLine = '||' + ('-' * ($width - 4)) + '||'
+    $headerLine = ('|| {0,-30} | {1,-10} | {2,-73} ||' -f 'Step', 'Status', 'Details')
+    Write-Host $borderLine -ForegroundColor $TableColor
+    Write-Host $headerLine -ForegroundColor $TableColor
+    Write-Host $dividerLine -ForegroundColor $TableColor
+
+    foreach ($row in $Rows) {
+        $badge = Get-StatusBadge -Status $row.Status
+        $details = [string]$row.Details
+        if ($details.Length -gt $detailsWidth) {
+            $details = $details.Substring(0, [Math]::Max(0, $detailsWidth - 3)) + '...'
+        }
+
+        $rowColor = Get-StatusColor -Status $row.Status
+        $rowLine = ('|| {0,-30} | {1,-10} | {2,-73} ||' -f $row.Label, $badge, $details)
+        Write-Host $rowLine -ForegroundColor $rowColor
+    }
+
+    Write-Host $borderLine -ForegroundColor $TableColor
+}
+
 $results = [ordered]@{
     'backend style' = $null
-    'backend quality' = $null
+    'backend tests' = $null
     'secret scan' = $null
     'frontend style' = $null
     'frontend tests' = $null
-    'frontend coverage' = $null
     'frontend build' = $null
 }
 
-$results['backend style'] = Invoke-Check 'Running backend style checks...' { Invoke-PowerShellScript -ScriptPath $backendStyleScript }
+$results['backend style'] = Invoke-Check 'Running backend style: formatting (Spotless), API checks (Checkstyle)...' { Invoke-PowerShellScript -ScriptPath $backendStyleScript }
 if ($results['backend style'].ExitCode -eq 0) {
-    $results['backend quality'] = Invoke-Check 'Running backend tests and coverage...' { Invoke-PowerShellScript -ScriptPath $backendCoverageScript }
+    $results['backend tests'] = Invoke-Check 'Running backend tests: unit tests (JUnit, Mockito), integration tests (Testcontainers, Docker)...' { Invoke-PowerShellScript -ScriptPath $backendTestsScript }
 }
 
-if ($results['backend quality'] -and $results['backend quality'].ExitCode -eq 0) {
-    $results['secret scan'] = Invoke-Check 'Running secret scan...' { Invoke-PowerShellScript -ScriptPath $secretScanScript }
+if ($results['backend tests'] -and $results['backend tests'].ExitCode -eq 0) {
+    $results['secret scan'] = Invoke-Check 'Running secret scan: repository secrets scan (Gitleaks)...' { Invoke-PowerShellScript -ScriptPath $secretScanScript }
 }
 
 if ($results['secret scan'] -and $results['secret scan'].ExitCode -eq 0) {
-    $results['frontend style'] = Invoke-Check 'Running frontend style checks...' { Invoke-PowerShellScript -ScriptPath $frontendStyleScript }
+    $results['frontend style'] = Invoke-Check 'Running frontend style: linting (ESLint), formatting (Prettier)...' { Invoke-PowerShellScript -ScriptPath $frontendStyleScript }
 }
 
 if ($results['frontend style'] -and $results['frontend style'].ExitCode -eq 0) {
-    $results['frontend tests'] = Invoke-Check 'Running frontend tests...' { Invoke-PowerShellScript -ScriptPath $frontendTestScript }
+    $results['frontend tests'] = Invoke-Check 'Running frontend tests: component tests (Vitest, Vue Test Utils, JSDOM)...' { Invoke-PowerShellScript -ScriptPath $frontendTestScript }
 }
 
 if ($results['frontend tests'] -and $results['frontend tests'].ExitCode -eq 0) {
-    $results['frontend coverage'] = Invoke-Check 'Running frontend coverage gate...' { Invoke-PowerShellScript -ScriptPath $frontendCoverageScript }
-}
-
-if ($results['frontend coverage'] -and $results['frontend coverage'].ExitCode -eq 0) {
     Push-Location $frontendDir
     try {
-        $results['frontend build'] = Invoke-Check 'Building frontend...' { npm run build }
+        $results['frontend build'] = Invoke-Check 'Building frontend: typecheck and production bundle (Vue TSC, Vite)...' { npm run build }
     }
     finally {
         Pop-Location
     }
 }
 
-$backendQualitySummary = if ($results['backend quality']) { Get-TestSummary -Output $results['backend quality'].Output } else { [ordered]@{} }
-$backendCoverageSummary = if ($results['backend quality']) { Get-BackendCoverageSummary } else { [ordered]@{} }
-$frontendTestSummary = if ($results['frontend tests']) { Get-TestSummary -Output $results['frontend tests'].Output } else { [ordered]@{} }
-$frontendCoverageSummaryValues = if ($results['frontend coverage']) { Get-FrontendCoverageSummary } else { [ordered]@{} }
+$backendTestSummary = if ($results['backend tests']) { Get-BackendTestSummary } else { [ordered]@{} }
+$frontendTestSummary = if ($results['frontend tests']) { Get-FrontendTestSummary -Output $results['frontend tests'].Output } else { [ordered]@{} }
 
 Write-BoxHeader 'Summary'
 
-if ($results['backend style']) {
-    Write-SummaryLine -Label 'backend style' -Status ($(if ($results['backend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
-} else {
-    Write-SummaryLine -Label 'backend style' -Status 'SKIPPED'
+$backendTestDetails = ''
+if ($backendTestSummary.Count -gt 0) {
+    $backendTestDetails = "$($backendTestSummary.testsRun) run, $($backendTestSummary.testsFailed) failed, $($backendTestSummary.testsErrors) errors, $($backendTestSummary.testsSkipped) skipped"
 }
 
-if ($results['backend quality']) {
-    $backendQualityDetails = ''
-    if ($backendQualitySummary.Count -gt 0 -or $backendCoverageSummary.Count -gt 0) {
-        $backendTestPart = ''
-        if ($backendQualitySummary.Count -gt 0) {
-            $backendTestPart = "$($backendQualitySummary.testsRun) run, $($backendQualitySummary.testsFailed) failed, $($backendQualitySummary.testsErrors) errors, $($backendQualitySummary.testsSkipped) skipped"
-        }
-        $backendCoveragePart = ''
-        if ($backendCoverageSummary.Count -gt 0) {
-            $backendCoveragePart = "$($backendCoverageSummary.linePct)% lines, $($backendCoverageSummary.branchPct)% branches"
-        }
-        $parts = @()
-        if ($backendTestPart) { $parts += $backendTestPart }
-        if ($backendCoveragePart) { $parts += $backendCoveragePart }
-        if ($parts.Count -gt 0) {
-            $backendQualityDetails = "($($parts -join '; '))"
-        }
+$frontendTestsDetails = ''
+if ($frontendTestSummary.Count -gt 0) {
+    $frontendTestsDetails = "Test Files $($frontendTestSummary.passedTestSuites) passed ($($frontendTestSummary.totalTestSuites))   Tests $($frontendTestSummary.passedTests) passed ($($frontendTestSummary.totalTests))"
+}
+
+$summaryRows = @(
+    [pscustomobject]@{
+        Label   = 'backend style'
+        Status  = if ($results['backend style']) { if ($results['backend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = ''
     }
-    Write-SummaryLine -Label 'backend quality' -Status ($(if ($results['backend quality'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' })) -Details (
-        $backendQualityDetails
-    )
-} else {
-    Write-SummaryLine -Label 'backend quality' -Status 'SKIPPED'
-}
-
-if ($results['secret scan']) {
-    Write-SummaryLine -Label 'secret scan' -Status ($(if ($results['secret scan'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
-} else {
-    Write-SummaryLine -Label 'secret scan' -Status 'SKIPPED'
-}
-
-if ($results['frontend style']) {
-    Write-SummaryLine -Label 'frontend style' -Status ($(if ($results['frontend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
-} else {
-    Write-SummaryLine -Label 'frontend style' -Status 'SKIPPED'
-}
-
-Write-Host ''
-if ($results['frontend tests']) {
-    $frontendTestsDetails = ''
-    if ($frontendTestSummary.Count -gt 0) {
-        $frontendTestsDetails = "($($frontendTestSummary.testFiles) files, $($frontendTestSummary.tests) tests)"
+    [pscustomobject]@{
+        Label   = 'backend tests'
+        Status  = if ($results['backend tests']) { if ($results['backend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = $backendTestDetails
     }
-    Write-SummaryLine -Label 'frontend tests' -Status ($(if ($results['frontend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' })) -Details (
-        $frontendTestsDetails
-    )
-} else {
-    Write-SummaryLine -Label 'frontend tests' -Status 'SKIPPED'
-}
-
-Write-Host ''
-if ($results['frontend coverage']) {
-    $frontendCoverageDetails = ''
-    if ($frontendCoverageSummaryValues.Count -gt 0) {
-        $frontendCoverageDetails = "($($frontendCoverageSummaryValues.lines)% lines, $($frontendCoverageSummaryValues.branches)% branches)"
+    [pscustomobject]@{
+        Label   = 'secret scan'
+        Status  = if ($results['secret scan']) { if ($results['secret scan'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = ''
     }
-    Write-SummaryLine -Label 'frontend coverage' -Status ($(if ($results['frontend coverage'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' })) -Details (
-        $frontendCoverageDetails
-    )
-} else {
-    Write-SummaryLine -Label 'frontend coverage' -Status 'SKIPPED'
+    [pscustomobject]@{
+        Label   = 'frontend style'
+        Status  = if ($results['frontend style']) { if ($results['frontend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = ''
+    }
+    [pscustomobject]@{
+        Label   = 'frontend tests'
+        Status  = if ($results['frontend tests']) { if ($results['frontend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = $frontendTestsDetails
+    }
+    [pscustomobject]@{
+        Label   = 'frontend build'
+        Status  = if ($results['frontend build']) { if ($results['frontend build'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = ''
+    }
+)
+
+$summaryColor = 'Green'
+if ($summaryRows.Status -contains 'FAIL') {
+    $summaryColor = 'Red'
+} elseif ($summaryRows.Status -contains 'SKIPPED') {
+    $summaryColor = 'DarkYellow'
 }
 
-Write-Host ''
-if ($results['frontend build']) {
-    Write-SummaryLine -Label 'frontend build' -Status ($(if ($results['frontend build'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' }))
-} else {
-    Write-SummaryLine -Label 'frontend build' -Status 'SKIPPED'
-}
+Write-SummaryTable -Rows $summaryRows -TableColor $summaryColor
 
 if ($results.Values | Where-Object { $_ -and -not $_.Succeeded }) {
-    exit 1
+    [System.Environment]::Exit(1)
 }

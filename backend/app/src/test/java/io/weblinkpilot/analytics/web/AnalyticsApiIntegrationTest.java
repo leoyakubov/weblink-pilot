@@ -1,127 +1,177 @@
 package io.weblinkpilot.analytics.web;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-import io.weblinkpilot.analytics.domain.ClickEvent;
-import io.weblinkpilot.analytics.repository.ClickEventRepository;
-import io.weblinkpilot.auth.config.BootstrapDefaults;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
-import io.weblinkpilot.url.domain.ShortLink;
-import io.weblinkpilot.url.repository.ShortLinkRepository;
-import io.weblinkpilot.url.service.UrlCacheService;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.analytics.service.AnalyticsQueryService;
+import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
+import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.url.service.UrlLookupService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.web.server.ResponseStatusException;
 
-@SpringBootTest
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ExtendWith(MockitoExtension.class)
 class AnalyticsApiIntegrationTest {
 
-  private static final String AUTH_USER = BootstrapDefaults.ADMIN_USERNAME;
-  private static final String AUTH_PASSWORD = BootstrapDefaults.ADMIN_PASSWORD;
+  @Mock private AnalyticsQueryService analyticsQueryService;
 
-  @Autowired private WebApplicationContext webApplicationContext;
+  @Mock private UrlLookupService urlLookupService;
 
-  @Autowired private ClickEventRepository clickEventRepository;
-
-  @Autowired private ShortLinkRepository shortLinkRepository;
-
-  @Autowired private UrlCacheService urlCacheService;
-
-  private MockMvc mockMvc;
+  private AnalyticsController controller;
 
   @BeforeEach
   void setUp() {
-    clickEventRepository.deleteAllInBatch();
-    shortLinkRepository.deleteAllInBatch();
-
-    OffsetDateTime createdAt = OffsetDateTime.of(2026, 5, 22, 11, 45, 0, 0, ZoneOffset.UTC);
-    shortLinkRepository.save(
-        new ShortLink(
-            "demo-it",
-            "https://github.com/weblinkpilot/weblink-pilot",
-            null,
-            null,
-            createdAt,
-            null));
-    urlCacheService.findByCode("demo-it");
-
-    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    controller =
+        new AnalyticsController(analyticsQueryService, urlLookupService, new SimpleMeterRegistry());
   }
 
   @Test
-  void returnsAnalyticsSummaryForClickHistory() throws Exception {
-    OffsetDateTime first = OffsetDateTime.of(2026, 5, 22, 12, 0, 0, 0, ZoneOffset.UTC);
-    OffsetDateTime second = first.plusMinutes(2);
-    OffsetDateTime third = first.plusMinutes(5);
-
-    clickEventRepository.saveAll(
-        List.of(
-            new ClickEvent(
-                "demo-it",
-                first,
-                LinkTrackingSource.REDIRECT,
-                "203.0.113.10",
-                "Mozilla/5.0 Chrome/123.0",
-                "https://news.ycombinator.com",
-                "US",
-                "CHROME",
-                "DESKTOP"),
-            new ClickEvent(
-                "demo-it",
-                second,
-                LinkTrackingSource.REDIRECT,
-                "203.0.113.11",
-                "Mozilla/5.0 Safari/17.0",
-                "https://github.com",
-                "DE",
-                "SAFARI",
-                "MOBILE"),
-            new ClickEvent(
-                "demo-it",
-                third,
-                LinkTrackingSource.QR_SCAN,
-                "203.0.113.10",
-                "Mozilla/5.0 Firefox/124.0",
+  void returnsClickCount() {
+    when(urlLookupService.getByCode("demo"))
+        .thenReturn(
+            new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
                 null,
-                "US",
-                "FIREFOX",
-                "MOBILE")));
+                0L,
+                "owner"));
+    when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
 
-    mockMvc
-        .perform(get("/api/v1/analytics/demo-it").with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.code").value("demo-it"))
-        .andExpect(jsonPath("$.totalClicks").value(3))
-        .andExpect(jsonPath("$.redirectClicks").value(2))
-        .andExpect(jsonPath("$.qrScans").value(1))
-        .andExpect(jsonPath("$.uniqueVisitors").value(2))
-        .andExpect(jsonPath("$.lastClickedAt").value("2026-05-22T12:05:00Z"))
-        .andExpect(jsonPath("$.lastReferrer").value(Matchers.nullValue()))
-        .andExpect(jsonPath("$.lastBrowserFamily").value("FIREFOX"))
-        .andExpect(jsonPath("$.lastDeviceType").value("MOBILE"))
-        .andExpect(jsonPath("$.topCountries[0].country").value("US"))
-        .andExpect(jsonPath("$.topCountries[0].clicks").value(2))
-        .andExpect(jsonPath("$.topCountries[1].country").value("DE"))
-        .andExpect(jsonPath("$.topCountries[1].clicks").value(1));
+    assertEquals(12L, controller.count(auth("owner", "USER"), "demo"));
+  }
 
-    mockMvc
-        .perform(get("/api/v1/analytics/demo-it/count").with(httpBasic(AUTH_USER, AUTH_PASSWORD)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").value(3));
+  @Test
+  void returnsSummary() {
+    when(urlLookupService.getByCode("demo"))
+        .thenReturn(
+            new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0L,
+                "owner"));
+    AnalyticsSummaryResponse summary =
+        new AnalyticsSummaryResponse(
+            "demo",
+            12L,
+            9L,
+            3L,
+            5L,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            "https://github.com",
+            "Chrome",
+            "Desktop",
+            List.of(new AnalyticsCountryStatResponse("US", 3L)));
+    when(analyticsQueryService.summarize("demo")).thenReturn(summary);
+
+    AnalyticsSummaryResponse response = controller.summary(auth("owner", "USER"), "demo");
+
+    assertEquals("demo", response.code());
+    assertEquals(12L, response.totalClicks());
+    assertEquals(9L, response.redirectClicks());
+    assertEquals(3L, response.qrScans());
+    assertEquals("US", response.topCountries().get(0).country());
+  }
+
+  @Test
+  void allowsAnonymousAccessForPublicLinks() {
+    when(urlLookupService.getByCode("public"))
+        .thenReturn(
+            new LinkResponse(
+                "public",
+                "http://localhost:8080/r/public",
+                "http://localhost:8080/api/v1/urls/public/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0L,
+                null));
+    when(analyticsQueryService.countClicks("public")).thenReturn(1L);
+
+    assertEquals(1L, controller.count(null, "public"));
+  }
+
+  @Test
+  void rejectsAnonymousAccessForOwnedLinks() {
+    when(urlLookupService.getByCode("demo"))
+        .thenReturn(
+            new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0L,
+                "owner"));
+
+    ResponseStatusException exception =
+        assertThrows(ResponseStatusException.class, () -> controller.summary(null, "demo"));
+
+    assertEquals(401, exception.getStatusCode().value());
+  }
+
+  @Test
+  void rejectsDifferentUsersForOwnedLinks() {
+    when(urlLookupService.getByCode("demo"))
+        .thenReturn(
+            new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0L,
+                "owner"));
+
+    ResponseStatusException exception =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> controller.summary(auth("someone-else", "USER"), "demo"));
+
+    assertEquals(403, exception.getStatusCode().value());
+  }
+
+  @Test
+  void allowsAdminAccessForOwnedLinks() {
+    when(urlLookupService.getByCode("demo"))
+        .thenReturn(
+            new LinkResponse(
+                "demo",
+                "http://localhost:8080/r/demo",
+                "http://localhost:8080/api/v1/urls/demo/qr",
+                "https://github.com/weblinkpilot/weblink-pilot",
+                OffsetDateTime.now(ZoneOffset.UTC),
+                null,
+                0L,
+                "owner"));
+    when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
+
+    assertEquals(12L, controller.count(auth("admin", "ADMIN"), "demo"));
+  }
+
+  private static Authentication auth(String username, String role) {
+    return new UsernamePasswordAuthenticationToken(
+        username, "n/a", List.of(new SimpleGrantedAuthority("ROLE_" + role)));
   }
 }

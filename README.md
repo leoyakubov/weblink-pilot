@@ -98,13 +98,13 @@ Useful API endpoints after startup:
 To run the backend verification gate from `backend/`:
 
 ```powershell
-.\mvnw.cmd -Pci clean install
+.\mvnw.cmd -Pci clean verify
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw -Pci clean install
+./mvnw -Pci clean verify
 ```
 
 The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
@@ -177,7 +177,7 @@ Then run analysis from `backend/`:
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
 $env:SONAR_HOST_URL = "http://localhost:9001"
-.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
+.\mvnw.cmd -Pci clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
 ```
 
 On macOS/Linux:
@@ -185,7 +185,7 @@ On macOS/Linux:
 ```bash
 export SONAR_TOKEN="<your-token>"
 export SONAR_HOST_URL="http://localhost:9001"
-./mvnw -Pci clean install sonar:sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL"
+./mvnw -Pci clean verify sonar:sonar -Dsonar.token="$SONAR_TOKEN" -Dsonar.host.url="$SONAR_HOST_URL"
 ```
 
 The default local SonarQube UI is available at `http://localhost:9001`.
@@ -212,14 +212,15 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Backend format: [`scripts/win/quality/backend-format.ps1`](scripts/win/quality/backend-format.ps1)
 - Backend style check: [`scripts/win/quality/backend-style.ps1`](scripts/win/quality/backend-style.ps1)
 - Backend tests only: [`scripts/win/quality/backend-tests.ps1`](scripts/win/quality/backend-tests.ps1)
-- Backend quality (tests + coverage): [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
+- Backend tests: [`scripts/win/quality/backend-tests.ps1`](scripts/win/quality/backend-tests.ps1)
+- Backend coverage: [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
 - Backend vulnerability check: [`scripts/win/security/backend-vulnerabilities.ps1`](scripts/win/security/backend-vulnerabilities.ps1)
 - Frontend local: [`scripts/win/dev/frontend-local.ps1`](scripts/win/dev/frontend-local.ps1)
 - Frontend format: [`scripts/win/quality/frontend-format.ps1`](scripts/win/quality/frontend-format.ps1)
 - Frontend style check: [`scripts/win/quality/frontend-style.ps1`](scripts/win/quality/frontend-style.ps1)
-- Frontend tests and coverage: [`scripts/win/quality/frontend-tests.ps1`](scripts/win/quality/frontend-tests.ps1)
+- Frontend tests: [`scripts/win/quality/frontend-tests.ps1`](scripts/win/quality/frontend-tests.ps1)
 - Frontend vulnerability check: [`scripts/win/security/frontend-vulnerabilities.ps1`](scripts/win/security/frontend-vulnerabilities.ps1)
-- Frontend coverage gate: `npm run test:coverage` from `frontend/`
+- Frontend coverage: `npm run test:coverage` from `frontend/`
 - Frontend build: [`scripts/win/dev/frontend-build.ps1`](scripts/win/dev/frontend-build.ps1)
 - Frontend smoke test: [`scripts/win/dev/frontend-smoke.ps1`](scripts/win/dev/frontend-smoke.ps1)
 - Deployment smoke: [`scripts/win/quality/deployment-smoke.ps1`](scripts/win/quality/deployment-smoke.ps1)
@@ -254,8 +255,9 @@ Note: stop any already running backend instance before starting dev mode, otherw
 If you want the exact test/build shortcuts the project uses day to day:
 
 - Frontend tests: [`scripts/win/quality/frontend-tests.ps1`](scripts/win/quality/frontend-tests.ps1)
+- Backend coverage: [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
 - Frontend build: [`scripts/win/dev/frontend-build.ps1`](scripts/win/dev/frontend-build.ps1)
-- Frontend coverage: [`scripts/win/quality/frontend-coverage.ps1`](scripts/win/quality/frontend-coverage.ps1)
+- Frontend coverage: `npm run test:coverage` from `frontend/`
 - Frontend smoke test: [`scripts/win/dev/frontend-smoke.ps1`](scripts/win/dev/frontend-smoke.ps1)
 
 ## Docker Stack

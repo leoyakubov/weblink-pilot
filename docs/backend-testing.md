@@ -130,7 +130,7 @@ The backend build now produces:
 
 - module-level coverage checks for `url`, `analytics`, and `app`
 - an aggregate multi-module report in `backend/coverage`
-- a dedicated Maven `ci` profile for verification runs in CI and local quality gates
+- a dedicated Maven `ci` profile for verification runs in CI and manual coverage runs
 
 Run the backend test suite from the repo root:
 
@@ -138,7 +138,7 @@ Run the backend test suite from the repo root:
 .\scripts\backend\test-backend.ps1
 ```
 
-Run the coverage build from the repo root:
+Run the backend coverage build from the repo root when you want coverage:
 
 ```powershell
 .\scripts\backend\coverage.ps1
@@ -147,7 +147,7 @@ Run the coverage build from the repo root:
 Run the aggregate coverage build from `backend/`:
 
 ```powershell
-.\mvnw.cmd -Pci clean install
+.\mvnw.cmd -Pci clean verify
 ```
 
 The HTML report is generated under:
@@ -170,7 +170,7 @@ Then run the analysis from `backend/` with a Sonar token:
 ```powershell
 $env:SONAR_TOKEN = "<your-token>"
 $env:SONAR_HOST_URL = "http://localhost:9001"
-.\mvnw.cmd -Pci clean install sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
+.\mvnw.cmd -Pci clean verify sonar:sonar -Dsonar.token=$env:SONAR_TOKEN -Dsonar.host.url=$env:SONAR_HOST_URL
 ```
 
 The backend POM points Sonar at the aggregate JaCoCo XML report:
