@@ -12,6 +12,7 @@ describe('normalizeBaseUrl', () => {
 describe('settings storage', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   it('returns defaults when storage is empty', () => {
@@ -28,7 +29,7 @@ describe('settings storage', () => {
     expect(loadSettings()).toEqual({
       apiBaseUrl: 'http://localhost:8080/api/v1',
       authToken: 'jwt-token',
-      refreshToken: 'refresh-token',
+      refreshToken: '',
     });
   });
 

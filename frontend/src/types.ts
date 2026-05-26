@@ -28,7 +28,6 @@ export interface AuthCredentialsRequest {
 
 export interface AuthResponse {
   token: string;
-  refreshToken: string;
   username: string;
   role: string;
 }

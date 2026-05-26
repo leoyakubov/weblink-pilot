@@ -5,6 +5,7 @@ import type { ApiSettings } from '@/types';
 
 const settings = reactive<ApiSettings>(loadSettings());
 const saved = ref(false);
+const canEditBackendUrl = !import.meta.env.PROD;
 
 function saveBaseUrl() {
   saveSettings(settings);
@@ -72,20 +73,27 @@ function saveBaseUrl() {
           </p>
         </div>
 
-        <label class="form-field">
-          <span class="field-label">API base URL</span>
-          <input
-            v-model="settings.apiBaseUrl"
-            class="input"
-            type="url"
-            placeholder="http://localhost:8080/api/v1"
-          />
-        </label>
+        <template v-if="canEditBackendUrl">
+          <label class="form-field">
+            <span class="field-label">API base URL</span>
+            <input
+              v-model="settings.apiBaseUrl"
+              class="input"
+              type="url"
+              placeholder="http://localhost:8080/api/v1"
+            />
+          </label>
 
-        <div class="actions">
-          <button class="button button-primary" type="button" @click="saveBaseUrl">
-            Save settings
-          </button>
+          <div class="actions">
+            <button class="button button-primary" type="button" @click="saveBaseUrl">
+              Save settings
+            </button>
+          </div>
+        </template>
+        <div v-else class="list-item">
+          <strong>API base URL</strong>
+          <p>{{ settings.apiBaseUrl }}</p>
+          <p class="help-text">This value is fixed in production builds.</p>
         </div>
 
         <p v-if="saved" class="status">

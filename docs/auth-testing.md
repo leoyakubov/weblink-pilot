@@ -1,6 +1,6 @@
 # Auth Testing Workflow
 
-This is the local end-to-end workflow for verifying the access-token plus refresh-token flow.
+This is the local end-to-end workflow for verifying the short-lived access-token plus refresh-cookie flow.
 
 It covers:
 
@@ -18,14 +18,21 @@ It covers:
   - `admin / admin123`
   - `user / user123`
 
-The frontend stores auth state in local storage under:
+The frontend stores the browser-facing config in local storage under:
 
 - `weblinkpilot.frontend.settings`
 
 That object contains:
 
-- `authToken`
-- `refreshToken`
+- `apiBaseUrl`
+
+The short-lived access token lives in session storage under:
+
+- `weblinkpilot.frontend.session`
+
+The refresh token itself is stored in an `HttpOnly` cookie named:
+
+- `weblinkpilot_refresh`
 
 ## 1. Sign In
 
@@ -43,8 +50,9 @@ Invoke-RestMethod `
 
 Expected result:
 
-- response includes both `token` and `refreshToken`
-- the frontend saves both tokens in local storage
+- response includes `token`
+- the backend sets the `weblinkpilot_refresh` cookie
+- the frontend saves the access token in session storage
 - the current user becomes authenticated in the UI
 
 ## 2. Verify Access Token
@@ -78,21 +86,21 @@ This checks the app bootstrapping path.
 1. Open browser devtools.
 2. Go to Application or Storage.
 3. Inspect `weblinkpilot.frontend.settings`.
-4. Remove `authToken` but keep `refreshToken`.
+4. Remove `authToken` from session storage but keep the refresh cookie in the browser.
 5. Reload the frontend.
 
 Expected result:
 
 - the app calls `POST /api/v1/auth/refresh`
-- it receives a rotated `token` and `refreshToken`
+- it receives a new `token`
 - the user stays signed in without logging in again
 
 ## 4. Verify Auto-Refresh On 401
 
 This checks the request retry path.
 
-1. Keep a valid `refreshToken`.
-2. Replace `authToken` with an invalid value such as `junk`.
+1. Keep a valid refresh cookie.
+2. Replace `authToken` in session storage with an invalid value such as `junk`.
 3. Trigger a protected request by refreshing the app or opening a protected page.
 
 Expected result:
@@ -106,19 +114,10 @@ Expected result:
 
 Sign out from the UI or call the logout endpoint directly.
 
-API example:
-
-```powershell
-Invoke-RestMethod `
-  -Method Post `
-  -Uri "http://localhost:8080/api/v1/auth/logout" `
-  -ContentType "application/json" `
-  -Body '{"refreshToken":"<refresh-token-from-local-storage>"}'
-```
-
 Expected result:
 
-- the frontend clears `authToken` and `refreshToken`
+- the frontend clears `authToken`
+- the browser clears the `weblinkpilot_refresh` cookie
 - the UI returns to guest mode
 - the refresh token cannot be used again
 
@@ -127,21 +126,22 @@ Expected result:
 This checks that the refresh token changes on every refresh.
 
 1. Log in.
-2. Save the current `refreshToken` value.
+2. Save the current `weblinkpilot_refresh` cookie value from devtools or the network tab.
 3. Trigger a refresh bootstrap or call `POST /api/v1/auth/refresh`.
-4. Compare the returned refresh token with the old one.
+4. Compare the new cookie value with the old one.
 
 Expected result:
 
-- the new refresh token is different
-- the old refresh token no longer works
+- the new cookie value is different
+- the old cookie value no longer works
 
 ## 7. Verify Rejection Paths
 
 Use these to make sure invalid sessions fail cleanly:
 
 - call `POST /api/v1/auth/refresh` with a blank token
-- call it with an already revoked token
+- call it with a missing cookie
+- call it with an already revoked cookie
 - call it after logout
 
 Expected result:
@@ -168,8 +168,8 @@ npm run test:run -- src/lib/auth.test.ts src/lib/api.test.ts
 For a fast manual verification, do these four things:
 
 1. log in
-2. confirm both tokens are stored
-3. remove `authToken` and reload to confirm refresh works
-4. log out and confirm the refresh token is revoked
+2. confirm the access token is stored and the refresh cookie is set
+3. remove `authToken` from session storage and reload to confirm refresh works from the cookie
+4. log out and confirm the refresh cookie is cleared
 
-That covers the main access/refresh-token behavior end to end.
+That covers the main access-token and refresh-cookie behavior end to end.

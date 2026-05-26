@@ -14,6 +14,34 @@ The app supports both anonymous demo links and signed-in user-owned links. Guest
 The cleaner SaaS-style landing page keeps the main create flow front and center, while the About page now holds the tech stack and developer settings.
 Local/dev startup also seeds the shared `admin` and `user` accounts plus a small set of starter links so the dashboards are never empty on first run.
 
+## Auth Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant SPA as Web UI
+    participant API as Backend API
+    participant Browser as Browser Cookie Jar
+
+    User->>SPA: Sign in or register
+    SPA->>API: POST /api/v1/auth/login
+    API-->>SPA: access token + username + role
+    API-->>Browser: Set-Cookie refresh token (HttpOnly)
+
+    SPA->>API: GET /api/v1/auth/me\nAuthorization: Bearer access token
+    API-->>SPA: current user profile
+
+    Note over SPA,API: When the access token expires, the SPA refreshes it automatically.
+    SPA->>API: POST /api/v1/auth/refresh
+    API-->>SPA: new access token
+    API-->>Browser: Rotate refresh cookie
+
+    User->>SPA: Sign out
+    SPA->>API: POST /api/v1/auth/logout
+    API-->>Browser: Clear refresh cookie
+```
+
 ## Docs
 
 - [Architecture Plan](docs/architecture-plan.md)

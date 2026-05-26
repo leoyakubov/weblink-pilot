@@ -88,12 +88,12 @@ The smoke output prints the backend HTTP status and `status=UP`, plus the fronte
 
 ### Auth session workflow
 
-Use this when you want to verify the access-token and refresh-token flow end to end:
+Use this when you want to verify the access-token and refresh-cookie flow end to end:
 
 - login and registration
-- token storage in the browser
+- access-token storage in session storage
 - automatic refresh on `401`
-- refresh-token rotation
+- refresh-cookie rotation
 - logout revocation
 
 The full local workflow is documented in:

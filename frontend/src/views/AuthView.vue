@@ -24,6 +24,9 @@ const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/;
 const title = computed(() => (props.mode === 'login' ? 'Sign in' : 'Sign up'));
 const submitLabel = computed(() => (props.mode === 'login' ? 'Sign in' : 'Create account'));
 const switchPath = computed(() => (props.mode === 'login' ? '/auth/signup' : '/auth/signin'));
+const passwordAutocomplete = computed(() =>
+  props.mode === 'register' ? 'new-password' : 'current-password',
+);
 
 function resetMessages() {
   errorMessage.value = '';
@@ -84,9 +87,7 @@ function formatAuthError(error: unknown): string {
       return 'This account is disabled.';
     }
 
-    if (error.message) {
-      return error.message;
-    }
+    return 'Authentication failed. Please try again.';
   }
 
   if (error instanceof Error && error.message) {
@@ -149,7 +150,7 @@ async function submit() {
                 class="input"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Enter your password"
-                autocomplete="current-password"
+                :autocomplete="passwordAutocomplete"
               />
               <button
                 class="password-toggle"

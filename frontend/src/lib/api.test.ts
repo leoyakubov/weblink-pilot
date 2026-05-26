@@ -22,6 +22,9 @@ const settings: ApiSettings = {
 
 beforeEach(() => {
   vi.stubGlobal('btoa', (value: string) => Buffer.from(value, 'binary').toString('base64'));
+  settings.apiBaseUrl = 'http://localhost:8080/api/v1/';
+  settings.authToken = 'jwt-token';
+  settings.refreshToken = 'refresh-token';
 });
 
 afterEach(() => {
@@ -206,6 +209,7 @@ describe('api helpers', () => {
 
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBeNull();
+      expect(init?.credentials).toBe('include');
       expect(init?.body).toBe(
         JSON.stringify({
           username: 'alice',
@@ -216,7 +220,6 @@ describe('api helpers', () => {
       return new Response(
         JSON.stringify({
           token: 'new-token',
-          refreshToken: 'refresh-token',
           username: 'alice',
           role: 'USER',
         }),
@@ -239,7 +242,6 @@ describe('api helpers', () => {
       ),
     ).resolves.toEqual({
       token: 'new-token',
-      refreshToken: 'refresh-token',
       username: 'alice',
       role: 'USER',
     });
@@ -251,6 +253,7 @@ describe('api helpers', () => {
 
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBeNull();
+      expect(init?.credentials).toBe('include');
       expect(init?.body).toBe(
         JSON.stringify({
           username: 'alice',
@@ -261,7 +264,6 @@ describe('api helpers', () => {
       return new Response(
         JSON.stringify({
           token: 'new-token',
-          refreshToken: 'refresh-token',
           username: 'alice',
           role: 'USER',
         }),
@@ -284,7 +286,6 @@ describe('api helpers', () => {
       ),
     ).resolves.toEqual({
       token: 'new-token',
-      refreshToken: 'refresh-token',
       username: 'alice',
       role: 'USER',
     });
@@ -296,16 +297,12 @@ describe('api helpers', () => {
 
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBeNull();
-      expect(init?.body).toBe(
-        JSON.stringify({
-          refreshToken: 'refresh-token',
-        }),
-      );
+      expect(init?.credentials).toBe('include');
+      expect(init?.body).toBeUndefined();
 
       return new Response(
         JSON.stringify({
           token: 'new-token',
-          refreshToken: 'rotated-refresh-token',
           username: 'alice',
           role: 'USER',
         }),
@@ -318,16 +315,8 @@ describe('api helpers', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(
-      refreshTokens(
-        {
-          refreshToken: 'refresh-token',
-        },
-        settings,
-      ),
-    ).resolves.toEqual({
+    await expect(refreshTokens(settings)).resolves.toEqual({
       token: 'new-token',
-      refreshToken: 'rotated-refresh-token',
       username: 'alice',
       role: 'USER',
     });
@@ -339,11 +328,8 @@ describe('api helpers', () => {
 
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBeNull();
-      expect(init?.body).toBe(
-        JSON.stringify({
-          refreshToken: 'refresh-token',
-        }),
-      );
+      expect(init?.credentials).toBe('include');
+      expect(init?.body).toBeUndefined();
 
       return new Response(null, {
         status: 204,
@@ -352,14 +338,7 @@ describe('api helpers', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(
-      logoutSession(
-        {
-          refreshToken: 'refresh-token',
-        },
-        settings,
-      ),
-    ).resolves.toBeUndefined();
+    await expect(logoutSession(settings)).resolves.toBeUndefined();
   });
 
   it('loads current user profile', async () => {
@@ -411,15 +390,11 @@ describe('api helpers', () => {
 
       if (callCount === 2) {
         expect(url).toBe('http://localhost:8080/api/v1/auth/refresh');
-        expect(init?.body).toBe(
-          JSON.stringify({
-            refreshToken: 'refresh-token',
-          }),
-        );
+        expect(init?.credentials).toBe('include');
+        expect(init?.body).toBeUndefined();
         return new Response(
           JSON.stringify({
             token: 'refreshed-token',
-            refreshToken: 'rotated-refresh-token',
             username: 'alice',
             role: 'USER',
           }),
@@ -452,7 +427,7 @@ describe('api helpers', () => {
       role: 'USER',
     });
     expect(settings.authToken).toBe('refreshed-token');
-    expect(settings.refreshToken).toBe('rotated-refresh-token');
+    expect(settings.refreshToken).toBe('refresh-token');
   });
 
   it('loads admin overview from the backend', async () => {

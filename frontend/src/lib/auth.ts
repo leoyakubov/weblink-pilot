@@ -32,25 +32,22 @@ export async function bootstrapAuth() {
   bootstrapPromise = (async () => {
     authState.loading = true;
     const settings = loadSettings();
+    const requestSettings = { ...settings };
 
     try {
       if (settings.authToken) {
-        authState.currentUser = await getCurrentUser(settings);
-      } else if (settings.refreshToken) {
-        const response = await refreshTokens({ refreshToken: settings.refreshToken }, settings);
+        authState.currentUser = await getCurrentUser(requestSettings);
+      } else {
+        const response = await refreshTokens(requestSettings);
         settings.authToken = response.token;
-        settings.refreshToken = response.refreshToken;
         saveSettings(settings);
         authState.currentUser = {
           username: response.username,
           role: response.role,
         };
-      } else {
-        authState.currentUser = null;
       }
     } catch {
       settings.authToken = '';
-      settings.refreshToken = '';
       saveSettings(settings);
       authState.currentUser = null;
     } finally {
@@ -67,11 +64,11 @@ export async function authenticate(
   request: AuthCredentialsRequest,
 ): Promise<AuthResponse> {
   const settings = loadSettings();
+  const requestSettings = { ...settings };
   const response =
-    mode === 'login' ? await login(request, settings) : await register(request, settings);
+    mode === 'login' ? await login(request, requestSettings) : await register(request, requestSettings);
 
   settings.authToken = response.token;
-  settings.refreshToken = response.refreshToken;
   saveSettings(settings);
   authState.currentUser = {
     username: response.username,
@@ -88,11 +85,8 @@ export async function authenticate(
 
 export function signOut() {
   const settings = loadSettings();
-  if (settings.refreshToken) {
-    void logoutSession({ refreshToken: settings.refreshToken }, settings).catch(() => undefined);
-  }
+  void logoutSession({ ...settings }).catch(() => undefined);
   settings.authToken = '';
-  settings.refreshToken = '';
   saveSettings(settings);
   authState.currentUser = null;
   showSessionNotice('Signed out. Guest mode active.');

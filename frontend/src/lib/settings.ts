@@ -1,6 +1,7 @@
 import type { ApiSettings } from '@/types';
 
 const STORAGE_KEY = 'weblinkpilot.frontend.settings';
+const SESSION_KEY = 'weblinkpilot.frontend.session';
 
 const defaultApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 
@@ -19,19 +20,26 @@ export function loadSettings(): ApiSettings {
 
   const fallback = defaultSettings();
   const raw = window.localStorage.getItem(STORAGE_KEY);
+  const sessionToken = window.sessionStorage.getItem(SESSION_KEY);
   if (!raw) {
-    return fallback;
+    return {
+      ...fallback,
+      authToken: sessionToken ?? fallback.authToken,
+    };
   }
 
   try {
     const parsed = JSON.parse(raw) as Partial<ApiSettings>;
     return {
       apiBaseUrl: normalizeBaseUrl(parsed.apiBaseUrl ?? fallback.apiBaseUrl),
-      authToken: parsed.authToken ?? fallback.authToken,
-      refreshToken: parsed.refreshToken ?? fallback.refreshToken,
+      authToken: sessionToken ?? parsed.authToken ?? fallback.authToken,
+      refreshToken: fallback.refreshToken,
     };
   } catch {
-    return fallback;
+    return {
+      ...fallback,
+      authToken: sessionToken ?? fallback.authToken,
+    };
   }
 }
 
@@ -42,12 +50,11 @@ export function saveSettings(settings: ApiSettings) {
 
   window.localStorage.setItem(
     STORAGE_KEY,
-      JSON.stringify({
-        apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
-        authToken: settings.authToken,
-        refreshToken: settings.refreshToken,
-      }),
+    JSON.stringify({
+      apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
+    }),
   );
+  window.sessionStorage.setItem(SESSION_KEY, settings.authToken);
 }
 
 export function normalizeBaseUrl(value: string) {

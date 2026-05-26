@@ -7,7 +7,6 @@ import type {
   CreateLinkRequest,
   LinkResponse,
   RedirectPreviewResponse,
-  RefreshTokenRequest,
   UserProfileResponse,
 } from '@/types';
 import { loadSettings, normalizeBaseUrl, saveSettings } from '@/lib/settings';
@@ -40,6 +39,7 @@ async function sendRequest(
   init: RequestInit = {},
   settings: ApiSettings = loadSettings(),
   includeAuth = true,
+  includeCredentials = false,
 ) {
   const headers = new Headers(init.headers);
   headers.set('Accept', 'application/json');
@@ -57,6 +57,7 @@ async function sendRequest(
 
   return fetch(`${normalizeBaseUrl(settings.apiBaseUrl)}${path}`, {
     ...init,
+    credentials: includeCredentials ? 'include' : 'same-origin',
     headers,
   });
 }
@@ -80,11 +81,9 @@ async function parseError(response: Response) {
 
 async function refreshSession(settings: ApiSettings) {
   if (!refreshSessionPromise) {
-    refreshSessionPromise = refreshTokens({ refreshToken: settings.refreshToken }, settings).finally(
-      () => {
-        refreshSessionPromise = null;
-      },
-    );
+    refreshSessionPromise = refreshTokens(settings).finally(() => {
+      refreshSessionPromise = null;
+    });
   }
 
   return refreshSessionPromise;
@@ -95,28 +94,26 @@ async function requestJson<T>(
   init: RequestInit = {},
   settings: ApiSettings = loadSettings(),
   includeAuth = true,
+  includeCredentials = false,
   allowRefresh = true,
 ): Promise<T> {
-  const response = await sendRequest(path, init, settings, includeAuth);
+  const response = await sendRequest(path, init, settings, includeAuth, includeCredentials);
 
   if (!response.ok) {
     if (
       response.status === 401 &&
       includeAuth &&
       allowRefresh &&
-      settings.refreshToken &&
       path !== '/auth/refresh' &&
       path !== '/auth/logout'
     ) {
       try {
         const refreshed = await refreshSession(settings);
         settings.authToken = refreshed.token;
-        settings.refreshToken = refreshed.refreshToken;
         saveSettings(settings);
-        return requestJson<T>(path, init, settings, includeAuth, false);
+        return requestJson<T>(path, init, settings, includeAuth, includeCredentials, false);
       } catch {
         settings.authToken = '';
-        settings.refreshToken = '';
         saveSettings(settings);
         throw await parseError(response);
       }
@@ -132,8 +129,9 @@ async function requestVoid(
   init: RequestInit = {},
   settings: ApiSettings = loadSettings(),
   includeAuth = true,
+  includeCredentials = false,
 ) {
-  const response = await sendRequest(path, init, settings, includeAuth);
+  const response = await sendRequest(path, init, settings, includeAuth, includeCredentials);
   if (!response.ok) {
     throw await parseError(response);
   }
@@ -163,6 +161,7 @@ export function register(request: AuthCredentialsRequest, settings: ApiSettings 
     },
     settings,
     false,
+    true,
   );
 }
 
@@ -175,37 +174,32 @@ export function login(request: AuthCredentialsRequest, settings: ApiSettings = l
     },
     settings,
     false,
+    true,
   );
 }
 
-export function refreshTokens(
-  request: RefreshTokenRequest,
-  settings: ApiSettings = loadSettings(),
-) {
+export function refreshTokens(settings: ApiSettings = loadSettings()) {
   return requestJson<AuthResponse>(
     '/auth/refresh',
     {
       method: 'POST',
-      body: JSON.stringify(request),
     },
     settings,
     false,
+    true,
     false,
   );
 }
 
-export function logoutSession(
-  request: RefreshTokenRequest,
-  settings: ApiSettings = loadSettings(),
-) {
+export function logoutSession(settings: ApiSettings = loadSettings()) {
   return requestVoid(
     '/auth/logout',
     {
       method: 'POST',
-      body: JSON.stringify(request),
     },
     settings,
     false,
+    true,
   );
 }
 
