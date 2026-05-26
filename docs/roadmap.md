@@ -21,7 +21,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | ✅ Done | Deployment setup | CI and deploy workflows are in place for the live Netlify frontend and Render backend. |
 | ✅ Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | ✅ Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, OAuth/social login, multiple auth providers, and richer account management when the current JWT flow stabilizes. |
+| 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, GitHub social login, optional Google social login, and richer account management when the current JWT flow stabilizes. |
 | 🟡 Maybe | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 
 ## Execution Checklist
@@ -261,7 +261,8 @@ Goals:
 - add refresh tokens for longer-lived sessions
 - add password reset flows
 - add email verification
-- support OAuth or social login providers
+- add GitHub social login first
+- add Google social login last, only if we want broader general-user sign-in
 - support multiple auth providers if the product needs them
 - add account management UI and API with dedicated tests and migrations
 
