@@ -71,10 +71,12 @@ public class AuthExceptionHandler {
   }
 
   @ExceptionHandler(AccountDisabledException.class)
-  public ResponseEntity<ApiErrorResponse> accountDisabled(
-      AccountDisabledException exception, HttpServletRequest request) {
+  public ResponseEntity<ApiErrorResponse> accountDisabled(HttpServletRequest request) {
     return build(
-        HttpStatus.FORBIDDEN, "ACCOUNT_DISABLED", exception.getMessage(), request.getRequestURI());
+        HttpStatus.UNAUTHORIZED,
+        "INVALID_CREDENTIALS",
+        "Incorrect username or password",
+        request.getRequestURI());
   }
 
   private ResponseEntity<ApiErrorResponse> build(

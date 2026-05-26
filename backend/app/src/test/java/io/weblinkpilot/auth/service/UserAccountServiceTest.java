@@ -101,7 +101,7 @@ class UserAccountServiceTest {
 
     assertThatThrownBy(() -> service.authenticate("alice", "Password1"))
         .isInstanceOf(AccountDisabledException.class)
-        .hasMessageContaining("alice");
+        .hasMessageContaining("Incorrect username or password");
   }
 
   @Test

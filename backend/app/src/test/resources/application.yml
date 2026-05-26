@@ -4,4 +4,4 @@ spring:
 
 app:
   auth:
-    jwt-secret: test-jwt-secret-for-tests-only
+    jwt-secret: test-jwt-secret-for-tests-only-32-chars-minimum

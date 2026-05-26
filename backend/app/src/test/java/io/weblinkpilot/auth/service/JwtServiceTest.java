@@ -59,4 +59,14 @@ class JwtServiceTest {
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("JWT secret must be configured");
   }
+
+  @Test
+  void validateConfigurationRejectsShortSecret() {
+    authProperties.setJwtSecret("too-short-secret");
+    JwtService invalidService = new JwtService(new ObjectMapper(), authProperties);
+
+    assertThatThrownBy(invalidService::validateConfiguration)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("at least 32 characters");
+  }
 }

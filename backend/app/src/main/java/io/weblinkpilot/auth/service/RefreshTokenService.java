@@ -80,7 +80,7 @@ public class RefreshTokenService {
 
     if (!token.getUser().isEnabled()) {
       evictSession(tokenHash);
-      throw new AccountDisabledException(token.getUser().getUsername());
+      throw new AccountDisabledException();
     }
 
     RefreshSession cachedSession = readSession(tokenHash);

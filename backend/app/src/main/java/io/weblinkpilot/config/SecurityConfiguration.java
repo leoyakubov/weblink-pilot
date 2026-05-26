@@ -34,6 +34,7 @@ public class SecurityConfiguration {
           .authorizeHttpRequests(
               auth ->
                   auth.requestMatchers(
+                          "/error",
                           "/actuator/health",
                           "/actuator/info",
                           "/actuator/metrics",
@@ -65,7 +66,7 @@ public class SecurityConfiguration {
                       .requestMatchers(HttpMethod.OPTIONS, "/**")
                       .permitAll()
                       .anyRequest()
-                      .permitAll())
+                      .denyAll())
           .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
       return http.build();
     } catch (Exception exception) {

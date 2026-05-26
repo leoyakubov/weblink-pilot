@@ -44,6 +44,10 @@ public class JwtService {
     if (jwtSecret == null || jwtSecret.isBlank()) {
       throw new IllegalStateException("JWT secret must be configured via JWT_SECRET");
     }
+    if (jwtSecret.trim().length() < 32) {
+      throw new IllegalStateException(
+          "JWT secret must be at least 32 characters long to resist brute force attacks");
+    }
   }
 
   public String issueToken(String username, String role) {

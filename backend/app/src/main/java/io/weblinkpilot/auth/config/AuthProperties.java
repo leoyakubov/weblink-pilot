@@ -1,14 +1,18 @@
 package io.weblinkpilot.auth.config;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @ConfigurationProperties(prefix = "app.auth")
 public class AuthProperties {
 
-  private String issuer = AuthDefaults.ISSUER;
-  private String jwtSecret;
-  private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
-  private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
+  @NotBlank private String issuer = AuthDefaults.ISSUER;
+  @NotBlank private String jwtSecret;
+  @Min(15) private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
+  @Min(1) private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
   private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
   private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
   private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;

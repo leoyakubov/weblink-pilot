@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -22,9 +23,13 @@ public class RefreshToken {
   @Column(name = "token_hash", nullable = false, unique = true, length = 128)
   private String tokenHash;
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserAccount user;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  private long version;
 
   @Column(name = "created_at", nullable = false)
   private OffsetDateTime createdAt;

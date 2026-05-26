@@ -75,7 +75,7 @@ public class UserAccountService {
         repository.findByUsername(normalizedUsername).orElseThrow(InvalidCredentialsException::new);
 
     if (!account.isEnabled()) {
-      throw new AccountDisabledException(normalizedUsername);
+      throw new AccountDisabledException();
     }
     if (!passwordEncoder.matches(rawPassword, account.getPasswordHash())) {
       throw new InvalidCredentialsException();

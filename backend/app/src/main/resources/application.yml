@@ -25,7 +25,7 @@ app:
   auth:
     issuer: weblink-pilot
     jwt-secret: ${JWT_SECRET}
-    token-ttl-minutes: 240
+    token-ttl-minutes: 30
     refresh-token-ttl-days: 30
   short-link:
     max-expiration: 365d
