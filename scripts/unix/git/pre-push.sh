@@ -169,7 +169,7 @@ if [ -s "$backend_tests_log" ]; then
   backend_tests_summary="$(grep -Eo 'Tests run: [0-9]+, Failures: [0-9]+, Errors: [0-9]+, Skipped: [0-9]+' "$backend_tests_log" | tail -n 1 || true)"
 fi
 if [ -s "$frontend_tests_log" ]; then
-  frontend_tests_summary="$(node -e 'const fs=require("fs"); const p=process.argv[1]; if (fs.existsSync(p)) { const t=fs.readFileSync(p, "utf8").replace(/\u001b\[[0-9;]*[A-Za-z]/g,"").replace(/\r/g,""); const m=t.match(/Test Files\s+(\d+)\s+passed(?:\s+\((\d+)\))?.*?Tests\s+(\d+)\s+passed(?:\s+\((\d+)\))?/s); if (m) { console.log(`Test Files ${m[1]} passed (${m[2] || m[1]})   Tests ${m[3]} passed (${m[4] || m[3]})`); } }' "$frontend_tests_log" 2>/dev/null || true)"
+  frontend_tests_summary="$(node -e 'const fs=require("fs"); const path=process.argv[1]; const report=process.argv[2]; if (fs.existsSync(report)) { try { const json=JSON.parse(fs.readFileSync(report,"utf8")); console.log(`${json.numPassedTestSuites} files, ${json.numPassedTests} tests`); process.exit(0); } catch {} } if (fs.existsSync(path)) { const t=fs.readFileSync(path, "utf8").replace(/\u001b\[[0-9;]*[A-Za-z]/g,"").replace(/\r/g,""); const m=t.match(/Test Files\s+(\d+)\s+passed(?:\s+\((\d+)\))?.*?Tests\s+(\d+)\s+passed(?:\s+\((\d+)\))?/s); if (m) { console.log(`${m[1]} files, ${m[3]} tests`); } }' "$frontend_tests_log" "$repo_root/frontend/.vite/vitest/results.json" 2>/dev/null || true)"
 fi
 
 print_box "Summary"

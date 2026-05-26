@@ -95,7 +95,9 @@ export async function authenticate(
   const settings = loadSettings();
   const requestSettings = { ...settings };
   const response =
-    mode === 'login' ? await login(request, requestSettings) : await register(request, requestSettings);
+    mode === 'login'
+      ? await login(request, requestSettings)
+      : await register(request, requestSettings);
 
   settings.authToken = response.token;
   saveSettings(settings);

@@ -42,6 +42,7 @@ dist/
 vite.svg
 *.tsbuildinfo
 coverage-final.json
+.vite/
 
 # Package managers
 # Env / secrets

@@ -246,9 +246,27 @@ function Get-BackendTestSummary {
 }
 
 function Get-FrontendTestSummary {
-    param([string]$Output)
+    param(
+        [string]$Output,
+
+        [string]$ReportPath
+    )
 
     $summary = [ordered]@{}
+
+    if (Test-Path -LiteralPath $ReportPath) {
+        try {
+            $json = Get-Content -Raw -LiteralPath $ReportPath | ConvertFrom-Json
+            $summary['totalTestSuites'] = [int]$json.numTotalTestSuites
+            $summary['passedTestSuites'] = [int]$json.numPassedTestSuites
+            $summary['totalTests'] = [int]$json.numTotalTests
+            $summary['passedTests'] = [int]$json.numPassedTests
+            return $summary
+        }
+        catch {
+        }
+    }
+
     $normalizedOutput = [regex]::Replace($Output, "`e\[[0-9;]*[A-Za-z]", '')
     $normalizedOutput = $normalizedOutput -replace "`r", ''
 
@@ -259,7 +277,6 @@ function Get-FrontendTestSummary {
         $summary['passedTestSuites'] = [int]$Matches.filesPassed
         $summary['totalTests'] = [int]$testsTotal
         $summary['passedTests'] = [int]$Matches.testsPassed
-        return $summary
     }
 
     return $summary
@@ -357,7 +374,8 @@ if ($results['frontend tests'] -and $results['frontend tests'].ExitCode -eq 0) {
 }
 
 $backendTestSummary = if ($results['backend tests']) { Get-BackendTestSummary } else { [ordered]@{} }
-$frontendTestSummary = if ($results['frontend tests']) { Get-FrontendTestSummary -Output $results['frontend tests'].Output } else { [ordered]@{} }
+$frontendTestReport = Join-Path $frontendDir '.vite\vitest\results.json'
+$frontendTestSummary = if ($results['frontend tests']) { Get-FrontendTestSummary -Output $results['frontend tests'].Output -ReportPath $frontendTestReport } else { [ordered]@{} }
 
 Write-BoxHeader 'Summary'
 
@@ -368,7 +386,7 @@ if ($backendTestSummary.Count -gt 0) {
 
 $frontendTestsDetails = ''
 if ($frontendTestSummary.Count -gt 0) {
-    $frontendTestsDetails = "Test Files $($frontendTestSummary.passedTestSuites) passed ($($frontendTestSummary.totalTestSuites))   Tests $($frontendTestSummary.passedTests) passed ($($frontendTestSummary.totalTests))"
+    $frontendTestsDetails = "$($frontendTestSummary.passedTestSuites) files, $($frontendTestSummary.passedTests) tests"
 }
 
 $summaryRows = @(
