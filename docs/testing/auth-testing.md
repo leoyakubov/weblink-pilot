@@ -4,7 +4,7 @@ This is the local end-to-end workflow for verifying the short-lived access-token
 
 For the broader feature-by-feature testing matrix, see:
 
-- [`docs/feature-testing.md`](feature-testing.md)
+- [`feature-testing.md`](feature-testing.md)
 
 It covers:
 

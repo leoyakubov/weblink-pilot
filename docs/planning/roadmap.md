@@ -1,31 +1,37 @@
-# Roadmap
+﻿# Roadmap
 
 This document is the single planning source of truth.
 The old implementation checklist has been merged here so we only maintain one plan.
 
 ## Status Overview
 
-| Status | Area | Notes |
-|---|---|---|
-| ✅ Done | Project bootstrap | Repo layout, baseline docs, naming, and initial tooling are in place. |
-| ✅ Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
-| ✅ Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
-| ✅ Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
-| ✅ Done | Frontend foundation | Vue app shell and backend integration are in place. |
-| ✅ Done | Frontend feature set | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
-| ✅ Done | Authentication and access control | JWT login/register/me flows, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
-| ✅ Done | Tests, code quality, Sonar | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
-| ✅ Done | Rate limiting | Request throttling is implemented for the public and API paths that need it. |
-| ✅ Done | Docker | Local and dev Docker workflows are in place for the full stack and backend support services. |
-| ✅ Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
-| ✅ Done | Deployment setup | CI and deploy workflows are in place for the live Netlify frontend and Render backend. |
-| ✅ Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
-| ✅ Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, GitHub social login, optional Google social login, and richer account management when the current JWT flow stabilizes. |
-| 🟡 Maybe | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 🟡 Maybe | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| # | Status | Area | Notes |
+|---|---|---|---|
+| 0 | &#x1F7E2; Done | Project bootstrap | Repo layout, baseline docs, naming, and initial tooling are in place. |
+| 1 | &#x1F7E2; Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
+| 2 | &#x1F7E2; Done | Tests, code quality, Sonar | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
+| 3 | &#x1F7E2; Done | Docker | Local and dev Docker workflows are in place for the full stack and backend support services. |
+| 4 | &#x1F7E2; Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
+| 5 | &#x1F7E2; Done | QR code support | QR generation and the QR endpoint are in place for the core link journey. |
+| 6 | &#x1F7E2; Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
+| 7 | &#x1F7E2; Done | Frontend foundation | Vue app shell and backend integration are in place. |
+| 8 | &#x1F7E2; Done | Frontend feature set | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
+| 9 | &#x1F7E2; Done | Authentication and access control | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
+| 10 | &#x1F7E2; Done | Production hardening | Logging, metrics, documentation polish, release checks, and deploy safety are in place. |
+| 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
+| 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
+| 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
+| 14 | &#x1F7E1; In Progress | Auth expansion | Add GitHub social login, optional Google social login, and richer account management on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
+| 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
 ## Execution Checklist
+
+Status note:
+
+- Phases 0-13 are already shipped and documented here as the implemented baseline.
+- Phases 14-16 are the remaining planned roadmap items.
+- The auth baseline now includes refresh cookies, password reset, and email verification; only social login and richer account management remain in phase 15.
 
 ### Phase 0 - Repo readiness
 
@@ -168,7 +174,8 @@ Exit criteria:
 
 Goals:
 
-- add JWT login/register/me flows
+- keep the shipped JWT login/register/me flow
+- keep refresh-cookie sessions, password reset, and email verification working
 - support user and admin roles
 - seed bootstrap accounts and starter links in the auth layer
 - make navigation and routes role-aware
@@ -195,6 +202,7 @@ Exit criteria:
 - project runs in containers
 - tests cover key flows
 - README and docs describe how to use it
+- release and deployment docs match the shipped product
 
 ### Phase 11 - Environment profiles and scripts
 
@@ -211,6 +219,7 @@ Exit criteria:
 - environment-specific behavior is explicit
 - configuration is easier to reason about
 - local, container, and demo workflows stay simple
+- helper scripts match the current folder layout and runtime behavior
 
 ### Phase 12 - Redis caching
 
@@ -225,6 +234,7 @@ Exit criteria:
 - URL lookups no longer rely only on the in-memory cache
 - analytics and other hot paths can use Redis-backed caching where it helps
 - cache behavior is documented and testable
+- Redis cache/session behavior is documented in the implementation docs
 
 ### Phase 13 - Monitoring
 
@@ -239,8 +249,25 @@ Exit criteria:
 - monitoring is visible from the app
 - the deploy path stays simple
 - the monitoring stack can be enabled after the app is live
+- the admin monitoring page and local stack are consistent with the docs
 
-### Phase 14 - RabbitMQ async messaging
+### Phase 14 - Auth expansion
+
+Goals:
+
+- add GitHub social login first
+- add Google social login last, only if we want broader general-user sign-in
+- support multiple auth providers if the product needs them
+- add account management UI and API with dedicated tests and migrations
+
+Exit criteria:
+
+- users can sign in with a social provider if we choose to enable it
+- the app can support more than one identity provider
+- account lifecycle flows are explicit and testable
+- admin and user account management remain separated cleanly
+
+### Phase 15 - RabbitMQ async messaging
 
 Goals:
 
@@ -254,25 +281,6 @@ Exit criteria:
 - async event processing is documented and testable
 - the broker is only used for workloads that benefit from queueing
 - local and CI workflows still work cleanly when RabbitMQ is disabled
-
-### Phase 15 - Auth expansion
-
-Goals:
-
-- add refresh tokens for longer-lived sessions
-- add password reset flows
-- add email verification
-- add GitHub social login first
-- add Google social login last, only if we want broader general-user sign-in
-- support multiple auth providers if the product needs them
-- add account management UI and API with dedicated tests and migrations
-
-Exit criteria:
-
-- users can recover access without manual intervention
-- the app can support more than one identity provider
-- account lifecycle flows are explicit and testable
-- admin and user account management remain separated cleanly
 
 ### Phase 16 - Expiry reminder emails
 
@@ -306,6 +314,7 @@ Exit criteria:
 11. environment profiles and scripts
 12. Redis caching
 13. monitoring
-14. RabbitMQ async messaging
-15. auth expansion
+14. auth expansion
+15. RabbitMQ async messaging
 16. expiry reminder emails
+

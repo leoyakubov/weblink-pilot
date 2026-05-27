@@ -18,10 +18,28 @@ weblink-pilot/
 │   ├── docker-compose.yml
 │   └── deployment/
 └── docs/
-    ├── architecture-plan.md
-    ├── product-spec.md
-    ├── roadmap.md
-    └── repo-structure.md
+    ├── README.md
+    ├── planning/
+    │   ├── product-spec.md
+    │   └── roadmap.md
+    ├── design/
+    │   ├── architecture-plan.md
+    │   ├── backend-module-plan.md
+    │   ├── frontend-plan.md
+    │   ├── adr.md
+    │   ├── tech-stack.md
+    │   └── repo-structure.md
+    ├── implementation/
+    │   ├── api-contract-v1.md
+    │   └── development-standards.md
+    ├── testing/
+    │   ├── feature-testing.md
+    │   ├── auth-testing.md
+    │   └── backend-testing.md
+    ├── operations/
+    │   └── deployment.md
+    └── reference/
+        └── interview-notes.md
 ```
 
 ## Why this layout
@@ -29,6 +47,7 @@ weblink-pilot/
 - keeps backend and frontend clearly separated
 - allows one repo to host the whole product
 - keeps deployment and docs alongside the code
+- makes the docs easier to scan by SDLC phase
 - makes future extraction into separate repos possible if needed
 
 ## Backend structure

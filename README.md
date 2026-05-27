@@ -44,26 +44,47 @@ sequenceDiagram
 
 ## Docs
 
-- [Architecture Plan](docs/architecture-plan.md)
-- [Product Spec](docs/product-spec.md)
-- [Backend Module Plan](docs/backend-module-plan.md)
-- [Frontend Plan](docs/frontend-plan.md)
-- [Architecture Decisions](docs/adr.md)
-- [Tech Stack](docs/tech-stack.md)
-- [API Contract v1](docs/api-contract-v1.md)
-- [Feature Testing Guide](docs/feature-testing.md)
-- [Auth Testing Workflow](docs/auth-testing.md)
-- [Backend Testing Strategy](docs/backend-testing.md)
-- [Development Standards](docs/development-standards.md)
-- [Deployment](docs/deployment.md)
-- [Roadmap](docs/roadmap.md)
+- [Documentation Index](docs/README.md)
+
+### Planning & Requirements
+
+- [Product Spec](docs/planning/product-spec.md)
+- [Roadmap](docs/planning/roadmap.md)
+
+### Design & Architecture
+
+- [Architecture Plan](docs/design/architecture-plan.md)
+- [Backend Module Plan](docs/design/backend-module-plan.md)
+- [Frontend Plan](docs/design/frontend-plan.md)
+- [Architecture Decisions](docs/design/adr.md)
+- [Tech Stack](docs/design/tech-stack.md)
+- [Repository Structure](docs/design/repo-structure.md)
+
+### Implementation & Development
+
+- [API Contract v1](docs/implementation/api-contract-v1.md)
+- [Development Standards](docs/implementation/development-standards.md)
+
+### Testing & QA
+
+- [Feature Testing Guide](docs/testing/feature-testing.md)
+- [Auth Testing Workflow](docs/testing/auth-testing.md)
+- [Backend Testing Strategy](docs/testing/backend-testing.md)
+
+### Deployment & Operations
+
+- [Deployment](docs/operations/deployment.md)
+
+### Release & Reference
+
 - [Changelog](CHANGELOG.md)
+- [Interview Notes](docs/reference/interview-notes.md)
 
 ## Repository Structure
 
 - `backend/` - Java modular monolith and infrastructure
 - `frontend/` - Vue mobile-first web application
-- `docs/` - architecture, product, roadmap, and decisions
+- `docs/` - categorized planning, design, implementation, testing, operations, and reference docs
 - `infra/` - Docker, deployment, and local environment tooling
 
 ## Backend Quick Start

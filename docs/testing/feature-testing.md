@@ -66,7 +66,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 
 ### Useful docs
 
-- [`docs/auth-testing.md`](auth-testing.md)
+- [`auth-testing.md`](auth-testing.md)
 
 ## 2. Email Workflow
 
@@ -204,6 +204,6 @@ That catches the most common regressions without running the full test suite.
 
 These are the closest scripted checks for the same flows:
 
-- Auth workflow: [`docs/auth-testing.md`](auth-testing.md)
-- Backend test strategy: [`docs/backend-testing.md`](backend-testing.md)
-- Deployment smoke: [`docs/deployment.md`](deployment.md)
+- Auth workflow: [`auth-testing.md`](auth-testing.md)
+- Backend test strategy: [`backend-testing.md`](backend-testing.md)
+- Deployment smoke: [`../operations/deployment.md`](../operations/deployment.md)

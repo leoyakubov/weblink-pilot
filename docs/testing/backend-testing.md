@@ -68,7 +68,7 @@ Use these when the API shape matters for frontend or external consumers:
 - OpenAPI examples
 - backward compatibility checks
 
-This repo already keeps the API contract documented in `docs/api-contract-v1.md`.
+This repo already keeps the API contract documented in `../implementation/api-contract-v1.md`.
 
 ### Smoke tests
 
@@ -99,8 +99,8 @@ Use this when you want to verify the access-token and refresh-cookie flow end to
 
 The full local workflow is documented in:
 
-- [`docs/auth-testing.md`](auth-testing.md)
-- [`docs/feature-testing.md`](feature-testing.md)
+- [`auth-testing.md`](auth-testing.md)
+- [`feature-testing.md`](feature-testing.md)
 
 Suggested verification order:
 
