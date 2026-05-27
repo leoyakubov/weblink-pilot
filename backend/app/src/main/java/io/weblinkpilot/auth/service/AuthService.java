@@ -3,6 +3,7 @@ package io.weblinkpilot.auth.service;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,29 +17,44 @@ public class AuthService {
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
   private final PasswordResetService passwordResetService;
+  private final EmailVerificationService emailVerificationService;
 
+  @Autowired
   public AuthService(
       UserAccountService userAccountService,
       JwtService jwtService,
       RefreshTokenService refreshTokenService,
-      PasswordResetService passwordResetService) {
+      PasswordResetService passwordResetService,
+      EmailVerificationService emailVerificationService) {
     this.userAccountService = userAccountService;
     this.jwtService = jwtService;
     this.refreshTokenService = refreshTokenService;
     this.passwordResetService = passwordResetService;
+    this.emailVerificationService = emailVerificationService;
   }
 
   public AuthService(
       UserAccountService userAccountService,
       JwtService jwtService,
       RefreshTokenService refreshTokenService) {
-    this(userAccountService, jwtService, refreshTokenService, null);
+    this(userAccountService, jwtService, refreshTokenService, null, null);
+  }
+
+  public AuthService(
+      UserAccountService userAccountService,
+      JwtService jwtService,
+      RefreshTokenService refreshTokenService,
+      PasswordResetService passwordResetService) {
+    this(userAccountService, jwtService, refreshTokenService, passwordResetService, null);
   }
 
   @Transactional
   public AuthSession register(AuthCredentialsRequest request) {
     UserAccount account =
         userAccountService.registerUser(request.username(), request.password(), request.email());
+    if (emailVerificationService != null && account.getEmail() != null) {
+      emailVerificationService.requestEmailVerification(account.getEmail());
+    }
     return issueSession(account);
   }
 
@@ -78,6 +94,22 @@ public class AuthService {
       throw new IllegalStateException("Password reset service is not configured");
     }
     passwordResetService.confirmPasswordReset(token, password);
+  }
+
+  @Transactional
+  public void requestEmailVerification(String email) {
+    if (emailVerificationService == null) {
+      throw new IllegalStateException("Email verification service is not configured");
+    }
+    emailVerificationService.requestEmailVerification(email);
+  }
+
+  @Transactional
+  public void confirmEmailVerification(String token) {
+    if (emailVerificationService == null) {
+      throw new IllegalStateException("Email verification service is not configured");
+    }
+    emailVerificationService.confirmEmailVerification(token);
   }
 
   @Transactional(readOnly = true)

@@ -142,4 +142,34 @@ class AuthControllerTest {
 
     verify(authService).confirmPasswordReset("reset-token", "Password1");
   }
+
+  @Test
+  void requestEmailVerificationReturnsNoContent() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/email-verification/request")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"email":"alice@example.com"}
+                    """))
+        .andExpect(status().isNoContent());
+
+    verify(authService).requestEmailVerification("alice@example.com");
+  }
+
+  @Test
+  void confirmEmailVerificationReturnsNoContent() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/email-verification/confirm")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"token":"verification-token"}
+                    """))
+        .andExpect(status().isNoContent());
+
+    verify(authService).confirmEmailVerification("verification-token");
+  }
 }

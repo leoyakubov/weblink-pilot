@@ -6,6 +6,8 @@ import type {
   AnalyticsSummaryResponse,
   CreateLinkRequest,
   LinkResponse,
+  EmailVerificationConfirmRequest,
+  EmailVerificationRequest,
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   RedirectPreviewResponse,
@@ -189,6 +191,38 @@ export function confirmPasswordReset(
 ) {
   return requestVoid(
     '/auth/password-reset/confirm',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    true,
+  );
+}
+
+export function requestEmailVerification(
+  request: EmailVerificationRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/email-verification/request',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    true,
+  );
+}
+
+export function confirmEmailVerification(
+  request: EmailVerificationConfirmRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/email-verification/confirm',
     {
       method: 'POST',
       body: JSON.stringify(request),

@@ -46,6 +46,14 @@ export interface PasswordResetConfirmRequest {
   password: string;
 }
 
+export interface EmailVerificationRequest {
+  email: string;
+}
+
+export interface EmailVerificationConfirmRequest {
+  token: string;
+}
+
 export interface UserProfileResponse {
   username: string;
   role: string;

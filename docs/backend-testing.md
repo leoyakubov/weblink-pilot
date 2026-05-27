@@ -91,6 +91,7 @@ The smoke output prints the backend HTTP status and `status=UP`, plus the fronte
 Use this when you want to verify the access-token and refresh-cookie flow end to end:
 
 - login and registration
+- email verification
 - access-token storage in session storage
 - automatic refresh on `401`
 - refresh-cookie rotation
@@ -99,6 +100,7 @@ Use this when you want to verify the access-token and refresh-cookie flow end to
 The full local workflow is documented in:
 
 - [`docs/auth-testing.md`](auth-testing.md)
+- [`docs/feature-testing.md`](feature-testing.md)
 
 Suggested verification order:
 

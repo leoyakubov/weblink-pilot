@@ -12,6 +12,8 @@ import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
+import io.weblinkpilot.shared.contracts.EmailVerificationConfirmRequest;
+import io.weblinkpilot.shared.contracts.EmailVerificationRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetConfirmRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetRequest;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
@@ -113,6 +115,42 @@ public class AuthController {
       @Valid @org.springframework.web.bind.annotation.RequestBody
           PasswordResetConfirmRequest request) {
     authService.confirmPasswordReset(request.token(), request.password());
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/email-verification/request")
+  @Operation(
+      summary = "Request an email verification link",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = EmailVerificationRequest.class))),
+      responses = {@ApiResponse(responseCode = "204", description = "Verification link queued")})
+  public ResponseEntity<Void> requestEmailVerification(
+      @Valid @org.springframework.web.bind.annotation.RequestBody
+          EmailVerificationRequest request) {
+    authService.requestEmailVerification(request.email());
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/email-verification/confirm")
+  @Operation(
+      summary = "Confirm an email verification link",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = EmailVerificationConfirmRequest.class))),
+      responses = {@ApiResponse(responseCode = "204", description = "Email verified")})
+  public ResponseEntity<Void> confirmEmailVerification(
+      @Valid @org.springframework.web.bind.annotation.RequestBody
+          EmailVerificationConfirmRequest request) {
+    authService.confirmEmailVerification(request.token());
     return ResponseEntity.noContent().build();
   }
 

@@ -2,6 +2,7 @@ package io.weblinkpilot.auth.web;
 
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.EmailAlreadyExistsException;
+import io.weblinkpilot.auth.exception.EmailNotVerifiedException;
 import io.weblinkpilot.auth.exception.InvalidAccountActionTokenException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.InvalidRefreshTokenException;
@@ -77,6 +78,16 @@ public class AuthExceptionHandler {
       EmailAlreadyExistsException exception, HttpServletRequest request) {
     return build(
         HttpStatus.CONFLICT, "EMAIL_EXISTS", exception.getMessage(), request.getRequestURI());
+  }
+
+  @ExceptionHandler(EmailNotVerifiedException.class)
+  public ResponseEntity<ApiErrorResponse> emailNotVerified(
+      EmailNotVerifiedException exception, HttpServletRequest request) {
+    return build(
+        HttpStatus.FORBIDDEN,
+        "EMAIL_NOT_VERIFIED",
+        exception.getMessage(),
+        request.getRequestURI());
   }
 
   @ExceptionHandler(InvalidAccountActionTokenException.class)

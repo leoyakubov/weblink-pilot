@@ -6,6 +6,7 @@ import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.EmailAlreadyExistsException;
+import io.weblinkpilot.auth.exception.EmailNotVerifiedException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
@@ -94,6 +95,9 @@ public class UserAccountService {
     if (!passwordEncoder.matches(rawPassword, account.getPasswordHash())) {
       throw new InvalidCredentialsException();
     }
+    if (!account.isEmailVerified()) {
+      throw new EmailNotVerifiedException();
+    }
 
     account.markLoggedIn(OffsetDateTime.now(ZoneOffset.UTC));
     return repository.save(account);
@@ -120,7 +124,7 @@ public class UserAccountService {
                             normalizeBootstrapRole(bootstrapAdminRole, RoleNames.ADMIN)),
                         true,
                         OffsetDateTime.now(ZoneOffset.UTC),
-                        null)));
+                        OffsetDateTime.now(ZoneOffset.UTC))));
   }
 
   @Transactional
@@ -144,7 +148,7 @@ public class UserAccountService {
                             normalizeBootstrapRole(bootstrapUserRole, RoleNames.USER)),
                         true,
                         OffsetDateTime.now(ZoneOffset.UTC),
-                        null)));
+                        OffsetDateTime.now(ZoneOffset.UTC))));
   }
 
   @Transactional(readOnly = true)

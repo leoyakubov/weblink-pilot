@@ -23,6 +23,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | ✅ Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
 | 🟡 Maybe | Auth expansion | Add refresh tokens, password reset, email verification, GitHub social login, optional Google social login, and richer account management when the current JWT flow stabilizes. |
 | 🟡 Maybe | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 🟡 Maybe | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
 ## Execution Checklist
 
@@ -273,6 +274,23 @@ Exit criteria:
 - account lifecycle flows are explicit and testable
 - admin and user account management remain separated cleanly
 
+### Phase 16 - Expiry reminder emails
+
+Goals:
+
+- add a scheduled backend job that scans each user's links
+- build a list of links that are about to expire
+- send reminder emails to the owning user
+- keep the reminder logic compatible with the existing mail infrastructure
+- make the job observable, testable, and safe to run repeatedly
+
+Exit criteria:
+
+- users receive a reminder before their links expire
+- reminder emails are deduplicated or otherwise controlled
+- the job is safe to run on a schedule without spamming users
+- the notification flow is documented and testable
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -290,3 +308,4 @@ Exit criteria:
 13. monitoring
 14. RabbitMQ async messaging
 15. auth expansion
+16. expiry reminder emails

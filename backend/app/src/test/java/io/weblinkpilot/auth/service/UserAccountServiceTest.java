@@ -11,6 +11,7 @@ import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
+import io.weblinkpilot.auth.exception.EmailNotVerifiedException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
@@ -66,6 +67,7 @@ class UserAccountServiceTest {
     assertThat(account.getRoleName()).isEqualTo(RoleNames.USER);
     assertThat(account.isEnabled()).isTrue();
     assertThat(account.getCreatedAt()).isNotNull();
+    assertThat(account.isEmailVerified()).isFalse();
     verify(repository).save(any(UserAccount.class));
   }
 
@@ -91,6 +93,7 @@ class UserAccountServiceTest {
     UserAccount account =
         new UserAccount(
             "alice", "hashed", new Role(RoleNames.USER), true, OffsetDateTime.now(ZoneOffset.UTC));
+    account.setEmailVerifiedAt(OffsetDateTime.now(ZoneOffset.UTC));
     when(repository.findByUsername("alice")).thenReturn(Optional.of(account));
     when(passwordEncoder.matches("Password1", "hashed")).thenReturn(true);
     when(repository.save(any(UserAccount.class)))
@@ -108,6 +111,7 @@ class UserAccountServiceTest {
     UserAccount account =
         new UserAccount(
             "alice", "hashed", new Role(RoleNames.USER), false, OffsetDateTime.now(ZoneOffset.UTC));
+    account.setEmailVerifiedAt(OffsetDateTime.now(ZoneOffset.UTC));
     when(repository.findByUsername("alice")).thenReturn(Optional.of(account));
 
     assertThatThrownBy(() -> service.authenticate("alice", "Password1"))
@@ -120,11 +124,31 @@ class UserAccountServiceTest {
     UserAccount account =
         new UserAccount(
             "alice", "hashed", new Role(RoleNames.USER), true, OffsetDateTime.now(ZoneOffset.UTC));
+    account.setEmailVerifiedAt(OffsetDateTime.now(ZoneOffset.UTC));
     when(repository.findByUsername("alice")).thenReturn(Optional.of(account));
     when(passwordEncoder.matches("Password1", "hashed")).thenReturn(false);
 
     assertThatThrownBy(() -> service.authenticate("alice", "Password1"))
         .isInstanceOf(InvalidCredentialsException.class);
+  }
+
+  @Test
+  void authenticateRejectsUnverifiedEmail() {
+    UserAccount account =
+        new UserAccount(
+            "alice",
+            "hashed",
+            "alice@example.com",
+            new Role(RoleNames.USER),
+            true,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
+    when(repository.findByUsername("alice")).thenReturn(Optional.of(account));
+    when(passwordEncoder.matches("Password1", "hashed")).thenReturn(true);
+
+    assertThatThrownBy(() -> service.authenticate("alice", "Password1"))
+        .isInstanceOf(EmailNotVerifiedException.class)
+        .hasMessageContaining("Please verify your email address");
   }
 
   @Test
@@ -150,6 +174,7 @@ class UserAccountServiceTest {
     assertThat(account.getUsername()).isEqualTo("admin");
     assertThat(account.getRoleName()).isEqualTo(RoleNames.ADMIN);
     assertThat(account.isEnabled()).isTrue();
+    assertThat(account.isEmailVerified()).isTrue();
   }
 
   @Test
@@ -167,6 +192,7 @@ class UserAccountServiceTest {
 
     assertThat(account.getUsername()).isEqualTo("user");
     assertThat(account.getRoleName()).isEqualTo("MEMBER");
+    assertThat(account.isEmailVerified()).isTrue();
   }
 
   @Test
@@ -174,6 +200,7 @@ class UserAccountServiceTest {
     UserAccount account =
         new UserAccount(
             "alice", "hashed", new Role(RoleNames.USER), true, OffsetDateTime.now(ZoneOffset.UTC));
+    account.setEmailVerifiedAt(OffsetDateTime.now(ZoneOffset.UTC));
     when(repository.findByUsername("alice")).thenReturn(Optional.of(account));
 
     assertThat(service.profile(" Alice "))

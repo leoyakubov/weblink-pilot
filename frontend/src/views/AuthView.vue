@@ -79,10 +79,14 @@ function validateForm(): string {
 }
 
 function formatAuthError(error: unknown): string {
-  if (error instanceof ApiRequestError) {
-    if (error.status === 401) {
-      return 'Incorrect username or password.';
-    }
+    if (error instanceof ApiRequestError) {
+      if (error.code === 'EMAIL_NOT_VERIFIED') {
+        return 'Please verify your email address before signing in.';
+      }
+
+      if (error.status === 401) {
+        return 'Incorrect username or password.';
+      }
 
     if (error.status === 409) {
       return 'This username already exists.';
@@ -113,11 +117,19 @@ async function submit() {
       return;
     }
 
-    await authenticate(props.mode, form);
+    const request =
+      props.mode === 'login'
+        ? {
+            username: form.username,
+            password: form.password,
+          }
+        : form;
+
+    await authenticate(props.mode, request);
     successMessage.value =
       props.mode === 'login'
         ? `Signed in as ${authState.currentUser?.username}`
-        : `Created ${authState.currentUser?.username} and signed in`;
+        : `Created ${authState.currentUser?.username}, signed in, and sent a verification email`;
     await router.push('/');
   } catch (error) {
     errorMessage.value = formatAuthError(error);
@@ -235,6 +247,15 @@ async function submit() {
             <span class="footnote">Forgot your password?</span>
             <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/forgot-password">
               Reset password
+            </RouterLink>
+          </div>
+          <div v-if="props.mode === 'login'" class="auth-switch">
+            <span class="footnote">Need a verification email?</span>
+            <RouterLink
+              class="button button-secondary button-small auth-link-button"
+              to="/auth/verify-email/request"
+            >
+              Resend verification
             </RouterLink>
           </div>
         </form>

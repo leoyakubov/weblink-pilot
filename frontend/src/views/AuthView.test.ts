@@ -80,6 +80,20 @@ describe('AuthView', () => {
     expect(wrapper.text()).toContain('This username already exists.');
   });
 
+  it('shows email verification guidance when login is blocked', async () => {
+    mocks.authenticateMock.mockRejectedValue(
+      new ApiRequestError('Please verify your email address before signing in', 403, 'EMAIL_NOT_VERIFIED'),
+    );
+
+    const wrapper = mountAuth('login');
+    await wrapper.get('input[placeholder="Your username"]').setValue('user1');
+    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('form').trigger('submit.prevent');
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Please verify your email address before signing in.');
+  });
+
   it('requires email in register mode', async () => {
     const wrapper = mountAuth('register');
 

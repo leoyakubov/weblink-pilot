@@ -29,9 +29,19 @@ class AuthServiceTest {
 
   @Mock private RefreshTokenService refreshTokenService;
 
+  @Mock private PasswordResetService passwordResetService;
+
+  @Mock private EmailVerificationService emailVerificationService;
+
   @Test
   void registerIssuesTokenForCreatedAccount() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
     UserAccount account =
         new UserAccount(
             "alice",
@@ -53,11 +63,18 @@ class AuthServiceTest {
     assertThat(response.username()).isEqualTo("alice");
     assertThat(response.role()).isEqualTo("USER");
     assertThat(response.refreshToken()).isEqualTo("refresh-1");
+    verify(emailVerificationService).requestEmailVerification("alice@example.com");
   }
 
   @Test
   void loginIssuesTokenForAuthenticatedAccount() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
     UserAccount account =
         new UserAccount(
             "alice",
@@ -82,7 +99,13 @@ class AuthServiceTest {
 
   @Test
   void refreshRotatesRefreshTokenForCurrentAccount() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
     UserAccount account =
         new UserAccount(
             "alice",
@@ -107,7 +130,13 @@ class AuthServiceTest {
 
   @Test
   void logoutRevokesRefreshToken() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
 
     service.logout("refresh-1");
 
@@ -116,7 +145,13 @@ class AuthServiceTest {
 
   @Test
   void profileReturnsCurrentUserProfile() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
     when(userAccountService.profile("alice")).thenReturn(new UserProfileResponse("alice", "USER"));
 
     UserProfileResponse response =
@@ -130,7 +165,13 @@ class AuthServiceTest {
 
   @Test
   void profileRejectsMissingAuthentication() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
 
     assertThatThrownBy(() -> service.profile(null))
         .isInstanceOf(AccessDeniedException.class)
@@ -139,7 +180,13 @@ class AuthServiceTest {
 
   @Test
   void profileRejectsAnonymousAuthentication() {
-    AuthService service = new AuthService(userAccountService, jwtService, refreshTokenService);
+    AuthService service =
+        new AuthService(
+            userAccountService,
+            jwtService,
+            refreshTokenService,
+            passwordResetService,
+            emailVerificationService);
 
     assertThatThrownBy(
             () ->

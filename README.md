@@ -51,6 +51,7 @@ sequenceDiagram
 - [Architecture Decisions](docs/adr.md)
 - [Tech Stack](docs/tech-stack.md)
 - [API Contract v1](docs/api-contract-v1.md)
+- [Feature Testing Guide](docs/feature-testing.md)
 - [Auth Testing Workflow](docs/auth-testing.md)
 - [Backend Testing Strategy](docs/backend-testing.md)
 - [Development Standards](docs/development-standards.md)
