@@ -8,16 +8,19 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.service.AccountManagementService;
 import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.auth.service.GitHubOAuthService;
 import io.weblinkpilot.auth.service.OAuthLoginService;
+import io.weblinkpilot.shared.contracts.AccountProfileResponse;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
 import io.weblinkpilot.shared.contracts.EmailVerificationConfirmRequest;
 import io.weblinkpilot.shared.contracts.EmailVerificationRequest;
 import io.weblinkpilot.shared.contracts.OAuthLoginCompleteRequest;
+import io.weblinkpilot.shared.contracts.PasswordChangeRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetConfirmRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetRequest;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
@@ -45,6 +48,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class AuthController {
 
   private final AuthService authService;
+  private final AccountManagementService accountManagementService;
   private final AuthCookieService authCookieService;
   private final GitHubOAuthService gitHubOAuthService;
   private final OAuthLoginService oauthLoginService;
@@ -52,11 +56,13 @@ public class AuthController {
 
   public AuthController(
       AuthService authService,
+      AccountManagementService accountManagementService,
       AuthCookieService authCookieService,
       GitHubOAuthService gitHubOAuthService,
       OAuthLoginService oauthLoginService,
       AuthProperties authProperties) {
     this.authService = authService;
+    this.accountManagementService = accountManagementService;
     this.authCookieService = authCookieService;
     this.gitHubOAuthService = gitHubOAuthService;
     this.oauthLoginService = oauthLoginService;
@@ -273,6 +279,32 @@ public class AuthController {
   @SecurityRequirement(name = "bearerAuth")
   public UserProfileResponse me(Authentication authentication) {
     return authService.profile(authentication);
+  }
+
+  @GetMapping("/account")
+  @Operation(summary = "Current signed-in account details")
+  @SecurityRequirement(name = "bearerAuth")
+  public AccountProfileResponse account(Authentication authentication) {
+    return accountManagementService.profile(authentication.getName());
+  }
+
+  @PostMapping("/account/password")
+  @Operation(
+      summary = "Change the current account password",
+      requestBody =
+          @RequestBody(
+              required = true,
+              content =
+                  @Content(
+                      mediaType = MediaType.APPLICATION_JSON_VALUE,
+                      schema = @Schema(implementation = PasswordChangeRequest.class))),
+      responses = {@ApiResponse(responseCode = "204", description = "Password updated")})
+  public ResponseEntity<Void> changePassword(
+      Authentication authentication,
+      @Valid @org.springframework.web.bind.annotation.RequestBody PasswordChangeRequest request) {
+    accountManagementService.changePassword(
+        authentication.getName(), request.currentPassword(), request.newPassword());
+    return ResponseEntity.noContent().build();
   }
 
   private String resolveRefreshToken(RefreshTokenRequest request, HttpServletRequest httpRequest) {

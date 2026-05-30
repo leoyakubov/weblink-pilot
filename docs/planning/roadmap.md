@@ -21,7 +21,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
 | 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E1; In Progress | Auth expansion | Add GitHub social login and richer account management on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
+| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login and richer account management are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
 | 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 | 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
@@ -30,9 +30,9 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 Status note:
 
-- Phases 0-13 are already shipped and documented here as the implemented baseline.
-- Phases 14-17 are the remaining planned roadmap items.
-- The auth baseline now includes refresh cookies, password reset, and email verification; only social login and richer account management remain in phase 14.
+- Phases 0-14 are already shipped and documented here as the implemented baseline.
+- Phases 15-17 are the remaining planned roadmap items.
+- The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 
 ### Phase 0 - Repo readiness
 
@@ -256,16 +256,15 @@ Exit criteria:
 
 Goals:
 
-- add GitHub social login first
-- support multiple auth providers if the product needs them
-- add account management UI and API with dedicated tests and migrations
+- GitHub social login is in place
+- richer account management is in place
 
 Exit criteria:
 
-- users can sign in with a social provider if we choose to enable it
-- the app can support more than one identity provider
-- account lifecycle flows are explicit and testable
-- admin and user account management remain separated cleanly
+- account profile and password management are visible in the app
+- linked social identities are visible in the account UI
+- password change revokes existing refresh sessions
+- the auth model supports the current product flow
 
 ### Phase 15 - RabbitMQ async messaging
 

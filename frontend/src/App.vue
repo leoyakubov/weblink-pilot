@@ -48,6 +48,10 @@ const currentSection = computed(() => {
     return 'Admin monitoring';
   }
 
+  if (route.name === 'account') {
+    return 'Account settings';
+  }
+
   if (route.name === 'about') {
     return 'About this product';
   }
@@ -57,7 +61,7 @@ const currentSection = computed(() => {
 
 const showSectionHeader = computed(
   () =>
-    !['home', 'about', 'signin', 'signup', 'github-login-complete'].includes(
+    !['home', 'about', 'signin', 'signup', 'github-login-complete', 'account'].includes(
       String(route.name ?? ''),
     ),
 );
@@ -123,7 +127,7 @@ onBeforeUnmount(() => {
               >
                 Log in
               </RouterLink>
-              <span v-else class="account-pill" aria-label="Signed in account">
+              <RouterLink v-else to="/account" class="account-pill" aria-label="Signed in account">
                 <span class="account-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24" role="presentation" focusable="false">
                     <path
@@ -132,7 +136,7 @@ onBeforeUnmount(() => {
                   </svg>
                 </span>
                 <span class="account-name">{{ accountLabel }}</span>
-              </span>
+              </RouterLink>
             </span>
 
             <span class="session-slot session-slot--secondary">

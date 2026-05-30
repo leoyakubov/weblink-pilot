@@ -46,6 +46,11 @@ export interface PasswordResetConfirmRequest {
   password: string;
 }
 
+export interface PasswordChangeRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface EmailVerificationRequest {
   email: string;
 }
@@ -61,6 +66,21 @@ export interface OAuthLoginCompleteRequest {
 export interface UserProfileResponse {
   username: string;
   role: string;
+}
+
+export interface AccountIdentityResponse {
+  provider: string;
+  providerLogin: string;
+}
+
+export interface AccountProfileResponse {
+  username: string;
+  role: string;
+  email: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+  lastLoginAt: string | null;
+  socialIdentities: AccountIdentityResponse[];
 }
 
 export interface AdminOverviewResponse {

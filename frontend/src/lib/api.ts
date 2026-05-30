@@ -8,7 +8,9 @@ import type {
   LinkResponse,
   EmailVerificationConfirmRequest,
   EmailVerificationRequest,
+  AccountProfileResponse,
   PasswordResetConfirmRequest,
+  PasswordChangeRequest,
   PasswordResetRequest,
   OAuthLoginCompleteRequest,
   RedirectPreviewResponse,
@@ -135,9 +137,29 @@ async function requestVoid(
   settings: ApiSettings = loadSettings(),
   includeAuth = true,
   includeCredentials = false,
+  allowRefresh = true,
 ) {
   const response = await sendRequest(path, init, settings, includeAuth, includeCredentials);
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      includeAuth &&
+      allowRefresh &&
+      path !== '/auth/refresh' &&
+      path !== '/auth/logout'
+    ) {
+      try {
+        const refreshed = await refreshSession(settings);
+        settings.authToken = refreshed.token;
+        saveSettings(settings);
+        await requestVoid(path, init, settings, includeAuth, includeCredentials, false);
+        return;
+      } catch {
+        settings.authToken = '';
+        saveSettings(settings);
+        throw await parseError(response);
+      }
+    }
     throw await parseError(response);
   }
 }
@@ -230,6 +252,31 @@ export function confirmEmailVerification(
     },
     settings,
     false,
+    true,
+  );
+}
+
+export function getAccountProfile(settings: ApiSettings = loadSettings()) {
+  return requestJson<AccountProfileResponse>(
+    '/auth/account',
+    {
+      method: 'GET',
+    },
+    settings,
+  );
+}
+
+export function changePassword(
+  request: PasswordChangeRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestVoid(
+    '/auth/account/password',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
     true,
   );
 }

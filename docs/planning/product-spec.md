@@ -68,10 +68,10 @@ The product is designed to look and feel like a real production service rather t
 - bulk link generation
 - API keys
 - webhook delivery for click events
-- richer auth/account management that is still not shipped:
-  - GitHub social login
-  - account management UI/API
-  - multiple auth providers if the product needs them
+- additional auth/account extensions if the product needs them:
+  - more identity providers
+  - organization-level account features
+  - team permissions
 
 ## 5. Frontend Scope
 

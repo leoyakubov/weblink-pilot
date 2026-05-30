@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   buildApiBaseUrl,
   createLink,
+  changePassword,
   confirmEmailVerification,
   confirmPasswordReset,
+  getAccountProfile,
   getAdminOverview,
   getAnalyticsSummary,
   getCurrentUser,
@@ -364,6 +366,69 @@ describe('api helpers', () => {
 
     await expect(
       confirmEmailVerification({ token: 'verify-token' }, settings),
+    ).resolves.toBeUndefined();
+  });
+
+  it('loads account profile with linked identities', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/account');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token');
+      return new Response(
+        JSON.stringify({
+          username: 'alice',
+          role: 'USER',
+          email: 'alice@example.com',
+          emailVerified: true,
+          createdAt: '2026-05-30T10:00:00Z',
+          lastLoginAt: '2026-05-30T12:00:00Z',
+          socialIdentities: [{ provider: 'GITHUB', providerLogin: 'alice-github' }],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(getAccountProfile(settings)).resolves.toEqual({
+      username: 'alice',
+      role: 'USER',
+      email: 'alice@example.com',
+      emailVerified: true,
+      createdAt: '2026-05-30T10:00:00Z',
+      lastLoginAt: '2026-05-30T12:00:00Z',
+      socialIdentities: [{ provider: 'GITHUB', providerLogin: 'alice-github' }],
+    });
+  });
+
+  it('serializes account password change payload', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/auth/account/password');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token');
+      expect(headers.get('Content-Type')).toBe('application/json');
+      expect(init?.body).toBe(
+        JSON.stringify({
+          currentPassword: 'Oldpass1',
+          newPassword: 'Newpass1',
+        }),
+      );
+      return new Response(null, { status: 204 });
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      changePassword(
+        {
+          currentPassword: 'Oldpass1',
+          newPassword: 'Newpass1',
+        },
+        settings,
+      ),
     ).resolves.toBeUndefined();
   });
 

@@ -110,7 +110,7 @@ describe('AuthView', () => {
     const openMock = vi.spyOn(window, 'open').mockReturnValue({
       focus: focusMock,
       closed: false,
-    } as Window);
+    } as unknown as Window);
 
     const wrapper = mountAuth('login');
     await wrapper.get('button.auth-link-button[type="button"]').trigger('click');

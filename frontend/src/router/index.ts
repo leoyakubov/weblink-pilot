@@ -12,6 +12,7 @@ import LinkView from '@/views/LinkView.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import HistoryView from '@/views/HistoryView.vue';
 import MonitoringView from '@/views/MonitoringView.vue';
+import AccountView from '@/views/AccountView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -41,6 +42,12 @@ const router = createRouter({
     { path: '/dashboard', name: 'dashboard', component: DashboardView },
     { path: '/history', name: 'history', component: HistoryView },
     {
+      path: '/account',
+      name: 'account',
+      component: AccountView,
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/monitoring',
       name: 'monitoring',
       component: MonitoringView,
@@ -59,6 +66,10 @@ router.beforeEach(async (to) => {
 
   if (to.meta.requiresAdmin && authState.currentUser?.role !== 'ADMIN') {
     return { name: 'home' };
+  }
+
+  if (to.meta.requiresAuth && !authState.currentUser) {
+    return { name: 'signin' };
   }
 
   return true;

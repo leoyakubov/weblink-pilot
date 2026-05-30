@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.service.AccountManagementService;
 import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -29,6 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class AuthControllerTest {
 
   @Mock private AuthService authService;
+  @Mock private AccountManagementService accountManagementService;
   @Mock private GitHubOAuthService gitHubOAuthService;
   @Mock private OAuthLoginService oauthLoginService;
 
@@ -52,6 +55,7 @@ class AuthControllerTest {
         MockMvcBuilders.standaloneSetup(
                 new AuthController(
                     authService,
+                    accountManagementService,
                     authCookieService,
                     gitHubOAuthService,
                     oauthLoginService,
@@ -188,6 +192,49 @@ class AuthControllerTest {
         .andExpect(status().isNoContent());
 
     verify(authService).confirmEmailVerification("verification-token");
+  }
+
+  @Test
+  void accountReturnsProfilePayload() throws Exception {
+    when(accountManagementService.profile("alice"))
+        .thenReturn(
+            new io.weblinkpilot.shared.contracts.AccountProfileResponse(
+                "alice",
+                "USER",
+                "alice@example.com",
+                true,
+                "2026-05-30T10:00:00Z",
+                "2026-05-30T12:00:00Z",
+                java.util.List.of(
+                    new io.weblinkpilot.shared.contracts.AccountIdentityResponse(
+                        "GITHUB", "alice-github"))));
+
+    mockMvc
+        .perform(
+            get("/api/v1/auth/account").principal(new TestingAuthenticationToken("alice", "n/a")))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.username").value("alice"))
+        .andExpect(jsonPath("$.role").value("USER"))
+        .andExpect(jsonPath("$.email").value("alice@example.com"))
+        .andExpect(jsonPath("$.emailVerified").value(true))
+        .andExpect(jsonPath("$.socialIdentities[0].provider").value("GITHUB"))
+        .andExpect(jsonPath("$.socialIdentities[0].providerLogin").value("alice-github"));
+  }
+
+  @Test
+  void changePasswordReturnsNoContent() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/account/password")
+                .principal(new TestingAuthenticationToken("alice", "n/a"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"currentPassword":"Oldpass1","newPassword":"Newpass1"}
+                    """))
+        .andExpect(status().isNoContent());
+
+    verify(accountManagementService).changePassword("alice", "Oldpass1", "Newpass1");
   }
 
   @Test

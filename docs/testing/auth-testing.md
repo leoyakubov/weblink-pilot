@@ -11,6 +11,9 @@ It covers:
 - login and registration
 - access-token use on protected API requests
 - email verification
+- GitHub social login
+- account profile loading
+- password change
 - refresh-token bootstrap and rotation
 - logout revocation
 - browser storage behavior
@@ -142,6 +145,33 @@ Use this flow when GitHub OAuth is configured in the environment.
 - the backend sets the refresh cookie
 - the signed-in user appears in the app shell
 - the social identity is reused on later GitHub logins
+
+## Account Management
+
+Use this flow to verify the signed-in account settings page.
+
+### What to test
+
+- account profile loading
+- linked identities
+- password change
+- refresh-token revocation after password change
+
+### Steps
+
+1. Sign in with a local account or GitHub.
+2. Open the account page.
+3. Check the profile details and linked identities.
+4. Change the password from the account page.
+5. Refresh the browser and sign in again if needed.
+
+### Expected result
+
+- the account page loads the current profile
+- linked social identities appear in the profile card
+- changing the password succeeds with the current password
+- the backend revokes existing refresh sessions after a password change
+- the current browser session stays usable until the access token expires or refresh is used again
 
 ## 2. Verify Access Token
 
