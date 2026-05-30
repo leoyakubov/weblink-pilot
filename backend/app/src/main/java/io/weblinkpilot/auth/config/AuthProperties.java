@@ -22,9 +22,17 @@ public class AuthProperties {
   @Min(1)
   private long accountActionTokenTtlHours = AuthDefaults.ACCOUNT_ACTION_TOKEN_TTL_HOURS;
 
+  @Min(1)
+  private long githubLoginTicketTtlMinutes = AuthDefaults.GITHUB_LOGIN_TICKET_TTL_MINUTES;
+
   @NotBlank private String refreshCookieName = AuthDefaults.REFRESH_COOKIE_NAME;
   @NotBlank private String refreshCookiePath = AuthDefaults.REFRESH_COOKIE_PATH;
   @NotBlank private String frontendBaseUrl = AuthDefaults.FRONTEND_BASE_URL;
+  private String githubClientId = AuthDefaults.GITHUB_CLIENT_ID;
+  private String githubClientSecret = AuthDefaults.GITHUB_CLIENT_SECRET;
+  @NotBlank private String githubScope = AuthDefaults.GITHUB_SCOPE;
+  @NotBlank private String githubStateCookieName = AuthDefaults.GITHUB_STATE_COOKIE_NAME;
+  @NotBlank private String githubStateCookiePath = AuthDefaults.GITHUB_STATE_COOKIE_PATH;
 
   @Pattern(regexp = "(?i)STRICT|LAX|NONE")
   private String refreshCookieSameSite = AuthDefaults.REFRESH_COOKIE_SAME_SITE;
@@ -79,6 +87,14 @@ public class AuthProperties {
     this.accountActionTokenTtlHours = accountActionTokenTtlHours;
   }
 
+  public long getGithubLoginTicketTtlMinutes() {
+    return githubLoginTicketTtlMinutes;
+  }
+
+  public void setGithubLoginTicketTtlMinutes(long githubLoginTicketTtlMinutes) {
+    this.githubLoginTicketTtlMinutes = githubLoginTicketTtlMinutes;
+  }
+
   public String getRefreshCookieName() {
     return refreshCookieName;
   }
@@ -101,6 +117,46 @@ public class AuthProperties {
 
   public void setFrontendBaseUrl(String frontendBaseUrl) {
     this.frontendBaseUrl = frontendBaseUrl;
+  }
+
+  public String getGithubClientId() {
+    return githubClientId;
+  }
+
+  public void setGithubClientId(String githubClientId) {
+    this.githubClientId = githubClientId;
+  }
+
+  public String getGithubClientSecret() {
+    return githubClientSecret;
+  }
+
+  public void setGithubClientSecret(String githubClientSecret) {
+    this.githubClientSecret = githubClientSecret;
+  }
+
+  public String getGithubScope() {
+    return githubScope;
+  }
+
+  public void setGithubScope(String githubScope) {
+    this.githubScope = githubScope;
+  }
+
+  public String getGithubStateCookieName() {
+    return githubStateCookieName;
+  }
+
+  public void setGithubStateCookieName(String githubStateCookieName) {
+    this.githubStateCookieName = githubStateCookieName;
+  }
+
+  public String getGithubStateCookiePath() {
+    return githubStateCookiePath;
+  }
+
+  public void setGithubStateCookiePath(String githubStateCookiePath) {
+    this.githubStateCookiePath = githubStateCookiePath;
   }
 
   public String getRefreshCookieSameSite() {
@@ -181,5 +237,12 @@ public class AuthProperties {
 
   public void setBootstrapUserEmail(String bootstrapUserEmail) {
     this.bootstrapUserEmail = bootstrapUserEmail;
+  }
+
+  public boolean isGithubConfigured() {
+    return githubClientId != null
+        && !githubClientId.isBlank()
+        && githubClientSecret != null
+        && !githubClientSecret.isBlank();
   }
 }

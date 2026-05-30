@@ -30,6 +30,20 @@ function showSessionNotice(message: string) {
   }, 2400);
 }
 
+export function applyAuthResponse(response: AuthResponse, notice?: string) {
+  const settings = loadSettings();
+  settings.authToken = response.token;
+  saveSettings(settings);
+  markSessionActive();
+  authState.currentUser = {
+    username: response.username,
+    role: response.role,
+  };
+  if (notice) {
+    showSessionNotice(notice);
+  }
+}
+
 export async function bootstrapAuth() {
   if (bootstrapPromise) {
     return bootstrapPromise;
@@ -54,23 +68,11 @@ export async function bootstrapAuth() {
           }
 
           const response = await refreshTokens(requestSettings);
-          settings.authToken = response.token;
-          saveSettings(settings);
-          markSessionActive();
-          authState.currentUser = {
-            username: response.username,
-            role: response.role,
-          };
+          applyAuthResponse(response);
         }
       } else if (hasSessionActiveHint()) {
         const response = await refreshTokens(requestSettings);
-        settings.authToken = response.token;
-        saveSettings(settings);
-        markSessionActive();
-        authState.currentUser = {
-          username: response.username,
-          role: response.role,
-        };
+        applyAuthResponse(response);
       } else {
         authState.currentUser = null;
       }
@@ -99,14 +101,8 @@ export async function authenticate(
       ? await login(request, requestSettings)
       : await register(request, requestSettings);
 
-  settings.authToken = response.token;
-  saveSettings(settings);
-  markSessionActive();
-  authState.currentUser = {
-    username: response.username,
-    role: response.role,
-  };
-  showSessionNotice(
+  applyAuthResponse(
+    response,
     mode === 'login'
       ? `Signed in as ${response.username}`
       : `Created ${response.username} and signed in`,

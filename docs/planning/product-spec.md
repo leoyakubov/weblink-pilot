@@ -70,7 +70,6 @@ The product is designed to look and feel like a real production service rather t
 - webhook delivery for click events
 - richer auth/account management that is still not shipped:
   - GitHub social login
-  - optional Google social login
   - account management UI/API
   - multiple auth providers if the product needs them
 

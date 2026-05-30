@@ -14,6 +14,7 @@ import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
+import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +101,35 @@ public class UserAccountService {
     }
 
     account.markLoggedIn(OffsetDateTime.now(ZoneOffset.UTC));
+    return repository.save(account);
+  }
+
+  @Transactional
+  public UserAccount createSocialUser(String username, String email) {
+    String normalizedUsername = normalizeUsername(username);
+    String normalizedEmail = normalizeEmail(email);
+    if (normalizedUsername.isBlank()) {
+      throw new IllegalArgumentException("Username is required.");
+    }
+    if (repository.existsByUsername(normalizedUsername)) {
+      throw new UsernameAlreadyExistsException(normalizedUsername);
+    }
+    if (!normalizedEmail.isBlank() && repository.existsByEmailIgnoreCase(normalizedEmail)) {
+      throw new EmailAlreadyExistsException(normalizedEmail);
+    }
+
+    Role userRole = roleCatalogService.getRequiredRole(RoleNames.USER);
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    UserAccount account =
+        new UserAccount(
+            normalizedUsername,
+            passwordEncoder.encode(UUID.randomUUID().toString()),
+            normalizedEmail.isBlank() ? null : normalizedEmail,
+            userRole,
+            true,
+            now,
+            now);
+    account.markLoggedIn(now);
     return repository.save(account);
   }
 

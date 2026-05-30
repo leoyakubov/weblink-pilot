@@ -104,4 +104,24 @@ describe('AuthView', () => {
 
     expect(wrapper.text()).toContain('Email is required.');
   });
+
+  it('opens the GitHub popup from the login form', async () => {
+    const focusMock = vi.fn();
+    const openMock = vi.spyOn(window, 'open').mockReturnValue({
+      focus: focusMock,
+      closed: false,
+    } as Window);
+
+    const wrapper = mountAuth('login');
+    await wrapper.get('button.auth-link-button[type="button"]').trigger('click');
+
+    expect(openMock).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/oauth2/github/start'),
+      'weblinkpilot-github-login',
+      'popup,width=560,height=720',
+    );
+    expect(focusMock).toHaveBeenCalled();
+
+    openMock.mockRestore();
+  });
 });

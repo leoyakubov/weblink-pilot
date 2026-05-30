@@ -2,7 +2,9 @@ package io.weblinkpilot.auth.web;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +13,8 @@ import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
+import io.weblinkpilot.auth.service.GitHubOAuthService;
+import io.weblinkpilot.auth.service.OAuthLoginService;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 class AuthControllerTest {
 
   @Mock private AuthService authService;
+  @Mock private GitHubOAuthService gitHubOAuthService;
+  @Mock private OAuthLoginService oauthLoginService;
 
   private MockMvc mockMvc;
   private AuthCookieService authCookieService;
@@ -37,9 +43,20 @@ class AuthControllerTest {
     authProperties.setRefreshCookieSameSite("Lax");
     authProperties.setRefreshCookieSecure(false);
     authProperties.setRefreshTokenTtlDays(30);
+    authProperties.setGithubStateCookieName("weblinkpilot_github_oauth_state");
+    authProperties.setGithubStateCookiePath("/api/v1/auth/oauth2/github");
+    authProperties.setGithubLoginTicketTtlMinutes(10);
+    authProperties.setFrontendBaseUrl("http://localhost:8081");
     authCookieService = new AuthCookieService(authProperties);
     mockMvc =
-        MockMvcBuilders.standaloneSetup(new AuthController(authService, authCookieService)).build();
+        MockMvcBuilders.standaloneSetup(
+                new AuthController(
+                    authService,
+                    authCookieService,
+                    gitHubOAuthService,
+                    oauthLoginService,
+                    authProperties))
+            .build();
   }
 
   @Test
@@ -171,5 +188,65 @@ class AuthControllerTest {
         .andExpect(status().isNoContent());
 
     verify(authService).confirmEmailVerification("verification-token");
+  }
+
+  @Test
+  void startGithubLoginRedirectsToGithubAndSetsStateCookie() throws Exception {
+    when(gitHubOAuthService.createStateToken()).thenReturn("state-token");
+    when(gitHubOAuthService.buildAuthorizationUrl(
+            "http://localhost/api/v1/auth/oauth2/github/callback", "state-token"))
+        .thenReturn("https://github.com/login/oauth/authorize?state=state-token");
+
+    mockMvc
+        .perform(get("/api/v1/auth/oauth2/github/start"))
+        .andExpect(status().isFound())
+        .andExpect(
+            header()
+                .string("Location", "https://github.com/login/oauth/authorize?state=state-token"))
+        .andExpect(cookie().value("weblinkpilot_github_oauth_state", "state-token"));
+  }
+
+  @Test
+  void completeGithubCallbackRedirectsToFrontendCompleteRoute() throws Exception {
+    when(gitHubOAuthService.completeLogin(
+            "github-code", "http://localhost/api/v1/auth/oauth2/github/callback"))
+        .thenReturn("login-ticket");
+
+    mockMvc
+        .perform(
+            get("/api/v1/auth/oauth2/github/callback")
+                .param("code", "github-code")
+                .param("state", "state-token")
+                .cookie(
+                    new jakarta.servlet.http.Cookie(
+                        "weblinkpilot_github_oauth_state", "state-token")))
+        .andExpect(status().isFound())
+        .andExpect(
+            header()
+                .string(
+                    "Location", "http://localhost:8081/auth/github/complete#ticket=login-ticket"))
+        .andExpect(cookie().value("weblinkpilot_github_oauth_state", ""));
+  }
+
+  @Test
+  void completeGithubLoginReturnsAccessTokenAndRefreshCookie() throws Exception {
+    when(oauthLoginService.completeLogin("login-ticket"))
+        .thenReturn(new OAuthLoginService.AuthSession("token-9", "refresh-9", "alice", "USER"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/oauth2/github/complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ticket\":\"login-ticket\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").value("token-9"))
+        .andExpect(jsonPath("$.username").value("alice"))
+        .andExpect(jsonPath("$.role").value("USER"))
+        .andExpect(jsonPath("$.refreshToken").doesNotExist())
+        .andExpect(
+            header()
+                .string(
+                    "Set-Cookie",
+                    org.hamcrest.Matchers.containsString("weblinkpilot_refresh=refresh-9")));
   }
 }

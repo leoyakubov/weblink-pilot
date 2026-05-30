@@ -10,6 +10,7 @@ import type {
   EmailVerificationRequest,
   PasswordResetConfirmRequest,
   PasswordResetRequest,
+  OAuthLoginCompleteRequest,
   RedirectPreviewResponse,
   UserProfileResponse,
 } from '@/types';
@@ -223,6 +224,22 @@ export function confirmEmailVerification(
 ) {
   return requestVoid(
     '/auth/email-verification/confirm',
+    {
+      method: 'POST',
+      body: JSON.stringify(request),
+    },
+    settings,
+    false,
+    true,
+  );
+}
+
+export function completeGithubLogin(
+  request: OAuthLoginCompleteRequest,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestJson<AuthResponse>(
+    '/auth/oauth2/github/complete',
     {
       method: 'POST',
       body: JSON.stringify(request),

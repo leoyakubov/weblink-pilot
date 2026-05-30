@@ -27,6 +27,11 @@ app:
     refresh-cookie-same-site: None
     refresh-cookie-secure: true
     frontend-base-url: ${FRONTEND_BASE_URL:${APP_FRONTEND_BASE_URL:https://weblink-pilot.netlify.app}}
+    github-client-id: ${GITHUB_CLIENT_ID:}
+    github-client-secret: ${GITHUB_CLIENT_SECRET:}
+    github-scope: read:user user:email
+    github-state-cookie-name: weblinkpilot_github_oauth_state
+    github-state-cookie-path: /api/v1/auth/oauth2/github
     bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:}
     bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:}

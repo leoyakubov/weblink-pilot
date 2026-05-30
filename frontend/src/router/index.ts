@@ -3,6 +3,7 @@ import { authState, bootstrapAuth } from '@/lib/auth';
 import HomeView from '@/views/HomeView.vue';
 import AboutView from '@/views/AboutView.vue';
 import AuthView from '@/views/AuthView.vue';
+import GithubLoginCompleteView from '@/views/GithubLoginCompleteView.vue';
 import PasswordResetRequestView from '@/views/PasswordResetRequestView.vue';
 import PasswordResetConfirmView from '@/views/PasswordResetConfirmView.vue';
 import EmailVerificationRequestView from '@/views/EmailVerificationRequestView.vue';
@@ -19,6 +20,11 @@ const router = createRouter({
     { path: '/about', name: 'about', component: AboutView },
     { path: '/auth/signin', name: 'signin', component: AuthView, props: { mode: 'login' } },
     { path: '/auth/signup', name: 'signup', component: AuthView, props: { mode: 'register' } },
+    {
+      path: '/auth/github/complete',
+      name: 'github-login-complete',
+      component: GithubLoginCompleteView,
+    },
     { path: '/auth/forgot-password', name: 'forgot-password', component: PasswordResetRequestView },
     { path: '/auth/reset-password', name: 'reset-password', component: PasswordResetConfirmView },
     {

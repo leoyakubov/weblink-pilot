@@ -54,6 +54,10 @@ export interface EmailVerificationConfirmRequest {
   token: string;
 }
 
+export interface OAuthLoginCompleteRequest {
+  ticket: string;
+}
+
 export interface UserProfileResponse {
   username: string;
   role: string;

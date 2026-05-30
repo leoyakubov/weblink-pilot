@@ -7,27 +7,37 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.service.AuthCookieService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
+import io.weblinkpilot.auth.service.GitHubOAuthService;
+import io.weblinkpilot.auth.service.OAuthLoginService;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
 import io.weblinkpilot.shared.contracts.EmailVerificationConfirmRequest;
 import io.weblinkpilot.shared.contracts.EmailVerificationRequest;
+import io.weblinkpilot.shared.contracts.OAuthLoginCompleteRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetConfirmRequest;
 import io.weblinkpilot.shared.contracts.PasswordResetRequest;
 import io.weblinkpilot.shared.contracts.RefreshTokenRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,10 +46,21 @@ public class AuthController {
 
   private final AuthService authService;
   private final AuthCookieService authCookieService;
+  private final GitHubOAuthService gitHubOAuthService;
+  private final OAuthLoginService oauthLoginService;
+  private final AuthProperties authProperties;
 
-  public AuthController(AuthService authService, AuthCookieService authCookieService) {
+  public AuthController(
+      AuthService authService,
+      AuthCookieService authCookieService,
+      GitHubOAuthService gitHubOAuthService,
+      OAuthLoginService oauthLoginService,
+      AuthProperties authProperties) {
     this.authService = authService;
     this.authCookieService = authCookieService;
+    this.gitHubOAuthService = gitHubOAuthService;
+    this.oauthLoginService = oauthLoginService;
+    this.authProperties = authProperties;
   }
 
   @PostMapping("/register")
@@ -154,6 +175,53 @@ public class AuthController {
     return ResponseEntity.noContent().build();
   }
 
+  @GetMapping("/oauth2/github/start")
+  @Operation(summary = "Start GitHub login")
+  public ResponseEntity<Void> startGithubLogin(HttpServletRequest request) {
+    String state = gitHubOAuthService.createStateToken();
+    String redirectUri = buildGithubCallbackUri(request);
+    String authorizationUrl = gitHubOAuthService.buildAuthorizationUrl(redirectUri, state);
+    return ResponseEntity.status(HttpStatus.FOUND)
+        .header(HttpHeaders.SET_COOKIE, authCookieService.createGithubStateCookie(state).toString())
+        .location(URI.create(authorizationUrl))
+        .build();
+  }
+
+  @GetMapping("/oauth2/github/callback")
+  @Operation(summary = "Handle GitHub login callback")
+  public ResponseEntity<Void> handleGithubCallback(
+      @RequestParam String code, @RequestParam String state, HttpServletRequest request) {
+    String cookieState = resolveGithubState(request);
+    if (!state.equals(cookieState)) {
+      throw new IllegalArgumentException("Invalid OAuth state");
+    }
+
+    String redirectUri = buildGithubCallbackUri(request);
+    String ticket = gitHubOAuthService.completeLogin(code, redirectUri);
+    URI frontendCompleteUri =
+        URI.create(
+            authProperties.getFrontendBaseUrl()
+                + "/auth/github/complete#ticket="
+                + URLEncoder.encode(ticket, StandardCharsets.UTF_8));
+    return ResponseEntity.status(HttpStatus.FOUND)
+        .header(HttpHeaders.SET_COOKIE, authCookieService.clearGithubStateCookie().toString())
+        .location(frontendCompleteUri)
+        .build();
+  }
+
+  @PostMapping("/oauth2/github/complete")
+  @Operation(summary = "Complete GitHub login with the one-time ticket")
+  public ResponseEntity<AuthResponse> completeGithubLogin(
+      @Valid @org.springframework.web.bind.annotation.RequestBody
+          OAuthLoginCompleteRequest request) {
+    OAuthLoginService.AuthSession session = oauthLoginService.completeLogin(request.ticket());
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.SET_COOKIE,
+            authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
+        .body(new AuthResponse(session.token(), session.username(), session.role()));
+  }
+
   @PostMapping("/refresh")
   @Operation(
       summary = "Rotate the refresh token cookie",
@@ -223,5 +291,28 @@ public class AuthController {
       }
     }
     throw new IllegalArgumentException("Refresh token is required");
+  }
+
+  private String resolveGithubState(HttpServletRequest request) {
+    if (request.getCookies() == null) {
+      throw new IllegalArgumentException("OAuth state is required");
+    }
+    for (var cookie : request.getCookies()) {
+      if (cookie != null && cookie.getName().equals(authCookieService.getGithubStateCookieName())) {
+        String value = cookie.getValue();
+        if (value != null && !value.isBlank()) {
+          return value;
+        }
+      }
+    }
+    throw new IllegalArgumentException("OAuth state is required");
+  }
+
+  private String buildGithubCallbackUri(HttpServletRequest request) {
+    return UriComponentsBuilder.fromUriString(request.getRequestURL().toString())
+        .replacePath("/api/v1/auth/oauth2/github/callback")
+        .replaceQuery(null)
+        .build()
+        .toUriString();
   }
 }

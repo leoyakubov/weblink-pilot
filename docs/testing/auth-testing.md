@@ -114,6 +114,35 @@ Browser checks:
 - verify `weblinkpilot.frontend.session` contains the access token
 - verify the `weblinkpilot_refresh` cookie is present and marked `HttpOnly`
 
+## GitHub Login
+
+Use this flow when GitHub OAuth is configured in the environment.
+
+### What to test
+
+- GitHub popup start
+- OAuth callback and ticket exchange
+- existing-account reuse or new account creation
+- refresh-cookie issuance after social sign-in
+
+### Steps
+
+1. Open the sign-in page.
+2. Click `Continue with GitHub`.
+3. Complete the GitHub authorization flow in the popup.
+4. Wait for the popup to close or return to the completion page.
+5. Check the main app window for the signed-in state.
+
+### Expected result
+
+- GitHub opens in a popup or tab
+- the backend validates the OAuth callback and state cookie
+- the popup completes through `/auth/github/complete`
+- the frontend receives the login response and stores the access token
+- the backend sets the refresh cookie
+- the signed-in user appears in the app shell
+- the social identity is reused on later GitHub logins
+
 ## 2. Verify Access Token
 
 Use the access token against a protected endpoint such as `GET /api/v1/auth/me`.

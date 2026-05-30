@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { onMounted } from 'vue';
-import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth';
+/* global MessageEvent */
+import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
+import { applyAuthResponse, authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth';
+import type { AuthResponse } from '@/types';
 
 const route = useRoute();
+const router = useRouter();
+
+type AuthMessage = {
+  type?: string;
+  response?: AuthResponse;
+};
 
 const navItems = computed(() => {
   const items = [
@@ -49,11 +56,33 @@ const currentSection = computed(() => {
 });
 
 const showSectionHeader = computed(
-  () => !['home', 'about', 'signin', 'signup'].includes(String(route.name ?? '')),
+  () =>
+    !['home', 'about', 'signin', 'signup', 'github-login-complete'].includes(
+      String(route.name ?? ''),
+    ),
 );
+
+function handleAuthMessage(event: MessageEvent) {
+  if (event.origin !== window.location.origin) {
+    return;
+  }
+
+  const message = event.data as AuthMessage | undefined;
+  if (message?.type !== 'weblinkpilot:github-login' || !message.response?.token) {
+    return;
+  }
+
+  applyAuthResponse(message.response, `Signed in as ${message.response.username}`);
+  void router.push('/');
+}
 
 onMounted(() => {
   bootstrapAuth();
+  window.addEventListener('message', handleAuthMessage);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('message', handleAuthMessage);
 });
 </script>
 

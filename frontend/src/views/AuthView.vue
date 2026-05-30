@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { ApiRequestError } from '@/lib/api';
+import { ApiRequestError, buildApiBaseUrl } from '@/lib/api';
 import { authenticate, authState } from '@/lib/auth';
 import type { AuthCredentialsRequest } from '@/types';
 
@@ -104,6 +104,21 @@ function formatAuthError(error: unknown): string {
   }
 
   return 'Authentication failed';
+}
+
+function openGithubLogin() {
+  const popup = window.open(
+    buildApiBaseUrl('/auth/oauth2/github/start'),
+    'weblinkpilot-github-login',
+    'popup,width=560,height=720',
+  );
+
+  if (!popup) {
+    errorMessage.value = 'Allow pop-ups to continue with GitHub sign-in.';
+    return;
+  }
+
+  popup.focus();
 }
 
 async function submit() {
@@ -257,6 +272,12 @@ async function submit() {
             >
               Resend verification
             </RouterLink>
+          </div>
+          <div v-if="props.mode === 'login'" class="auth-switch">
+            <span class="footnote">Prefer GitHub?</span>
+            <button class="button button-secondary button-small auth-link-button" type="button" @click="openGithubLogin">
+              Continue with GitHub
+            </button>
           </div>
         </form>
       </div>

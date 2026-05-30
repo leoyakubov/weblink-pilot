@@ -39,11 +39,17 @@ app:
     token-ttl-minutes: 30
     refresh-token-ttl-days: 30
     account-action-token-ttl-hours: 24
+    github-login-ticket-ttl-minutes: 10
     refresh-cookie-name: weblinkpilot_refresh
     refresh-cookie-path: /api/v1/auth
     refresh-cookie-same-site: Lax
     refresh-cookie-secure: false
     frontend-base-url: http://localhost:8081
+    github-client-id: ${GITHUB_CLIENT_ID:}
+    github-client-secret: ${GITHUB_CLIENT_SECRET:}
+    github-scope: read:user user:email
+    github-state-cookie-name: weblinkpilot_github_oauth_state
+    github-state-cookie-path: /api/v1/auth/oauth2/github
   short-link:
     max-expiration: 365d
     cleanup-retention: 30d

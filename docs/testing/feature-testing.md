@@ -24,7 +24,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 
 | Feature | Steps | Expected result |
 |---|---|---|
-| Authentication | Sign up, verify email, sign in, refresh the page, sign out | Access token is issued, refresh cookie is set, bootstrap refresh works, logout clears session |
+| Authentication | Sign up, verify email, sign in, use GitHub login, refresh the page, sign out | Access token is issued, refresh cookie is set, social login works, bootstrap refresh works, logout clears session |
 | Email workflow | Request password reset, confirm reset, request email verification, confirm verification | Reset and verification emails are sent, links work, the account state updates |
 | Link creation | Create a short link with and without alias | Link is created, alias rules are enforced, expiration is accepted or rejected correctly |
 | Redirect flow | Open the short URL and QR path | Redirect happens fast, click count increments, analytics source is recorded |

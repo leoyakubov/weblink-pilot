@@ -21,17 +21,18 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
 | 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E1; In Progress | Auth expansion | Add GitHub social login, optional Google social login, and richer account management on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
+| 14 | &#x1F7E1; In Progress | Auth expansion | Add GitHub social login and richer account management on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
 | 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-13 are already shipped and documented here as the implemented baseline.
-- Phases 14-16 are the remaining planned roadmap items.
-- The auth baseline now includes refresh cookies, password reset, and email verification; only social login and richer account management remain in phase 15.
+- Phases 14-17 are the remaining planned roadmap items.
+- The auth baseline now includes refresh cookies, password reset, and email verification; only social login and richer account management remain in phase 14.
 
 ### Phase 0 - Repo readiness
 
@@ -256,7 +257,6 @@ Exit criteria:
 Goals:
 
 - add GitHub social login first
-- add Google social login last, only if we want broader general-user sign-in
 - support multiple auth providers if the product needs them
 - add account management UI and API with dedicated tests and migrations
 
@@ -299,6 +299,22 @@ Exit criteria:
 - the job is safe to run on a schedule without spamming users
 - the notification flow is documented and testable
 
+### Phase 17 - Demo visit analytics
+
+Goals:
+
+- integrate a ready-made analytics service for the demo site
+- track visits, referrers, and basic page usage for the public demo
+- keep the analytics setup optional so local/dev can stay lightweight
+- document the privacy and deployment implications of the chosen analytics provider
+
+Exit criteria:
+
+- demo traffic is visible in the selected analytics dashboard
+- the snippet or integration is easy to enable and disable by environment
+- local/dev remain usable without the external analytics service
+- the analytics choice is documented alongside the deployment notes
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -317,4 +333,5 @@ Exit criteria:
 14. auth expansion
 15. RabbitMQ async messaging
 16. expiry reminder emails
+17. demo visit analytics
 

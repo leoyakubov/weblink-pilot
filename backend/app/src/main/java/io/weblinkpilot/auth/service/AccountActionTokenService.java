@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -41,11 +42,18 @@ public class AccountActionTokenService {
 
   @Transactional
   public String issueToken(UserAccount user, AccountActionTokenType type) {
+    return issueToken(user, type, Duration.ofHours(tokenTtlHours));
+  }
+
+  @Transactional
+  public String issueToken(UserAccount user, AccountActionTokenType type, Duration ttl) {
+    if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+      throw new IllegalArgumentException("Account action token TTL must be positive");
+    }
     String rawToken = generateToken();
     OffsetDateTime issuedAt = nowUtc();
     AccountActionToken token =
-        new AccountActionToken(
-            hash(rawToken), type, user, issuedAt, issuedAt.plusHours(tokenTtlHours));
+        new AccountActionToken(hash(rawToken), type, user, issuedAt, issuedAt.plus(ttl));
     repository.save(token);
     return rawToken;
   }
