@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 Push-Location $repoRoot
 try {
-    docker compose -f infra/sonar/docker-compose.yml up -d
+    docker compose -p weblink-pilot-sonar -f infra/sonar/docker-compose.yml up -d
 
     Write-Host 'SonarQube is starting at http://localhost:9001'
     Write-Host 'Default login: admin / admin'

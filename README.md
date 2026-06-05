@@ -300,7 +300,7 @@ The repo also includes a containerized local stack:
 Start it from the repo root:
 
 ```bash
-docker compose -f infra/docker-compose.yml up --build
+docker compose -p weblink-pilot -f infra/docker-compose.yml up --build
 ```
 
 Services:

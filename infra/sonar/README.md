@@ -7,13 +7,13 @@ This stack runs a local SonarQube server and its PostgreSQL database for backend
 From the repo root:
 
 ```powershell
-docker compose -f infra/sonar/docker-compose.yml up -d
+docker compose -p weblink-pilot-sonar -f infra/sonar/docker-compose.yml up -d
 ```
 
 On macOS/Linux:
 
 ```bash
-docker compose -f infra/sonar/docker-compose.yml up -d
+docker compose -p weblink-pilot-sonar -f infra/sonar/docker-compose.yml up -d
 ```
 
 The UI is available at:

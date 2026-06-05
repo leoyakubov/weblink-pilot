@@ -51,4 +51,4 @@ print_service "$cyan" "frontend" "Vue SPA on port 8081"
 printf '\n'
 
 cd "$repo_root"
-exec docker compose -f "$compose_file" up --build
+exec docker compose -p weblink-pilot -f "$compose_file" up --build

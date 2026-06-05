@@ -60,7 +60,7 @@ Write-Host ''
 
 Push-Location $repoRoot
 try {
-    docker compose -f $composeFile up --build
+    docker compose -p weblink-pilot -f $composeFile up --build
 }
 finally {
     Pop-Location

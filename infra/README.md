@@ -28,13 +28,13 @@ From the repository root:
 Or run Compose directly:
 
 ```powershell
-docker compose -f infra/docker-compose.yml up --build
+docker compose -p weblink-pilot -f infra/docker-compose.yml up --build
 ```
 
 ## Stop
 
 ```powershell
-docker compose -f infra/docker-compose.yml down
+docker compose -p weblink-pilot -f infra/docker-compose.yml down
 ```
 
 ## URLs
