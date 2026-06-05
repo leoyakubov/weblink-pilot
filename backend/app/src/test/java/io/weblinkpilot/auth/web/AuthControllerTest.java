@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.service.AccountManagementService;
 import io.weblinkpilot.auth.service.AuthCookieService;
+import io.weblinkpilot.auth.service.AuthFrontendRedirectService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.auth.service.GitHubOAuthService;
@@ -34,6 +35,7 @@ class AuthControllerTest {
   @Mock private AccountManagementService accountManagementService;
   @Mock private GitHubOAuthService gitHubOAuthService;
   @Mock private OAuthLoginService oauthLoginService;
+  private AuthFrontendRedirectService authFrontendRedirectService;
 
   private MockMvc mockMvc;
   private AuthCookieService authCookieService;
@@ -51,6 +53,7 @@ class AuthControllerTest {
     authProperties.setGithubLoginTicketTtlMinutes(10);
     authProperties.setFrontendBaseUrl("http://localhost:8081");
     authCookieService = new AuthCookieService(authProperties);
+    authFrontendRedirectService = new AuthFrontendRedirectService(authProperties);
     mockMvc =
         MockMvcBuilders.standaloneSetup(
                 new AuthController(
@@ -59,7 +62,7 @@ class AuthControllerTest {
                     authCookieService,
                     gitHubOAuthService,
                     oauthLoginService,
-                    authProperties))
+                    authFrontendRedirectService))
             .build();
   }
 

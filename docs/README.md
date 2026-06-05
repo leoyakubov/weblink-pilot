@@ -11,6 +11,7 @@ This repo keeps one documentation tree with a small set of categories so it is e
 
 - [Architecture Plan](design/architecture-plan.md) - system shape, runtime composition, and module boundaries.
 - [Backend Module Plan](design/backend-module-plan.md) - backend modules, dependencies, and data flow.
+- [Spring Modulith Migration Plan](design/spring-modulith-migration.md) - the step-by-step plan for moving the backend toward standard Spring Modulith boundaries.
 - [Frontend Plan](design/frontend-plan.md) - Vue app structure, pages, components, and state plan.
 - [Architecture Decisions](design/adr.md) - the decisions we have already accepted and why.
 - [Tech Stack](design/tech-stack.md) - the approved baseline stack for backend, frontend, and infrastructure.

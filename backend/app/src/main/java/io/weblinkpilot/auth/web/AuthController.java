@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.service.AccountManagementService;
 import io.weblinkpilot.auth.service.AuthCookieService;
+import io.weblinkpilot.auth.service.AuthFrontendRedirectService;
 import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.auth.service.GitHubOAuthService;
@@ -28,8 +28,6 @@ import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -52,7 +50,7 @@ public class AuthController {
   private final AuthCookieService authCookieService;
   private final GitHubOAuthService gitHubOAuthService;
   private final OAuthLoginService oauthLoginService;
-  private final AuthProperties authProperties;
+  private final AuthFrontendRedirectService authFrontendRedirectService;
 
   public AuthController(
       AuthService authService,
@@ -60,13 +58,13 @@ public class AuthController {
       AuthCookieService authCookieService,
       GitHubOAuthService gitHubOAuthService,
       OAuthLoginService oauthLoginService,
-      AuthProperties authProperties) {
+      AuthFrontendRedirectService authFrontendRedirectService) {
     this.authService = authService;
     this.accountManagementService = accountManagementService;
     this.authCookieService = authCookieService;
     this.gitHubOAuthService = gitHubOAuthService;
     this.oauthLoginService = oauthLoginService;
-    this.authProperties = authProperties;
+    this.authFrontendRedirectService = authFrontendRedirectService;
   }
 
   @PostMapping("/register")
@@ -204,11 +202,7 @@ public class AuthController {
 
     String redirectUri = buildGithubCallbackUri(request);
     String ticket = gitHubOAuthService.completeLogin(code, redirectUri);
-    URI frontendCompleteUri =
-        URI.create(
-            authProperties.getFrontendBaseUrl()
-                + "/auth/github/complete#ticket="
-                + URLEncoder.encode(ticket, StandardCharsets.UTF_8));
+    URI frontendCompleteUri = authFrontendRedirectService.buildGithubCompleteUri(ticket);
     return ResponseEntity.status(HttpStatus.FOUND)
         .header(HttpHeaders.SET_COOKIE, authCookieService.clearGithubStateCookie().toString())
         .location(frontendCompleteUri)

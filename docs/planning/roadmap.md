@@ -29,13 +29,14 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 19 | Planned | Remember-me session control | Add an explicit remember-me choice on sign in so users can opt into a longer refresh-cookie lifetime for trusted devices. |
 | 20 | Planned | Testing scenarios and README polish | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
 | 21 | Planned | Codebase refactoring and security review | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
+| 22 | Planned | Spring Modulith migration | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-21 are the remaining planned roadmap items.
+- Phases 15-22 are the remaining planned roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 
 ### Phase 0 - Repo readiness
@@ -386,6 +387,23 @@ Exit criteria:
 - logs avoid sensitive data and are consistent with the deployment model
 - the remaining security issues are documented, fixed, or explicitly accepted
 
+### Phase 22 - Spring Modulith migration
+
+Goals:
+
+- audit the current backend module boundaries and decide the final Modulith module map
+- define explicit public APIs for each module and keep internal packages private by convention
+- add Modulith-style structural verification tests alongside the existing ArchUnit checks
+- replace direct cross-module calls with named interfaces or events where that improves coupling
+- decide whether the current Maven module layout should stay as-is or be flattened toward a more standard Modulith arrangement
+
+Exit criteria:
+
+- module boundaries are documented and enforced
+- cross-module dependencies go through approved public interfaces
+- the codebase has structural tests that fail when the module contract is broken
+- the backend is on a clear path to a standard Spring Modulith arrangement
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -409,4 +427,5 @@ Exit criteria:
 19. remember-me session control
 20. testing scenarios and README polish
 21. codebase refactoring and security review
+22. Spring Modulith migration
 
