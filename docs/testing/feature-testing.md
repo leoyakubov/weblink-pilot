@@ -25,6 +25,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 | Feature | Steps | Expected result |
 |---|---|---|
 | Authentication | Sign up, verify email, sign in, use GitHub login, open account settings, change password, refresh the page, sign out | Access token is issued, refresh cookie is set, social login works, account profile loads, password change works, bootstrap refresh works, logout clears session |
+| Remember me | Sign in with and without the remember-me option once it is added | Trusted-device sessions last longer only when the user opts in, while the default sign-in remains short-lived |
 | Email workflow | Request password reset, confirm reset, request email verification, confirm verification | Reset and verification emails are sent, links work, the account state updates |
 | Link creation | Create a short link with and without alias | Link is created, alias rules are enforced, expiration is accepted or rejected correctly |
 | Redirect flow | Open the short URL and QR path | Redirect happens fast, click count increments, analytics source is recorded |
@@ -41,6 +42,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 - refresh-cookie rotation
 - logout
 - blocked login for unverified accounts
+- remember-me session duration
 
 ### Steps
 

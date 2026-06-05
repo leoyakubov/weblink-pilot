@@ -21,18 +21,21 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
 | 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login and richer account management are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
+| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login and richer account management are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. Session duration controls such as remember-me remain a planned follow-up. |
 | 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 | 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
 | 18 | Planned | Security hardening follow-up | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
+| 19 | Planned | Remember-me session control | Add an explicit remember-me choice on sign in so users can opt into a longer refresh-cookie lifetime for trusted devices. |
+| 20 | Planned | Testing scenarios and README polish | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
+| 21 | Planned | Codebase refactoring and security review | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-18 are the remaining planned roadmap items.
+- Phases 15-21 are the remaining planned roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 
 ### Phase 0 - Repo readiness
@@ -259,6 +262,7 @@ Goals:
 
 - GitHub social login is in place
 - richer account management is in place
+- remember-me session controls are planned as a follow-up usability improvement
 
 Exit criteria:
 
@@ -332,6 +336,56 @@ Exit criteria:
 - observability, CORS, and abuse controls match the intended deployment model
 - the security review stays aligned with the codebase
 
+### Phase 19 - Remember-me session control
+
+Goals:
+
+- add an explicit remember-me option to the sign-in flow
+- keep the default sign-in behavior short-lived and safe for shared devices
+- extend the refresh-cookie lifetime only when the user opts in
+- document how the access-token session and refresh-cookie duration differ with and without remember-me
+
+Exit criteria:
+
+- the sign-in form exposes a clear remember-me choice
+- trusted-device sessions last longer without changing the access-token model
+- logout and refresh-token revocation still work predictably
+- the behavior is covered by auth testing docs and frontend test cases
+
+### Phase 20 - Testing scenarios and README polish
+
+Goals:
+
+- add a README section that documents step-by-step test scenarios for key user journeys
+- include simple flow diagrams for auth, email, link creation, and analytics verification
+- rewrite the main README into a clearer presentation-ready format that looks like a product landing page plus developer guide
+- keep the README structure aligned with the rest of the docs so testing, setup, and feature flows stay easy to scan
+
+Exit criteria:
+
+- the README includes concrete test scenarios with steps and expected results
+- flow diagrams make the major app journeys easy to understand at a glance
+- the main README feels polished and demo-friendly instead of purely technical
+- the README remains consistent with the current app behavior and roadmap
+
+### Phase 21 - Codebase refactoring and security review
+
+Goals:
+
+- review backend, frontend, and shared docs/scripts for best practices and code smells
+- replace hardcoded values, magic strings, and magic numbers where a clear config or constant is better
+- split large classes and services when they are doing too much
+- review logging for useful structure, consistency, and accidental sensitive-data exposure
+- run a full-project security review to catch common OWASP-style issues and risky implementation patterns
+
+Exit criteria:
+
+- the main code paths are easier to read and maintain
+- hardcoded configuration and duplicated logic are reduced
+- oversized classes are broken up where it improves clarity
+- logs avoid sensitive data and are consistent with the deployment model
+- the remaining security issues are documented, fixed, or explicitly accepted
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -352,4 +406,7 @@ Exit criteria:
 16. expiry reminder emails
 17. demo visit analytics
 18. security hardening follow-up
+19. remember-me session control
+20. testing scenarios and README polish
+21. codebase refactoring and security review
 

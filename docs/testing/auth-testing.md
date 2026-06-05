@@ -17,6 +17,7 @@ It covers:
 - refresh-token bootstrap and rotation
 - logout revocation
 - browser storage behavior
+- remember-me session duration when the option is added
 
 ## Prerequisites
 
@@ -74,7 +75,7 @@ SPRING_MAIL_SMTP_AUTH=true
 SPRING_MAIL_SMTP_STARTTLS=true
 ```
 
-Brevo’s official docs recommend port `587` as the default SMTP option and note that `465` is the encrypted alternative. Use an SMTP key, not an API key. The sender domain should be authenticated in Brevo before you use the demo mail flow.
+Brevo's official docs recommend port `587` as the default SMTP option and note that `465` is the encrypted alternative. Use an SMTP key, not an API key. The sender domain should be authenticated in Brevo before you use the demo mail flow.
 
 Useful references:
 
@@ -116,6 +117,34 @@ Browser checks:
 - open DevTools
 - verify `weblinkpilot.frontend.session` contains the access token
 - verify the `weblinkpilot_refresh` cookie is present and marked `HttpOnly`
+
+## Remember Me (Planned)
+
+This is the target behavior for the next auth usability step. The current app does not expose a dedicated remember-me toggle yet.
+
+### What to test
+
+- sign in with the remember-me option enabled
+- sign in with the remember-me option disabled
+- refresh-cookie lifetime changes only when the user opts in
+- logout still clears the browser session and revokes refresh tokens
+
+### Steps
+
+1. Open the sign-in form once the remember-me control is available.
+2. Sign in with remember-me enabled.
+3. Close and reopen the browser or tab.
+4. Confirm the session survives according to the longer refresh-cookie lifetime.
+5. Sign out.
+6. Sign in again without remember-me.
+7. Confirm the default session remains shorter-lived for shared-device safety.
+
+### Expected result
+
+- the user can explicitly choose whether the session should be remembered
+- the access-token model stays short-lived
+- the refresh-cookie lifetime is longer only when remember-me is selected
+- logout and refresh-token revocation keep working as expected
 
 ## GitHub Login
 

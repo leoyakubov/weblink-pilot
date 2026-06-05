@@ -72,6 +72,7 @@ The product is designed to look and feel like a real production service rather t
   - more identity providers
   - organization-level account features
   - team permissions
+  - remember-me session controls for trusted devices
 
 ## 5. Frontend Scope
 
