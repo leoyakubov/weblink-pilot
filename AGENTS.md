@@ -87,6 +87,9 @@ npm run test:run -- src/path/to/test.ts
 - Cross-surface change: verify both backend and frontend.
 - Docs-only change: run `git diff --check`; no build is required unless links or generated docs are involved.
 - Before committing, run `scripts/*/run-before-push.*` when the change is broad or touches shared behavior.
+- After any code or behavior change, do not claim the change works until the relevant verification command has been run in the current workspace and has passed.
+- When the exact scope is unclear, prefer the broader project verify command over a narrow guess, then report the exact command and result back to the user.
+- If verification fails, report the failure plainly and do not describe the change as working.
 
 If a command cannot run because of sandbox, network, Docker, or local tool limits, report that clearly and run the closest meaningful check.
 
