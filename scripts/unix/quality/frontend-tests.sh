@@ -3,4 +3,4 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root/frontend"
-npm test -- --run --reporter=default --reporter=json --outputFile=.vite/vitest/results.json
+npm run test:run

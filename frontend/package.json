@@ -4,16 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "node scripts/run-build.mjs",
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "audit": "npm audit --audit-level=high",
-    "test": "vitest",
-    "test:run": "vitest --run",
-    "test:coverage": "vitest --run --coverage",
+    "test": "node scripts/run-vitest.mjs",
+    "test:run": "node scripts/run-vitest.mjs",
+    "test:coverage": "node scripts/run-vitest.mjs --coverage",
     "smoke:docker": "node scripts/smoke-docker.mjs"
   },
   "dependencies": {

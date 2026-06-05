@@ -5,7 +5,7 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScript
 $frontendDir = Join-Path $repoRoot 'frontend'
 Push-Location $frontendDir
 try {
-    npm test -- --run --reporter=default --reporter=json --outputFile=.vite/vitest/results.json
+    npm run test:run
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }

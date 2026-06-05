@@ -24,6 +24,9 @@ vi.mock('vue-router', () => ({
     template: '<div data-test="router-view"></div>',
   },
   useRoute: () => mocks.routeState,
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
 }));
 
 vi.mock('@/lib/auth', () => ({
