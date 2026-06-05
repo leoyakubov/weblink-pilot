@@ -25,13 +25,14 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 | 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
+| 18 | Planned | Security hardening follow-up | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-17 are the remaining planned roadmap items.
+- Phases 15-18 are the remaining planned roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 
 ### Phase 0 - Repo readiness
@@ -314,6 +315,23 @@ Exit criteria:
 - local/dev remain usable without the external analytics service
 - the analytics choice is documented alongside the deployment notes
 
+### Phase 18 - Security hardening follow-up
+
+Goals:
+
+- review the remaining OWASP-style findings from the security review
+- tighten CSRF handling for cookie-based auth where needed
+- reduce browser-side token exposure risk and keep auth storage safe
+- review public observability exposure, CORS patterns, and abuse controls
+- keep the fixes testable and documented so future changes do not reintroduce the issues
+
+Exit criteria:
+
+- the known high-priority security gaps are tracked and closed or explicitly accepted
+- the auth and browser token strategy is documented clearly
+- observability, CORS, and abuse controls match the intended deployment model
+- the security review stays aligned with the codebase
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -333,4 +351,5 @@ Exit criteria:
 15. RabbitMQ async messaging
 16. expiry reminder emails
 17. demo visit analytics
+18. security hardening follow-up
 
