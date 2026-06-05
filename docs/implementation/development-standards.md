@@ -16,6 +16,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 - Centralized config and secret handling.
 - Secret scanning for hardcoded credentials and tokens.
 - Clear module boundaries.
+- Verification must be executed before claiming a change is working.
 
 ## Should Have
 
@@ -43,6 +44,13 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 5. Run static analysis.
 6. Push only if the pre-push gate passes.
 7. Run coverage checks in CI or manually when needed.
+
+## Verification Rule
+
+- After any code or behavior change, run the relevant verify or build command in the current workspace before telling others that the change works.
+- If the exact scope is unclear, prefer the broader repo or backend/frontend verify command over a narrow guess.
+- If verification fails, report the failure plainly and do not describe the change as passing.
+- Docs-only changes still need a quick sanity check such as `git diff --check`, but they do not need a full build unless the docs include generated artifacts or live links that must be validated.
 
 ## Tooling Plan
 

@@ -38,6 +38,7 @@ Status note:
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
 - Phases 15-22 are the remaining planned roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
+- Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
 ### Phase 0 - Repo readiness
 
@@ -56,6 +57,14 @@ Exit criteria:
 - tech stack finalized
 - initial tooling agreed
 
+Checklist:
+
+- [x] Bootstrapped the repo layout
+- [x] Agreed the final repo naming
+- [x] Added the baseline docs
+- [x] Cleaned the `.gitignore`
+- [x] Confirmed the repo structure
+
 ### Phase 1 - Backend foundation
 
 Goals:
@@ -72,6 +81,13 @@ Exit criteria:
 - health endpoint is available
 - module boundaries are visible in code
 
+Checklist:
+
+- [x] Created the backend module structure
+- [x] Wired the Spring Boot application
+- [x] Configured PostgreSQL, Flyway, security, cache, and observability
+- [x] Defined shared contracts and domain modules
+
 ### Phase 2 - Tests, code quality, Sonar
 
 Goals:
@@ -87,6 +103,13 @@ Exit criteria:
 - test and coverage reports are available
 - the code quality feedback loop is quick
 
+Checklist:
+
+- [x] Kept the test suite green
+- [x] Maintained coverage checks
+- [x] Enforced ArchUnit and integration test safety
+- [x] Ran local SonarQube analysis
+
 ### Phase 3 - Docker
 
 Goals:
@@ -100,6 +123,12 @@ Exit criteria:
 - the full stack can be started locally
 - the dev environment matches the demo topology closely
 - container orchestration is documented and stable
+
+Checklist:
+
+- [x] Kept the dev Docker stack reproducible
+- [x] Ran backend, frontend, database, and cache through Compose
+- [x] Mirrored the demo deployment shape as closely as practical
 
 ### Phase 4 - URL lifecycle
 
@@ -117,6 +146,14 @@ Exit criteria:
 - redirect path is working end to end
 - basic validation and error handling are in place
 
+Checklist:
+
+- [x] Implemented short URL creation
+- [x] Supported custom aliases
+- [x] Supported expiration
+- [x] Implemented redirect flow
+- [x] Returned short link details
+
 ### Phase 5 - QR code support
 
 Goals:
@@ -129,6 +166,12 @@ Exit criteria:
 
 - backend can generate QR output
 - frontend can display or download QR
+
+Checklist:
+
+- [x] Generated QR code for a short URL
+- [x] Exposed the QR endpoint
+- [x] Made QR visible in the API contract and frontend
 
 ### Phase 6 - Analytics
 
@@ -147,6 +190,14 @@ Exit criteria:
 - analytics are stored and queryable
 - metrics are visible for one short code
 
+Checklist:
+
+- [x] Published click events
+- [x] Consumed events asynchronously
+- [x] Persisted click data
+- [x] Exposed analytics summary endpoints
+- [x] Distinguished redirect clicks from QR scans
+
 ### Phase 7 - Frontend foundation
 
 Goals:
@@ -162,6 +213,13 @@ Exit criteria:
 - create-link form is present
 - API integration is working
 
+Checklist:
+
+- [x] Scaffolded the Vue app
+- [x] Created the mobile-first shell
+- [x] Wired routing and base layout
+- [x] Connected the frontend to the backend API
+
 ### Phase 8 - Frontend feature set
 
 Goals:
@@ -175,6 +233,13 @@ Exit criteria:
 
 - core user journeys work on mobile and desktop
 - UI is stable enough for demo and review
+
+Checklist:
+
+- [x] Built the create link flow UI
+- [x] Added the success page with short link and QR
+- [x] Added the analytics dashboard
+- [x] Added link details/history views
 
 ### Phase 9 - Authentication and access control
 
@@ -195,6 +260,16 @@ Exit criteria:
 - anonymous and owned links both work
 - the auth model supports the current product flow
 
+Checklist:
+
+- [x] Kept the JWT login/register/me flow
+- [x] Kept refresh-cookie sessions, password reset, and email verification
+- [x] Supported user and admin roles
+- [x] Seeded bootstrap accounts and starter links
+- [x] Made navigation and routes role-aware
+- [x] Kept guest link creation available for demo users
+- [x] Protected admin-only monitoring access
+
 ### Phase 10 - Production hardening
 
 Goals:
@@ -209,6 +284,12 @@ Exit criteria:
 - tests cover key flows
 - README and docs describe how to use it
 - release and deployment docs match the shipped product
+
+Checklist:
+
+- [x] Added logging and metrics
+- [x] Polished documentation
+- [x] Added release checks and deploy safety
 
 ### Phase 11 - Environment profiles and scripts
 
@@ -227,6 +308,14 @@ Exit criteria:
 - local, container, and demo workflows stay simple
 - helper scripts match the current folder layout and runtime behavior
 
+Checklist:
+
+- [x] Kept the local/dev/demo runtime split explicit
+- [x] Used Maven profiles only as a convenience for `spring-boot:run`
+- [x] Documented the local/dev/docker/test/demo configuration story
+- [x] Kept the helper scripts readable and predictable
+- [x] Seeded local/dev users and demo bootstrap data in a profile-driven way
+
 ### Phase 12 - Redis caching
 
 Goals:
@@ -241,6 +330,12 @@ Exit criteria:
 - analytics and other hot paths can use Redis-backed caching where it helps
 - cache behavior is documented and testable
 - Redis cache/session behavior is documented in the implementation docs
+
+Checklist:
+
+- [x] Replaced the in-memory cache with Redis for hot short-code lookups
+- [x] Used Redis for rate-limiting counters where useful
+- [x] Kept cache behavior explicit in all profiles
 
 ### Phase 13 - Monitoring
 
@@ -257,6 +352,12 @@ Exit criteria:
 - the monitoring stack can be enabled after the app is live
 - the admin monitoring page and local stack are consistent with the docs
 
+Checklist:
+
+- [x] Wired Prometheus/Grafana links into the admin monitoring page
+- [x] Surfaced health and metrics in the UI
+- [x] Evaluated JWT protection for monitoring endpoints
+
 ### Phase 14 - Auth expansion
 
 Goals:
@@ -272,6 +373,12 @@ Exit criteria:
 - password change revokes existing refresh sessions
 - the auth model supports the current product flow
 
+Checklist:
+
+- [x] Added GitHub social login
+- [x] Added richer account management
+- [x] Planned remember-me as a follow-up usability improvement
+
 ### Phase 15 - RabbitMQ async messaging
 
 Goals:
@@ -286,6 +393,14 @@ Exit criteria:
 - async event processing is documented and testable
 - the broker is only used for workloads that benefit from queueing
 - local and CI workflows still work cleanly when RabbitMQ is disabled
+
+Checklist:
+
+- [ ] Decide which workloads actually need queueing
+- [ ] Define the event fan-out and background-job use cases
+- [ ] Add broker configuration for local/dev/demo environments
+- [ ] Add integration tests for the queue-backed flow
+- [ ] Keep RabbitMQ optional until the need is proven
 
 ### Phase 16 - Expiry reminder emails
 
@@ -304,6 +419,14 @@ Exit criteria:
 - the job is safe to run on a schedule without spamming users
 - the notification flow is documented and testable
 
+Checklist:
+
+- [ ] Add the scheduled expiry scan job
+- [ ] Build the list of links nearing expiry
+- [ ] Send reminder mail to the owning user
+- [ ] Deduplicate reminders across runs
+- [ ] Document the mail workflow and test it
+
 ### Phase 17 - Demo visit analytics
 
 Goals:
@@ -319,6 +442,14 @@ Exit criteria:
 - the snippet or integration is easy to enable and disable by environment
 - local/dev remain usable without the external analytics service
 - the analytics choice is documented alongside the deployment notes
+
+Checklist:
+
+- [ ] Choose the demo analytics provider
+- [ ] Add the provider snippet or integration
+- [ ] Track visits, referrers, and basic page usage
+- [ ] Keep local/dev optional and lightweight
+- [ ] Document the privacy and deployment implications
 
 ### Phase 18 - Security hardening follow-up
 
@@ -337,6 +468,14 @@ Exit criteria:
 - observability, CORS, and abuse controls match the intended deployment model
 - the security review stays aligned with the codebase
 
+Checklist:
+
+- [ ] Review the remaining OWASP-style findings
+- [ ] Tighten CSRF handling for cookie-based auth where needed
+- [ ] Reduce browser-side token exposure risk
+- [ ] Review public observability exposure, CORS, and abuse controls
+- [ ] Close or explicitly accept the remaining findings
+
 ### Phase 19 - Remember-me session control
 
 Goals:
@@ -353,6 +492,14 @@ Exit criteria:
 - logout and refresh-token revocation still work predictably
 - the behavior is covered by auth testing docs and frontend test cases
 
+Checklist:
+
+- [ ] Add the remember-me control to sign in
+- [ ] Extend the refresh-cookie lifetime only when opted in
+- [ ] Keep the default session short-lived
+- [ ] Update auth tests and docs for the new behavior
+- [ ] Verify logout and refresh rotation still work
+
 ### Phase 20 - Testing scenarios and README polish
 
 Goals:
@@ -368,6 +515,13 @@ Exit criteria:
 - flow diagrams make the major app journeys easy to understand at a glance
 - the main README feels polished and demo-friendly instead of purely technical
 - the README remains consistent with the current app behavior and roadmap
+
+Checklist:
+
+- [ ] Add step-by-step test scenarios for major app flows
+- [ ] Add flow diagrams for auth, email, links, and analytics
+- [ ] Rewrite the main README into a more presentation-ready form
+- [ ] Keep the README aligned with the current implementation
 
 ### Phase 21 - Codebase refactoring and security review
 
@@ -387,6 +541,14 @@ Exit criteria:
 - logs avoid sensitive data and are consistent with the deployment model
 - the remaining security issues are documented, fixed, or explicitly accepted
 
+Checklist:
+
+- [ ] Review backend, frontend, and docs/scripts for best practices
+- [ ] Replace hardcoded values and magic strings/numbers where appropriate
+- [ ] Split large classes and services where it improves clarity
+- [ ] Review logging for quality and sensitive-data exposure
+- [ ] Run a full-project security review
+
 ### Phase 22 - Spring Modulith migration
 
 Goals:
@@ -403,6 +565,14 @@ Exit criteria:
 - cross-module dependencies go through approved public interfaces
 - the codebase has structural tests that fail when the module contract is broken
 - the backend is on a clear path to a standard Spring Modulith arrangement
+
+Checklist:
+
+- [ ] Freeze the final module map
+- [ ] Add Spring Modulith structural verification tests
+- [ ] Define named interfaces for approved public access
+- [ ] Replace direct cross-module calls with APIs or events
+- [ ] Verify the new module contracts in tests
 
 ## Suggested Build Order
 

@@ -42,37 +42,37 @@ The product is designed to look and feel like a real production service rather t
 
 ### MVP
 
-- create short URL with random default code
-- optional custom alias
-- expiration time
-- redirect endpoint
-- QR code generation
-- basic analytics
-- mobile-first UI
-- authentication for management endpoints
+- [x] create short URL with random default code
+- [x] optional custom alias
+- [x] expiration time
+- [x] redirect endpoint
+- [x] QR code generation
+- [x] basic analytics
+- [x] mobile-first UI
+- [x] authentication for management endpoints
 
 ### V1+
 
-- link list and detail pages
-- chart-based analytics dashboard
-- copy/share actions
-- QR download in PNG/SVG
-- rate limiting
-- cache-backed redirects
+- [x] link list and detail pages
+- [x] chart-based analytics dashboard
+- [x] copy/share actions
+- [x] QR download in PNG/SVG
+- [x] rate limiting
+- [x] cache-backed redirects
 
 ### Future
 
-- team accounts
-- link ownership
-- branded domains
-- bulk link generation
-- API keys
-- webhook delivery for click events
-- additional auth/account extensions if the product needs them:
-  - more identity providers
-  - organization-level account features
-  - team permissions
-  - remember-me session controls for trusted devices
+- [ ] team accounts
+- [x] link ownership
+- [ ] branded domains
+- [ ] bulk link generation
+- [ ] API keys
+- [ ] webhook delivery for click events
+- [ ] additional auth/account extensions if the product needs them:
+  - [ ] more identity providers
+  - [ ] organization-level account features
+  - [ ] team permissions
+  - [ ] remember-me session controls for trusted devices
 
 ## 5. Frontend Scope
 
