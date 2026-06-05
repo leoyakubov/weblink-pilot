@@ -20,6 +20,8 @@ This repo keeps one documentation tree with a small set of categories so it is e
 
 - [API Contract v1](implementation/api-contract-v1.md) - the agreed backend/frontend contract surface.
 - [Development Standards](implementation/development-standards.md) - formatting, testing, coverage, scanning, and release hygiene.
+- [Development Environment](implementation/development-environment.md) - local setup, scripts, verification commands, and commit readiness.
+- [Agent Instructions](../AGENTS.md) - repository-specific guidance for coding agents.
 
 ## Testing & QA
 
@@ -35,10 +37,11 @@ This repo keeps one documentation tree with a small set of categories so it is e
 
 - [Changelog](../CHANGELOG.md) - release notes for shipped user-visible changes.
 - [Interview Notes](reference/interview-notes.md) - short talking points and trade-offs for interviews.
+- [Security Review](reference/security-review.md) - OWASP-style risks, fixes, priorities, and status.
 
 ## Suggested Reading Order
 
 1. Start with [Product Spec](planning/product-spec.md) to understand the product shape.
 2. Read [Architecture Plan](design/architecture-plan.md) and [Backend Module Plan](design/backend-module-plan.md) for system design.
 3. Use the [Feature Testing Guide](testing/feature-testing.md) and [Auth Testing Workflow](testing/auth-testing.md) when you need verification steps.
-4. Check [Deployment](operations/deployment.md) and [Development Standards](implementation/development-standards.md) for runtime and hygiene expectations.
+4. Check [Deployment](operations/deployment.md), [Development Environment](implementation/development-environment.md), and [Development Standards](implementation/development-standards.md) for runtime and hygiene expectations.

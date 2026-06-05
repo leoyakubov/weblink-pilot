@@ -64,6 +64,8 @@ sequenceDiagram
 
 - [API Contract v1](docs/implementation/api-contract-v1.md)
 - [Development Standards](docs/implementation/development-standards.md)
+- [Development Environment](docs/implementation/development-environment.md)
+- [Agent Instructions](AGENTS.md)
 
 ### Testing & QA
 
@@ -79,6 +81,7 @@ sequenceDiagram
 
 - [Changelog](CHANGELOG.md)
 - [Interview Notes](docs/reference/interview-notes.md)
+- [Security Review](docs/reference/security-review.md)
 
 ## Repository Structure
 
