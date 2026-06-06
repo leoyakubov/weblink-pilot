@@ -2,28 +2,9 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$commonScript = Join-Path $repoRoot 'scripts/win/lib/common.ps1'
+. $commonScript
 $composeFile = Join-Path $repoRoot 'infra/docker-compose.yml'
-
-function Write-BoxHeader {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Title
-    )
-
-    $width = 84
-    $innerWidth = $width - 4
-    $titleText = " $Title "
-    if ($titleText.Length -gt $innerWidth) {
-        $titleText = $titleText.Substring(0, $innerWidth)
-    }
-    $titleLine = ('||{0}||' -f $titleText.PadRight($innerWidth))
-    $borderLine = '||' + ('=' * ($width - 4)) + '||'
-
-    Write-Host $borderLine -ForegroundColor Cyan
-    Write-Host $titleLine -ForegroundColor Cyan
-    Write-Host $borderLine -ForegroundColor Cyan
-    Write-Host ''
-}
 
 function Write-StackService {
     param(

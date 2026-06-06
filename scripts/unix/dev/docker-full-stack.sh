@@ -2,6 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+source "$repo_root/scripts/unix/lib/common.sh"
 compose_file="$repo_root/infra/docker-compose.yml"
 reset='\033[0m'
 cyan='\033[36m'
@@ -11,17 +12,6 @@ magenta='\033[35m'
 blue='\033[34m'
 white='\033[37m'
 red='\033[31m'
-
-print_box() {
-  local title="$1"
-  local width=84
-  local inner_width=$((width - 4))
-  local border
-  border="||$(printf '%0.s=' $(seq 1 $((width - 4))))||"
-  printf '%s\n' "$border"
-  printf '|| %-*s ||\n' "$inner_width" "$title"
-  printf '%s\n\n' "$border"
-}
 
 print_service() {
   local color="$1"

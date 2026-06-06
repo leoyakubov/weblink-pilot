@@ -3,6 +3,12 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
+. (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
+
+$resolvedJavaHome = Resolve-JavaHome
+if ($resolvedJavaHome) {
+    $env:JAVA_HOME = $resolvedJavaHome
+}
 
 Push-Location $backendDir
 try {
@@ -31,8 +37,9 @@ try {
         }
     }
 
+    $combinedOutput = ($commandOutput | ForEach-Object { $_.ToString() }) -join "`n"
     $exitCode = if ($process) { $process.ExitCode } else { 1 }
-    if ($exitCode -eq 0 -and $commandOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Non-resolvable import POM|Could not transfer artifact') {
+    if ($exitCode -eq 0 -and $combinedOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Error loading java.security file|AccessDeniedException') {
         $exitCode = 1
     }
     if ($exitCode -ne 0) {

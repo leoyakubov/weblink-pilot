@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,8 +30,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 @ExtendWith(MockitoExtension.class)
@@ -198,7 +198,8 @@ class RefreshTokenServiceTest {
     RefreshToken second =
         new RefreshToken("token-hash-2", account, issuedAt, issuedAt.plusDays(30));
     when(setOperations.members(anyString())).thenReturn(Set.of("token-hash-1", "token-hash-2"));
-    when(refreshTokenRepository.findAllByTokenHashIn(anyCollection())).thenReturn(List.of(first, second));
+    when(refreshTokenRepository.findAllByTokenHashIn(anyCollection()))
+        .thenReturn(List.of(first, second));
 
     service.revokeAllForUser("alice");
 

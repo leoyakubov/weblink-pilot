@@ -3,63 +3,32 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
+. (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
 $envFile = Join-Path $repoRoot '.env.local'
+
+$resolvedJavaHome = Resolve-JavaHome
+if ($resolvedJavaHome) {
+    $env:JAVA_HOME = $resolvedJavaHome
+}
+
 Push-Location $backendDir
-
-function Import-LocalEnvFile {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Path
-    )
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        return
-    }
-
-    foreach ($line in Get-Content -LiteralPath $Path) {
-        $trimmed = $line.Trim()
-        if ($trimmed.Length -eq 0 -or $trimmed.StartsWith('#')) {
-            continue
-        }
-
-        $separatorIndex = $trimmed.IndexOf('=')
-        if ($separatorIndex -lt 1) {
-            continue
-        }
-
-        $name = $trimmed.Substring(0, $separatorIndex).Trim()
-        $value = $trimmed.Substring($separatorIndex + 1).Trim()
-        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
-            $value = $value.Substring(1, $value.Length - 2)
-        }
-
-        if ($name -eq 'SONAR_TOKEN' -and -not [string]::IsNullOrWhiteSpace($value)) {
-            $env:SONAR_TOKEN = $value
-        }
-
-        if ($name -eq 'SONAR_HOST_URL' -and -not [string]::IsNullOrWhiteSpace($value)) {
-            $env:SONAR_HOST_URL = $value
-        }
-    }
-}
-
-Import-LocalEnvFile -Path $envFile
-
-if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
-    $env:SONAR_TOKEN = Read-Host 'Enter Sonar token'
-}
-
-if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
-    throw 'SONAR_TOKEN is required.'
-}
-
-if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL)) {
-    $env:SONAR_HOST_URL = 'http://localhost:9001'
-}
-
-$sonarArg = "-Dsonar.token=$($env:SONAR_TOKEN)"
-$sonarHostArg = "-Dsonar.host.url=$($env:SONAR_HOST_URL)"
 try {
+    Import-DotEnv -Path $envFile
+
+    if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+        $env:SONAR_TOKEN = Read-Host 'Enter Sonar token'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+        throw 'SONAR_TOKEN is required.'
+    }
+
+    if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL)) {
+        $env:SONAR_HOST_URL = 'http://localhost:9001'
+    }
+
+    $sonarArg = "-Dsonar.token=$($env:SONAR_TOKEN)"
+    $sonarHostArg = "-Dsonar.host.url=$($env:SONAR_HOST_URL)"
     & .\mvnw.cmd -Pci clean install sonar:sonar $sonarArg $sonarHostArg 2>&1 | Out-Host
 }
 finally {

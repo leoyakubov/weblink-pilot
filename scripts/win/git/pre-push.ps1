@@ -2,6 +2,8 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$commonScript = Join-Path $repoRoot 'scripts/win/lib/common.ps1'
+. $commonScript
 $backendStyleScript = Join-Path $repoRoot 'scripts\win\quality\backend-style.ps1'
 $backendTestsScript = Join-Path $repoRoot 'scripts\win\quality\backend-tests.ps1'
 $secretScanScript = Join-Path $repoRoot 'scripts\win\git\scan-secrets.ps1'
@@ -39,153 +41,6 @@ function Invoke-Check {
         ExitCode = $exitCode
         Succeeded = ($exitCode -eq 0)
         Output = $capturedText
-    }
-}
-
-function Write-BoxHeader {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Title
-    )
-
-    $width = 84
-    $innerWidth = $width - 4
-    $words = $Title -split '\s+'
-    $titleLines = New-Object System.Collections.Generic.List[string]
-    $current = ''
-    foreach ($word in $words) {
-        if ([string]::IsNullOrWhiteSpace($word)) { continue }
-        if (-not $current) {
-            $current = $word
-            continue
-        }
-        if (($current.Length + 1 + $word.Length) -le $innerWidth) {
-            $current = "$current $word"
-        } else {
-            [void]$titleLines.Add($current)
-            $current = $word
-        }
-    }
-    if ($current) {
-        [void]$titleLines.Add($current)
-    }
-    if ($titleLines.Count -eq 0) {
-        [void]$titleLines.Add('')
-    }
-    $borderLine = '||' + ('=' * ($width - 4)) + '||'
-
-    Write-Host ''
-    Write-Host $borderLine -ForegroundColor Cyan
-    foreach ($line in $titleLines) {
-        Write-Host ('|| {0} ||' -f $line.PadRight($innerWidth)) -ForegroundColor Cyan
-    }
-    Write-Host $borderLine -ForegroundColor Cyan
-    Write-Host ''
-}
-
-function Get-StatusColor {
-    param([Parameter(Mandatory = $true)][string]$Status)
-
-    switch ($Status) {
-        'PASS' { 'Green' }
-        'FAIL' { 'Red' }
-        'SKIPPED' { 'DarkYellow' }
-        default { 'DarkYellow' }
-    }
-}
-
-function Get-StatusBadge {
-    param([Parameter(Mandatory = $true)][string]$Status)
-
-    switch ($Status) {
-        'PASS' { '[PASS]' }
-        'FAIL' { '[FAIL]' }
-        'SKIPPED' { '[SKIP]' }
-        default { "[${Status}]" }
-    }
-}
-
-function Invoke-PowerShellScript {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$ScriptPath,
-
-        [string[]]$Arguments = @()
-    )
-
-    $argumentList = @(
-        '-NoProfile'
-        '-ExecutionPolicy'
-        'Bypass'
-        '-File'
-        $ScriptPath
-    ) + $Arguments
-
-    $stdoutFile = [System.IO.Path]::GetTempFileName()
-    $stderrFile = [System.IO.Path]::GetTempFileName()
-    $capturedOutput = [System.Text.StringBuilder]::new()
-    $stdoutLength = 0
-    $stderrLength = 0
-    $process = $null
-
-    function Write-NewText {
-        param(
-            [Parameter(Mandatory = $true)]
-            [string]$Path,
-
-            [Parameter(Mandatory = $true)]
-            [ref]$KnownLength
-        )
-
-        if (-not (Test-Path -LiteralPath $Path)) {
-            return
-        }
-
-        $text = Get-Content -Raw -LiteralPath $Path -ErrorAction SilentlyContinue
-        if ([string]::IsNullOrEmpty($text)) {
-            return
-        }
-
-        if ($text.Length -le $KnownLength.Value) {
-            return
-        }
-
-        $chunk = $text.Substring($KnownLength.Value)
-        if ($chunk) {
-            Write-Host $chunk -NoNewline
-            [void]$capturedOutput.Append($chunk)
-            $KnownLength.Value = $text.Length
-        }
-    }
-
-    try {
-        $pathValue = [System.Environment]::GetEnvironmentVariable('Path', 'Process')
-        if ($pathValue) {
-            [System.Environment]::SetEnvironmentVariable('PATH', $null, 'Process')
-            [System.Environment]::SetEnvironmentVariable('Path', $pathValue, 'Process')
-        }
-
-        $process = Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentList -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
-
-        while (-not $process.HasExited) {
-            Write-NewText -Path $stdoutFile -KnownLength ([ref]$stdoutLength)
-            Write-NewText -Path $stderrFile -KnownLength ([ref]$stderrLength)
-            Start-Sleep -Milliseconds 200
-        }
-
-        $process.WaitForExit()
-        $process.Refresh()
-        Write-NewText -Path $stdoutFile -KnownLength ([ref]$stdoutLength)
-        Write-NewText -Path $stderrFile -KnownLength ([ref]$stderrLength)
-        $global:LASTEXITCODE = $process.ExitCode
-    }
-    finally {
-        Remove-Item -LiteralPath $stdoutFile, $stderrFile -ErrorAction SilentlyContinue
-    }
-
-    return [pscustomobject]@{
-        ExitCode = $process.ExitCode
-        Output = $capturedOutput.ToString()
     }
 }
 
@@ -311,13 +166,16 @@ function Write-SummaryTable {
         [string]$TableColor = 'Cyan'
     )
 
-    $width = 132
-    $stepWidth = 30
+    $width = 112
+    $stepWidth = 24
     $statusWidth = 10
     $detailsWidth = $width - 15 - $stepWidth - $statusWidth
     $borderLine = '||' + ('=' * ($width - 4)) + '||'
     $dividerLine = '||' + ('-' * ($width - 4)) + '||'
-    $headerLine = ('|| {0,-30} | {1,-10} | {2,-73} ||' -f 'Step', 'Status', 'Details')
+    $headerStep = 'Step'.PadRight($stepWidth)
+    $headerStatus = 'Status'.PadRight($statusWidth)
+    $headerDetails = 'Details'.PadRight($detailsWidth)
+    $headerLine = "|| $headerStep | $headerStatus | $headerDetails ||"
     Write-Host $borderLine -ForegroundColor $TableColor
     Write-Host $headerLine -ForegroundColor $TableColor
     Write-Host $dividerLine -ForegroundColor $TableColor
@@ -330,7 +188,10 @@ function Write-SummaryTable {
         }
 
         $rowColor = Get-StatusColor -Status $row.Status
-        $rowLine = ('|| {0,-30} | {1,-10} | {2,-73} ||' -f $row.Label, $badge, $details)
+        $stepText = ([string]$row.Label).PadRight($stepWidth)
+        $statusText = $badge.PadRight($statusWidth)
+        $detailsText = $details.PadRight($detailsWidth)
+        $rowLine = "|| $stepText | $statusText | $detailsText ||"
         Write-Host $rowLine -ForegroundColor $rowColor
     }
 

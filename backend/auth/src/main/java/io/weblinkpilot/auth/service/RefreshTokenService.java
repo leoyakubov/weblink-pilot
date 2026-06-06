@@ -226,7 +226,10 @@ public class RefreshTokenService {
     try {
       redisTemplate
           .opsForValue()
-          .set(sessionRedisKey(tokenHash), objectMapper.writeValueAsString(session), refreshTokenTtl);
+          .set(
+              sessionRedisKey(tokenHash),
+              objectMapper.writeValueAsString(session),
+              refreshTokenTtl);
     } catch (java.io.IOException | RuntimeException exception) {
       // Cache is best-effort; the database remains the source of truth.
     }

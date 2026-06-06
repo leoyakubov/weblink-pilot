@@ -2,6 +2,8 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$commonScript = Join-Path $repoRoot 'scripts/win/lib/common.ps1'
+. $commonScript
 $envFile = Join-Path $repoRoot '.env.local'
 $smokeTarget = if ([string]::IsNullOrWhiteSpace($env:SMOKE_TARGET)) { 'local' } else { $env:SMOKE_TARGET.Trim().ToLowerInvariant() }
 $smokeCheck = if ([string]::IsNullOrWhiteSpace($env:SMOKE_CHECK)) { 'all' } else { $env:SMOKE_CHECK.Trim().ToLowerInvariant() }
@@ -9,45 +11,8 @@ $checksToRun = if ($smokeCheck -eq 'all') { @('backend', 'frontend') } else { @(
 $backendHealthUrl = ''
 $frontendSmokeUrl = ''
 
-function Import-LocalEnvFile {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$Path
-    )
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        return
-    }
-
-    foreach ($line in Get-Content -LiteralPath $Path) {
-        $trimmed = $line.Trim()
-        if ($trimmed.Length -eq 0 -or $trimmed.StartsWith('#')) {
-            continue
-        }
-
-        $separatorIndex = $trimmed.IndexOf('=')
-        if ($separatorIndex -lt 1) {
-            continue
-        }
-
-        $name = $trimmed.Substring(0, $separatorIndex).Trim()
-        $value = $trimmed.Substring($separatorIndex + 1).Trim()
-        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
-            $value = $value.Substring(1, $value.Length - 2)
-        }
-
-        if ($name -eq 'RENDER_HEALTH_URL' -and [string]::IsNullOrWhiteSpace($env:RENDER_HEALTH_URL)) {
-            $env:RENDER_HEALTH_URL = $value
-        }
-
-        if ($name -eq 'FRONTEND_SMOKE_URL' -and [string]::IsNullOrWhiteSpace($env:FRONTEND_SMOKE_URL)) {
-            $env:FRONTEND_SMOKE_URL = $value
-        }
-    }
-}
-
 if ($smokeTarget -eq 'demo') {
-    Import-LocalEnvFile -Path $envFile
+    Import-DotEnv -Path $envFile
     if ($checksToRun -contains 'backend') {
         $backendHealthUrl = $env:RENDER_HEALTH_URL
     }

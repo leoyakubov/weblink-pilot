@@ -2,6 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+source "$repo_root/scripts/unix/lib/common.sh"
 backend_style_log="$(mktemp)"
 backend_tests_log="$(mktemp)"
 secret_scan_log="$(mktemp)"
@@ -15,91 +16,6 @@ cyan='\033[36m'
 green='\033[32m'
 red='\033[31m'
 yellow='\033[33m'
-
-print_box() {
-  local title="$1"
-  local width=84
-  local inner_width=$((width - 4))
-  local border
-  local -a lines=()
-  local current=""
-  local word
-  for word in $title; do
-    if [ -z "$current" ]; then
-      current="$word"
-    elif [ $(( ${#current} + 1 + ${#word} )) -le "$inner_width" ]; then
-      current="$current $word"
-    else
-      lines+=("$current")
-      current="$word"
-    fi
-  done
-  if [ -n "$current" ]; then
-    lines+=("$current")
-  fi
-  if [ ${#lines[@]} -eq 0 ]; then
-    lines+=("")
-  fi
-  border="||$(printf '%0.s=' $(seq 1 $((width - 4))))||"
-  printf '\n%s\n' "$border"
-  for line in "${lines[@]}"; do
-    printf '|| %-*s ||\n' "$inner_width" "$line"
-  done
-  printf '%s\n\n' "$border"
-}
-
-print_summary_border() {
-  local color="${1:-$cyan}"
-  local width=132
-  printf '%b||%s||%b\n' "$color" "$(printf '%0.s=' $(seq 1 $((width - 4))))" "$reset"
-}
-
-print_summary_divider() {
-  local color="${1:-$cyan}"
-  local width=132
-  printf '%b||%s||%b\n' "$color" "$(printf '%0.s-' $(seq 1 $((width - 4))))" "$reset"
-}
-
-status_color() {
-  case "$1" in
-    PASS) printf '%b' "$green" ;;
-    FAIL) printf '%b' "$red" ;;
-    SKIPPED) printf '%b' "$yellow" ;;
-    *) printf '%b' "$yellow" ;;
-  esac
-}
-
-status_badge() {
-  case "$1" in
-    PASS) printf '[PASS]' ;;
-    FAIL) printf '[FAIL]' ;;
-    SKIPPED) printf '[SKIP]' ;;
-    *) printf '[%s]' "$1" ;;
-  esac
-}
-
-truncate_text() {
-  local text="$1"
-  local max_len="$2"
-  if [ "${#text}" -gt "$max_len" ]; then
-    printf '%s...' "${text:0:max_len-3}"
-  else
-    printf '%s' "$text"
-  fi
-}
-
-print_summary_row() {
-  local label="$1"
-  local status="$2"
-  local details="$3"
-  local color badge text
-  color="$(status_color "$status")"
-  badge="$(status_badge "$status")"
-  label="$(truncate_text "$label" 30)"
-  details="$(truncate_text "$details" 73)"
-  text="$(printf '|| %-30s | %-10s | %-73s ||' "$label" "$badge" "$details")"
-  printf '%b%s%b\n' "$color" "$text" "$reset"
-}
 
 backend_style_status="SKIPPED"
 backend_tests_status="SKIPPED"
@@ -181,7 +97,7 @@ elif [ "$backend_style_status" = "SKIPPED" ] || [ "$backend_tests_status" = "SKI
 fi
 
 print_summary_border "$summary_color"
-printf '%b|| %-24s | %-10s | %-65s ||%b\n' "$summary_color" "Step" "Status" "Details" "$reset"
+printf '%b|| %-24s | %-10s | %-57s ||%b\n' "$summary_color" "Step" "Status" "Details" "$reset"
 print_summary_divider "$summary_color"
 print_summary_row "backend style" "$backend_style_status" ""
 print_summary_row "backend tests" "$backend_tests_status" "$backend_tests_summary"

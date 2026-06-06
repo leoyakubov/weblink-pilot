@@ -3,51 +3,23 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
-if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    throw 'java is not available on PATH. Install Java 25 before running this script.'
+. (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
+$envFile = Join-Path $repoRoot '.env.local'
+
+$resolvedJavaHome = Resolve-JavaHome
+if ($resolvedJavaHome) {
+    $env:JAVA_HOME = $resolvedJavaHome
 }
 
-$mvnw = Join-Path $backendDir 'mvnw.cmd'
-if (-not (Test-Path $mvnw)) {
-    throw "Maven wrapper not found at $mvnw"
-}
-
-function Import-DotEnv {
-    param([string]$Path)
-
-    if (-not (Test-Path $Path)) {
-        return
-    }
-
-    Get-Content -LiteralPath $Path | ForEach-Object {
-        $line = $_.Trim()
-        if (-not $line -or $line.StartsWith('#')) {
-            return
-        }
-
-        $index = $line.IndexOf('=')
-        if ($index -lt 1) {
-            return
-        }
-
-        $name = $line.Substring(0, $index).Trim()
-        $value = $line.Substring($index + 1).Trim()
-        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
-            $value = $value.Substring(1, $value.Length - 2)
-        }
-
-        Set-Item -Path "Env:$name" -Value $value
-    }
-}
-
-Import-DotEnv (Join-Path $repoRoot '.env.local')
+Import-DotEnv $envFile
 
 Push-Location $backendDir
 try {
-    & $mvnw -pl application -am package -DskipTests 2>&1 | Out-Host
+    & .\mvnw.cmd -pl application -am package -DskipTests 2>&1 | Out-Host
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
+
     $env:SPRING_PROFILES_ACTIVE = 'local'
     try {
         java -jar (Join-Path $backendDir 'application/target/application-0.1.0-SNAPSHOT.jar')

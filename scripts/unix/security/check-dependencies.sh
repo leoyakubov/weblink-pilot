@@ -2,30 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-
-print_box() {
-  local title="$1"
-  local width=62
-  local inner_width=$((width - 4))
-  local border
-  border="||$(printf '%0.s=' $(seq 1 $((width - 4))))||"
-  printf '\n%s\n' "$border"
-  printf '|| %-*s ||\n' "$inner_width" "$title"
-  printf '%s\n\n' "$border"
-}
-
-print_status() {
-  local label="$1"
-  local status="$2"
-  local badge
-  case "$status" in
-    PASS) badge='[PASS]' ;;
-    FAIL) badge='[FAIL]' ;;
-    SKIPPED) badge='[SKIP]' ;;
-    *) badge="[$status]" ;;
-  esac
-  printf '  %s %s\n' "$badge" "$label"
-}
+source "$repo_root/scripts/unix/lib/common.sh"
 
 backend_status='SKIPPED'
 frontend_status='SKIPPED'
@@ -47,9 +24,9 @@ if [ "$backend_status" = 'PASS' ]; then
 fi
 
 print_box "Summary"
-print_status 'backend vulnerabilities' "$backend_status"
+printf '  %s %s\n' "$(status_badge "$backend_status")" 'backend vulnerabilities'
 printf '\n'
-print_status 'frontend vulnerabilities' "$frontend_status"
+printf '  %s %s\n' "$(status_badge "$frontend_status")" 'frontend vulnerabilities'
 
 if [ "$backend_status" != 'PASS' ] || [ "$frontend_status" != 'PASS' ]; then
   exit 1

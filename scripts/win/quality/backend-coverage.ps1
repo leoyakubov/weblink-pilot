@@ -3,6 +3,12 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
+. (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
+
+$resolvedJavaHome = Resolve-JavaHome
+if ($resolvedJavaHome) {
+    $env:JAVA_HOME = $resolvedJavaHome
+}
 
 Push-Location $backendDir
 try {

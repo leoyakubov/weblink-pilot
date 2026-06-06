@@ -23,22 +23,22 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 13 | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring) | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
 | 14 | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion) | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
 | 15 | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration) | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place. |
-| 23 | Planned | [Redis-first refresh tokens](#phase-23-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
-| 24 | &#x1F7E1; In Progress | [Async and non-blocking operations strategy](#phase-24-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs. |
-| 16 | Planned | [Frontend redesign](#phase-16-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, using PrimeVue plus the free Sakai template as the preferred starting point. |
-| 17 | Planned | [Demo visit analytics](#phase-17-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
-| 18 | Planned | [Security hardening follow-up](#phase-18-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
-| 19 | Planned | [Testing scenarios and README polish](#phase-19-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
-| 20 | Planned | [Codebase refactoring and security review](#phase-20-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
-| 21 | Planned | [RabbitMQ async messaging](#phase-21-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 22 | Planned | [Expiry reminder emails](#phase-22-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| 16 | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
+| 17 | &#x1F7E1; In Progress | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs. |
+| 18 | Planned | [Frontend redesign](#phase-18-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, using PrimeVue plus the free Sakai template as the preferred starting point. |
+| 19 | Planned | [Demo visit analytics](#phase-19-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
+| 20 | Planned | [Security hardening follow-up](#phase-20-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
+| 21 | Planned | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
+| 22 | Planned | [Codebase refactoring and security review](#phase-22-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
+| 23 | Planned | [RabbitMQ async messaging](#phase-23-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 24 | Planned | [Expiry reminder emails](#phase-24-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-24 are the remaining roadmap items, with phase 15 now complete and phase 24 in progress.
+- Phases 15-24 are the remaining roadmap items, with phase 15 now complete and phase 17 in progress.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -414,7 +414,7 @@ Checklist:
 - [x] Document the final public APIs for each module
 - [x] Mark the Modulith migration as complete in the roadmap
 
-### Phase 23 - Redis-first refresh tokens
+### Phase 16 - Redis-first refresh tokens
 
 Goals:
 
@@ -433,13 +433,13 @@ Exit criteria:
 
 Checklist:
 
-- [ ] Design the Redis-first refresh-token lookup path
-- [ ] Keep PostgreSQL as the durable source of truth
-- [ ] Implement rotation and revocation with safe concurrency handling
-- [ ] Add tests for cache-hit, cache-miss, rotation, and logout paths
-- [ ] Document the refresh-token cache and persistence strategy
+- [x] Design the Redis-first refresh-token lookup path
+- [x] Keep PostgreSQL as the durable source of truth
+- [x] Implement rotation and revocation with safe concurrency handling
+- [x] Add tests for cache-hit, cache-miss, rotation, and logout paths
+- [x] Document the refresh-token cache and persistence strategy
 
-### Phase 24 - Async and non-blocking operations strategy
+### Phase 17 - Async and non-blocking operations strategy
 
 Goals:
 
@@ -464,7 +464,7 @@ Checklist:
 - [ ] Document the retry and failure-handling expectations
 - [ ] Keep the plan aligned with the module communication map
 
-### Phase 16 - Frontend redesign
+### Phase 18 - Frontend redesign
 
 Goals:
 
@@ -490,7 +490,7 @@ Checklist:
 - [ ] Preserve existing frontend behavior
 - [ ] Document the updated visual direction
 
-### Phase 17 - Demo visit analytics
+### Phase 19 - Demo visit analytics
 
 Goals:
 
@@ -514,7 +514,7 @@ Checklist:
 - [ ] Keep local/dev optional and lightweight
 - [ ] Document the privacy and deployment implications
 
-### Phase 18 - Security hardening follow-up
+### Phase 20 - Security hardening follow-up
 
 Goals:
 
@@ -539,7 +539,7 @@ Checklist:
 - [ ] Review public observability exposure, CORS, and abuse controls
 - [ ] Close or explicitly accept the remaining findings
 
-### Phase 19 - Testing scenarios and README polish
+### Phase 21 - Testing scenarios and README polish
 
 Goals:
 
@@ -562,7 +562,7 @@ Checklist:
 - [ ] Rewrite the main README into a more presentation-ready form
 - [ ] Keep the README aligned with the current implementation
 
-### Phase 20 - Codebase refactoring and security review
+### Phase 22 - Codebase refactoring and security review
 
 Goals:
 
@@ -588,7 +588,7 @@ Checklist:
 - [ ] Review logging for quality and sensitive-data exposure
 - [ ] Run a full-project security review
 
-### Phase 21 - RabbitMQ async messaging
+### Phase 23 - RabbitMQ async messaging
 
 Goals:
 
@@ -611,7 +611,7 @@ Checklist:
 - [ ] Add integration tests for the queue-backed flow
 - [ ] Keep RabbitMQ optional until the need is proven
 
-### Phase 22 - Expiry reminder emails
+### Phase 24 - Expiry reminder emails
 
 Goals:
 
@@ -653,13 +653,12 @@ Checklist:
 13. monitoring
 14. auth expansion
 15. Spring Modulith migration
-23. Redis-first refresh tokens
-24. async and non-blocking operations strategy
-16. frontend redesign
-17. demo visit analytics
-18. security hardening follow-up
-19. testing scenarios and README polish
-20. codebase refactoring and security review
-21. RabbitMQ async messaging
-22. expiry reminder emails
-
+16. Redis-first refresh tokens
+17. async and non-blocking operations strategy
+18. frontend redesign
+19. demo visit analytics
+20. security hardening follow-up
+21. testing scenarios and README polish
+22. codebase refactoring and security review
+23. RabbitMQ async messaging
+24. expiry reminder emails
