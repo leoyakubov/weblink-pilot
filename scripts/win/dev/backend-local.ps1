@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
 if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    throw 'java is not available on PATH. Install Java 21 before running this script.'
+    throw 'java is not available on PATH. Install Java 25 before running this script.'
 }
 
 $mvnw = Join-Path $backendDir 'mvnw.cmd'

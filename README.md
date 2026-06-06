@@ -92,7 +92,7 @@ sequenceDiagram
 
 ## Backend Quick Start
 
-Requires Java 21. Maven is downloaded automatically by the wrapper on the first run.
+Requires Java 25. Maven is downloaded automatically by the wrapper on the first run.
 
 From `backend/` on Windows:
 

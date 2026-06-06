@@ -5,7 +5,7 @@ This document describes the local workflow for building, testing, and maintainin
 ## Baseline Tools
 
 - Git
-- Java 21
+- Java 25
 - Maven through the backend wrapper
 - Node.js and npm for the frontend
 - Docker Desktop or compatible Docker runtime

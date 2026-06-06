@@ -4,7 +4,7 @@
 
 ### Runtime
 
-- Java 21 LTS
+- Java 25 LTS
 
 Why:
 
@@ -30,7 +30,7 @@ Why:
 - Spring Cache
 - Spring Actuator
 - Flyway
-- springdoc-openapi
+- springdoc-openapi 3.0.3
 
 ### Data stores
 
@@ -60,7 +60,7 @@ Why:
 
 ### Framework
 
-- Vue 3.5.x
+- Vue 3.5.34
 
 Why:
 
@@ -69,20 +69,20 @@ Why:
 
 ### Frontend toolchain
 
-- Vite 8.x
-- TypeScript
-- Vue Router
+- Vue Router 4.6.4
+- Vite 8.0.14
+- TypeScript 5.9.3
 - Pinia
 - Vitest
 - Playwright
 
 ### Styling
 
-- Tailwind CSS 4.3.x
+- CSS
 
 Why:
 
-- modern CSS-first setup
+- simple, framework-free styling keeps the stack lightweight
 - well-suited for a fast, mobile-first UI
 
 ## Infra and delivery
@@ -94,11 +94,10 @@ Why:
 
 ## Versioning policy
 
-We will pin exact versions in the repo once implementation starts.
+We pin exact versions in the repo where it helps reproducibility, and we keep the stack aligned with the current stable releases used by the project.
 
-For planning purposes, the target baseline is:
+Current baseline:
 
-- backend on Java 21 + Spring Boot 4.0.6
-- frontend on Vue 3.5.x + Vite 8.x + Node 24 LTS
-- styling on Tailwind CSS 4.3.x
-
+- backend on Java 25 + Spring Boot 4.0.6 + springdoc-openapi 3.0.3
+- frontend on Vue 3.5.34 + Vue Router 4.6.4 + Vite 8.0.14 + Node 24.16.0 LTS
+- styling on plain CSS
