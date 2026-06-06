@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import CopyActionButton from '@/components/CopyActionButton.vue';
 import { isAdminUser } from '@/lib/auth';
 import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
@@ -168,25 +170,35 @@ watch(
           <h3 class="panel-title">Inspect clicks for any short code.</h3>
         </div>
 
-        <form class="form-grid" @submit.prevent="load(form.code)">
-          <label class="form-field">
-            <span class="field-label">Short code</span>
-            <input
-              v-model="form.code"
-              class="input"
-              type="text"
-              placeholder="github-org"
-              autocomplete="off"
-            />
-          </label>
+          <form class="form-grid" @submit.prevent="load(form.code)">
+            <label class="form-field">
+              <span class="field-label">Short code</span>
+              <InputText
+                v-model="form.code"
+                type="text"
+                placeholder="github-org"
+                autocomplete="off"
+                fluid
+              />
+            </label>
 
-          <div class="actions">
-            <button class="button button-primary" type="submit" :disabled="loading">
-              {{ loading ? 'Loading...' : 'Load analytics' }}
-            </button>
-            <RouterLink class="button button-secondary" to="/"> Create new link </RouterLink>
-          </div>
-        </form>
+            <div class="actions">
+              <Button
+                type="submit"
+                :label="loading ? 'Loading...' : 'Load analytics'"
+                icon="pi pi-chart-line"
+                :disabled="loading"
+              />
+              <RouterLink to="/">
+                <Button
+                  label="Create new link"
+                  icon="pi pi-plus"
+                  severity="secondary"
+                  variant="outlined"
+                />
+              </RouterLink>
+            </div>
+          </form>
 
         <p v-if="errorMessage" class="status error">
           <span class="status-dot"></span>
@@ -324,32 +336,31 @@ watch(
             <span>Expires: {{ formatDate(link.expiresAt) }}</span>
           </div>
           <div class="actions">
-            <RouterLink
-              class="button button-primary"
-              :to="{ name: 'link', params: { code: link.code } }"
-            >
-              Open details page
+            <RouterLink :to="{ name: 'link', params: { code: link.code } }">
+              <Button label="Open details page" icon="pi pi-external-link" />
             </RouterLink>
             <CopyActionButton
               :value="link.shortUrl"
               label="Copy short URL"
               copied-label="Short URL copied"
             />
-            <button
-              class="button button-secondary"
-              type="button"
-              @click="openExternal(link.shortUrl)"
-            >
-              Open redirect
-            </button>
-            <button
-              v-if="canSeePreview"
-              class="button button-secondary"
-              type="button"
-              @click="openExternal(buildApiBaseUrl(`/urls/${link.code}/preview`, settings))"
-            >
-              Open preview JSON
-            </button>
+              <Button
+                type="button"
+                label="Open redirect"
+                icon="pi pi-arrow-right"
+                severity="secondary"
+                variant="outlined"
+                @click="openExternal(link.shortUrl)"
+              />
+              <Button
+                v-if="canSeePreview"
+                type="button"
+                label="Open preview JSON"
+                icon="pi pi-code"
+                severity="secondary"
+                variant="outlined"
+                @click="openExternal(buildApiBaseUrl(`/urls/${link.code}/preview`, settings))"
+              />
           </div>
 
           <figure class="stack" style="margin: 0">
@@ -361,13 +372,14 @@ watch(
                 copied-label="QR URL copied"
                 variant="primary"
               />
-              <button
-                class="button button-secondary"
+              <Button
                 type="button"
+                label="Open QR"
+                icon="pi pi-qrcode"
+                severity="secondary"
+                variant="outlined"
                 @click="openQrModal(link.qrCodeUrl, link.code)"
-              >
-                Open QR
-              </button>
+              />
             </div>
           </figure>
         </template>

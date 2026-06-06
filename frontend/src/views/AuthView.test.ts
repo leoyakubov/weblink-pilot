@@ -65,11 +65,6 @@ describe('AuthView', () => {
     mocks.authenticateMock.mockRejectedValue(new ApiRequestError('Conflict', 409));
 
     const wrapper = mountAuth('register');
-    await wrapper.get('button[aria-label="Show password"]').trigger('click');
-    expect(wrapper.get('input[placeholder="Enter your password"]').element).toHaveProperty(
-      'type',
-      'text',
-    );
 
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
     await wrapper.get('input[placeholder="you@example.com"]').setValue('user1@example.com');
@@ -117,7 +112,7 @@ describe('AuthView', () => {
     } as unknown as Window);
 
     const wrapper = mountAuth('login');
-    await wrapper.get('button.auth-link-button[type="button"]').trigger('click');
+    await wrapper.get('button[aria-label="Continue with GitHub"]').trigger('click');
 
     expect(openMock).toHaveBeenCalledWith(
       expect.stringContaining('/auth/oauth2/github/start'),

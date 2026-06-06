@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import Button from 'primevue/button';
 import { getAdminOverview } from '@/lib/api';
 import { buildMonitoringLinks } from '@/lib/monitoring';
 import { loadSettings } from '@/lib/settings';
@@ -77,14 +78,15 @@ onMounted(() => {
             <p class="eyebrow">Admin monitoring</p>
             <h3 class="panel-title">System overview and ownership mix.</h3>
           </div>
-          <button
-            class="button button-secondary"
+          <Button
             type="button"
+            :label="loading ? 'Refreshing...' : 'Refresh'"
+            icon="pi pi-refresh"
+            severity="secondary"
+            variant="outlined"
             :disabled="loading"
             @click="refresh"
-          >
-            {{ loading ? 'Refreshing...' : 'Refresh' }}
-          </button>
+          />
         </div>
 
         <p class="help-text">
@@ -147,8 +149,8 @@ onMounted(() => {
                 <strong>{{ link.label }}</strong>
                 <p>{{ link.description }}</p>
               </div>
-              <a class="button button-secondary" :href="link.href" target="_blank" rel="noreferrer">
-                Open
+              <a :href="link.href" target="_blank" rel="noreferrer">
+                <Button label="Open" severity="secondary" variant="outlined" />
               </a>
             </div>
           </div>
@@ -179,8 +181,8 @@ onMounted(() => {
                 <strong>{{ link.label }}</strong>
                 <p>{{ link.description }}</p>
               </div>
-              <a class="button button-secondary" :href="link.href" target="_blank" rel="noreferrer">
-                Open
+              <a :href="link.href" target="_blank" rel="noreferrer">
+                <Button label="Open" severity="secondary" variant="outlined" />
               </a>
             </div>
           </div>

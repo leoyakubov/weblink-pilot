@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import Button from 'primevue/button';
+import Password from 'primevue/password';
 import { ApiRequestError, changePassword, getAccountProfile } from '@/lib/api';
 import type { AccountProfileResponse } from '@/types';
 
@@ -183,41 +185,51 @@ onMounted(() => {
         <form class="form-grid" @submit.prevent="submitPasswordChange">
           <label class="form-field">
             <span class="field-label">Current password</span>
-            <input
+            <Password
               v-model="form.currentPassword"
-              class="input"
-              type="password"
               autocomplete="current-password"
               placeholder="Current password"
+              :feedback="false"
+              toggle-mask
+              fluid
             />
           </label>
           <label class="form-field">
             <span class="field-label">New password</span>
-            <input
+            <Password
               v-model="form.newPassword"
-              class="input"
-              type="password"
               autocomplete="new-password"
               placeholder="New password"
+              :feedback="false"
+              toggle-mask
+              fluid
             />
           </label>
           <label class="form-field">
             <span class="field-label">Confirm new password</span>
-            <input
+            <Password
               v-model="form.confirmPassword"
-              class="input"
-              type="password"
               autocomplete="new-password"
               placeholder="Confirm new password"
+              :feedback="false"
+              toggle-mask
+              fluid
             />
           </label>
 
           <div class="actions">
-            <button class="button button-primary" type="submit" :disabled="saving">
-              {{ saving ? 'Updating...' : 'Update password' }}
-            </button>
-            <RouterLink class="button button-secondary" to="/auth/forgot-password">
-              Reset password instead
+            <Button
+              type="submit"
+              :label="saving ? 'Updating...' : 'Update password'"
+              icon="pi pi-shield"
+              :disabled="saving"
+            />
+            <RouterLink to="/auth/forgot-password">
+              <Button
+                label="Reset password instead"
+                severity="secondary"
+                variant="outlined"
+              />
             </RouterLink>
           </div>
         </form>

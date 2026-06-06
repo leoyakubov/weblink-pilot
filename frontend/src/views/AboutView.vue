@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import { loadSettings, saveSettings } from '@/lib/settings';
 import type { ApiSettings } from '@/types';
 
@@ -76,18 +78,16 @@ function saveBaseUrl() {
         <template v-if="canEditBackendUrl">
           <label class="form-field">
             <span class="field-label">API base URL</span>
-            <input
+            <InputText
               v-model="settings.apiBaseUrl"
-              class="input"
               type="url"
               placeholder="http://localhost:8080/api/v1"
+              fluid
             />
           </label>
 
           <div class="actions">
-            <button class="button button-primary" type="button" @click="saveBaseUrl">
-              Save settings
-            </button>
+            <Button type="button" label="Save settings" icon="pi pi-save" @click="saveBaseUrl" />
           </div>
         </template>
         <div v-else class="list-item">

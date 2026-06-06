@@ -56,6 +56,13 @@ textarea {
   font: inherit;
 }
 
+.p-inputtext,
+.p-password,
+.p-password-input,
+.p-inputtextarea {
+  width: 100%;
+}
+
 button {
   cursor: pointer;
 }

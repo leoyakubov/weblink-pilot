@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+import Button from 'primevue/button';
 import { ApiRequestError, buildApiBaseUrl } from '@/lib/api';
 import { authenticate, authState } from '@/lib/auth';
 import type { AuthCredentialsRequest } from '@/types';
+import InputText from 'primevue/inputtext';
+import Password from 'primevue/password';
+import Tag from 'primevue/tag';
 
 const props = defineProps<{
   mode: 'login' | 'register';
@@ -155,7 +159,44 @@ async function submit() {
 </script>
 
 <template>
-  <section class="auth-layout">
+  <section class="page-grid two-col auth-layout">
+    <article class="card">
+      <div class="card-inner stack">
+        <div class="auth-heading">
+          <p class="eyebrow">Account access</p>
+          <h3 class="panel-title">Move between guest mode and saved ownership.</h3>
+        </div>
+
+        <p class="hero-note">
+          Use a password for the local account flow, or switch to GitHub sign-in when you want to
+          keep ownership tied to an external identity.
+        </p>
+
+        <div class="hero-badges">
+          <Tag value="JWT access tokens" severity="info" />
+          <Tag value="Refresh session" severity="success" />
+          <Tag value="Email reset flow" severity="warn" />
+          <Tag value="GitHub login" severity="contrast" />
+        </div>
+
+        <div class="grid-2">
+          <div class="list-item">
+            <strong>Fast sign-in</strong>
+            <p>Use your existing account to get back to owned links and analytics.</p>
+          </div>
+          <div class="list-item">
+            <strong>Recovery ready</strong>
+            <p>Reset email and verification flows stay available from the same page.</p>
+          </div>
+        </div>
+
+        <div class="list-item">
+          <strong>Current mode</strong>
+          <p>{{ props.mode === 'login' ? 'Sign in to your account' : 'Create a new account' }}</p>
+        </div>
+      </div>
+    </article>
+
     <article class="card auth-card">
       <div class="card-inner stack">
         <div class="auth-heading">
@@ -166,77 +207,43 @@ async function submit() {
         <form class="form-grid" @submit.prevent="submit">
           <label class="form-field">
             <span class="field-label">Username</span>
-            <input
+            <InputText
               v-model="form.username"
-              class="input"
               type="text"
               placeholder="Your username"
               autocomplete="username"
+              fluid
             />
           </label>
           <label v-if="props.mode === 'register'" class="form-field">
             <span class="field-label">Email</span>
-            <input
+            <InputText
               v-model="form.email"
-              class="input"
               type="email"
               placeholder="you@example.com"
               autocomplete="email"
+              fluid
             />
           </label>
           <label class="form-field">
             <span class="field-label">Password</span>
-            <div class="input-row">
-              <input
-                v-model="form.password"
-                class="input"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Enter your password"
-                :autocomplete="passwordAutocomplete"
-              />
-              <button
-                class="password-toggle"
-                type="button"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                :title="showPassword ? 'Hide password' : 'Show password'"
-                @click="showPassword = !showPassword"
-              >
-                <svg v-if="showPassword" viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M3 3l18 18M10.5 10.62a2 2 0 1 0 2.88 2.76m-4.21-4.17A4.5 4.5 0 0 1 16.5 12c0 .88-.24 1.7-.66 2.4m-2.02 2.02A4.5 4.5 0 0 1 7.5 12c0-.88.24-1.7.66-2.4M9.9 5.23A10.96 10.96 0 0 1 12 4.5c5.5 0 9.5 7.5 9.5 7.5a19.58 19.58 0 0 1-4.1 5.12M6.84 6.84A19.83 19.83 0 0 0 2.5 12s4 7.5 9.5 7.5c1.26 0 2.47-.23 3.56-.64"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.7"
-                  />
-                </svg>
-                <svg v-else viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M2.5 12S6.4 4.5 12 4.5 21.5 12 21.5 12 17.6 19.5 12 19.5 2.5 12 2.5 12Z"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.7"
-                  />
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="2.75"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.7"
-                  />
-                </svg>
-              </button>
-            </div>
+            <Password
+              v-model="form.password"
+              :feedback="false"
+              toggle-mask
+              :placeholder="'Enter your password'"
+              :autocomplete="passwordAutocomplete"
+              fluid
+            />
           </label>
 
           <div class="actions">
-            <button class="button button-primary" type="submit" :disabled="busy">
-              {{ busy ? 'Working...' : submitLabel }}
-            </button>
+            <Button
+              type="submit"
+              :label="busy ? 'Working...' : submitLabel"
+              icon="pi pi-lock"
+              :disabled="busy"
+            />
           </div>
 
           <p v-if="errorMessage" class="status error" role="alert" aria-live="polite">
@@ -251,40 +258,48 @@ async function submit() {
             <span class="footnote">
               {{ props.mode === 'login' ? 'Need an account?' : 'Already have an account?' }}
             </span>
-            <RouterLink
-              class="button button-secondary button-small auth-link-button"
-              :to="switchPath"
-            >
-              {{ props.mode === 'login' ? 'Sign up' : 'Sign in' }}
+            <RouterLink :to="switchPath">
+              <Button
+                :label="props.mode === 'login' ? 'Sign up' : 'Sign in'"
+                severity="secondary"
+                variant="outlined"
+                size="small"
+              />
             </RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Forgot your password?</span>
-            <RouterLink
-              class="button button-secondary button-small auth-link-button"
-              to="/auth/forgot-password"
-            >
-              Reset password
+            <RouterLink to="/auth/forgot-password">
+              <Button
+                label="Reset password"
+                severity="secondary"
+                variant="outlined"
+                size="small"
+              />
             </RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Need a verification email?</span>
-            <RouterLink
-              class="button button-secondary button-small auth-link-button"
-              to="/auth/verify-email/request"
-            >
-              Resend verification
+            <RouterLink to="/auth/verify-email/request">
+              <Button
+                label="Resend verification"
+                severity="secondary"
+                variant="outlined"
+                size="small"
+              />
             </RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Prefer GitHub?</span>
-            <button
-              class="button button-secondary button-small auth-link-button"
+            <Button
               type="button"
+              label="Continue with GitHub"
+              icon="pi pi-github"
+              severity="secondary"
+              variant="outlined"
+              size="small"
               @click="openGithubLogin"
-            >
-              Continue with GitHub
-            </button>
+            />
           </div>
         </form>
       </div>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Tag from 'primevue/tag';
 import CopyActionButton from '@/components/CopyActionButton.vue';
 import { authState } from '@/lib/auth';
 import { buildApiBaseUrl, createLink, listLinks } from '@/lib/api';
@@ -137,10 +140,10 @@ watch(
           </p>
 
           <div class="hero-badges">
-            <span class="badge"><strong>Guest</strong> demo links</span>
-            <span class="badge"><strong>Owned</strong> user links</span>
-            <span class="badge"><strong>QR</strong> scans</span>
-            <span class="badge"><strong>Analytics</strong> insights</span>
+            <Tag value="Guest demo links" severity="info" />
+            <Tag value="Owned user links" severity="success" />
+            <Tag value="QR scans" severity="warn" />
+            <Tag value="Analytics insights" severity="contrast" />
           </div>
 
           <div class="hero-points">
@@ -174,9 +177,8 @@ watch(
           <form class="form-grid" @submit.prevent="submit">
             <label class="form-field">
               <span class="field-label">Original URL</span>
-              <input
+              <InputText
                 v-model="form.originalUrl"
-                class="input"
                 type="url"
                 placeholder="https://github.com/weblinkpilot/weblink-pilot/tree/main/docs"
                 required
@@ -185,9 +187,8 @@ watch(
 
             <label class="form-field">
               <span class="field-label">Custom alias (optional)</span>
-              <input
+              <InputText
                 v-model="form.customAlias"
-                class="input"
                 type="text"
                 placeholder="github-org"
               />
@@ -195,17 +196,27 @@ watch(
 
             <label class="form-field">
               <span class="field-label">Expiration</span>
-              <input v-model="form.expiresAt" class="input" type="datetime-local" />
+              <InputText v-model="form.expiresAt" type="datetime-local" />
               <p class="help-text">
                 Optional. Expired links stop redirecting, and the backend caps the maximum lifetime.
               </p>
             </label>
 
             <div class="actions">
-              <button class="button button-primary" type="submit" :disabled="submitting">
-                {{ submitting ? 'Creating...' : 'Create short link' }}
-              </button>
-              <RouterLink class="button button-secondary" to="/about"> About </RouterLink>
+              <Button
+                type="submit"
+                :label="submitting ? 'Creating...' : 'Create short link'"
+                icon="pi pi-link"
+                :disabled="submitting"
+              />
+              <RouterLink to="/about">
+              <Button
+                label="About"
+                icon="pi pi-info-circle"
+                severity="secondary"
+                variant="outlined"
+              />
+              </RouterLink>
             </div>
 
             <p v-if="errorMessage" class="status error">
@@ -223,20 +234,21 @@ watch(
 
     <article class="card">
       <div class="card-inner stack">
-        <div class="section-row">
-          <div>
-            <p class="eyebrow">Recent links</p>
-            <h3 class="panel-title">{{ recentTitle }}</h3>
-          </div>
-          <button
-            class="button button-secondary"
+          <div class="section-row">
+            <div>
+              <p class="eyebrow">Recent links</p>
+              <h3 class="panel-title">{{ recentTitle }}</h3>
+            </div>
+          <Button
             type="button"
+            :label="loadingRecent ? 'Refreshing...' : 'Refresh'"
+            icon="pi pi-refresh"
+            severity="secondary"
+            variant="outlined"
             :disabled="loadingRecent"
             @click="refreshRecent"
-          >
-            {{ loadingRecent ? 'Refreshing...' : 'Refresh' }}
-          </button>
-        </div>
+          />
+          </div>
 
         <p v-if="recentError" class="status error">
           <span class="status-dot"></span>
@@ -255,29 +267,33 @@ watch(
             <p class="footnote">{{ item.clickCount }} clicks</p>
             <div class="actions">
               <RouterLink
-                class="button button-primary"
                 :to="{ name: 'link', params: { code: item.code } }"
               >
-                Details
+                <Button label="Details" icon="pi pi-external-link" />
               </RouterLink>
               <RouterLink
-                class="button button-secondary"
                 :to="{ name: 'dashboard', query: { code: item.code } }"
               >
-                Analytics
+                <Button
+                  label="Analytics"
+                  icon="pi pi-chart-line"
+                  severity="secondary"
+                  variant="outlined"
+                />
               </RouterLink>
               <CopyActionButton
                 :value="item.shortUrl"
                 label="Copy short URL"
                 copied-label="Short URL copied"
               />
-              <button
-                class="button button-secondary"
+              <Button
                 type="button"
+                label="Open QR"
+                icon="pi pi-qrcode"
+                severity="secondary"
+                variant="outlined"
                 @click="openQrModal(item.qrCodeUrl, item.code)"
-              >
-                Open QR
-              </button>
+              />
             </div>
             <div class="list-item-meta">
               <span>Created: {{ formatDate(item.createdAt) }}</span>
@@ -319,13 +335,17 @@ watch(
           </div>
           <div class="actions">
             <RouterLink
-              class="button button-primary"
               :to="{ name: 'link', params: { code: createdLink.code } }"
             >
-              View details page
+              <Button label="View details page" icon="pi pi-external-link" />
             </RouterLink>
-            <RouterLink class="button button-secondary" :to="dashboardUrl">
-              Open analytics
+            <RouterLink :to="dashboardUrl">
+              <Button
+                label="Open analytics"
+                icon="pi pi-chart-bar"
+                severity="secondary"
+                variant="outlined"
+              />
             </RouterLink>
             <CopyActionButton
               :value="createdLink.shortUrl"
@@ -333,13 +353,14 @@ watch(
               copied-label="Short URL copied"
               variant="primary"
             />
-            <button
-              class="button button-secondary"
+            <Button
               type="button"
+              label="Open redirect"
+              icon="pi pi-arrow-right"
+              severity="secondary"
+              variant="outlined"
               @click="openExternal(createdLink.shortUrl)"
-            >
-              Open redirect
-            </button>
+            />
             <CopyActionButton
               v-if="canSeePreview"
               :value="linkPreviewUrl"
@@ -372,13 +393,14 @@ watch(
               copied-label="QR URL copied"
               variant="primary"
             />
-            <button
-              class="button button-secondary"
+            <Button
               type="button"
+              label="Open QR"
+              icon="pi pi-qrcode"
+              severity="secondary"
+              variant="outlined"
               @click="openQrModal(createdLink.qrCodeUrl, createdLink.code)"
-            >
-              Open QR
-            </button>
+            />
           </div>
 
           <p class="help-text">
@@ -398,13 +420,15 @@ watch(
                   <p class="eyebrow">QR code</p>
                   <h3 class="panel-title">{{ qrModalTitle }}</h3>
                 </div>
-                <button
-                  class="button button-secondary button-small"
+                <Button
                   type="button"
+                  label="Close"
+                  icon="pi pi-times"
+                  severity="secondary"
+                  variant="text"
+                  size="small"
                   @click="closeQrModal"
-                >
-                  Close
-                </button>
+                />
               </div>
 
               <img
