@@ -2,8 +2,14 @@
 /* global MessageEvent */
 import { computed, onBeforeUnmount, onMounted } from 'vue';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
-import { applyAuthResponse, authState, bootstrapAuth, isAdminUser, signOut } from '@/lib/auth';
-import type { AuthResponse } from '@/types';
+import {
+  applyAuthResponse,
+  authState,
+  bootstrapAuth,
+  isAdminUser,
+  signOut,
+} from '@/shared/services/auth';
+import type { AuthResponse } from '@/shared/models/api';
 
 const route = useRoute();
 const router = useRouter();
