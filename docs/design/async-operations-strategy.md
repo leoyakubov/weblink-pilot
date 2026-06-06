@@ -31,6 +31,14 @@ Our current default is:
 
 That default keeps the app easy to reason about and fits the current stack.
 
+## Failure And Retry Expectations
+
+- Async listeners should never block the request path.
+- Failures should be logged centrally through the async exception handler.
+- We do not automatically retry mail or cache events yet.
+- If a failure needs a replay path later, prefer an explicit retry queue or outbox-style flow instead of hidden retries.
+- The current async steps are best-effort side effects, not user-visible guarantees.
+
 ## Good Async Candidates
 
 | Flow | Why async helps | Suggested mechanism |

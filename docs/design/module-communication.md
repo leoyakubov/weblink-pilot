@@ -207,6 +207,12 @@ Async parts:
 - SMTP delivery through the listener
 - any future retry / failure handling around outbound mail
 
+Failure policy:
+
+- listener failures are logged centrally
+- the request path does not wait on email delivery
+- retries are intentionally not automatic yet
+
 ## Cache And Database Responsibilities
 
 ### PostgreSQL

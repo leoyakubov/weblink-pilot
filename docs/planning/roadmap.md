@@ -459,12 +459,12 @@ Exit criteria:
 Checklist:
 
 - [x] Document the current async/non-blocking communication patterns
-- [ ] Classify the remaining product flows by sync vs async fit
+- [x] Classify the remaining product flows by sync vs async fit
 - [x] Define implementation order for the best async candidates
 - [x] Implement async auth email delivery with after-commit events
 - [x] Implement async analytics cache invalidation with after-commit events
-- [ ] Document the retry and failure-handling expectations
-- [ ] Keep the plan aligned with the module communication map
+- [x] Document the retry and failure-handling expectations
+- [x] Keep the plan aligned with the module communication map
 
 ### Phase 18 - Frontend redesign
 
