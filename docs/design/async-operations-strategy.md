@@ -27,6 +27,7 @@ Our current default is:
 
 - auth email verification and password reset notifications are published as domain events after the surrounding transaction commits
 - the actual SMTP send is handled by an async listener, not on the request thread
+- analytics cache invalidation is published after a click record is stored and handled asynchronously after commit
 
 That default keeps the app easy to reason about and fits the current stack.
 
@@ -106,6 +107,10 @@ Potential async follow-ups:
 - consume link click events asynchronously
 - batch or queue expensive enrichments
 - move summary rebuilds off the request path
+
+Implemented:
+
+- evict analytics caches asynchronously after click persistence
 
 ### Operations
 

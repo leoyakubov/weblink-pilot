@@ -38,6 +38,7 @@ For the Redis-specific scenarios across links, auth, analytics, and rate limitin
 | `links` | Redis | cache-aside | Sync | hot short-code lookups |
 | `links` | PostgreSQL | repository layer | Sync | short links, aliases, ownership, expiration state |
 | `analytics` | PostgreSQL | repository layer | Sync | click events, summary data |
+| `analytics` | Redis | async cache eviction listener | Async | analytics counts and summaries |
 | `auth` | PostgreSQL | repository layer | Sync | users, roles, refresh tokens, password reset tokens, email verification tokens |
 | `auth` | Redis | optional token/session cache | Sync | fast refresh-token lookup and rotation metadata |
 | `analytics` | `links` | read facade | Sync | link read model for summaries and admin views |
@@ -57,6 +58,7 @@ flowchart LR
   B -->|"sync: statistics facade"| C
   C -->|"async: LinkCreatedEvent / LinkClickedEvent"| D
   C -->|"sync: cache-aside"| R["Redis"]
+  D -->|"async: cache invalidation event"| R
   C -->|"sync: repositories"| P["PostgreSQL"]
   B -->|"sync: repositories"| P
   D -->|"sync: repositories"| P
@@ -138,14 +140,18 @@ sequenceDiagram
   participant L as links
   participant E as analytics
   participant DB as PostgreSQL
+  participant C as async cache listener
 
   L-->>E: publish LinkClickedEvent (async)
   E->>E: enrich event data (sync internal work)
   E->>DB: persist click event (sync)
-  E->>DB: update summary/read model (sync)
+  E-->>C: publish AnalyticsCacheInvalidationRequestedEvent (async)
+  C->>C: evict analytics caches after commit
 ```
 
 Analytics is event-driven from the link module, but the persistence work inside `analytics` is synchronous once the event has been received.
+
+Analytics cache eviction is also event-driven, so Redis invalidation does not block the recorder.
 
 ## Auth Flow
 

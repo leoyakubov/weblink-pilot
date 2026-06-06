@@ -85,10 +85,12 @@ sequenceDiagram
   participant B as Backend
   participant R as Redis
   participant DB as PostgreSQL
+  participant C as Async listener
 
   B->>DB: persist click event and summary data (sync)
-  B->>R: evict cached counts / summaries (sync)
-  R-->>B: cache cleared
+  B-->>C: publish analytics cache invalidation event (async)
+  C->>R: evict cached counts / summaries (async after commit)
+  R-->>C: cache cleared
 ```
 
 What is cached:
@@ -101,6 +103,8 @@ What invalidates it:
 - new clicks
 - new summary state
 - changes that affect a link's reporting view
+
+The invalidation now happens after the transaction commits, through an async listener, so the recorder no longer waits on Redis.
 
 ## Auth Refresh-Token Cache Flow
 
@@ -179,6 +183,7 @@ Redis can be used here for lightweight throttling and abuse controls because the
 ### Asynchronous
 
 - analytics event fan-out after a redirect or create-link action
+- analytics cache invalidation after click writes
 - future cache warming jobs
 - future reminders or maintenance tasks that do not need to block the request path
 

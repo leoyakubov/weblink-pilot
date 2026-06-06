@@ -5,10 +5,9 @@ import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.shared.contracts.LinkClickedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 public class ClickEventRecorder {
@@ -17,15 +16,15 @@ public class ClickEventRecorder {
 
   private final ClickEventRepository repository;
   private final UserAgentParser userAgentParser;
-  private final AnalyticsCacheService analyticsCacheService;
+  private final ApplicationEventPublisher eventPublisher;
 
   public ClickEventRecorder(
       ClickEventRepository repository,
       UserAgentParser userAgentParser,
-      AnalyticsCacheService analyticsCacheService) {
+      ApplicationEventPublisher eventPublisher) {
     this.repository = repository;
     this.userAgentParser = userAgentParser;
-    this.analyticsCacheService = analyticsCacheService;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional
@@ -42,7 +41,7 @@ public class ClickEventRecorder {
             event.country(),
             metadata.browserFamily(),
             metadata.deviceType()));
-    evictAfterCommit(event.code());
+    eventPublisher.publishEvent(new AnalyticsCacheInvalidationRequestedEvent(event.code()));
     log.info(
         "analytics.click.persisted code={} source={} country={} browser={} device={} referrerPresent={}",
         event.code(),
@@ -51,20 +50,5 @@ public class ClickEventRecorder {
         metadata.browserFamily(),
         metadata.deviceType(),
         event.referrer() != null && !event.referrer().isBlank());
-  }
-
-  private void evictAfterCommit(String code) {
-    if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-      analyticsCacheService.evict(code);
-      return;
-    }
-
-    TransactionSynchronizationManager.registerSynchronization(
-        new TransactionSynchronization() {
-          @Override
-          public void afterCommit() {
-            analyticsCacheService.evict(code);
-          }
-        });
   }
 }
