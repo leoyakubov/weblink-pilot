@@ -27,15 +27,16 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 17 | Planned | [Security hardening follow-up](#phase-17-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
 | 18 | Planned | [Testing scenarios and README polish](#phase-18-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
 | 19 | Planned | [Codebase refactoring and security review](#phase-19-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
-| 20 | Planned | [RabbitMQ async messaging](#phase-20-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 21 | Planned | [Expiry reminder emails](#phase-21-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| 20 | Planned | [Frontend redesign](#phase-20-frontend-redesign) | Redesign the main frontend pages and forms to better match the polished demo experience we want to present. |
+| 21 | Planned | [RabbitMQ async messaging](#phase-21-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 22 | Planned | [Expiry reminder emails](#phase-22-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-21 are the remaining roadmap items, with phase 15 already in progress.
+- Phases 15-22 are the remaining roadmap items, with phase 15 already in progress.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -407,22 +408,22 @@ Checklist:
 
 Goals:
 
-- integrate a ready-made analytics service for the demo site
+- integrate Cloudflare Web Analytics for the demo site
 - track visits, referrers, and basic page usage for the public demo
 - keep the analytics setup optional so local/dev can stay lightweight
 - document the privacy and deployment implications of the chosen analytics provider
 
 Exit criteria:
 
-- demo traffic is visible in the selected analytics dashboard
+- demo traffic is visible in the Cloudflare analytics dashboard
 - the snippet or integration is easy to enable and disable by environment
 - local/dev remain usable without the external analytics service
 - the analytics choice is documented alongside the deployment notes
 
 Checklist:
 
-- [ ] Choose the demo analytics provider
-- [ ] Add the provider snippet or integration
+- [x] Choose Cloudflare Web Analytics as the demo analytics provider
+- [ ] Add the Cloudflare beacon snippet or integration
 - [ ] Track visits, referrers, and basic page usage
 - [ ] Keep local/dev optional and lightweight
 - [ ] Document the privacy and deployment implications
@@ -501,7 +502,31 @@ Checklist:
 - [ ] Review logging for quality and sensitive-data exposure
 - [ ] Run a full-project security review
 
-### Phase 20 - RabbitMQ async messaging
+### Phase 20 - Frontend redesign
+
+Goals:
+
+- redesign the main frontend pages and forms for a more polished demo presentation
+- keep the mobile-first experience strong while improving hierarchy, spacing, and visual clarity
+- update the core screens so the demo feels more intentional and less like a scaffold
+- preserve the existing app behavior while refreshing the look and feel
+
+Exit criteria:
+
+- the main pages and forms look noticeably more polished
+- the redesign remains mobile-first and responsive
+- existing frontend flows continue to work
+- the visual system is documented well enough to keep future pages consistent
+
+Checklist:
+
+- [ ] Redesign the main frontend pages
+- [ ] Redesign the core forms
+- [ ] Keep the mobile-first layout intact
+- [ ] Preserve existing frontend behavior
+- [ ] Document the updated visual direction
+
+### Phase 21 - RabbitMQ async messaging
 
 Goals:
 
@@ -524,7 +549,7 @@ Checklist:
 - [ ] Add integration tests for the queue-backed flow
 - [ ] Keep RabbitMQ optional until the need is proven
 
-### Phase 21 - Expiry reminder emails
+### Phase 22 - Expiry reminder emails
 
 Goals:
 
@@ -570,6 +595,7 @@ Checklist:
 17. security hardening follow-up
 18. testing scenarios and README polish
 19. codebase refactoring and security review
-20. RabbitMQ async messaging
-21. expiry reminder emails
+20. frontend redesign
+21. RabbitMQ async messaging
+22. expiry reminder emails
 
