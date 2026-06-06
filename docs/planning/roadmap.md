@@ -30,6 +30,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 20 | Planned | [Codebase refactoring and security review](#phase-20-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
 | 21 | Planned | [RabbitMQ async messaging](#phase-21-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 22 | Planned | [Expiry reminder emails](#phase-22-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| 23 | Planned | [Redis-first refresh tokens](#phase-23-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. |
 
 ## Execution Checklist
 
@@ -583,6 +584,31 @@ Checklist:
 - [ ] Deduplicate reminders across runs
 - [ ] Document the mail workflow and test it
 
+### Phase 23 - Redis-first refresh tokens
+
+Goals:
+
+- make refresh-token lookup and rotation Redis-first
+- keep PostgreSQL as the durable source of truth
+- reduce refresh-token latency on login, refresh, and logout
+- keep token revocation and rotation safe under concurrent requests
+- document the cache and persistence split clearly
+
+Exit criteria:
+
+- refresh-token requests prefer Redis before falling back to PostgreSQL
+- token rotation and revocation remain correct under concurrent access
+- durable token state still survives cache loss
+- the refresh-token flow is testable and documented
+
+Checklist:
+
+- [ ] Design the Redis-first refresh-token lookup path
+- [ ] Keep PostgreSQL as the durable source of truth
+- [ ] Implement rotation and revocation with safe concurrency handling
+- [ ] Add tests for cache-hit, cache-miss, rotation, and logout paths
+- [ ] Document the refresh-token cache and persistence strategy
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -607,4 +633,5 @@ Checklist:
 20. codebase refactoring and security review
 21. RabbitMQ async messaging
 22. expiry reminder emails
+23. Redis-first refresh tokens
 
