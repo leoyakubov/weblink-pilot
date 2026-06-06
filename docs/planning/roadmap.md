@@ -7,35 +7,35 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 | # | Status | Area | Notes |
 |---|---|---|---|
-| 0 | &#x1F7E2; Done | Project bootstrap | Repo layout, baseline docs, naming, and initial tooling are in place. |
-| 1 | &#x1F7E2; Done | Backend foundation | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
-| 2 | &#x1F7E2; Done | Tests, code quality, Sonar | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
-| 3 | &#x1F7E2; Done | Docker | Local and dev Docker workflows are in place for the full stack and backend support services. |
-| 4 | &#x1F7E2; Done | URL lifecycle | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
-| 5 | &#x1F7E2; Done | QR code support | QR generation and the QR endpoint are in place for the core link journey. |
-| 6 | &#x1F7E2; Done | Analytics | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
-| 7 | &#x1F7E2; Done | Frontend foundation | Vue app shell and backend integration are in place. |
-| 8 | &#x1F7E2; Done | Frontend feature set | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
-| 9 | &#x1F7E2; Done | Authentication and access control | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
-| 10 | &#x1F7E2; Done | Production hardening | Logging, metrics, documentation polish, release checks, and deploy safety are in place. |
-| 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
-| 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
-| 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
-| 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
-| 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 22 | Planned | Spring Modulith migration | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
-| 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
-| 18 | Planned | Security hardening follow-up | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
-| 20 | Planned | Testing scenarios and README polish | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
-| 21 | Planned | Codebase refactoring and security review | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
+| 0 | &#x1F7E2; Done | [Project bootstrap](#phase-0-repo-readiness) | Repo layout, baseline docs, naming, and initial tooling are in place. |
+| 1 | &#x1F7E2; Done | [Backend foundation](#phase-1-backend-foundation) | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
+| 2 | &#x1F7E2; Done | [Tests, code quality, Sonar](#phase-2-tests-code-quality-sonar) | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
+| 3 | &#x1F7E2; Done | [Docker](#phase-3-docker) | Local and dev Docker workflows are in place for the full stack and backend support services. |
+| 4 | &#x1F7E2; Done | [URL lifecycle](#phase-4-url-lifecycle) | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
+| 5 | &#x1F7E2; Done | [QR code support](#phase-5-qr-code-support) | QR generation and the QR endpoint are in place for the core link journey. |
+| 6 | &#x1F7E2; Done | [Analytics](#phase-6-analytics) | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
+| 7 | &#x1F7E2; Done | [Frontend foundation](#phase-7-frontend-foundation) | Vue app shell and backend integration are in place. |
+| 8 | &#x1F7E2; Done | [Frontend feature set](#phase-8-frontend-feature-set) | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
+| 9 | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control) | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
+| 10 | &#x1F7E2; Done | [Production hardening](#phase-10-production-hardening) | Logging, metrics, documentation polish, release checks, and deploy safety are in place. |
+| 11 | &#x1F7E2; Done | [Environment profiles and scripts](#phase-11-environment-profiles-and-scripts) | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
+| 12 | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching) | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
+| 13 | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring) | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
+| 14 | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion) | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
+| 15 | &#x1F7E1; In Progress | [Spring Modulith migration](#phase-15-spring-modulith-migration) | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
+| 16 | Planned | [Demo visit analytics](#phase-16-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
+| 17 | Planned | [Security hardening follow-up](#phase-17-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
+| 18 | Planned | [Testing scenarios and README polish](#phase-18-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
+| 19 | Planned | [Codebase refactoring and security review](#phase-19-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
+| 20 | Planned | [RabbitMQ async messaging](#phase-20-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 21 | Planned | [Expiry reminder emails](#phase-21-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-22 are the remaining planned roadmap items.
+- Phases 15-21 are the remaining roadmap items, with phase 15 already in progress.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -378,54 +378,7 @@ Checklist:
 - [x] Added richer account management
 - [x] Added remember-me session controls
 
-### Phase 17 - Demo visit analytics
-
-Goals:
-
-- integrate a ready-made analytics service for the demo site
-- track visits, referrers, and basic page usage for the public demo
-- keep the analytics setup optional so local/dev can stay lightweight
-- document the privacy and deployment implications of the chosen analytics provider
-
-Exit criteria:
-
-- demo traffic is visible in the selected analytics dashboard
-- the snippet or integration is easy to enable and disable by environment
-- local/dev remain usable without the external analytics service
-- the analytics choice is documented alongside the deployment notes
-
-Checklist:
-
-- [ ] Choose the demo analytics provider
-- [ ] Add the provider snippet or integration
-- [ ] Track visits, referrers, and basic page usage
-- [ ] Keep local/dev optional and lightweight
-- [ ] Document the privacy and deployment implications
-
-### Phase 15 - RabbitMQ async messaging
-
-Goals:
-
-- add RabbitMQ only if the app needs queued work instead of synchronous request handling
-- move click events or other background tasks off the request thread when that improves latency
-- support event fan-out for future notifications, cache invalidation, or integration jobs
-- keep local/dev/demo setup and tests explicit so the broker stays optional until the feature need is clear
-
-Exit criteria:
-
-- async event processing is documented and testable
-- the broker is only used for workloads that benefit from queueing
-- local and CI workflows still work cleanly when RabbitMQ is disabled
-
-Checklist:
-
-- [ ] Decide which workloads actually need queueing
-- [ ] Define the event fan-out and background-job use cases
-- [ ] Add broker configuration for local/dev/demo environments
-- [ ] Add integration tests for the queue-backed flow
-- [ ] Keep RabbitMQ optional until the need is proven
-
-### Phase 22 - Spring Modulith migration
+### Phase 15 - Spring Modulith migration
 
 Goals:
 
@@ -450,32 +403,31 @@ Checklist:
 - [ ] Replace direct cross-module calls with APIs or events
 - [ ] Verify the new module contracts in tests
 
-### Phase 16 - Expiry reminder emails
+### Phase 16 - Demo visit analytics
 
 Goals:
 
-- add a scheduled backend job that scans each user's links
-- build a list of links that are about to expire
-- send reminder emails to the owning user
-- keep the reminder logic compatible with the existing mail infrastructure
-- make the job observable, testable, and safe to run repeatedly
+- integrate a ready-made analytics service for the demo site
+- track visits, referrers, and basic page usage for the public demo
+- keep the analytics setup optional so local/dev can stay lightweight
+- document the privacy and deployment implications of the chosen analytics provider
 
 Exit criteria:
 
-- users receive a reminder before their links expire
-- reminder emails are deduplicated or otherwise controlled
-- the job is safe to run on a schedule without spamming users
-- the notification flow is documented and testable
+- demo traffic is visible in the selected analytics dashboard
+- the snippet or integration is easy to enable and disable by environment
+- local/dev remain usable without the external analytics service
+- the analytics choice is documented alongside the deployment notes
 
 Checklist:
 
-- [ ] Add the scheduled expiry scan job
-- [ ] Build the list of links nearing expiry
-- [ ] Send reminder mail to the owning user
-- [ ] Deduplicate reminders across runs
-- [ ] Document the mail workflow and test it
+- [ ] Choose the demo analytics provider
+- [ ] Add the provider snippet or integration
+- [ ] Track visits, referrers, and basic page usage
+- [ ] Keep local/dev optional and lightweight
+- [ ] Document the privacy and deployment implications
 
-### Phase 18 - Security hardening follow-up
+### Phase 17 - Security hardening follow-up
 
 Goals:
 
@@ -500,7 +452,7 @@ Checklist:
 - [ ] Review public observability exposure, CORS, and abuse controls
 - [ ] Close or explicitly accept the remaining findings
 
-### Phase 20 - Testing scenarios and README polish
+### Phase 18 - Testing scenarios and README polish
 
 Goals:
 
@@ -523,7 +475,7 @@ Checklist:
 - [ ] Rewrite the main README into a more presentation-ready form
 - [ ] Keep the README aligned with the current implementation
 
-### Phase 21 - Codebase refactoring and security review
+### Phase 19 - Codebase refactoring and security review
 
 Goals:
 
@@ -549,6 +501,54 @@ Checklist:
 - [ ] Review logging for quality and sensitive-data exposure
 - [ ] Run a full-project security review
 
+### Phase 20 - RabbitMQ async messaging
+
+Goals:
+
+- add RabbitMQ only if the app needs queued work instead of synchronous request handling
+- move click events or other background tasks off the request thread when that improves latency
+- support event fan-out for future notifications, cache invalidation, or integration jobs
+- keep local/dev/demo setup and tests explicit so the broker stays optional until the feature need is clear
+
+Exit criteria:
+
+- async event processing is documented and testable
+- the broker is only used for workloads that benefit from queueing
+- local and CI workflows still work cleanly when RabbitMQ is disabled
+
+Checklist:
+
+- [ ] Decide which workloads actually need queueing
+- [ ] Define the event fan-out and background-job use cases
+- [ ] Add broker configuration for local/dev/demo environments
+- [ ] Add integration tests for the queue-backed flow
+- [ ] Keep RabbitMQ optional until the need is proven
+
+### Phase 21 - Expiry reminder emails
+
+Goals:
+
+- add a scheduled backend job that scans each user's links
+- build a list of links that are about to expire
+- send reminder emails to the owning user
+- keep the reminder logic compatible with the existing mail infrastructure
+- make the job observable, testable, and safe to run repeatedly
+
+Exit criteria:
+
+- users receive a reminder before their links expire
+- reminder emails are deduplicated or otherwise controlled
+- the job is safe to run on a schedule without spamming users
+- the notification flow is documented and testable
+
+Checklist:
+
+- [ ] Add the scheduled expiry scan job
+- [ ] Build the list of links nearing expiry
+- [ ] Send reminder mail to the owning user
+- [ ] Deduplicate reminders across runs
+- [ ] Document the mail workflow and test it
+
 ## Suggested Build Order
 
 1. backend foundation
@@ -565,11 +565,11 @@ Checklist:
 12. Redis caching
 13. monitoring
 14. auth expansion
-17. demo visit analytics
-15. RabbitMQ async messaging
-22. Spring Modulith migration
-16. expiry reminder emails
-18. security hardening follow-up
-20. testing scenarios and README polish
-21. codebase refactoring and security review
+15. Spring Modulith migration
+16. demo visit analytics
+17. security hardening follow-up
+18. testing scenarios and README polish
+19. codebase refactoring and security review
+20. RabbitMQ async messaging
+21. expiry reminder emails
 
