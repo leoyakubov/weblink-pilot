@@ -6,6 +6,8 @@ This document explains how the backend modules relate to each other, how they co
 
 The goal is to make the modular monolith easy to reason about without turning it into a microservices architecture.
 
+For the Redis-specific scenarios across links, auth, analytics, and rate limiting, see [cache-redis-scenarios.md](cache-redis-scenarios.md).
+
 ## Module Ownership
 
 | Module | Owns | Notes |

@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,8 @@ public class RefreshTokenService {
       String username, String role, OffsetDateTime issuedAt, OffsetDateTime expiresAt) {}
 
   private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
+  private static final String REFRESH_SESSION_KEY_PREFIX = "auth:refresh:";
+  private static final String REFRESH_USER_INDEX_KEY_PREFIX = "auth:refresh:user:";
 
   private final RefreshTokenRepository refreshTokenRepository;
   private final StringRedisTemplate redisTemplate;
@@ -63,19 +66,29 @@ public class RefreshTokenService {
   public String issueRefreshToken(UserAccount account) {
     String rawToken = generateToken();
     RefreshToken token = persistRefreshToken(account, rawToken);
-    afterCommit(() -> cacheSession(token.getTokenHash(), toSession(token)));
+    afterCommit(
+        () -> {
+          cacheSession(token.getTokenHash(), toSession(token));
+          indexTokenForUser(token.getUser().getUsername(), token.getTokenHash());
+        });
     return rawToken;
   }
 
   @Transactional
   public RotationResult rotateRefreshToken(String rawToken) {
     String tokenHash = hash(rawToken);
+    RefreshSession cachedSession = readSession(tokenHash);
+    OffsetDateTime now = nowUtc();
+    if (cachedSession != null && cachedSession.expiresAt().isBefore(now)) {
+      evictSession(tokenHash);
+      throw new InvalidRefreshTokenException();
+    }
+
     RefreshToken token =
         refreshTokenRepository
             .findByTokenHash(tokenHash)
             .orElseThrow(InvalidRefreshTokenException::new);
 
-    OffsetDateTime now = nowUtc();
     if (!token.isActive(now)) {
       evictSession(tokenHash);
       throw new InvalidRefreshTokenException();
@@ -86,7 +99,6 @@ public class RefreshTokenService {
       throw new AccountDisabledException();
     }
 
-    RefreshSession cachedSession = readSession(tokenHash);
     if (cachedSession != null && !token.getUser().getUsername().equals(cachedSession.username())) {
       evictSession(tokenHash);
       throw new InvalidRefreshTokenException();
@@ -94,11 +106,19 @@ public class RefreshTokenService {
 
     token.revoke(now);
     refreshTokenRepository.save(token);
-    afterCommit(() -> evictSession(tokenHash));
+    afterCommit(
+        () -> {
+          evictSession(tokenHash);
+          unindexTokenForUser(token.getUser().getUsername(), tokenHash);
+        });
 
     String nextRawToken = generateToken();
     RefreshToken nextToken = persistRefreshToken(token.getUser(), nextRawToken);
-    afterCommit(() -> cacheSession(nextToken.getTokenHash(), toSession(nextToken)));
+    afterCommit(
+        () -> {
+          cacheSession(nextToken.getTokenHash(), toSession(nextToken));
+          indexTokenForUser(nextToken.getUser().getUsername(), nextToken.getTokenHash());
+        });
     return new RotationResult(
         token.getUser().getUsername(), token.getUser().getRoleName(), nextRawToken);
   }
@@ -110,15 +130,29 @@ public class RefreshTokenService {
     }
 
     String tokenHash = hash(rawToken);
+    RefreshSession cachedSession = readSession(tokenHash);
+    final String[] usernameHolder = new String[1];
     refreshTokenRepository
         .findByTokenHash(tokenHash)
-        .filter(token -> token.getRevokedAt() == null)
         .ifPresent(
             token -> {
-              token.revoke(nowUtc());
-              refreshTokenRepository.save(token);
+              usernameHolder[0] = token.getUser().getUsername();
+              if (token.getRevokedAt() == null) {
+                token.revoke(nowUtc());
+                refreshTokenRepository.save(token);
+              }
             });
-    afterCommit(() -> evictSession(tokenHash));
+    afterCommit(
+        () -> {
+          evictSession(tokenHash);
+          String username = usernameHolder[0];
+          if (username == null && cachedSession != null) {
+            username = cachedSession.username();
+          }
+          if (username != null) {
+            unindexTokenForUser(username, tokenHash);
+          }
+        });
   }
 
   @Transactional
@@ -127,8 +161,22 @@ public class RefreshTokenService {
       return;
     }
 
-    List<RefreshToken> tokens = refreshTokenRepository.findAllByUsername(username);
+    List<String> indexedTokenHashes = readIndexedTokenHashes(username);
+    List<RefreshToken> tokens =
+        indexedTokenHashes.isEmpty()
+            ? refreshTokenRepository.findAllByUsername(username)
+            : refreshTokenRepository.findAllByTokenHashIn(indexedTokenHashes);
+    if (tokens.isEmpty() && !indexedTokenHashes.isEmpty()) {
+      tokens = refreshTokenRepository.findAllByUsername(username);
+    }
     if (tokens.isEmpty()) {
+      if (!indexedTokenHashes.isEmpty()) {
+        afterCommit(
+            () -> {
+              indexedTokenHashes.forEach(this::evictSession);
+              deleteUserTokenIndex(username);
+            });
+      }
       return;
     }
 
@@ -137,7 +185,13 @@ public class RefreshTokenService {
         .filter(token -> token.getRevokedAt() == null)
         .forEach(token -> token.revoke(now));
     refreshTokenRepository.saveAll(tokens);
-    afterCommit(() -> tokens.forEach(token -> evictSession(token.getTokenHash())));
+    String resolvedUsername = username;
+    final List<RefreshToken> revokedTokens = tokens;
+    afterCommit(
+        () -> {
+          revokedTokens.forEach(token -> evictSession(token.getTokenHash()));
+          deleteUserTokenIndex(resolvedUsername);
+        });
   }
 
   private RefreshToken persistRefreshToken(UserAccount account, String rawToken) {
@@ -172,7 +226,7 @@ public class RefreshTokenService {
     try {
       redisTemplate
           .opsForValue()
-          .set(redisKey(tokenHash), objectMapper.writeValueAsString(session), refreshTokenTtl);
+          .set(sessionRedisKey(tokenHash), objectMapper.writeValueAsString(session), refreshTokenTtl);
     } catch (java.io.IOException | RuntimeException exception) {
       // Cache is best-effort; the database remains the source of truth.
     }
@@ -180,7 +234,43 @@ public class RefreshTokenService {
 
   private void evictSession(String tokenHash) {
     try {
-      redisTemplate.delete(redisKey(tokenHash));
+      redisTemplate.delete(sessionRedisKey(tokenHash));
+    } catch (RuntimeException exception) {
+      // Best-effort cache eviction only.
+    }
+  }
+
+  private void indexTokenForUser(String username, String tokenHash) {
+    try {
+      redisTemplate.opsForSet().add(userIndexRedisKey(username), tokenHash);
+    } catch (RuntimeException exception) {
+      // Best-effort index maintenance only.
+    }
+  }
+
+  private void unindexTokenForUser(String username, String tokenHash) {
+    try {
+      redisTemplate.opsForSet().remove(userIndexRedisKey(username), tokenHash);
+    } catch (RuntimeException exception) {
+      // Best-effort index maintenance only.
+    }
+  }
+
+  private List<String> readIndexedTokenHashes(String username) {
+    try {
+      Set<String> tokenHashes = redisTemplate.opsForSet().members(userIndexRedisKey(username));
+      if (tokenHashes == null || tokenHashes.isEmpty()) {
+        return List.of();
+      }
+      return List.copyOf(tokenHashes);
+    } catch (RuntimeException exception) {
+      return List.of();
+    }
+  }
+
+  private void deleteUserTokenIndex(String username) {
+    try {
+      redisTemplate.delete(userIndexRedisKey(username));
     } catch (RuntimeException exception) {
       // Best-effort cache eviction only.
     }
@@ -211,7 +301,15 @@ public class RefreshTokenService {
   }
 
   private String redisKey(String tokenHash) {
-    return "auth:refresh:" + tokenHash;
+    return sessionRedisKey(tokenHash);
+  }
+
+  private String sessionRedisKey(String tokenHash) {
+    return REFRESH_SESSION_KEY_PREFIX + tokenHash;
+  }
+
+  private String userIndexRedisKey(String username) {
+    return REFRESH_USER_INDEX_KEY_PREFIX + username;
   }
 
   private String hash(String token) {

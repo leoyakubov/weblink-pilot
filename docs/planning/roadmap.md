@@ -19,10 +19,12 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 9 | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control) | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
 | 10 | &#x1F7E2; Done | [Production hardening](#phase-10-production-hardening) | Logging, metrics, documentation polish, release checks, and deploy safety are in place. |
 | 11 | &#x1F7E2; Done | [Environment profiles and scripts](#phase-11-environment-profiles-and-scripts) | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
-| 12 | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching) | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
+| 12 | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching) | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place, and the broader cache map lives in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
 | 13 | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring) | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
 | 14 | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion) | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
 | 15 | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration) | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place. |
+| 23 | Planned | [Redis-first refresh tokens](#phase-23-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
+| 24 | &#x1F7E1; In Progress | [Async and non-blocking operations strategy](#phase-24-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs. |
 | 16 | Planned | [Frontend redesign](#phase-16-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, using PrimeVue plus the free Sakai template as the preferred starting point. |
 | 17 | Planned | [Demo visit analytics](#phase-17-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
 | 18 | Planned | [Security hardening follow-up](#phase-18-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
@@ -30,14 +32,13 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 20 | Planned | [Codebase refactoring and security review](#phase-20-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
 | 21 | Planned | [RabbitMQ async messaging](#phase-21-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 22 | Planned | [Expiry reminder emails](#phase-22-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
-| 23 | Planned | [Redis-first refresh tokens](#phase-23-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. |
 
 ## Execution Checklist
 
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-22 are the remaining roadmap items, with phase 15 now complete.
+- Phases 15-24 are the remaining roadmap items, with phase 15 now complete and phase 24 in progress.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -331,6 +332,7 @@ Exit criteria:
 - analytics and other hot paths can use Redis-backed caching where it helps
 - cache behavior is documented and testable
 - Redis cache/session behavior is documented in the implementation docs
+- the broader cache and Redis scenarios are documented in the design docs
 
 Checklist:
 
@@ -411,6 +413,56 @@ Checklist:
 - [x] Freeze the final Maven module layout
 - [x] Document the final public APIs for each module
 - [x] Mark the Modulith migration as complete in the roadmap
+
+### Phase 23 - Redis-first refresh tokens
+
+Goals:
+
+- make refresh-token lookup and rotation Redis-first
+- keep PostgreSQL as the durable source of truth
+- reduce refresh-token latency on login, refresh, and logout
+- keep token revocation and rotation safe under concurrent requests
+- document the cache and persistence split clearly, including the user-indexed auth cache flow
+
+Exit criteria:
+
+- refresh-token requests prefer Redis before falling back to PostgreSQL
+- token rotation and revocation remain correct under concurrent access
+- durable token state still survives cache loss
+- the refresh-token flow is testable and documented
+
+Checklist:
+
+- [ ] Design the Redis-first refresh-token lookup path
+- [ ] Keep PostgreSQL as the durable source of truth
+- [ ] Implement rotation and revocation with safe concurrency handling
+- [ ] Add tests for cache-hit, cache-miss, rotation, and logout paths
+- [ ] Document the refresh-token cache and persistence strategy
+
+### Phase 24 - Async and non-blocking operations strategy
+
+Goals:
+
+- document which flows should stay synchronous and which should move to async or deferred processing
+- start with the highest-value candidates such as auth email delivery, analytics fan-out, cache updates, and reminder jobs
+- keep user-facing request paths short and predictable
+- avoid introducing a reactive stack unless we have a clear payoff
+- define where events, scheduled jobs, and background workers fit into the app
+
+Exit criteria:
+
+- the async vs sync decision rules are documented
+- the main candidate flows are categorized
+- the document is detailed enough to guide future implementation work
+- the plan stays aligned with the current modular monolith architecture
+
+Checklist:
+
+- [x] Document the current async/non-blocking communication patterns
+- [ ] Classify the remaining product flows by sync vs async fit
+- [ ] Define implementation order for the best async candidates
+- [ ] Document the retry and failure-handling expectations
+- [ ] Keep the plan aligned with the module communication map
 
 ### Phase 16 - Frontend redesign
 
@@ -584,31 +636,6 @@ Checklist:
 - [ ] Deduplicate reminders across runs
 - [ ] Document the mail workflow and test it
 
-### Phase 23 - Redis-first refresh tokens
-
-Goals:
-
-- make refresh-token lookup and rotation Redis-first
-- keep PostgreSQL as the durable source of truth
-- reduce refresh-token latency on login, refresh, and logout
-- keep token revocation and rotation safe under concurrent requests
-- document the cache and persistence split clearly
-
-Exit criteria:
-
-- refresh-token requests prefer Redis before falling back to PostgreSQL
-- token rotation and revocation remain correct under concurrent access
-- durable token state still survives cache loss
-- the refresh-token flow is testable and documented
-
-Checklist:
-
-- [ ] Design the Redis-first refresh-token lookup path
-- [ ] Keep PostgreSQL as the durable source of truth
-- [ ] Implement rotation and revocation with safe concurrency handling
-- [ ] Add tests for cache-hit, cache-miss, rotation, and logout paths
-- [ ] Document the refresh-token cache and persistence strategy
-
 ## Suggested Build Order
 
 1. backend foundation
@@ -626,6 +653,8 @@ Checklist:
 13. monitoring
 14. auth expansion
 15. Spring Modulith migration
+23. Redis-first refresh tokens
+24. async and non-blocking operations strategy
 16. frontend redesign
 17. demo visit analytics
 18. security hardening follow-up
@@ -633,5 +662,4 @@ Checklist:
 20. codebase refactoring and security review
 21. RabbitMQ async messaging
 22. expiry reminder emails
-23. Redis-first refresh tokens
 

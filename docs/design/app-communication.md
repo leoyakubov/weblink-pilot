@@ -6,6 +6,8 @@ This document shows how the frontend and backend work together as one applicatio
 
 It complements the module communication map by showing the user-facing flows end to end.
 
+For the Redis/cache breakdown behind those flows, see [cache-redis-scenarios.md](cache-redis-scenarios.md).
+
 ## High-Level View
 
 ```mermaid
