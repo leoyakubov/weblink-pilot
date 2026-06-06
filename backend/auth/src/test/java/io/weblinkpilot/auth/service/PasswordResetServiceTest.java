@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,7 +34,7 @@ class PasswordResetServiceTest {
 
   @Mock private AccountActionTokenService tokenService;
 
-  @Mock private AccountNotificationService notificationService;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   private PasswordResetService service;
 
@@ -48,12 +49,12 @@ class PasswordResetServiceTest {
             userAccountService,
             passwordEncoder,
             tokenService,
-            notificationService,
+            eventPublisher,
             authProperties);
   }
 
   @Test
-  void requestPasswordResetSendsNotificationForKnownEmail() {
+  void requestPasswordResetPublishesNotificationEventForKnownEmail() {
     UserAccount account =
         new UserAccount(
             "alice",
@@ -70,11 +71,11 @@ class PasswordResetServiceTest {
 
     service.requestPasswordReset("alice@example.com");
 
-    ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
-    verify(notificationService).sendPasswordResetLink(emailCaptor.capture(), linkCaptor.capture());
-    assertThat(emailCaptor.getValue()).isEqualTo("alice@example.com");
-    assertThat(linkCaptor.getValue()).contains("/auth/reset-password?token=");
+    ArgumentCaptor<PasswordResetLinkRequestedEvent> eventCaptor =
+        ArgumentCaptor.forClass(PasswordResetLinkRequestedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().email()).isEqualTo("alice@example.com");
+    assertThat(eventCaptor.getValue().link()).contains("/auth/reset-password?token=");
   }
 
   @Test

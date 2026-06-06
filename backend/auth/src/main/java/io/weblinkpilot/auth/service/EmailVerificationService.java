@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,17 +21,17 @@ public class EmailVerificationService {
 
   private final UserAccountRepository userAccountRepository;
   private final AccountActionTokenService tokenService;
-  private final AccountNotificationService notificationService;
+  private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
 
   public EmailVerificationService(
       UserAccountRepository userAccountRepository,
       AccountActionTokenService tokenService,
-      AccountNotificationService notificationService,
+      ApplicationEventPublisher eventPublisher,
       AuthProperties authProperties) {
     this.userAccountRepository = userAccountRepository;
     this.tokenService = tokenService;
-    this.notificationService = notificationService;
+    this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
   }
 
@@ -65,7 +66,7 @@ public class EmailVerificationService {
             + VERIFY_PATH
             + "?token="
             + URLEncoder.encode(token, StandardCharsets.UTF_8);
-    notificationService.sendEmailVerificationLink(account.getEmail(), link);
+    eventPublisher.publishEvent(new EmailVerificationLinkRequestedEvent(account.getEmail(), link));
   }
 
   private OffsetDateTime nowUtc() {

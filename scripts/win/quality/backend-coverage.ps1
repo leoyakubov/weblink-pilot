@@ -5,10 +5,13 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScript
 $backendDir = Join-Path $repoRoot 'backend'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
 
-$resolvedJavaHome = Resolve-JavaHome
-if ($resolvedJavaHome) {
-    $env:JAVA_HOME = $resolvedJavaHome
+$previousJavaHome = $env:JAVA_HOME
+$javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot
+if (-not $javaHome) {
+    throw 'No compatible Java home found for backend coverage.'
 }
+$env:JAVA_HOME = $javaHome
+$previousJavaToolOptions = Enter-JavaSecurityOverride -JavaHome $javaHome
 
 Push-Location $backendDir
 try {
@@ -34,4 +37,10 @@ try {
 }
 finally {
     Pop-Location
+    Exit-JavaSecurityOverride -PreviousJavaToolOptions $previousJavaToolOptions
+    if ($null -ne $previousJavaHome) {
+        $env:JAVA_HOME = $previousJavaHome
+    } else {
+        Remove-Item Env:JAVA_HOME -ErrorAction SilentlyContinue
+    }
 }

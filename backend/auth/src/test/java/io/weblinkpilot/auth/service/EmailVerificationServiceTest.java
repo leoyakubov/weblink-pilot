@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class EmailVerificationServiceTest {
@@ -30,7 +31,7 @@ class EmailVerificationServiceTest {
 
   @Mock private AccountActionTokenService tokenService;
 
-  @Mock private AccountNotificationService notificationService;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   private EmailVerificationService service;
 
@@ -41,11 +42,11 @@ class EmailVerificationServiceTest {
     authProperties.setAccountActionTokenTtlHours(24);
     service =
         new EmailVerificationService(
-            userAccountRepository, tokenService, notificationService, authProperties);
+            userAccountRepository, tokenService, eventPublisher, authProperties);
   }
 
   @Test
-  void requestEmailVerificationSendsNotificationForUnverifiedAccount() {
+  void requestEmailVerificationPublishesNotificationEventForUnverifiedAccount() {
     UserAccount account =
         new UserAccount(
             "alice",
@@ -62,12 +63,11 @@ class EmailVerificationServiceTest {
 
     service.requestEmailVerification("alice@example.com");
 
-    ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
-    verify(notificationService)
-        .sendEmailVerificationLink(emailCaptor.capture(), linkCaptor.capture());
-    assertThat(emailCaptor.getValue()).isEqualTo("alice@example.com");
-    assertThat(linkCaptor.getValue()).contains("/auth/verify-email?token=");
+    ArgumentCaptor<EmailVerificationLinkRequestedEvent> eventCaptor =
+        ArgumentCaptor.forClass(EmailVerificationLinkRequestedEvent.class);
+    verify(eventPublisher).publishEvent(eventCaptor.capture());
+    assertThat(eventCaptor.getValue().email()).isEqualTo("alice@example.com");
+    assertThat(eventCaptor.getValue().link()).contains("/auth/verify-email?token=");
   }
 
   @Test
@@ -86,7 +86,7 @@ class EmailVerificationServiceTest {
 
     service.requestEmailVerification("alice@example.com");
 
-    verify(notificationService, never()).sendEmailVerificationLink(any(), any());
+    verify(eventPublisher, never()).publishEvent(any());
   }
 
   @Test

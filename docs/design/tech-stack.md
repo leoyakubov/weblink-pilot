@@ -4,7 +4,7 @@
 
 ### Runtime
 
-- Java 25 LTS
+- Java 21 LTS
 
 Why:
 
@@ -112,6 +112,6 @@ We pin exact versions in the repo where it helps reproducibility, and we keep th
 
 Current baseline:
 
-- backend on Java 25 + Spring Boot 4.0.6 + springdoc-openapi 3.0.3
+- backend on Java 21 + Spring Boot 4.0.6 + springdoc-openapi 3.0.3
 - frontend on Vue 3.5.34 + Vue Router 4.6.4 + Vite 8.0.14 + Node 24.16.0 LTS + npm 11.13.0
 - styling on plain CSS

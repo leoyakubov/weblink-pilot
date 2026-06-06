@@ -8,6 +8,7 @@ import io.weblinkpilot.auth.repository.UserAccountRepository;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ public class PasswordResetService {
   private final UserAccountService userAccountService;
   private final PasswordEncoder passwordEncoder;
   private final AccountActionTokenService tokenService;
-  private final AccountNotificationService notificationService;
+  private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
 
   public PasswordResetService(
@@ -29,13 +30,13 @@ public class PasswordResetService {
       UserAccountService userAccountService,
       PasswordEncoder passwordEncoder,
       AccountActionTokenService tokenService,
-      AccountNotificationService notificationService,
+      ApplicationEventPublisher eventPublisher,
       AuthProperties authProperties) {
     this.userAccountRepository = userAccountRepository;
     this.userAccountService = userAccountService;
     this.passwordEncoder = passwordEncoder;
     this.tokenService = tokenService;
-    this.notificationService = notificationService;
+    this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
   }
 
@@ -65,7 +66,7 @@ public class PasswordResetService {
     String token = tokenService.issueToken(account, AccountActionTokenType.PASSWORD_RESET);
     String link =
         frontendBaseUrl + RESET_PATH + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
-    notificationService.sendPasswordResetLink(account.getEmail(), link);
+    eventPublisher.publishEvent(new PasswordResetLinkRequestedEvent(account.getEmail(), link));
   }
 
   private String normalizeEmail(String email) {

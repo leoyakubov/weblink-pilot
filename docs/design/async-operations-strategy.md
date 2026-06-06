@@ -20,8 +20,13 @@ Our current default is:
 
 - synchronous HTTP request handling for the main product flows
 - synchronous repository access for durable writes and reads
-- asynchronous domain events for click analytics and future fan-out
+- asynchronous domain events for click analytics, auth email notifications, and future fan-out
 - scheduled jobs for maintenance tasks
+
+## Implemented Async Paths
+
+- auth email verification and password reset notifications are published as domain events after the surrounding transaction commits
+- the actual SMTP send is handled by an async listener, not on the request thread
 
 That default keeps the app easy to reason about and fits the current stack.
 
@@ -29,7 +34,7 @@ That default keeps the app easy to reason about and fits the current stack.
 
 | Flow | Why async helps | Suggested mechanism |
 |---|---|---|
-| Email delivery for auth workflows | login/reset/verification should return quickly even if SMTP is slow | event handler or background job |
+| Email delivery for auth workflows | login/reset/verification should return quickly even if SMTP is slow | event handler or background job, now implemented for reset/verification mail |
 | Expiry reminder emails | batch work does not belong on the request path | scheduled job + async mail dispatch |
 | Click analytics fan-out | redirect latency should stay low | application event now, broker later if needed |
 | Cache invalidation / warming | side effects should not delay user-visible work | event listener or deferred job |
@@ -77,10 +82,13 @@ If the answer is mostly yes, the flow is a candidate.
 
 ### Auth
 
-Potential async follow-ups:
+Implemented:
 
 - send email verification mail asynchronously
 - send password reset mail asynchronously
+
+Potential async follow-ups:
+
 - eventually queue login side effects that are not required for immediate response
 
 ### Links

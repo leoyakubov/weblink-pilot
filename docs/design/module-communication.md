@@ -172,6 +172,35 @@ Refresh token storage is intentionally designed as durable-first:
 - Redis can cache refresh-token lookup metadata for speed
 - the API still behaves synchronously for login and refresh calls
 
+## Auth Email Side Effects
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as User
+  participant AU as auth
+  participant DB as PostgreSQL
+  participant E as async auth listener
+  participant N as notification service
+
+  U->>AU: request password reset or email verification
+  AU->>DB: create or refresh token state (sync)
+  AU-->>E: publish reset/verification event after commit (async)
+  E->>N: send SMTP email (async)
+  N-->>U: deliver reset or verification link
+```
+
+Sync parts:
+
+- request validation
+- token issuance and durable persistence
+- event publication after commit
+
+Async parts:
+
+- SMTP delivery through the listener
+- any future retry / failure handling around outbound mail
+
 ## Cache And Database Responsibilities
 
 ### PostgreSQL

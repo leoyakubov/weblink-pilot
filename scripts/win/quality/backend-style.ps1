@@ -5,40 +5,34 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScript
 $backendDir = Join-Path $repoRoot 'backend'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
 
-$resolvedJavaHome = Resolve-JavaHome
-if ($resolvedJavaHome) {
-    $env:JAVA_HOME = $resolvedJavaHome
+$previousJavaHome = $env:JAVA_HOME
+$javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot
+if (-not $javaHome) {
+    throw 'No compatible Java home found for backend style.'
 }
+$env:JAVA_HOME = $javaHome
+$previousJavaToolOptions = Enter-JavaSecurityOverride -JavaHome $javaHome
 
 Push-Location $backendDir
 try {
-    $stdoutFile = [System.IO.Path]::GetTempFileName()
-    $stderrFile = [System.IO.Path]::GetTempFileName()
-    $process = $null
+    $previousErrorActionPreference = $ErrorActionPreference
+    $nativeCommandPreference = Get-Variable -Name PSNativeCommandUseErrorActionPreference -Scope Global -ErrorAction SilentlyContinue
+    $previousNativeCommandPreference = if ($nativeCommandPreference) { [bool] $nativeCommandPreference.Value } else { $false }
+    $ErrorActionPreference = 'Continue'
+    if ($nativeCommandPreference) {
+        $PSNativeCommandUseErrorActionPreference = $false
+    }
     try {
-        $process = Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', 'call .\mvnw.cmd -Pci spotless:check checkstyle:check') -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
-        $process.WaitForExit()
-        $process.Refresh()
-
-        $stdout = if (Test-Path -LiteralPath $stdoutFile) { Get-Content -Raw -LiteralPath $stdoutFile -ErrorAction SilentlyContinue } else { '' }
-        $stderr = if (Test-Path -LiteralPath $stderrFile) { Get-Content -Raw -LiteralPath $stderrFile -ErrorAction SilentlyContinue } else { '' }
-        $commandOutput = @($stdout, $stderr) -join "`n"
-
-        if ($commandOutput) {
-            Write-Host $commandOutput
-        }
+        $commandOutput = & .\mvnw.cmd -Pci spotless:check checkstyle:check 2>&1 | Tee-Object -Variable commandOutput | Out-Host
     }
     finally {
-        if (Test-Path -LiteralPath $stdoutFile) {
-            Remove-Item -LiteralPath $stdoutFile -ErrorAction SilentlyContinue
-        }
-        if (Test-Path -LiteralPath $stderrFile) {
-            Remove-Item -LiteralPath $stderrFile -ErrorAction SilentlyContinue
+        $ErrorActionPreference = $previousErrorActionPreference
+        if ($nativeCommandPreference) {
+            $PSNativeCommandUseErrorActionPreference = $previousNativeCommandPreference
         }
     }
-
     $combinedOutput = ($commandOutput | ForEach-Object { $_.ToString() }) -join "`n"
-    $exitCode = if ($process) { $process.ExitCode } else { 1 }
+    $exitCode = $LASTEXITCODE
     if ($exitCode -eq 0 -and $combinedOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Error loading java.security file|AccessDeniedException') {
         $exitCode = 1
     }
@@ -48,4 +42,10 @@ try {
 }
 finally {
     Pop-Location
+    Exit-JavaSecurityOverride -PreviousJavaToolOptions $previousJavaToolOptions
+    if ($null -ne $previousJavaHome) {
+        $env:JAVA_HOME = $previousJavaHome
+    } else {
+        Remove-Item Env:JAVA_HOME -ErrorAction SilentlyContinue
+    }
 }

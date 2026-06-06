@@ -5,7 +5,7 @@ This document describes the local workflow for building, testing, and maintainin
 ## Baseline Tools
 
 - Git
-- Java 25
+- Java 21
 - Maven through the backend wrapper
 - Node.js 24.16.0 LTS
 - npm 11.13.0

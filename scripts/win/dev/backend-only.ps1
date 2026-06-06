@@ -6,13 +6,16 @@ $backendDir = Join-Path $repoRoot 'backend'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
 
 if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
-    throw 'java is not available on PATH. Install Java 25 before running this script.'
+    throw 'java is not available on PATH. Install Java 21 or newer before running this script.'
 }
 
-$resolvedJavaHome = Resolve-JavaHome
-if ($resolvedJavaHome) {
-    $env:JAVA_HOME = $resolvedJavaHome
+$previousJavaHome = $env:JAVA_HOME
+$javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot
+if (-not $javaHome) {
+    throw 'No compatible Java home found for backend-only.'
 }
+$env:JAVA_HOME = $javaHome
+$previousJavaToolOptions = Enter-JavaSecurityOverride -JavaHome $javaHome
 
 $mvnw = Join-Path $backendDir 'mvnw.cmd'
 if (-not (Test-Path $mvnw)) {
@@ -28,8 +31,14 @@ try {
         exit $LASTEXITCODE
     }
 
-    & $mvnw -Pdev -f (Join-Path $backendDir 'application/pom.xml') spring-boot:run 2>&1 | Out-Host
+    & (Join-Path $javaHome 'bin\java.exe') -jar (Join-Path $backendDir 'application/target/application-0.1.0-SNAPSHOT.jar')
 }
 finally {
     Pop-Location
+    Exit-JavaSecurityOverride -PreviousJavaToolOptions $previousJavaToolOptions
+    if ($null -ne $previousJavaHome) {
+        $env:JAVA_HOME = $previousJavaHome
+    } else {
+        Remove-Item Env:JAVA_HOME -ErrorAction SilentlyContinue
+    }
 }
