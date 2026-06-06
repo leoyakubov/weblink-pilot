@@ -21,15 +21,14 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 11 | &#x1F7E2; Done | Environment profiles and scripts | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
 | 12 | &#x1F7E2; Done | Redis cache | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | 13 | &#x1F7E2; Done | Monitoring stack integration | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login and richer account management are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. Session duration controls such as remember-me remain a planned follow-up. |
-| 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| 14 | &#x1F7E2; Done | Auth expansion | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
 | 17 | Planned | Demo visit analytics | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
+| 15 | Planned | RabbitMQ async messaging | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
+| 22 | Planned | Spring Modulith migration | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
+| 16 | Planned | Expiry reminder emails | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 | 18 | Planned | Security hardening follow-up | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
-| 19 | Planned | Remember-me session control | Add an explicit remember-me choice on sign in so users can opt into a longer refresh-cookie lifetime for trusted devices. |
 | 20 | Planned | Testing scenarios and README polish | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
 | 21 | Planned | Codebase refactoring and security review | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
-| 22 | Planned | Spring Modulith migration | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
 
 ## Execution Checklist
 
@@ -364,7 +363,7 @@ Goals:
 
 - GitHub social login is in place
 - richer account management is in place
-- remember-me session controls are planned as a follow-up usability improvement
+- remember-me session controls are in place
 
 Exit criteria:
 
@@ -377,7 +376,31 @@ Checklist:
 
 - [x] Added GitHub social login
 - [x] Added richer account management
-- [x] Planned remember-me as a follow-up usability improvement
+- [x] Added remember-me session controls
+
+### Phase 17 - Demo visit analytics
+
+Goals:
+
+- integrate a ready-made analytics service for the demo site
+- track visits, referrers, and basic page usage for the public demo
+- keep the analytics setup optional so local/dev can stay lightweight
+- document the privacy and deployment implications of the chosen analytics provider
+
+Exit criteria:
+
+- demo traffic is visible in the selected analytics dashboard
+- the snippet or integration is easy to enable and disable by environment
+- local/dev remain usable without the external analytics service
+- the analytics choice is documented alongside the deployment notes
+
+Checklist:
+
+- [ ] Choose the demo analytics provider
+- [ ] Add the provider snippet or integration
+- [ ] Track visits, referrers, and basic page usage
+- [ ] Keep local/dev optional and lightweight
+- [ ] Document the privacy and deployment implications
 
 ### Phase 15 - RabbitMQ async messaging
 
@@ -401,6 +424,31 @@ Checklist:
 - [ ] Add broker configuration for local/dev/demo environments
 - [ ] Add integration tests for the queue-backed flow
 - [ ] Keep RabbitMQ optional until the need is proven
+
+### Phase 22 - Spring Modulith migration
+
+Goals:
+
+- audit the current backend module boundaries and decide the final Modulith module map
+- define explicit public APIs for each module and keep internal packages private by convention
+- add Modulith-style structural verification tests alongside the existing ArchUnit checks
+- replace direct cross-module calls with named interfaces or events where that improves coupling
+- decide whether the current Maven module layout should stay as-is or be flattened toward a more standard Modulith arrangement
+
+Exit criteria:
+
+- module boundaries are documented and enforced
+- cross-module dependencies go through approved public interfaces
+- the codebase has structural tests that fail when the module contract is broken
+- the backend is on a clear path to a standard Spring Modulith arrangement
+
+Checklist:
+
+- [ ] Freeze the final module map
+- [ ] Add Spring Modulith structural verification tests
+- [ ] Define named interfaces for approved public access
+- [ ] Replace direct cross-module calls with APIs or events
+- [ ] Verify the new module contracts in tests
 
 ### Phase 16 - Expiry reminder emails
 
@@ -427,30 +475,6 @@ Checklist:
 - [ ] Deduplicate reminders across runs
 - [ ] Document the mail workflow and test it
 
-### Phase 17 - Demo visit analytics
-
-Goals:
-
-- integrate a ready-made analytics service for the demo site
-- track visits, referrers, and basic page usage for the public demo
-- keep the analytics setup optional so local/dev can stay lightweight
-- document the privacy and deployment implications of the chosen analytics provider
-
-Exit criteria:
-
-- demo traffic is visible in the selected analytics dashboard
-- the snippet or integration is easy to enable and disable by environment
-- local/dev remain usable without the external analytics service
-- the analytics choice is documented alongside the deployment notes
-
-Checklist:
-
-- [ ] Choose the demo analytics provider
-- [ ] Add the provider snippet or integration
-- [ ] Track visits, referrers, and basic page usage
-- [ ] Keep local/dev optional and lightweight
-- [ ] Document the privacy and deployment implications
-
 ### Phase 18 - Security hardening follow-up
 
 Goals:
@@ -475,30 +499,6 @@ Checklist:
 - [ ] Reduce browser-side token exposure risk
 - [ ] Review public observability exposure, CORS, and abuse controls
 - [ ] Close or explicitly accept the remaining findings
-
-### Phase 19 - Remember-me session control
-
-Goals:
-
-- add an explicit remember-me option to the sign-in flow
-- keep the default sign-in behavior short-lived and safe for shared devices
-- extend the refresh-cookie lifetime only when the user opts in
-- document how the access-token session and refresh-cookie duration differ with and without remember-me
-
-Exit criteria:
-
-- the sign-in form exposes a clear remember-me choice
-- trusted-device sessions last longer without changing the access-token model
-- logout and refresh-token revocation still work predictably
-- the behavior is covered by auth testing docs and frontend test cases
-
-Checklist:
-
-- [ ] Add the remember-me control to sign in
-- [ ] Extend the refresh-cookie lifetime only when opted in
-- [ ] Keep the default session short-lived
-- [ ] Update auth tests and docs for the new behavior
-- [ ] Verify logout and refresh rotation still work
 
 ### Phase 20 - Testing scenarios and README polish
 
@@ -549,31 +549,6 @@ Checklist:
 - [ ] Review logging for quality and sensitive-data exposure
 - [ ] Run a full-project security review
 
-### Phase 22 - Spring Modulith migration
-
-Goals:
-
-- audit the current backend module boundaries and decide the final Modulith module map
-- define explicit public APIs for each module and keep internal packages private by convention
-- add Modulith-style structural verification tests alongside the existing ArchUnit checks
-- replace direct cross-module calls with named interfaces or events where that improves coupling
-- decide whether the current Maven module layout should stay as-is or be flattened toward a more standard Modulith arrangement
-
-Exit criteria:
-
-- module boundaries are documented and enforced
-- cross-module dependencies go through approved public interfaces
-- the codebase has structural tests that fail when the module contract is broken
-- the backend is on a clear path to a standard Spring Modulith arrangement
-
-Checklist:
-
-- [ ] Freeze the final module map
-- [ ] Add Spring Modulith structural verification tests
-- [ ] Define named interfaces for approved public access
-- [ ] Replace direct cross-module calls with APIs or events
-- [ ] Verify the new module contracts in tests
-
 ## Suggested Build Order
 
 1. backend foundation
@@ -590,12 +565,11 @@ Checklist:
 12. Redis caching
 13. monitoring
 14. auth expansion
-15. RabbitMQ async messaging
-16. expiry reminder emails
 17. demo visit analytics
+15. RabbitMQ async messaging
+22. Spring Modulith migration
+16. expiry reminder emails
 18. security hardening follow-up
-19. remember-me session control
 20. testing scenarios and README polish
 21. codebase refactoring and security review
-22. Spring Modulith migration
 
