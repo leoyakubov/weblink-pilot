@@ -97,15 +97,15 @@ Requires Java 25. Maven is downloaded automatically by the wrapper on the first 
 From `backend/` on Windows:
 
 ```powershell
-.\mvnw.cmd -pl app -am clean package -DskipTests
-java -jar app\target\app-0.1.0-SNAPSHOT.jar
+.\mvnw.cmd -pl application -am clean package -DskipTests
+java -jar application\\target\\application-0.1.0-SNAPSHOT.jar
 ```
 
 On macOS/Linux:
 
 ```bash
-./mvnw -pl app -am clean package -DskipTests
-java -jar app/target/app-0.1.0-SNAPSHOT.jar
+./mvnw -pl application -am clean package -DskipTests
+java -jar application/target/application-0.1.0-SNAPSHOT.jar
 ```
 
 Useful API endpoints after startup:
@@ -132,7 +132,7 @@ On macOS/Linux:
 ./mvnw -Pci clean verify
 ```
 
-The HTML report is written to `backend/coverage/target/site/jacoco-aggregate/index.html`.
+The HTML report is written to `backend/build-support/target/site/jacoco-aggregate/index.html`.
 
 Helper script:
 
@@ -326,9 +326,9 @@ When running `local`, the H2 console is available at `http://localhost:8080/h2-c
 You can also select the Maven convenience profiles when running the backend directly:
 
 ```powershell
-.\mvnw.cmd -Plocal -pl app -am spring-boot:run
-.\mvnw.cmd -Pdev -pl app -am spring-boot:run
-.\mvnw.cmd -Pdemo -pl app -am spring-boot:run
+.\mvnw.cmd -Plocal -pl application -am spring-boot:run
+.\mvnw.cmd -Pdev -pl application -am spring-boot:run
+.\mvnw.cmd -Pdemo -pl application -am spring-boot:run
 ```
 
 Quick guide:
@@ -365,7 +365,7 @@ On macOS/Linux:
 
 ## Frontend Quick Start
 
-Requires Node.js 22+.
+Requires Node.js 24.16.0 LTS and npm 11.13.0.
 
 From `frontend/`:
 

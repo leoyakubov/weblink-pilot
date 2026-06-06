@@ -3,8 +3,8 @@ package io.weblinkpilot.analytics.web;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
+import io.weblinkpilot.links.service.UrlService;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.url.service.UrlLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -23,16 +23,16 @@ public class AnalyticsController {
   private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
   private final AnalyticsQueryService analyticsQueryService;
-  private final UrlLookupService urlLookupService;
+  private final UrlService urlService;
   private final Counter countCounter;
   private final Counter summaryCounter;
 
   public AnalyticsController(
       AnalyticsQueryService analyticsQueryService,
-      UrlLookupService urlLookupService,
+      UrlService urlService,
       MeterRegistry meterRegistry) {
     this.analyticsQueryService = analyticsQueryService;
-    this.urlLookupService = urlLookupService;
+    this.urlService = urlService;
     this.countCounter =
         Counter.builder("weblinkpilot.analytics.count.requests")
             .description("Number of analytics count requests")
@@ -65,7 +65,7 @@ public class AnalyticsController {
   }
 
   private void assertCanReadAnalytics(Authentication authentication, String code) {
-    String ownerUsername = urlLookupService.getByCode(code).ownerUsername();
+    String ownerUsername = urlService.getByCode(code).ownerUsername();
     if (ownerUsername == null || ownerUsername.isBlank()) {
       return;
     }

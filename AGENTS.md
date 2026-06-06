@@ -71,7 +71,7 @@ Unix/macOS/Linux:
 Backend targeted tests from `backend/`:
 
 ```powershell
-.\mvnw.cmd -pl app -am "-Dtest=SomeTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+.\mvnw.cmd -pl applicationlication -am "-Dtest=SomeTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 
 Frontend targeted tests from `frontend/`:

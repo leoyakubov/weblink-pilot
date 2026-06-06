@@ -6,25 +6,33 @@ $backendDir = Join-Path $repoRoot 'backend'
 
 Push-Location $backendDir
 try {
-    $previousErrorActionPreference = $ErrorActionPreference
-    $nativeCommandPreference = Get-Variable -Name PSNativeCommandUseErrorActionPreference -Scope Global -ErrorAction SilentlyContinue
-    $previousNativeCommandPreference = if ($nativeCommandPreference) { [bool] $nativeCommandPreference.Value } else { $false }
-    $ErrorActionPreference = 'Continue'
-    if ($nativeCommandPreference) {
-        $PSNativeCommandUseErrorActionPreference = $false
-    }
+    $stdoutFile = [System.IO.Path]::GetTempFileName()
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    $process = $null
     try {
-        $commandOutput = & cmd.exe /c "call .\mvnw.cmd -Pci spotless:check checkstyle:check" 2>&1 | Tee-Object -Variable commandOutput | Out-Host
-    }
-    finally {
-        $ErrorActionPreference = $previousErrorActionPreference
-        if ($nativeCommandPreference) {
-            $PSNativeCommandUseErrorActionPreference = $previousNativeCommandPreference
+        $process = Start-Process -FilePath 'cmd.exe' -ArgumentList @('/c', 'call .\mvnw.cmd -Pci spotless:check checkstyle:check') -NoNewWindow -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+        $process.WaitForExit()
+        $process.Refresh()
+
+        $stdout = if (Test-Path -LiteralPath $stdoutFile) { Get-Content -Raw -LiteralPath $stdoutFile -ErrorAction SilentlyContinue } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrFile) { Get-Content -Raw -LiteralPath $stderrFile -ErrorAction SilentlyContinue } else { '' }
+        $commandOutput = @($stdout, $stderr) -join "`n"
+
+        if ($commandOutput) {
+            Write-Host $commandOutput
         }
     }
-    $combinedOutput = ($commandOutput | ForEach-Object { $_.ToString() }) -join "`n"
-    $exitCode = $LASTEXITCODE
-    if ($exitCode -eq 0 -and $combinedOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Non-resolvable import POM|Could not transfer artifact|Could not resolve') {
+    finally {
+        if (Test-Path -LiteralPath $stdoutFile) {
+            Remove-Item -LiteralPath $stdoutFile -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $stderrFile) {
+            Remove-Item -LiteralPath $stderrFile -ErrorAction SilentlyContinue
+        }
+    }
+
+    $exitCode = if ($process) { $process.ExitCode } else { 1 }
+    if ($exitCode -eq 0 -and $commandOutput -match '(?m)^\[ERROR\]|BUILD FAILURE|Non-resolvable import POM|Could not transfer artifact') {
         $exitCode = 1
     }
     if ($exitCode -ne 0) {

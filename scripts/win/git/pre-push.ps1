@@ -29,7 +29,7 @@ function Invoke-Check {
             $exitCode = $LASTEXITCODE
         }
 
-        if ($exitCode -eq 0 -and $capturedText -match '(?m)^\[ERROR\]|BUILD FAILURE|Coverage checks have not been met|Failed to execute goal|Non-resolvable import POM|Could not transfer artifact|Could not resolve|failed to load config|Access is denied') {
+        if ($exitCode -eq 0 -and $capturedText -match '(?m)^\[ERROR\]|BUILD FAILURE|Coverage checks have not been met|Failed to execute goal|Non-resolvable import POM|Could not transfer artifact|failed to load config|Access is denied') {
             $exitCode = 1
         }
     }
@@ -254,6 +254,19 @@ function Get-FrontendTestSummary {
 
     $summary = [ordered]@{}
 
+    $normalizedOutput = [regex]::Replace($Output, "(`e|\x1B)\[[0-9;]*[A-Za-z]", '')
+    $normalizedOutput = $normalizedOutput -replace "`r", ''
+
+    if ($normalizedOutput -match '(?s)Test Files\D+(?<filesPassed>\d+)\s+passed(?:\D+\((?<filesTotal>\d+)\))?.*?Tests\D+(?<testsPassed>\d+)\s+passed(?:\D+\((?<testsTotal>\d+)\))?') {
+        $filesTotal = if ($Matches.filesTotal) { $Matches.filesTotal } else { $Matches.filesPassed }
+        $testsTotal = if ($Matches.testsTotal) { $Matches.testsTotal } else { $Matches.testsPassed }
+        $summary['totalTestSuites'] = [int]$filesTotal
+        $summary['passedTestSuites'] = [int]$Matches.filesPassed
+        $summary['totalTests'] = [int]$testsTotal
+        $summary['passedTests'] = [int]$Matches.testsPassed
+        return $summary
+    }
+
     if (Test-Path -LiteralPath $ReportPath) {
         try {
             $json = Get-Content -Raw -LiteralPath $ReportPath | ConvertFrom-Json
@@ -261,22 +274,9 @@ function Get-FrontendTestSummary {
             $summary['passedTestSuites'] = [int]$json.numPassedTestSuites
             $summary['totalTests'] = [int]$json.numTotalTests
             $summary['passedTests'] = [int]$json.numPassedTests
-            return $summary
         }
         catch {
         }
-    }
-
-    $normalizedOutput = [regex]::Replace($Output, "`e\[[0-9;]*[A-Za-z]", '')
-    $normalizedOutput = $normalizedOutput -replace "`r", ''
-
-    if ($normalizedOutput -match '(?s)Test Files\s+(?<filesPassed>\d+)\s+passed(?:\s+\((?<filesTotal>\d+)\))?.*?Tests\s+(?<testsPassed>\d+)\s+passed(?:\s+\((?<testsTotal>\d+)\))?') {
-        $filesTotal = if ($Matches.filesTotal) { $Matches.filesTotal } else { $Matches.filesPassed }
-        $testsTotal = if ($Matches.testsTotal) { $Matches.testsTotal } else { $Matches.testsPassed }
-        $summary['totalTestSuites'] = [int]$filesTotal
-        $summary['passedTestSuites'] = [int]$Matches.filesPassed
-        $summary['totalTests'] = [int]$testsTotal
-        $summary['passedTests'] = [int]$Matches.testsPassed
     }
 
     return $summary

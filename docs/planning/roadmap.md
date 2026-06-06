@@ -22,12 +22,12 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 12 | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching) | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place. |
 | 13 | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring) | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
 | 14 | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion) | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
-| 15 | &#x1F7E1; In Progress | [Spring Modulith migration](#phase-15-spring-modulith-migration) | Audit the current backend modules, define explicit module boundaries and public interfaces, add Modulith-style verification tests, and gradually move cross-module interactions to named interfaces and events. |
-| 16 | Planned | [Demo visit analytics](#phase-16-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
-| 17 | Planned | [Security hardening follow-up](#phase-17-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
-| 18 | Planned | [Testing scenarios and README polish](#phase-18-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
-| 19 | Planned | [Codebase refactoring and security review](#phase-19-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
-| 20 | Planned | [Frontend redesign](#phase-20-frontend-redesign) | Redesign the main frontend pages and forms to better match the polished demo experience we want to present. |
+| 15 | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration) | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place. |
+| 16 | Planned | [Frontend redesign](#phase-16-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, using PrimeVue plus the free Sakai template as the preferred starting point. |
+| 17 | Planned | [Demo visit analytics](#phase-17-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
+| 18 | Planned | [Security hardening follow-up](#phase-18-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
+| 19 | Planned | [Testing scenarios and README polish](#phase-19-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
+| 20 | Planned | [Codebase refactoring and security review](#phase-20-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
 | 21 | Planned | [RabbitMQ async messaging](#phase-21-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
 | 22 | Planned | [Expiry reminder emails](#phase-22-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
 
@@ -36,7 +36,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-22 are the remaining roadmap items, with phase 15 already in progress.
+- Phases 15-22 are the remaining roadmap items, with phase 15 now complete.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -383,28 +383,61 @@ Checklist:
 
 Goals:
 
-- audit the current backend module boundaries and decide the final Modulith module map
+- freeze the current backend module boundaries as the canonical Modulith map
 - define explicit public APIs for each module and keep internal packages private by convention
-- add Modulith-style structural verification tests alongside the existing ArchUnit checks
+- keep Modulith-style structural verification tests alongside the existing ArchUnit checks
 - replace direct cross-module calls with named interfaces or events where that improves coupling
-- decide whether the current Maven module layout should stay as-is or be flattened toward a more standard Modulith arrangement
+- keep app-level bootstrap and scheduled maintenance limited to public module APIs
+- document the final Maven module layout as a production-style modular monolith
+- keep `auth` as its own backend module
 
 Exit criteria:
 
 - module boundaries are documented and enforced
 - cross-module dependencies go through approved public interfaces
 - the codebase has structural tests that fail when the module contract is broken
-- the backend is on a clear path to a standard Spring Modulith arrangement
+- the backend follows the frozen Spring Modulith arrangement
 
 Checklist:
 
-- [ ] Freeze the final module map
-- [ ] Add Spring Modulith structural verification tests
-- [ ] Define named interfaces for approved public access
-- [ ] Replace direct cross-module calls with APIs or events
-- [ ] Verify the new module contracts in tests
+- [x] Freeze the final module map
+- [x] Add Spring Modulith structural verification tests
+- [x] Define named interfaces for approved public access
+- [x] Replace direct cross-module calls with APIs or events
+- [x] Verify the new module contracts in tests
+- [x] Move bootstrap seeding and cleanup behind module APIs
+- [x] Extract auth into a dedicated backend module
+- [x] Freeze the final Maven module layout
+- [x] Document the final public APIs for each module
+- [x] Mark the Modulith migration as complete in the roadmap
 
-### Phase 16 - Demo visit analytics
+### Phase 16 - Frontend redesign
+
+Goals:
+
+- redesign the main frontend pages and forms for a more polished demo presentation
+- use PrimeVue as the component library and Sakai as the preferred free template/theme base
+- keep the mobile-first experience strong while improving hierarchy, spacing, and visual clarity
+- update the core screens so the demo feels more intentional and less like a scaffold
+- preserve the existing app behavior while refreshing the look and feel
+
+Exit criteria:
+
+- the main pages and forms look noticeably more polished
+- the redesign remains mobile-first and responsive
+- existing frontend flows continue to work
+- the visual system is documented well enough to keep future pages consistent
+
+Checklist:
+
+- [ ] Pick PrimeVue + Sakai as the frontend UI foundation
+- [ ] Redesign the main frontend pages
+- [ ] Redesign the core forms
+- [ ] Keep the mobile-first layout intact
+- [ ] Preserve existing frontend behavior
+- [ ] Document the updated visual direction
+
+### Phase 17 - Demo visit analytics
 
 Goals:
 
@@ -428,7 +461,7 @@ Checklist:
 - [ ] Keep local/dev optional and lightweight
 - [ ] Document the privacy and deployment implications
 
-### Phase 17 - Security hardening follow-up
+### Phase 18 - Security hardening follow-up
 
 Goals:
 
@@ -453,7 +486,7 @@ Checklist:
 - [ ] Review public observability exposure, CORS, and abuse controls
 - [ ] Close or explicitly accept the remaining findings
 
-### Phase 18 - Testing scenarios and README polish
+### Phase 19 - Testing scenarios and README polish
 
 Goals:
 
@@ -476,7 +509,7 @@ Checklist:
 - [ ] Rewrite the main README into a more presentation-ready form
 - [ ] Keep the README aligned with the current implementation
 
-### Phase 19 - Codebase refactoring and security review
+### Phase 20 - Codebase refactoring and security review
 
 Goals:
 
@@ -501,30 +534,6 @@ Checklist:
 - [ ] Split large classes and services where it improves clarity
 - [ ] Review logging for quality and sensitive-data exposure
 - [ ] Run a full-project security review
-
-### Phase 20 - Frontend redesign
-
-Goals:
-
-- redesign the main frontend pages and forms for a more polished demo presentation
-- keep the mobile-first experience strong while improving hierarchy, spacing, and visual clarity
-- update the core screens so the demo feels more intentional and less like a scaffold
-- preserve the existing app behavior while refreshing the look and feel
-
-Exit criteria:
-
-- the main pages and forms look noticeably more polished
-- the redesign remains mobile-first and responsive
-- existing frontend flows continue to work
-- the visual system is documented well enough to keep future pages consistent
-
-Checklist:
-
-- [ ] Redesign the main frontend pages
-- [ ] Redesign the core forms
-- [ ] Keep the mobile-first layout intact
-- [ ] Preserve existing frontend behavior
-- [ ] Document the updated visual direction
 
 ### Phase 21 - RabbitMQ async messaging
 
@@ -591,11 +600,11 @@ Checklist:
 13. monitoring
 14. auth expansion
 15. Spring Modulith migration
-16. demo visit analytics
-17. security hardening follow-up
-18. testing scenarios and README polish
-19. codebase refactoring and security review
-20. frontend redesign
+16. frontend redesign
+17. demo visit analytics
+18. security hardening follow-up
+19. testing scenarios and README polish
+20. codebase refactoring and security review
 21. RabbitMQ async messaging
 22. expiry reminder emails
 

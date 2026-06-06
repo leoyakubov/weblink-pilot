@@ -3,4 +3,4 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root/backend"
-./mvnw -pl app -am clean test
+./mvnw -pl application -am clean test

@@ -10,10 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
+import io.weblinkpilot.links.service.UrlService;
 import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.url.service.UrlLookupService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
@@ -33,7 +33,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Mock private AnalyticsQueryService analyticsQueryService;
 
-  @Mock private UrlLookupService urlLookupService;
+  @Mock private UrlService urlService;
 
   private AnalyticsController controller;
   private MockMvc mockMvc;
@@ -41,13 +41,13 @@ class AnalyticsControllerStandaloneTest {
   @BeforeEach
   void setUp() {
     controller =
-        new AnalyticsController(analyticsQueryService, urlLookupService, new SimpleMeterRegistry());
+        new AnalyticsController(analyticsQueryService, urlService, new SimpleMeterRegistry());
     mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
   }
 
   @Test
   void returnsClickCount() throws Exception {
-    when(urlLookupService.getByCode("demo"))
+    when(urlService.getByCode("demo"))
         .thenReturn(
             new LinkResponse(
                 "demo",
@@ -68,7 +68,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void returnsSummary() throws Exception {
-    when(urlLookupService.getByCode("demo"))
+    when(urlService.getByCode("demo"))
         .thenReturn(
             new LinkResponse(
                 "demo",
@@ -105,7 +105,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void allowsAnonymousAccessForPublicLinks() {
-    when(urlLookupService.getByCode("public"))
+    when(urlService.getByCode("public"))
         .thenReturn(
             new LinkResponse(
                 "public",
@@ -125,7 +125,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void rejectsAnonymousAccessForOwnedLinks() {
-    when(urlLookupService.getByCode("demo"))
+    when(urlService.getByCode("demo"))
         .thenReturn(
             new LinkResponse(
                 "demo",
@@ -144,7 +144,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void rejectsDifferentUsersForOwnedLinks() {
-    when(urlLookupService.getByCode("demo"))
+    when(urlService.getByCode("demo"))
         .thenReturn(
             new LinkResponse(
                 "demo",
@@ -169,7 +169,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void allowsAdminAccessForOwnedLinks() {
-    when(urlLookupService.getByCode("demo"))
+    when(urlService.getByCode("demo"))
         .thenReturn(
             new LinkResponse(
                 "demo",

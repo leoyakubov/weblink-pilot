@@ -82,7 +82,11 @@ describe('AuthView', () => {
 
   it('shows email verification guidance when login is blocked', async () => {
     mocks.authenticateMock.mockRejectedValue(
-      new ApiRequestError('Please verify your email address before signing in', 403, 'EMAIL_NOT_VERIFIED'),
+      new ApiRequestError(
+        'Please verify your email address before signing in',
+        403,
+        'EMAIL_NOT_VERIFIED',
+      ),
     );
 
     const wrapper = mountAuth('login');

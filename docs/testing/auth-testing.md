@@ -362,7 +362,7 @@ Expected result:
 Run the focused backend auth tests from `backend/`:
 
 ```powershell
-.\mvnw.cmd -Pci -pl app -am clean "-Dtest=AuthServiceTest,AuthControllerTest,RefreshTokenServiceTest,JwtServiceTest,UserAccountServiceTest,AuthExceptionHandlerTest,PasswordResetServiceTest,EmailVerificationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+.\mvnw.cmd -Pci -pl application -am clean "-Dtest=AuthServiceTest,AuthControllerTest,RefreshTokenServiceTest,JwtServiceTest,UserAccountServiceTest,AuthExceptionHandlerTest,PasswordResetServiceTest,EmailVerificationServiceTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 
 Run the focused frontend auth tests from `frontend/`:

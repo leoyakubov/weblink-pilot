@@ -93,7 +93,7 @@ Rules:
 - no domain logic that belongs in `url` or `analytics`
 - use it as the composition root and runtime shell
 
-### 5. `coverage`
+### 5. `build-support`
 
 Build/reporting module only.
 
@@ -111,9 +111,9 @@ Rules:
 
 - `url` and `analytics` depend on `shared-contracts`
 - `app` wires the runtime and depends on the feature modules
-- `coverage` only aggregates reports
+- `build-support` only aggregates reports
 - feature modules should not depend on each other's internals
-- `coverage` does not participate in the runtime dependency graph
+- `build-support` does not participate in the runtime dependency graph
 
 ## Domain Boundaries
 

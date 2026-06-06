@@ -1,0 +1,31 @@
+package io.weblinkpilot.auth.service;
+
+import io.weblinkpilot.auth.config.RoleNames;
+import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.links.service.UrlStatisticsService;
+import io.weblinkpilot.shared.contracts.AdminOverviewResponse;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AdminOverviewService {
+
+  private final UserAccountRepository userAccountRepository;
+  private final UrlStatisticsService urlStatisticsService;
+
+  public AdminOverviewService(
+      UserAccountRepository userAccountRepository, UrlStatisticsService urlStatisticsService) {
+    this.userAccountRepository = userAccountRepository;
+    this.urlStatisticsService = urlStatisticsService;
+  }
+
+  public AdminOverviewResponse overview() {
+    long totalUsers = userAccountRepository.count();
+    long adminUsers = userAccountRepository.countByRoleName(RoleNames.ADMIN);
+    long totalLinks = urlStatisticsService.countActiveLinks();
+    long anonymousLinks = urlStatisticsService.countAnonymousLinks();
+    long ownedLinks = urlStatisticsService.countOwnedLinks();
+    long totalClicks = urlStatisticsService.sumClickCount();
+    return new AdminOverviewResponse(
+        totalUsers, adminUsers, totalLinks, anonymousLinks, ownedLinks, totalClicks);
+  }
+}

@@ -44,13 +44,13 @@ Import-DotEnv (Join-Path $repoRoot '.env.local')
 
 Push-Location $backendDir
 try {
-    & $mvnw -pl app -am package -DskipTests 2>&1 | Out-Host
+    & $mvnw -pl application -am package -DskipTests 2>&1 | Out-Host
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
     $env:SPRING_PROFILES_ACTIVE = 'local'
     try {
-        java -jar (Join-Path $backendDir 'app/target/app-0.1.0-SNAPSHOT.jar')
+        java -jar (Join-Path $backendDir 'application/target/application-0.1.0-SNAPSHOT.jar')
     }
     finally {
         Remove-Item Env:SPRING_PROFILES_ACTIVE -ErrorAction SilentlyContinue

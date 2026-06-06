@@ -93,7 +93,7 @@ Responsibilities:
 - bootstrap seed runners
 - deployment-facing configuration
 
-### `coverage`
+### `build-support`
 
 Build and reporting module only.
 
@@ -263,4 +263,3 @@ Auth is expected to stay in the `app` composition root unless it grows into a mu
 - strong local dev experience
 - easy container and demo deployment
 - mobile-friendly frontend
-

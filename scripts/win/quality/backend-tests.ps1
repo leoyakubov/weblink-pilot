@@ -14,7 +14,7 @@ try {
         $PSNativeCommandUseErrorActionPreference = $false
     }
     try {
-        $commandOutput = & cmd.exe /c "call .\mvnw.cmd -pl app -am clean test" 2>&1 | Tee-Object -Variable commandOutput | Out-Host
+        $commandOutput = & cmd.exe /c "call .\mvnw.cmd -pl application -am clean test" 2>&1 | Tee-Object -Variable commandOutput | Out-Host
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference

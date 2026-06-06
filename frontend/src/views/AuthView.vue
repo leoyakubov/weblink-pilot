@@ -79,14 +79,14 @@ function validateForm(): string {
 }
 
 function formatAuthError(error: unknown): string {
-    if (error instanceof ApiRequestError) {
-      if (error.code === 'EMAIL_NOT_VERIFIED') {
-        return 'Please verify your email address before signing in.';
-      }
+  if (error instanceof ApiRequestError) {
+    if (error.code === 'EMAIL_NOT_VERIFIED') {
+      return 'Please verify your email address before signing in.';
+    }
 
-      if (error.status === 401) {
-        return 'Incorrect username or password.';
-      }
+    if (error.status === 401) {
+      return 'Incorrect username or password.';
+    }
 
     if (error.status === 409) {
       return 'This username already exists.';
@@ -260,7 +260,10 @@ async function submit() {
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Forgot your password?</span>
-            <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/forgot-password">
+            <RouterLink
+              class="button button-secondary button-small auth-link-button"
+              to="/auth/forgot-password"
+            >
               Reset password
             </RouterLink>
           </div>
@@ -275,7 +278,11 @@ async function submit() {
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Prefer GitHub?</span>
-            <button class="button button-secondary button-small auth-link-button" type="button" @click="openGithubLogin">
+            <button
+              class="button button-secondary button-small auth-link-button"
+              type="button"
+              @click="openGithubLogin"
+            >
               Continue with GitHub
             </button>
           </div>

@@ -9,6 +9,8 @@ cd frontend
 npm install
 ```
 
+Requires Node.js 24.16.0 LTS and npm 11.13.0.
+
 Create a local env file if needed:
 
 ```bash

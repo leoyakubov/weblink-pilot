@@ -11,10 +11,11 @@
 
     <modules>
         <module>shared-contracts</module>
-        <module>url</module>
+        <module>auth</module>
+        <module>links</module>
         <module>analytics</module>
-        <module>app</module>
-        <module>coverage</module>
+        <module>application</module>
+        <module>build-support</module>
     </modules>
 
     <properties>
@@ -32,7 +33,7 @@
         <dependency-check.version>12.2.2</dependency-check.version>
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
         <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
-        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/coverage/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/build-support/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <spring-boot.run.profiles>local</spring-boot.run.profiles>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -47,7 +48,12 @@
             </dependency>
             <dependency>
                 <groupId>io.weblinkpilot</groupId>
-                <artifactId>url</artifactId>
+                <artifactId>auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>links</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -57,7 +63,7 @@
             </dependency>
             <dependency>
                 <groupId>io.weblinkpilot</groupId>
-                <artifactId>app</artifactId>
+                <artifactId>application</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -203,12 +209,12 @@
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>2.44.2</version>
+                    <version>3.6.0</version>
                     <configuration>
                         <lineEndings>UNIX</lineEndings>
                         <java>
                             <googleJavaFormat>
-                                <version>1.25.2</version>
+                                <version>1.33.0</version>
                             </googleJavaFormat>
                             <removeUnusedImports />
                         </java>

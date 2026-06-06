@@ -73,7 +73,10 @@ onMounted(() => {
 
         <div class="auth-switch">
           <span class="footnote">Need to sign in?</span>
-          <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/signin">
+          <RouterLink
+            class="button button-secondary button-small auth-link-button"
+            to="/auth/signin"
+          >
             Sign in
           </RouterLink>
         </div>

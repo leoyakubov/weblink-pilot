@@ -6,5 +6,5 @@ backend_dir="$repo_root/backend"
 
 (
   cd "$backend_dir"
-  ./mvnw -pl app,url,analytics -am spotless:apply
+  ./mvnw -pl application,links,analytics -am spotless:apply
 )

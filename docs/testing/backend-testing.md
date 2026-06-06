@@ -15,8 +15,8 @@ Use these for small, deterministic pieces of logic:
 
 Examples in this repo:
 
-- `backend/url/src/test/java/io/weblinkpilot/url/service/Base62CodecTest.java`
-- `backend/url/src/test/java/io/weblinkpilot/url/web/CountryResolverTest.java`
+- `backend/links/src/test/java/io/weblinkpilot/links/service/Base62CodecTest.java`
+- `backend/links/src/test/java/io/weblinkpilot/links/web/CountryResolverTest.java`
 - `backend/analytics/src/test/java/io/weblinkpilot/analytics/service/UserAgentParserTest.java`
 
 ### Slice tests
@@ -39,7 +39,7 @@ Use these when you want a production-like PostgreSQL database instead of H2:
 
 Example in this repo:
 
-- `backend/app/src/test/java/io/weblinkpilot/config/testcontainers/PostgresUrlApiIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/config/testcontainers/PostgresUrlApiIntegrationTest.java`
 
 ### Integration tests
 
@@ -54,11 +54,11 @@ Use these to verify module wiring and real runtime behavior:
 
 Examples in this repo:
 
-- `backend/app/src/test/java/io/weblinkpilot/ApplicationContextTest.java`
-- `backend/app/src/test/java/io/weblinkpilot/url/web/UrlApiIntegrationTest.java`
-- `backend/app/src/test/java/io/weblinkpilot/analytics/web/AnalyticsApiIntegrationTest.java`
-- `backend/app/src/test/java/io/weblinkpilot/config/rate/RateLimitIntegrationTest.java`
-- `backend/app/src/test/java/io/weblinkpilot/config/observability/ObservabilityIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/ApplicationContextTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/links/web/UrlApiIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/analytics/web/AnalyticsApiIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/config/rate/RateLimitIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/config/observability/ObservabilityIntegrationTest.java`
 
 ### Contract tests
 
@@ -124,14 +124,14 @@ These are optional but useful once the modular monolith grows further.
 
 Example in this repo:
 
-- `backend/app/src/test/java/io/weblinkpilot/architecture/ArchitectureTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/architecture/ArchitectureTest.java`
 
 ## Coverage
 
 The backend build now produces:
 
-- module-level coverage checks for `url`, `analytics`, and `app`
-- an aggregate multi-module report in `backend/coverage`
+- module-level coverage checks for `links`, `analytics`, and `application`
+- an aggregate multi-module report in `backend/build-support`
 - a dedicated Maven `ci` profile for verification runs in CI and manual coverage runs
 
 Run the backend test suite from the repo root:
@@ -154,7 +154,7 @@ Run the aggregate coverage build from `backend/`:
 
 The HTML report is generated under:
 
-- `backend/coverage/target/site/jacoco-aggregate/index.html`
+- `backend/build-support/target/site/jacoco-aggregate/index.html`
 
 ## SonarQube
 
@@ -177,7 +177,7 @@ $env:SONAR_HOST_URL = "http://localhost:9001"
 
 The backend POM points Sonar at the aggregate JaCoCo XML report:
 
-- `coverage/target/site/jacoco-aggregate/jacoco.xml`
+- `build-support/target/site/jacoco-aggregate/jacoco.xml`
 
 For local SonarQube, the scripts and docs default the host URL to `http://localhost:9001`.
 For GitHub Actions, set `SONAR_HOST_URL` as a repository secret or environment secret that points at the hosted SonarQube server.

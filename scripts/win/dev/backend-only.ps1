@@ -44,12 +44,12 @@ Import-DotEnv (Join-Path $repoRoot '.env.local')
 
 Push-Location $backendDir
 try {
-    & $mvnw -Pdev -pl shared-contracts,url,analytics,app -am install -DskipTests 2>&1 | Out-Host
+    & $mvnw -Pdev -pl shared-contracts,links,analytics,application -am install -DskipTests 2>&1 | Out-Host
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
 
-    & $mvnw -Pdev -f (Join-Path $backendDir 'app/pom.xml') spring-boot:run 2>&1 | Out-Host
+    & $mvnw -Pdev -f (Join-Path $backendDir 'application/pom.xml') spring-boot:run 2>&1 | Out-Host
 }
 finally {
     Pop-Location

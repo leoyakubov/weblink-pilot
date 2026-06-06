@@ -13,7 +13,9 @@ const errorMessage = ref('');
 function readTicket() {
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
   const hashParams = new URLSearchParams(hash);
-  return hashParams.get('ticket') ?? new URLSearchParams(window.location.search).get('ticket') ?? '';
+  return (
+    hashParams.get('ticket') ?? new URLSearchParams(window.location.search).get('ticket') ?? ''
+  );
 }
 
 function postLoginMessage(response: AuthResponse) {

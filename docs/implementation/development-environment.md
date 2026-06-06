@@ -7,7 +7,8 @@ This document describes the local workflow for building, testing, and maintainin
 - Git
 - Java 25
 - Maven through the backend wrapper
-- Node.js and npm for the frontend
+- Node.js 24.16.0 LTS
+- npm 11.13.0
 - Docker Desktop or compatible Docker runtime
 - PowerShell on Windows
 - Bash-compatible shell on Unix/macOS/Linux

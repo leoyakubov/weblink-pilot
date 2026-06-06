@@ -82,7 +82,12 @@ async function submit() {
         <form class="form-grid" @submit.prevent="submit">
           <label class="form-field">
             <span class="field-label">Reset token</span>
-            <input v-model="form.token" class="input" type="text" placeholder="Paste token from email" />
+            <input
+              v-model="form.token"
+              class="input"
+              type="text"
+              placeholder="Paste token from email"
+            />
           </label>
           <label class="form-field">
             <span class="field-label">New password</span>
@@ -112,7 +117,10 @@ async function submit() {
 
           <div class="auth-switch">
             <span class="footnote">Need a fresh reset link?</span>
-            <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/forgot-password">
+            <RouterLink
+              class="button button-secondary button-small auth-link-button"
+              to="/auth/forgot-password"
+            >
               Request again
             </RouterLink>
           </div>

@@ -156,7 +156,11 @@ onMounted(() => {
         </div>
 
         <div v-if="linkedAccounts.length" class="stack">
-          <div v-for="identity in linkedAccounts" :key="`${identity.provider}-${identity.providerLogin}`" class="linked-account">
+          <div
+            v-for="identity in linkedAccounts"
+            :key="`${identity.provider}-${identity.providerLogin}`"
+            class="linked-account"
+          >
             <strong>{{ identity.provider }}</strong>
             <span class="footnote">{{ identity.providerLogin }}</span>
           </div>

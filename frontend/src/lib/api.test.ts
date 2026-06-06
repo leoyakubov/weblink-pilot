@@ -322,9 +322,7 @@ describe('api helpers', () => {
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBeNull();
       expect(init?.credentials).toBe('include');
-      expect(init?.body).toBe(
-        JSON.stringify({ token: 'reset-token', password: 'Password1' }),
-      );
+      expect(init?.body).toBe(JSON.stringify({ token: 'reset-token', password: 'Password1' }));
       return new Response(null, { status: 204 });
     });
 

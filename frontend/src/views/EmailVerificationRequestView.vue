@@ -92,7 +92,10 @@ async function submit() {
 
           <div class="auth-switch">
             <span class="footnote">Already verified?</span>
-            <RouterLink class="button button-secondary button-small auth-link-button" to="/auth/signin">
+            <RouterLink
+              class="button button-secondary button-small auth-link-button"
+              to="/auth/signin"
+            >
               Sign in
             </RouterLink>
           </div>
