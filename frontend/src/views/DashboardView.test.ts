@@ -6,6 +6,15 @@ const mocks = vi.hoisted(() => ({
   listLinksMock: vi.fn(),
   getLinkMock: vi.fn(),
   getAnalyticsSummaryMock: vi.fn(),
+  ApiRequestError: class ApiRequestError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+      super(message);
+      this.name = 'ApiRequestError';
+      this.status = status;
+    }
+  },
   authState: {
     currentUser: { username: 'admin', role: 'ADMIN' } as null | { username: string; role: string },
   },
@@ -32,6 +41,7 @@ vi.mock('@/lib/auth', () => ({
 }));
 
 vi.mock('@/lib/api', () => ({
+  ApiRequestError: mocks.ApiRequestError,
   buildApiBaseUrl: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
   getLink: mocks.getLinkMock,
@@ -115,5 +125,27 @@ describe('DashboardView', () => {
 
     await buttons.find((button) => button.text().includes('preview JSON'))?.trigger('click');
     expect(mocks.openMock).toHaveBeenCalled();
+  });
+
+  it('keeps link details visible when analytics are forbidden', async () => {
+    mocks.getAnalyticsSummaryMock.mockRejectedValueOnce(
+      new mocks.ApiRequestError('Forbidden', 403),
+    );
+
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Analytics are available only to the link owner or an admin user.');
+    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('Short URL');
   });
 });

@@ -2,7 +2,13 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import CopyActionButton from '@/shared/components/CopyActionButton.vue';
-import { buildApiBaseUrl, getAnalyticsSummary, getLink, getRedirectPreview } from '@/lib/api';
+import {
+  ApiRequestError,
+  buildApiBaseUrl,
+  getAnalyticsSummary,
+  getLink,
+  getRedirectPreview,
+} from '@/lib/api';
 import { isAdminUser } from '@/lib/auth';
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
@@ -16,6 +22,7 @@ const preview = ref<RedirectPreviewResponse | null>(null);
 const analytics = ref<AnalyticsSummaryResponse | null>(null);
 const loading = ref(false);
 const errorMessage = ref('');
+const analyticsMessage = ref('');
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
 
@@ -29,18 +36,43 @@ async function load(codeValue: string) {
 
   loading.value = true;
   errorMessage.value = '';
+  analyticsMessage.value = '';
 
   try {
-    const [details, redirectPreview, analyticsSummary] = await Promise.all([
-      getLink(codeValue, settings),
+    link.value = await getLink(codeValue, settings);
+
+    const [redirectPreviewResult, analyticsResult] = await Promise.allSettled([
       getRedirectPreview(codeValue, settings),
       getAnalyticsSummary(codeValue, settings),
     ]);
 
-    link.value = details;
-    preview.value = redirectPreview;
-    analytics.value = analyticsSummary;
+    if (redirectPreviewResult.status === 'fulfilled') {
+      preview.value = redirectPreviewResult.value;
+    } else {
+      preview.value = null;
+    }
+
+    if (analyticsResult.status === 'fulfilled') {
+      analytics.value = analyticsResult.value;
+    } else {
+      analytics.value = null;
+      if (
+        analyticsResult.reason instanceof ApiRequestError &&
+        analyticsResult.reason.status === 403
+      ) {
+        analyticsMessage.value =
+          'Analytics are available only to the link owner or an admin user.';
+      } else {
+        analyticsMessage.value =
+          analyticsResult.reason instanceof Error
+            ? analyticsResult.reason.message
+            : 'Could not load analytics';
+      }
+    }
   } catch (error) {
+    link.value = null;
+    preview.value = null;
+    analytics.value = null;
     errorMessage.value = error instanceof Error ? error.message : 'Could not load link details';
   } finally {
     loading.value = false;
@@ -266,6 +298,11 @@ function formatDate(value: string | null) {
               </div>
             </div>
           </div>
+
+          <p v-else-if="analyticsMessage" class="status warning">
+            <span class="status-dot"></span>
+            {{ analyticsMessage }}
+          </p>
         </div>
       </article>
     </div>

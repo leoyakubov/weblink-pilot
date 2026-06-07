@@ -6,6 +6,15 @@ const mocks = vi.hoisted(() => ({
   getLinkMock: vi.fn(),
   getRedirectPreviewMock: vi.fn(),
   getAnalyticsSummaryMock: vi.fn(),
+  ApiRequestError: class ApiRequestError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+      super(message);
+      this.name = 'ApiRequestError';
+      this.status = status;
+    }
+  },
   buildApiBaseUrlMock: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   copyTextMock: vi.fn(),
   replaceMock: vi.fn(),
@@ -21,6 +30,7 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/lib/api', () => ({
+  ApiRequestError: mocks.ApiRequestError,
   buildApiBaseUrl: mocks.buildApiBaseUrlMock,
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
   getLink: mocks.getLinkMock,
@@ -105,5 +115,39 @@ describe('LinkView', () => {
     expect(wrapper.text()).toContain('Copy QR URL');
     expect(wrapper.text()).toContain('US');
     expect(wrapper.text()).toContain('https://news.ycombinator.com');
+  });
+
+  it('shows link details when analytics are forbidden', async () => {
+    mocks.getLinkMock.mockResolvedValue({
+      code: 'github-org',
+      shortUrl: 'http://localhost:8080/r/github-org',
+      qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+      originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+      createdAt: '2026-05-23T11:00:00Z',
+      expiresAt: null,
+      clickCount: 3,
+      ownerUsername: null,
+    });
+
+    mocks.getRedirectPreviewMock.mockResolvedValue({
+      code: 'github-org',
+      shortUrl: 'http://localhost:8080/r/github-org',
+      targetUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+      status: 302,
+      locationHeader: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+    });
+
+    mocks.getAnalyticsSummaryMock.mockRejectedValue(
+      new mocks.ApiRequestError('Forbidden', 403),
+    );
+
+    const wrapper = mount(LinkView);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain(
+      'Analytics are available only to the link owner or an admin user.',
+    );
+    expect(wrapper.text()).toContain('Code: github-org');
+    expect(wrapper.text()).toContain('https://github.com/weblinkpilot/weblink-pilot/tree/main/docs');
   });
 });

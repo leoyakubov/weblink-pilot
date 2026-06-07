@@ -5,7 +5,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import CopyActionButton from '@/shared/components/CopyActionButton.vue';
 import { isAdminUser } from '@/lib/auth';
-import { buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
+import { ApiRequestError, buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
@@ -22,12 +22,12 @@ const link = ref<LinkResponse | null>(null);
 const summary = ref<AnalyticsSummaryResponse | null>(null);
 const loading = ref(false);
 const errorMessage = ref('');
+const analyticsMessage = ref('');
 const recentLinks = ref<LinkResponse[]>([]);
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
 
 const selectedCode = computed(() => form.code.trim());
-const hasData = computed(() => Boolean(link.value && summary.value));
 const hasRecent = computed(() => recentLinks.value.length > 0);
 const canSeePreview = computed(() => isAdminUser());
 
@@ -89,23 +89,34 @@ async function load(codeValue: string) {
     errorMessage.value = 'Enter a short code to load analytics.';
     link.value = null;
     summary.value = null;
+    analyticsMessage.value = '';
     return;
   }
 
   loading.value = true;
   errorMessage.value = '';
+  analyticsMessage.value = '';
 
   try {
     router.replace({ query: { code: trimmed } });
-    const [details, analytics] = await Promise.all([
-      getLink(trimmed, settings),
-      getAnalyticsSummary(trimmed, settings),
-    ]);
-    link.value = details;
-    summary.value = analytics;
+    link.value = await getLink(trimmed, settings);
+
+    try {
+      summary.value = await getAnalyticsSummary(trimmed, settings);
+    } catch (error) {
+      summary.value = null;
+      if (error instanceof ApiRequestError && error.status === 403) {
+        analyticsMessage.value =
+          'Analytics are available only to the link owner or an admin user.';
+      } else {
+        analyticsMessage.value =
+          error instanceof Error ? error.message : 'Could not load analytics';
+      }
+    }
   } catch (error) {
     link.value = null;
     summary.value = null;
+    analyticsMessage.value = '';
     errorMessage.value = error instanceof Error ? error.message : 'Could not load analytics';
   } finally {
     loading.value = false;
@@ -263,7 +274,12 @@ watch(
           </svg>
         </div>
 
-        <div class="empty-state" v-if="!hasData">
+        <p v-else-if="analyticsMessage" class="status warning">
+          <span class="status-dot"></span>
+          {{ analyticsMessage }}
+        </p>
+
+        <div class="empty-state" v-else>
           <p class="eyebrow">No data loaded</p>
           <h4 class="card-title">Pick a code from recent links or enter one manually.</h4>
           <p class="muted">
@@ -272,7 +288,7 @@ watch(
           </p>
         </div>
 
-        <div v-else class="stack">
+        <div v-if="summary" class="stack">
           <div class="grid-2">
             <div class="metric">
               <span class="value">{{ summary?.totalClicks }}</span>
