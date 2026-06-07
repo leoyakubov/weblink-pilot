@@ -25,6 +25,7 @@ The frontend currently uses:
 - a custom shell, spacing system, and page styling
 - feature-oriented page folders for the main screens
 - a theme toggle that can switch between the legacy dark shell and the lighter Sakai-style shell
+- a shared analytics summary component for repeated dashboard/detail blocks
 - shared utilities for repeated behavior
 
 That means the migration is mostly about presentation, structure, and shared styling, not business logic.
@@ -109,6 +110,7 @@ Current status:
 
 - legacy copy-button wrappers have been removed from the active frontend path
 - the app shell now exposes a legacy/Sakai theme toggle
+- the analytics summary block is now a shared component used by dashboard and link detail
 - the main pages use PrimeVue buttons directly for copy and action flows
 
 ### Phase 5 - Legacy Cleanup

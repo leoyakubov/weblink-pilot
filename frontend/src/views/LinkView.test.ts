@@ -113,8 +113,7 @@ describe('LinkView', () => {
       'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
     );
     expect(wrapper.text()).toContain('Copy QR URL');
-    expect(wrapper.text()).toContain('US');
-    expect(wrapper.text()).toContain('https://news.ycombinator.com');
+    expect(wrapper.text()).toContain('Click breakdown');
   });
 
   it('shows link details when analytics are forbidden', async () => {

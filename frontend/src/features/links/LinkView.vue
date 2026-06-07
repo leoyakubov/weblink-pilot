@@ -11,9 +11,9 @@ import {
 } from '@/lib/api';
 import { useCopyAction } from '@/lib/copy-action';
 import { isAdminUser } from '@/lib/auth';
-import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
 import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types';
+import AnalyticsSummaryPanel from '@/shared/components/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();
 const settings = loadSettings();
@@ -247,65 +247,7 @@ function formatDate(value: string | null) {
           </div>
 
           <div v-if="analytics" class="stack">
-            <div class="grid-2">
-              <div class="metric">
-                <span class="value">{{ analytics.totalClicks }}</span>
-                <span class="label">Total interactions</span>
-              </div>
-              <div class="metric">
-                <span class="value">{{ analytics.redirectClicks }}</span>
-                <span class="label">Redirect clicks</span>
-              </div>
-              <div class="metric">
-                <span class="value">{{ analytics.qrScans }}</span>
-                <span class="label">QR scans</span>
-              </div>
-              <div class="metric">
-                <span class="value">{{ analytics.uniqueVisitors }}</span>
-                <span class="label">Unique visitors</span>
-              </div>
-            </div>
-
-            <div class="list-item">
-              <strong>Last click</strong>
-              <p>{{ formatDate(analytics.lastClickedAt) }}</p>
-            </div>
-            <div class="list-item">
-              <strong>Last referrer</strong>
-              <p>{{ analytics.lastReferrer ?? 'No referrer captured yet' }}</p>
-            </div>
-            <div class="list-item">
-              <strong>Browser / device</strong>
-              <p>
-                {{ analytics.lastBrowserFamily ?? 'Unknown browser' }} -
-                {{ analytics.lastDeviceType ?? 'Unknown device' }}
-              </p>
-            </div>
-
-            <div v-if="analytics.topCountries.length" class="stack">
-              <div>
-                <p class="eyebrow">Top countries</p>
-                <h4 class="card-title">Where clicks are coming from</h4>
-              </div>
-              <div class="list">
-                <div
-                  v-for="country in analytics.topCountries"
-                  :key="country.country"
-                  class="list-item"
-                >
-                  <strong class="country-label">
-                    <img
-                      v-if="countryFlagUrl(country.country)"
-                      class="country-flag"
-                      :src="countryFlagUrl(country.country) || ''"
-                      :alt="`${countryCodeLabel(country.country)} flag`"
-                    />
-                    <span>{{ countryCodeLabel(country.country) }}</span>
-                  </strong>
-                  <p>{{ country.clicks }} clicks</p>
-                </div>
-              </div>
-            </div>
+            <AnalyticsSummaryPanel :summary="analytics" />
           </div>
 
           <p v-else-if="analyticsMessage" class="status warning">

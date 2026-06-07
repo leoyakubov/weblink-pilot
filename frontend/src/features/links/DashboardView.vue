@@ -9,6 +9,7 @@ import { useCopyAction } from '@/lib/copy-action';
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
+import AnalyticsSummaryPanel from '@/shared/components/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -289,42 +290,7 @@ watch(
           </p>
         </div>
 
-        <div v-if="summary" class="stack">
-          <div class="grid-2">
-            <div class="metric">
-              <span class="value">{{ summary?.totalClicks }}</span>
-              <span class="label">Total interactions</span>
-            </div>
-            <div class="metric">
-              <span class="value">{{ summary?.redirectClicks }}</span>
-              <span class="label">Redirect clicks</span>
-            </div>
-            <div class="metric">
-              <span class="value">{{ summary?.qrScans }}</span>
-              <span class="label">QR scans</span>
-            </div>
-            <div class="metric">
-              <span class="value">{{ summary?.uniqueVisitors }}</span>
-              <span class="label">Unique visitors</span>
-            </div>
-          </div>
-
-          <div class="list-item">
-            <strong>Last click</strong>
-            <p>{{ formatDate(summary?.lastClickedAt ?? null) }}</p>
-          </div>
-          <div class="list-item">
-            <strong>Last referrer</strong>
-            <p>{{ summary?.lastReferrer ?? 'No referrer captured yet' }}</p>
-          </div>
-          <div class="list-item">
-            <strong>Browser / device</strong>
-            <p>
-              {{ summary?.lastBrowserFamily ?? 'Unknown browser' }} -
-              {{ summary?.lastDeviceType ?? 'Unknown device' }}
-            </p>
-          </div>
-        </div>
+        <AnalyticsSummaryPanel :summary="summary" :show-top-countries="false" />
       </div>
     </article>
 
@@ -422,27 +388,7 @@ watch(
           <p v-else class="muted">No saved links yet. Create one from the home page first.</p>
         </div>
 
-        <div v-if="summary?.topCountries.length" class="stack">
-          <div>
-            <p class="eyebrow">Top countries</p>
-            <h4 class="card-title">Where clicks are coming from</h4>
-          </div>
-
-          <div class="list">
-            <div v-for="country in summary.topCountries" :key="country.country" class="list-item">
-              <strong class="country-label">
-                <img
-                  v-if="countryFlagUrl(country.country)"
-                  class="country-flag"
-                  :src="countryFlagUrl(country.country) || ''"
-                  :alt="`${countryCodeLabel(country.country)} flag`"
-                />
-                <span>{{ countryCodeLabel(country.country) }}</span>
-              </strong>
-              <p>{{ country.clicks }} clicks</p>
-            </div>
-          </div>
-        </div>
+        <AnalyticsSummaryPanel :summary="summary" :show-metrics="false" />
       </div>
     </article>
   </section>

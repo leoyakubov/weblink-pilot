@@ -9,7 +9,7 @@ import {
   bootstrapAuth,
   isAdminUser,
   signOut,
-} from '@/shared/services/auth';
+} from '@/lib/auth';
 import type { AuthResponse } from '@/shared/models/api';
 import { toggleUiMode, uiModeState } from '@/lib/ui-mode';
 

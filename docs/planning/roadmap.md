@@ -25,7 +25,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 15 | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration) | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place. |
 | 16 | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
 | 17 | &#x1F7E2; Done | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs. |
-| 18 | &#x1F7E1; In Progress | [Frontend redesign](#phase-18-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, moving toward full Sakai adoption while preserving the current design as a rollback path. |
+| 18 | &#x1F7E2; Done | [Frontend redesign](#phase-18-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, moving toward full Sakai adoption while preserving the current design as a rollback path. |
 | 19 | Planned | [Demo visit analytics](#phase-19-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
 | 20 | Planned | [Security hardening follow-up](#phase-20-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
 | 21 | Planned | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
@@ -38,7 +38,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 Status note:
 
 - Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-24 are the remaining roadmap items, with phase 15 now complete, phase 16 complete, phase 17 complete, and phase 18 in progress.
+- Phases 15-24 are the remaining roadmap items, with phase 15 complete, phase 16 complete, phase 17 complete, and phase 18 complete.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -500,8 +500,8 @@ Checklist:
 - [x] Preserve existing frontend behavior
 - [x] Document the updated visual direction
 - [x] Remove the remaining wrapper and compatibility layers
-- [ ] Unify `lib` vs `shared/services`
-- [ ] Extract repeated UI blocks into smaller components
+- [x] Unify `lib` vs `shared/services`
+- [x] Extract repeated UI blocks into smaller components
 
 ### Phase 19 - Demo visit analytics
 
