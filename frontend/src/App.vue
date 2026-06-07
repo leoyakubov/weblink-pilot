@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /* global MessageEvent */
 import { computed, onBeforeUnmount, onMounted } from 'vue';
+import Button from 'primevue/button';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
 import {
   applyAuthResponse,
@@ -10,6 +11,7 @@ import {
   signOut,
 } from '@/shared/services/auth';
 import type { AuthResponse } from '@/shared/models/api';
+import { toggleUiMode, uiModeState } from '@/lib/ui-mode';
 
 const route = useRoute();
 const router = useRouter();
@@ -72,6 +74,11 @@ const showSectionHeader = computed(
     ),
 );
 
+const themeButtonLabel = computed(() =>
+  uiModeState.mode === 'legacy' ? 'Switch to Sakai' : 'Switch to legacy',
+);
+const themeButtonIcon = computed(() => (uiModeState.mode === 'legacy' ? 'pi pi-sun' : 'pi pi-moon'));
+
 function handleAuthMessage(event: MessageEvent) {
   if (event.origin !== window.location.origin) {
     return;
@@ -123,6 +130,17 @@ onBeforeUnmount(() => {
           </RouterLink>
         </nav>
 
+        <Button
+          type="button"
+          class="theme-toggle"
+          :label="themeButtonLabel"
+          :icon="themeButtonIcon"
+          severity="secondary"
+          variant="outlined"
+          size="small"
+          @click="toggleUiMode"
+        />
+
         <div class="auth-links">
           <div class="session-controls">
             <span class="session-slot">
@@ -153,14 +171,15 @@ onBeforeUnmount(() => {
               >
                 Sign up
               </RouterLink>
-              <button
+              <Button
                 v-else
-                class="button button-secondary button-small"
                 type="button"
+                label="Sign out"
+                severity="secondary"
+                variant="outlined"
+                size="small"
                 @click="signOut()"
-              >
-                Sign out
-              </button>
+              />
             </span>
           </div>
         </div>

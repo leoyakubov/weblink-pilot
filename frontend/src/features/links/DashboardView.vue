@@ -3,9 +3,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import CopyActionButton from '@/shared/components/CopyActionButton.vue';
 import { isAdminUser } from '@/lib/auth';
 import { ApiRequestError, buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
+import { useCopyAction } from '@/lib/copy-action';
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
@@ -26,6 +26,7 @@ const analyticsMessage = ref('');
 const recentLinks = ref<LinkResponse[]>([]);
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
+const { copy, isCopied } = useCopyAction();
 
 const selectedCode = computed(() => form.code.trim());
 const hasRecent = computed(() => recentLinks.value.length > 0);
@@ -355,10 +356,13 @@ watch(
             <RouterLink :to="{ name: 'link', params: { code: link.code } }">
               <Button label="Open details page" icon="pi pi-external-link" />
             </RouterLink>
-            <CopyActionButton
-              :value="link.shortUrl"
-              label="Copy short URL"
-              copied-label="Short URL copied"
+            <Button
+              type="button"
+              :label="isCopied('dashboard-short') ? 'Short URL copied' : 'Copy short URL'"
+              :icon="isCopied('dashboard-short') ? 'pi pi-check' : 'pi pi-copy'"
+              severity="secondary"
+              variant="outlined"
+              @click="copy(link.shortUrl, 'dashboard-short')"
             />
             <Button
               type="button"
@@ -382,11 +386,11 @@ watch(
           <figure class="stack" style="margin: 0">
             <img class="qr-image" :src="link.qrCodeUrl" :alt="`QR code for ${link.code}`" />
             <div class="actions">
-              <CopyActionButton
-                :value="link.qrCodeUrl"
-                label="Copy QR URL"
-                copied-label="QR URL copied"
-                variant="primary"
+              <Button
+                type="button"
+                :label="isCopied('dashboard-qr') ? 'QR URL copied' : 'Copy QR URL'"
+                :icon="isCopied('dashboard-qr') ? 'pi pi-check' : 'pi pi-copy'"
+                @click="copy(link.qrCodeUrl, 'dashboard-qr')"
               />
               <Button
                 type="button"
@@ -453,13 +457,15 @@ watch(
                 <p class="eyebrow">QR code</p>
                 <h3 class="panel-title">{{ qrModalTitle }}</h3>
               </div>
-              <button
-                class="button button-secondary button-small"
+              <Button
                 type="button"
+                label="Close"
+                icon="pi pi-times"
+                severity="secondary"
+                variant="text"
+                size="small"
                 @click="closeQrModal"
-              >
-                Close
-              </button>
+              />
             </div>
 
             <img

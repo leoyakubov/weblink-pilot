@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import CopyActionButton from '@/shared/components/CopyActionButton.vue';
+import Button from 'primevue/button';
 import {
   ApiRequestError,
   buildApiBaseUrl,
@@ -9,6 +9,7 @@ import {
   getLink,
   getRedirectPreview,
 } from '@/lib/api';
+import { useCopyAction } from '@/lib/copy-action';
 import { isAdminUser } from '@/lib/auth';
 import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
 import { loadSettings } from '@/lib/settings';
@@ -25,6 +26,7 @@ const errorMessage = ref('');
 const analyticsMessage = ref('');
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
+const { copy, isCopied } = useCopyAction();
 
 const code = computed(() => String(route.params.code ?? ''));
 const canSeePreview = computed(() => isAdminUser());
@@ -170,27 +172,31 @@ function formatDate(value: string | null) {
           </div>
 
           <div class="actions">
-            <CopyActionButton
-              :value="link.shortUrl"
-              label="Copy short URL"
-              copied-label="Short URL copied"
-              variant="primary"
+            <Button
+              type="button"
+              :label="isCopied('link-short') ? 'Short URL copied' : 'Copy short URL'"
+              :icon="isCopied('link-short') ? 'pi pi-check' : 'pi pi-copy'"
+              severity="secondary"
+              variant="outlined"
+              @click="copy(link.shortUrl, 'link-short')"
             />
-            <button
-              class="button button-secondary"
+            <Button
               type="button"
+              label="Open redirect"
+              icon="pi pi-arrow-right"
+              severity="secondary"
+              variant="outlined"
               @click="openExternal(link.shortUrl)"
-            >
-              Open redirect
-            </button>
-            <button
+            />
+            <Button
               v-if="canSeePreview"
-              class="button button-secondary"
               type="button"
+              label="Open preview JSON"
+              icon="pi pi-code"
+              severity="secondary"
+              variant="outlined"
               @click="openExternal(buildApiBaseUrl(`/urls/${link.code}/preview`, settings))"
-            >
-              Open preview JSON
-            </button>
+            />
           </div>
         </template>
       </div>
@@ -213,19 +219,22 @@ function formatDate(value: string | null) {
           </figure>
 
           <div class="actions" v-if="link">
-            <CopyActionButton
-              :value="link.qrCodeUrl"
-              label="Copy QR URL"
-              copied-label="QR URL copied"
-              variant="primary"
-            />
-            <button
-              class="button button-secondary"
+            <Button
               type="button"
+              :label="isCopied('link-qr') ? 'QR URL copied' : 'Copy QR URL'"
+              :icon="isCopied('link-qr') ? 'pi pi-check' : 'pi pi-copy'"
+              severity="secondary"
+              variant="outlined"
+              @click="copy(link.qrCodeUrl, 'link-qr')"
+            />
+            <Button
+              type="button"
+              label="Open QR"
+              icon="pi pi-qrcode"
+              severity="secondary"
+              variant="outlined"
               @click="openQrModal(link.qrCodeUrl, link.code)"
-            >
-              Open QR
-            </button>
+            />
           </div>
         </div>
       </article>
@@ -317,13 +326,15 @@ function formatDate(value: string | null) {
                   <p class="eyebrow">QR code</p>
                   <h3 class="panel-title">{{ qrModalTitle }}</h3>
                 </div>
-                <button
-                  class="button button-secondary button-small"
+                <Button
                   type="button"
+                  label="Close"
+                  icon="pi pi-times"
+                  severity="secondary"
+                  variant="text"
+                  size="small"
                   @click="closeQrModal"
-                >
-                  Close
-                </button>
+                />
               </div>
 
               <img

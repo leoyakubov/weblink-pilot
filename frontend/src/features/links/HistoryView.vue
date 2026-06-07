@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import CopyActionButton from '@/shared/components/CopyActionButton.vue';
+import Button from 'primevue/button';
+import { useCopyAction } from '@/lib/copy-action';
 import { buildApiBaseUrl, listLinks } from '@/lib/api';
 import { loadSettings } from '@/lib/settings';
 import type { LinkResponse } from '@/types';
@@ -10,6 +11,7 @@ const settings = loadSettings();
 const links = ref<LinkResponse[]>([]);
 const loading = ref(false);
 const errorMessage = ref('');
+const { copy, isCopied } = useCopyAction();
 
 const hasLinks = computed(() => links.value.length > 0);
 
@@ -52,14 +54,15 @@ function formatDate(value: string) {
             <p class="eyebrow">Link history</p>
             <h3 class="panel-title">Recent links from the backend.</h3>
           </div>
-          <button
-            class="button button-secondary"
+          <Button
             type="button"
+            :label="loading ? 'Refreshing...' : 'Refresh'"
+            icon="pi pi-refresh"
+            severity="secondary"
+            variant="outlined"
             :disabled="loading"
             @click="refresh"
-          >
-            {{ loading ? 'Refreshing...' : 'Refresh' }}
-          </button>
+          />
         </div>
 
         <p class="help-text">
@@ -96,25 +99,30 @@ function formatDate(value: string) {
               >
                 Analytics
               </RouterLink>
-              <CopyActionButton
-                :value="item.shortUrl"
-                label="Copy short URL"
-                copied-label="Short URL copied"
+              <Button
+                type="button"
+                :label="isCopied(`history-${item.code}`) ? 'Short URL copied' : 'Copy short URL'"
+                :icon="isCopied(`history-${item.code}`) ? 'pi pi-check' : 'pi pi-copy'"
+                severity="secondary"
+                variant="outlined"
+                @click="copy(item.shortUrl, `history-${item.code}`)"
               />
-              <button
-                class="button button-secondary"
+              <Button
                 type="button"
+                label="Open QR"
+                icon="pi pi-qrcode"
+                severity="secondary"
+                variant="outlined"
                 @click="openExternal(item.qrCodeUrl)"
-              >
-                Open QR
-              </button>
-              <button
-                class="button button-secondary"
+              />
+              <Button
                 type="button"
+                label="Preview JSON"
+                icon="pi pi-code"
+                severity="secondary"
+                variant="outlined"
                 @click="openExternal(buildApiBaseUrl(`/urls/${item.code}/preview`, settings))"
-              >
-                Preview JSON
-              </button>
+              />
             </div>
           </div>
         </div>
@@ -126,7 +134,9 @@ function formatDate(value: string) {
             The history list is backed by the URL browse endpoint, so there is no separate
             client-side state to manage.
           </p>
-          <RouterLink class="button button-primary" to="/"> Create link </RouterLink>
+          <RouterLink to="/">
+            <Button label="Create link" icon="pi pi-plus" />
+          </RouterLink>
         </div>
       </div>
     </article>

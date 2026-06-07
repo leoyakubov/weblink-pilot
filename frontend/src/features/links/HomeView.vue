@@ -4,7 +4,7 @@ import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
-import CopyActionButton from '@/shared/components/CopyActionButton.vue';
+import { useCopyAction } from '@/lib/copy-action';
 import { authState } from '@/lib/auth';
 import { buildApiBaseUrl, createLink, listLinks } from '@/lib/api';
 import { loadSettings, saveSettings } from '@/lib/settings';
@@ -44,6 +44,8 @@ const linkPreviewUrl = computed(() =>
 const dashboardUrl = computed(() =>
   createdLink.value ? { name: 'dashboard', query: { code: createdLink.value.code } } : '/',
 );
+
+const { copy, isCopied } = useCopyAction();
 
 function syncSettings() {
   saveSettings(settings);
@@ -273,10 +275,13 @@ watch(
                   variant="outlined"
                 />
               </RouterLink>
-              <CopyActionButton
-                :value="item.shortUrl"
-                label="Copy short URL"
-                copied-label="Short URL copied"
+              <Button
+                type="button"
+                :label="isCopied(`recent-${item.code}`) ? 'Short URL copied' : 'Copy short URL'"
+                :icon="isCopied(`recent-${item.code}`) ? 'pi pi-check' : 'pi pi-copy'"
+                severity="secondary"
+                variant="outlined"
+                @click="copy(item.shortUrl, `recent-${item.code}`)"
               />
               <Button
                 type="button"
@@ -337,11 +342,11 @@ watch(
                 variant="outlined"
               />
             </RouterLink>
-            <CopyActionButton
-              :value="createdLink.shortUrl"
-              label="Copy short URL"
-              copied-label="Short URL copied"
-              variant="primary"
+            <Button
+              type="button"
+              :label="isCopied('created-short') ? 'Short URL copied' : 'Copy short URL'"
+              :icon="isCopied('created-short') ? 'pi pi-check' : 'pi pi-copy'"
+              @click="copy(createdLink.shortUrl, 'created-short')"
             />
             <Button
               type="button"
@@ -351,11 +356,14 @@ watch(
               variant="outlined"
               @click="openExternal(createdLink.shortUrl)"
             />
-            <CopyActionButton
+            <Button
               v-if="canSeePreview"
-              :value="linkPreviewUrl"
-              label="Copy preview URL"
-              copied-label="Preview URL copied"
+              type="button"
+              :label="isCopied('created-preview') ? 'Preview URL copied' : 'Copy preview URL'"
+              :icon="isCopied('created-preview') ? 'pi pi-check' : 'pi pi-copy'"
+              severity="secondary"
+              variant="outlined"
+              @click="copy(linkPreviewUrl, 'created-preview')"
             />
           </div>
         </div>
@@ -377,11 +385,11 @@ watch(
           </figure>
 
           <div class="grid-2">
-            <CopyActionButton
-              :value="createdLink.qrCodeUrl"
-              label="Copy QR URL"
-              copied-label="QR URL copied"
-              variant="primary"
+            <Button
+              type="button"
+              :label="isCopied('created-qr') ? 'QR URL copied' : 'Copy QR URL'"
+              :icon="isCopied('created-qr') ? 'pi pi-check' : 'pi pi-copy'"
+              @click="copy(createdLink.qrCodeUrl, 'created-qr')"
             />
             <Button
               type="button"

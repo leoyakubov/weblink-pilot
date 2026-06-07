@@ -4,9 +4,10 @@ import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css';
 import App from './App.vue';
 import router from './app/router';
+import { initializeUiMode } from './lib/ui-mode';
 import './styles.css';
 
-document.documentElement.classList.add('app-dark');
+initializeUiMode();
 
 createApp(App)
   .use(router)
