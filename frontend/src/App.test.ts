@@ -64,7 +64,7 @@ describe('App', () => {
     const wrapper = mount(App);
 
     expect(wrapper.text()).toContain('Analytics shell');
-    expect(wrapper.text()).toContain('Monitoring');
     expect(wrapper.text()).toContain('admin');
+    expect(wrapper.text()).toContain('Sign out');
   });
 });
