@@ -252,6 +252,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Dependency security: [`scripts/win/security/check-dependencies.ps1`](scripts/win/security/check-dependencies.ps1)
 - Secret scanning: [`scripts/win/git/scan-secrets.ps1`](scripts/win/git/scan-secrets.ps1)
 - Dev Docker full stack: [`scripts/win/dev/docker-full-stack.ps1`](scripts/win/dev/docker-full-stack.ps1)
+- Dev monitoring stack: [`scripts/win/dev/monitoring.ps1`](scripts/win/dev/monitoring.ps1)
 - SonarQube stack: [`scripts/win/quality/sonar-stack.ps1`](scripts/win/quality/sonar-stack.ps1)
 - Sonar analysis: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
 - Git hook setup: [`scripts/win/git/setup-hooks.ps1`](scripts/win/git/setup-hooks.ps1)
@@ -294,8 +295,7 @@ The repo also includes a containerized local stack:
 - frontend image built from [`frontend/Dockerfile`](frontend/Dockerfile)
 - Postgres 17 for persistence
 - Redis 7 for hot-cache lookups and analytics cache invalidation
-- Prometheus for backend metrics scraping
-- Grafana for local monitoring dashboards
+- Prometheus and Grafana are available in a separate monitoring stack
 
 Start it from the repo root:
 
@@ -308,6 +308,16 @@ Services:
 - frontend: `http://localhost:8081`
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
+- Mailpit: `http://localhost:8025`
+
+Start monitoring separately when you need it:
+
+```bash
+docker compose -p weblink-pilot -f infra/docker-compose.monitoring.yml up --build
+```
+
+Monitoring services:
+
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
 
@@ -334,7 +344,7 @@ You can also select the Maven convenience profiles when running the backend dire
 Quick guide:
 
 - `local`: [`scripts/win/dev/backend-local.ps1`](scripts/win/dev/backend-local.ps1)
-- `dev`: [`scripts/win/dev/docker-full-stack.ps1`](scripts/win/dev/docker-full-stack.ps1) for the full stack, or [`scripts/win/dev/backend-only.ps1`](scripts/win/dev/backend-only.ps1) after Postgres and Redis are up locally
+- `dev`: [`scripts/win/dev/docker-full-stack.ps1`](scripts/win/dev/docker-full-stack.ps1) for the main stack, [`scripts/win/dev/monitoring.ps1`](scripts/win/dev/monitoring.ps1) for dashboards, or [`scripts/win/dev/backend-only.ps1`](scripts/win/dev/backend-only.ps1) after Postgres and Redis are up locally
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:

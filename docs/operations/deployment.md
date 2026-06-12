@@ -60,7 +60,7 @@ flowchart TD
 | Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
 | Backend public URL | Done | The backend is reachable over HTTPS from the browser. |
 | CORS origin | Done | The exact Netlify origin is allowed by the backend CORS config. |
-| Monitoring | Done | The admin page now links to backend health/info/metrics/prometheus and the Docker stack includes Prometheus and Grafana. |
+| Monitoring | Done | The admin page now links to backend health/info/metrics/prometheus, and Prometheus/Grafana are available in a separate optional monitoring stack. |
 
 ## GitHub Actions workflows
 

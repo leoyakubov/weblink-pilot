@@ -5,8 +5,7 @@ This folder contains the Docker Compose stack for running the full project local
 - PostgreSQL 17
 - backend service
 - frontend service
-- Prometheus
-- Grafana
+- Prometheus and Grafana are available in the optional monitoring stack
 
 ## Requirements
 
@@ -42,6 +41,7 @@ docker compose -p weblink-pilot -f infra/docker-compose.yml down
 - Frontend: `http://localhost:8081`
 - Backend API: `http://localhost:8080/api/v1`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Monitoring stack: `docker compose -p weblink-pilot -f infra/docker-compose.monitoring.yml up --build`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
 

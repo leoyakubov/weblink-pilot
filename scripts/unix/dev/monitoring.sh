@@ -3,15 +3,13 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 source "$repo_root/scripts/unix/lib/common.sh"
-compose_file="$repo_root/infra/docker-compose.yml"
+compose_file="$repo_root/infra/docker-compose.monitoring.yml"
 reset='\033[0m'
 cyan='\033[36m'
 green='\033[32m'
 yellow='\033[33m'
 magenta='\033[35m'
 blue='\033[34m'
-white='\033[37m'
-red='\033[31m'
 
 print_service() {
   local color="$1"
@@ -31,18 +29,12 @@ if [[ ! -f "$compose_file" ]]; then
 fi
 
 remove_stale_docker_containers \
-  weblink-pilot-postgres \
-  weblink-pilot-redis \
-  weblink-pilot-mailpit \
-  weblink-pilot-backend \
-  weblink-pilot-frontend
+  weblink-pilot-prometheus \
+  weblink-pilot-grafana
 
-print_box "Starting docker full stack:"
-print_service "$red" "postgres" "PostgreSQL database on port 5432"
-print_service "$magenta" "redis" "Redis cache/session store on port 6379"
-print_service "$yellow" "mailpit" "SMTP catcher on port 1025, inbox UI on port 8025"
-print_service "$green" "backend" "Spring Boot API on port 8080"
-print_service "$cyan" "frontend" "Vue SPA on port 8081"
+print_box "Starting monitoring stack:"
+print_service "$yellow" "prometheus" "Metrics scraper on port 9090"
+print_service "$blue" "grafana" "Dashboards on port 3001"
 printf '\n'
 
 cd "$repo_root"

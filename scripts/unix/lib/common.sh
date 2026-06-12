@@ -84,3 +84,13 @@ print_summary_row() {
   text="$(printf '|| %-24s | %-10s | %-57s ||' "$label" "$badge" "$details")"
   printf '%b%s%b\n' "$color" "$text" "$reset"
 }
+
+remove_stale_docker_containers() {
+  local container_name
+  for container_name in "$@"; do
+    if docker ps -a --filter "name=^/${container_name}$" --format '{{.Names}}' | grep -qx "$container_name"; then
+      printf '%bRemoving stale Docker container %s%b\n' "$yellow" "$container_name" "$reset"
+      docker rm -f "$container_name" >/dev/null
+    fi
+  done
+}

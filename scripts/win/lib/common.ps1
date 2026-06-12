@@ -410,3 +410,18 @@ function Invoke-PowerShellScript {
         Output = $capturedOutput.ToString()
     }
 }
+
+function Remove-StaleDockerContainers {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string[]]$ContainerNames
+    )
+
+    foreach ($containerName in $ContainerNames) {
+        $existing = docker ps -a --filter "name=^/${containerName}$" --format '{{.Names}}' 2>$null
+        if ($existing) {
+            Write-Host "Removing stale Docker container $containerName" -ForegroundColor DarkYellow
+            docker rm -f $containerName | Out-Null
+        }
+    }
+}
