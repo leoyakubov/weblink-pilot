@@ -8,7 +8,7 @@ import type {
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   UserProfileResponse,
-} from '@/types';
+} from '@/shared/types/api';
 import { loadSettings } from '@/shared/services/settings';
 import {
   completeGithubLoginRequest,

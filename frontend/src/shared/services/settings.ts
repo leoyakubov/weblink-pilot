@@ -1,4 +1,4 @@
-import type { ApiSettings } from '@/types';
+import type { ApiSettings } from '@/shared/types/api';
 
 const STORAGE_KEY = 'weblinkpilot.frontend.settings';
 const SESSION_KEY = 'weblinkpilot.frontend.session';

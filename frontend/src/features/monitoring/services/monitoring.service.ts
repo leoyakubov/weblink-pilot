@@ -1,4 +1,4 @@
-import type { ApiSettings } from '@/types';
+import type { ApiSettings } from '@/shared/types/api';
 import { normalizeBaseUrl } from '@/shared/services/settings';
 
 export interface MonitoringLinks {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AnalyticsSummaryResponse } from '@/types';
+import type { AnalyticsSummaryResponse } from '@/shared/types/api';
 import { countryCodeLabel, countryFlagUrl } from '@/shared/utils/countries';
 
 const props = defineProps<{

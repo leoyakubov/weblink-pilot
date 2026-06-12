@@ -13,7 +13,7 @@ import {
   getLink,
   listLinks,
 } from '@/features/links/repositories/link.repository';
-import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
+import type { AnalyticsSummaryResponse, LinkResponse } from '@/shared/types/api';
 import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();

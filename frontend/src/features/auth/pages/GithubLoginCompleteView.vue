@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { completeGithubLogin } from '@/features/auth/repositories/auth.repository';
 import { applyAuthResponse } from '@/features/auth/services/auth.service';
-import type { AuthResponse } from '@/types';
+import type { AuthResponse } from '@/shared/types/api';
 
 const router = useRouter();
 const busy = ref(true);

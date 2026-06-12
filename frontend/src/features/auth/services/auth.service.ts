@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/types';
+import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/shared/types/api';
 import {
   clearSessionActive,
   hasSessionActiveHint,

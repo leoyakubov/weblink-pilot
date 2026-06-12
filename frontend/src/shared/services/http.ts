@@ -15,7 +15,7 @@ import type {
   PasswordResetRequest,
   RedirectPreviewResponse,
   UserProfileResponse,
-} from '@/types';
+} from '@/shared/types/api';
 import { loadSettings, normalizeBaseUrl, saveSettings } from '@/shared/services/settings';
 
 export class ApiRequestError extends Error {

@@ -1,4 +1,4 @@
-import type { ApiSettings, AccountProfileResponse, PasswordChangeRequest } from '@/types';
+import type { ApiSettings, AccountProfileResponse, PasswordChangeRequest } from '@/shared/types/api';
 import { loadSettings } from '@/shared/services/settings';
 import { changePasswordRequest, getAccountProfileRequest } from '@/shared/services/http';
 

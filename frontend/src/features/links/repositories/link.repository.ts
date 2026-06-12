@@ -4,7 +4,7 @@ import type {
   CreateLinkRequest,
   LinkResponse,
   RedirectPreviewResponse,
-} from '@/types';
+} from '@/shared/types/api';
 import { loadSettings } from '@/shared/services/settings';
 import {
   createLinkRequest,

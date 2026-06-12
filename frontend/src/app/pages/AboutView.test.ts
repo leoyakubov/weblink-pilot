@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import AboutView from '@/features/about/pages/AboutView.vue';
+import AboutView from '@/app/pages/AboutView.vue';
 
 const mocks = vi.hoisted(() => ({
   saveSettingsMock: vi.fn(),

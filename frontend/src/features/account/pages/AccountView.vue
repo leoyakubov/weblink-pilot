@@ -5,7 +5,7 @@ import Button from 'primevue/button';
 import Password from 'primevue/password';
 import { ApiRequestError } from '@/shared/services/http';
 import { changePassword, getAccountProfile } from '@/features/account/repositories/account.repository';
-import type { AccountProfileResponse } from '@/types';
+import type { AccountProfileResponse } from '@/shared/types/api';
 
 const busy = ref(true);
 const saving = ref(false);

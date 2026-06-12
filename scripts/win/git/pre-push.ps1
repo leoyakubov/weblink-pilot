@@ -9,6 +9,7 @@ $backendTestsScript = Join-Path $repoRoot 'scripts\win\quality\backend-tests.ps1
 $secretScanScript = Join-Path $repoRoot 'scripts\win\git\scan-secrets.ps1'
 $frontendStyleScript = Join-Path $repoRoot 'scripts\win\quality\frontend-style.ps1'
 $frontendTestScript = Join-Path $repoRoot 'scripts\win\quality\frontend-tests.ps1'
+$frontendE2EScript = Join-Path $repoRoot 'scripts\win\quality\frontend-e2e.ps1'
 $frontendDir = Join-Path $repoRoot 'frontend'
 
 function Invoke-Check {
@@ -137,6 +138,25 @@ function Get-FrontendTestSummary {
     return $summary
 }
 
+function Get-FrontendE2ESummary {
+    param([string]$Output)
+
+    $summary = [ordered]@{}
+    $normalizedOutput = [regex]::Replace($Output, "(`e|\x1B)\[[0-9;]*[A-Za-z]", '')
+    $normalizedOutput = $normalizedOutput -replace "`r", ''
+
+    if ($normalizedOutput -match '(?s)# tests\s+(?<tests>\d+)') {
+        $summary['tests'] = [int]$Matches.tests
+        return $summary
+    }
+
+    if ($normalizedOutput -match '(?s)1\.\.(?<tests>\d+)') {
+        $summary['tests'] = [int]$Matches.tests
+    }
+
+    return $summary
+}
+
 function Write-SummaryLine {
     param(
         [Parameter(Mandatory = $true)]
@@ -225,6 +245,10 @@ if ($results['frontend style'] -and $results['frontend style'].ExitCode -eq 0) {
 }
 
 if ($results['frontend tests'] -and $results['frontend tests'].ExitCode -eq 0) {
+    $results['frontend e2e'] = Invoke-Check 'Running frontend e2e tests: browser flows (Playwright, node:test)...' { Invoke-PowerShellScript -ScriptPath $frontendE2EScript }
+}
+
+if ($results['frontend e2e'] -and $results['frontend e2e'].ExitCode -eq 0) {
     Push-Location $frontendDir
     try {
         $results['frontend build'] = Invoke-Check 'Building frontend: typecheck and production bundle (Vue TSC, Vite)...' { npm run build }
@@ -237,6 +261,7 @@ if ($results['frontend tests'] -and $results['frontend tests'].ExitCode -eq 0) {
 $backendTestSummary = if ($results['backend tests']) { Get-BackendTestSummary } else { [ordered]@{} }
 $frontendTestReport = Join-Path $frontendDir '.vite\vitest\results.json'
 $frontendTestSummary = if ($results['frontend tests']) { Get-FrontendTestSummary -Output $results['frontend tests'].Output -ReportPath $frontendTestReport } else { [ordered]@{} }
+$frontendE2ESummary = if ($results['frontend e2e']) { Get-FrontendE2ESummary -Output $results['frontend e2e'].Output } else { [ordered]@{} }
 
 Write-BoxHeader 'Summary'
 
@@ -248,6 +273,11 @@ if ($backendTestSummary.Count -gt 0) {
 $frontendTestsDetails = ''
 if ($frontendTestSummary.Count -gt 0) {
     $frontendTestsDetails = "$($frontendTestSummary.passedTestSuites) files, $($frontendTestSummary.passedTests) tests"
+}
+
+$frontendE2EDetails = ''
+if ($frontendE2ESummary.Count -gt 0) {
+    $frontendE2EDetails = "$($frontendE2ESummary.tests) tests"
 }
 
 $summaryRows = @(
@@ -275,6 +305,11 @@ $summaryRows = @(
         Label   = 'frontend tests'
         Status  = if ($results['frontend tests']) { if ($results['frontend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = $frontendTestsDetails
+    }
+    [pscustomobject]@{
+        Label   = 'frontend e2e'
+        Status  = if ($results['frontend e2e']) { if ($results['frontend e2e'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
+        Details = $frontendE2EDetails
     }
     [pscustomobject]@{
         Label   = 'frontend build'

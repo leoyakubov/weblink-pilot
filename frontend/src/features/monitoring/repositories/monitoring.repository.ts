@@ -1,4 +1,4 @@
-import type { ApiSettings, AdminOverviewResponse } from '@/types';
+import type { ApiSettings, AdminOverviewResponse } from '@/shared/types/api';
 import { loadSettings } from '@/shared/services/settings';
 import { getAdminOverviewRequest } from '@/shared/services/http';
 

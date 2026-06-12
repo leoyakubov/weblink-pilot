@@ -6,7 +6,7 @@ import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
 import { authenticate, authState } from '@/features/auth/services/auth.service';
-import type { AuthCredentialsRequest } from '@/types';
+import type { AuthCredentialsRequest } from '@/shared/types/api';
 
 const props = defineProps<{
   mode: 'login' | 'register';

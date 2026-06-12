@@ -6,7 +6,7 @@ import { useCopyAction } from '@/shared/composables/useCopyAction';
 import { buildApiBaseUrl } from '@/shared/services/http';
 import { loadSettings } from '@/shared/services/settings';
 import { listLinks } from '@/features/links/repositories/link.repository';
-import type { LinkResponse } from '@/types';
+import type { LinkResponse } from '@/shared/types/api';
 
 const settings = loadSettings();
 const links = ref<LinkResponse[]>([]);

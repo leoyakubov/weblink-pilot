@@ -4,7 +4,7 @@ import Button from 'primevue/button';
 import { getAdminOverview } from '@/features/monitoring/repositories/monitoring.repository';
 import { buildMonitoringLinks } from '@/features/monitoring/services/monitoring.service';
 import { loadSettings } from '@/shared/services/settings';
-import type { AdminOverviewResponse } from '@/types';
+import type { AdminOverviewResponse } from '@/shared/types/api';
 
 const settings = loadSettings();
 const monitoringLinks = buildMonitoringLinks(settings);

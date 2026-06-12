@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AuthResponse, UserProfileResponse } from '@/types';
+import type { AuthResponse, UserProfileResponse } from '@/shared/types/api';
 
 const mocks = vi.hoisted(() => ({
   getCurrentUserMock: vi.fn(),

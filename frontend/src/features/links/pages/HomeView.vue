@@ -9,7 +9,7 @@ import { authState } from '@/features/auth/services/auth.service';
 import { buildApiBaseUrl } from '@/shared/services/http';
 import { loadSettings, saveSettings } from '@/shared/services/settings';
 import { createLink, listLinks } from '@/features/links/repositories/link.repository';
-import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types';
+import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/shared/types/api';
 
 const settings = reactive<ApiSettings>(loadSettings());
 const form = reactive<CreateLinkRequest>({

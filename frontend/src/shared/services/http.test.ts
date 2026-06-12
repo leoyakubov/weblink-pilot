@@ -18,7 +18,7 @@ import {
   register,
   refreshTokens,
 } from '@/shared/services/http';
-import type { ApiSettings } from '@/types';
+import type { ApiSettings } from '@/shared/types/api';
 
 const settings: ApiSettings = {
   apiBaseUrl: 'http://localhost:8080/api/v1/',

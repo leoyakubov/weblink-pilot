@@ -5,7 +5,7 @@ import Button from 'primevue/button';
 import Drawer from 'primevue/drawer';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
 import { applyAuthResponse, authState, bootstrapAuth, signOut } from '@/features/auth/services/auth.service';
-import type { AuthResponse } from '@/shared/models/api';
+import type { AuthResponse } from '@/shared/types/api';
 import { getSectionTitle, getPrimaryNavigation } from '@/app/navigation';
 
 const route = useRoute();

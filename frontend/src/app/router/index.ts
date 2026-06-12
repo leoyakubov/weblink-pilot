@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authState, bootstrapAuth } from '@/features/auth/services/auth.service';
 import HomeView from '@/features/links/pages/HomeView.vue';
-import AboutView from '@/features/about/pages/AboutView.vue';
+import AboutView from '@/app/pages/AboutView.vue';
 import AuthView from '@/features/auth/pages/AuthView.vue';
 import GithubLoginCompleteView from '@/features/auth/pages/GithubLoginCompleteView.vue';
 import PasswordResetRequestView from '@/features/auth/pages/PasswordResetRequestView.vue';
