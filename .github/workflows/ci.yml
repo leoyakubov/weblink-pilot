@@ -1,4 +1,4 @@
-run-name: ${{ github.workflow }}: ${{ github.event_name == 'pull_request' && github.event.pull_request.title || github.event.head_commit.message || github.sha }}
+run-name: "CI: ${{ github.event_name == 'pull_request' && github.event.pull_request.title || github.event.head_commit.message || github.sha }}"
 
 name: CI
 
