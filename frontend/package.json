@@ -14,6 +14,7 @@
     "test": "node scripts/run-vitest.mjs",
     "test:run": "node scripts/run-vitest.mjs",
     "test:coverage": "node scripts/run-vitest.mjs --coverage",
+    "test:e2e": "node scripts/run-e2e.mjs",
     "smoke:docker": "node scripts/smoke-docker.mjs"
   },
   "dependencies": {

@@ -29,7 +29,7 @@ vi.mock('vue-router', () => ({
   }),
 }));
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/features/auth/services/auth.service', () => ({
   authState: mocks.authState,
   bootstrapAuth: mocks.bootstrapAuthMock,
   isAdminUser: () =>
@@ -51,6 +51,10 @@ describe('App', () => {
     const wrapper = mount(App);
 
     expect(mocks.bootstrapAuthMock).toHaveBeenCalled();
+    expect(wrapper.text()).toContain('Home');
+    expect(wrapper.text()).toContain('Dashboard');
+    expect(wrapper.text()).toContain('History');
+    expect(wrapper.text()).toContain('About');
     expect(wrapper.text()).toContain('Log in');
     expect(wrapper.text()).toContain('Sign up');
     expect(wrapper.text()).not.toContain('Monitoring');
@@ -64,6 +68,7 @@ describe('App', () => {
     const wrapper = mount(App);
 
     expect(wrapper.text()).toContain('Analytics shell');
+    expect(wrapper.text()).toContain('Monitoring');
     expect(wrapper.text()).toContain('admin');
     expect(wrapper.text()).toContain('Sign out');
   });

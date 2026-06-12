@@ -4,10 +4,7 @@ import Nora from '@primeuix/themes/nora';
 import 'primeicons/primeicons.css';
 import App from './App.vue';
 import router from './app/router';
-import { initializeUiMode } from './lib/ui-mode';
 import './styles.css';
-
-initializeUiMode();
 
 createApp(App)
   .use(router)
