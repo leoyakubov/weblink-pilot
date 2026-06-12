@@ -33,7 +33,7 @@ app:
     refresh-cookie-path: /api/v1/auth
     refresh-cookie-same-site: Lax
     refresh-cookie-secure: false
-    frontend-base-url: http://localhost:8081
+    frontend-base-url: http://localhost:5173
     github-client-id: ${GITHUB_CLIENT_ID:}
     github-client-secret: ${GITHUB_CLIENT_SECRET:}
     github-scope: read:user user:email

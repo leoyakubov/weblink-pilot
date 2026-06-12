@@ -11,7 +11,7 @@ public final class AuthDefaults {
   public static final String REFRESH_COOKIE_PATH = "/api/v1/auth";
   public static final String REFRESH_COOKIE_SAME_SITE = "Lax";
   public static final boolean REFRESH_COOKIE_SECURE = false;
-  public static final String FRONTEND_BASE_URL = "http://localhost:8081";
+  public static final String FRONTEND_BASE_URL = "http://localhost:5173";
   public static final String GITHUB_CLIENT_ID = "";
   public static final String GITHUB_CLIENT_SECRET = "";
   public static final String GITHUB_SCOPE = "read:user user:email";

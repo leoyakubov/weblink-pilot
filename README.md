@@ -220,9 +220,10 @@ If you prefer not to type the Maven command manually, use the helper scripts:
 - Windows: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
 - Unix: [`scripts/unix/quality/sonar-analysis.sh`](scripts/unix/quality/sonar-analysis.sh)
 
-For a local-only convenience file, create `.env.local` at the repo root with:
+For a local-only convenience file, copy `.env.example` to `.env.local` at the repo root and fill in the values:
 
 ```bash
+cp .env.example .env.local
 SONAR_TOKEN=your-token-here
 SONAR_HOST_URL=http://localhost:9001
 JWT_SECRET=your-local-jwt-secret
