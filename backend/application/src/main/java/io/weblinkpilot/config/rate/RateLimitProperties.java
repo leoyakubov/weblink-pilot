@@ -12,9 +12,11 @@ public class RateLimitProperties {
 
   private boolean enabled;
 
-  @Min(1) private int apiPerMinute;
+  @Min(1)
+  private int apiPerMinute;
 
-  @Min(1) private int redirectPerMinute;
+  @Min(1)
+  private int redirectPerMinute;
 
   public boolean isEnabled() {
     return enabled;

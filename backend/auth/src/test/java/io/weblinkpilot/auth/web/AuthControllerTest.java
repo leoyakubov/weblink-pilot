@@ -79,8 +79,8 @@ class AuthControllerTest {
                     """))
         .andExpect(status().isNoContent());
 
-    verify(authService).register(
-        new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
+    verify(authService)
+        .register(new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
   }
 
   @Test

@@ -35,6 +35,7 @@ class RateLimitServiceTest {
   @Test
   void apiPolicyUsesApiLimit() {
     RateLimitProperties properties = new RateLimitProperties();
+    properties.setEnabled(true);
     properties.setApiPerMinute(1);
     properties.setRedirectPerMinute(1);
     RateLimitService service = new RateLimitService(properties);
@@ -53,6 +54,7 @@ class RateLimitServiceTest {
   @Test
   void redirectPolicyUsesRedirectLimitForShortPath() {
     RateLimitProperties properties = new RateLimitProperties();
+    properties.setEnabled(true);
     properties.setApiPerMinute(10);
     properties.setRedirectPerMinute(1);
     RateLimitService service = new RateLimitService(properties);
@@ -68,6 +70,7 @@ class RateLimitServiceTest {
   @Test
   void redirectPolicyAlsoAppliesToQrPath() {
     RateLimitProperties properties = new RateLimitProperties();
+    properties.setEnabled(true);
     properties.setApiPerMinute(10);
     properties.setRedirectPerMinute(1);
     RateLimitService service = new RateLimitService(properties);

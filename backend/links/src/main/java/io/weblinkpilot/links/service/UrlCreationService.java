@@ -1,10 +1,10 @@
 package io.weblinkpilot.links.service;
 
 import io.weblinkpilot.links.codegen.ShortCodeGenerator;
+import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.event.LinkPublisher;
 import io.weblinkpilot.links.exception.DuplicateAliasException;
-import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;

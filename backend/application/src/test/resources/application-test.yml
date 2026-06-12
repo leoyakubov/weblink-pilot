@@ -10,10 +10,31 @@ spring:
 
 app:
   public-base-url: http://localhost:8080
+  short-link:
+    max-expiration: 365d
+    cleanup-retention: 30d
+    cleanup-cron: 0 15 3 * * *
   cache:
     provider: local
   auth:
+    issuer: weblink-pilot-test
+    jwt-secret: test-jwt-secret-for-tests-only-0123456789
+    token-ttl-minutes: 30
+    refresh-token-ttl-days: 30
+    account-action-token-ttl-hours: 24
+    github-login-ticket-ttl-minutes: 10
+    refresh-cookie-name: weblinkpilot_refresh
+    refresh-cookie-path: /api/v1/auth
+    refresh-cookie-same-site: Lax
+    refresh-cookie-secure: false
     frontend-base-url: http://localhost:5173
+    github-scope: read:user user:email
+    github-state-cookie-name: weblinkpilot_github_oauth_state
+    github-state-cookie-path: /api/v1/auth/oauth2/github
+  rate-limit:
+    enabled: true
+    api-per-minute: 120
+    redirect-per-minute: 300
   cors:
     allowed-origin-patterns:
       - http://localhost:5173

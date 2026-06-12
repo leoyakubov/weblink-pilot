@@ -13,13 +13,17 @@ public class AuthProperties {
   @NotBlank private String issuer;
   @NotBlank private String jwtSecret;
 
-  @Min(15) private long tokenTtlMinutes;
+  @Min(15)
+  private long tokenTtlMinutes;
 
-  @Min(1) private long refreshTokenTtlDays;
+  @Min(1)
+  private long refreshTokenTtlDays;
 
-  @Min(1) private long accountActionTokenTtlHours;
+  @Min(1)
+  private long accountActionTokenTtlHours;
 
-  @Min(1) private long githubLoginTicketTtlMinutes;
+  @Min(1)
+  private long githubLoginTicketTtlMinutes;
 
   @NotBlank private String refreshCookieName;
   @NotBlank private String refreshCookiePath;
