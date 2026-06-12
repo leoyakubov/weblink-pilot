@@ -5,7 +5,7 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
-import { authenticate, authState } from '@/features/auth/services/auth.service';
+import { authenticate } from '@/features/auth/services/auth.service';
 import type { AuthCredentialsRequest } from '@/shared/types/api';
 import AuthNoticeModal from '@/features/auth/components/AuthNoticeModal.vue';
 

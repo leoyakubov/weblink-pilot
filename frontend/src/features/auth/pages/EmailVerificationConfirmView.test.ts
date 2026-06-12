@@ -35,7 +35,7 @@ describe('EmailVerificationConfirmView', () => {
   it('confirms an email verification link', async () => {
     mocks.confirmEmailVerificationMock.mockResolvedValue(undefined);
 
-    const wrapper = mount(EmailVerificationConfirmView, {
+    mount(EmailVerificationConfirmView, {
       global: {
         stubs: {
           RouterLink: {
