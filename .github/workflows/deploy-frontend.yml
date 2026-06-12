@@ -1,4 +1,4 @@
-run-name: "Deploy Frontend: ${{ github.event.workflow_run.head_sha || github.sha }}"
+run-name: "Deploy Frontend: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message || github.sha }}"
 
 name: Deploy Frontend
 
@@ -114,9 +114,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_MESSAGE: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message }}
           DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
         run: |
           set -euo pipefail
+
+          payload="$(jq -nc \
+            --arg sha "$DEPLOY_SHA" \
+            --arg message "$DEPLOY_MESSAGE" \
+            --arg smoke_url "$DEPLOY_URL" \
+            '{event_type:"frontend_deployed", client_payload:{sha:$sha, message:$message, smoke_url:$smoke_url}}')"
 
           curl --fail --silent --show-error \
             --request POST \
@@ -124,7 +131,7 @@ jobs:
             --header "Accept: application/vnd.github+json" \
             --header "Authorization: Bearer ${GITHUB_TOKEN}" \
             --header "X-GitHub-Api-Version: 2022-11-28" \
-            --data "$(printf '{"event_type":"frontend_deployed","client_payload":{"sha":"%s","smoke_url":"%s"}}' "$DEPLOY_SHA" "$DEPLOY_URL")" \
+            --data "$payload" \
             >/dev/null
 
           {

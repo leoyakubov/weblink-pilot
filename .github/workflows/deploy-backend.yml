@@ -1,4 +1,4 @@
-run-name: "Deploy Backend: ${{ github.event.workflow_run.head_sha || github.sha }}"
+run-name: "Deploy Backend: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message || github.sha }}"
 
 name: Deploy Backend
 
@@ -123,8 +123,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_MESSAGE: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message }}
         run: |
           set -euo pipefail
+
+          payload="$(jq -nc \
+            --arg sha "$DEPLOY_SHA" \
+            --arg message "$DEPLOY_MESSAGE" \
+            '{event_type:"backend_deployed", client_payload:{sha:$sha, message:$message}}')"
 
           curl --fail --silent --show-error \
             --request POST \
@@ -132,7 +138,7 @@ jobs:
             --header "Accept: application/vnd.github+json" \
             --header "Authorization: Bearer ${GITHUB_TOKEN}" \
             --header "X-GitHub-Api-Version: 2022-11-28" \
-            --data "$(printf '{"event_type":"backend_deployed","client_payload":{"sha":"%s"}}' "$DEPLOY_SHA")" \
+            --data "$payload" \
             >/dev/null
 
           {
