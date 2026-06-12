@@ -1,56 +1,74 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authState, bootstrapAuth } from '@/features/auth/services/auth.service';
-import HomeView from '@/features/links/pages/HomeView.vue';
-import AboutView from '@/app/pages/AboutView.vue';
-import AuthView from '@/features/auth/pages/AuthView.vue';
-import GithubLoginCompleteView from '@/features/auth/pages/GithubLoginCompleteView.vue';
-import PasswordResetRequestView from '@/features/auth/pages/PasswordResetRequestView.vue';
-import PasswordResetConfirmView from '@/features/auth/pages/PasswordResetConfirmView.vue';
-import EmailVerificationRequestView from '@/features/auth/pages/EmailVerificationRequestView.vue';
-import EmailVerificationConfirmView from '@/features/auth/pages/EmailVerificationConfirmView.vue';
-import LinkView from '@/features/links/pages/LinkView.vue';
-import DashboardView from '@/features/links/pages/DashboardView.vue';
-import HistoryView from '@/features/links/pages/HistoryView.vue';
-import MonitoringView from '@/features/monitoring/pages/MonitoringView.vue';
-import AccountView from '@/features/account/pages/AccountView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'home', component: HomeView },
-    { path: '/about', name: 'about', component: AboutView },
-    { path: '/auth/signin', name: 'signin', component: AuthView, props: { mode: 'login' } },
-    { path: '/auth/signup', name: 'signup', component: AuthView, props: { mode: 'register' } },
+    { path: '/', name: 'home', component: () => import('@/features/links/pages/HomeView.vue') },
+    { path: '/about', name: 'about', component: () => import('@/app/pages/AboutView.vue') },
+    {
+      path: '/auth/signin',
+      name: 'signin',
+      component: () => import('@/features/auth/pages/AuthView.vue'),
+      props: { mode: 'login' },
+    },
+    {
+      path: '/auth/signup',
+      name: 'signup',
+      component: () => import('@/features/auth/pages/AuthView.vue'),
+      props: { mode: 'register' },
+    },
     {
       path: '/auth/github/complete',
       name: 'github-login-complete',
-      component: GithubLoginCompleteView,
+      component: () => import('@/features/auth/pages/GithubLoginCompleteView.vue'),
     },
-    { path: '/auth/forgot-password', name: 'forgot-password', component: PasswordResetRequestView },
-    { path: '/auth/reset-password', name: 'reset-password', component: PasswordResetConfirmView },
+    {
+      path: '/auth/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/features/auth/pages/PasswordResetRequestView.vue'),
+    },
+    {
+      path: '/auth/reset-password',
+      name: 'reset-password',
+      component: () => import('@/features/auth/pages/PasswordResetConfirmView.vue'),
+    },
     {
       path: '/auth/verify-email/request',
       name: 'verify-email-request',
-      component: EmailVerificationRequestView,
+      component: () => import('@/features/auth/pages/EmailVerificationRequestView.vue'),
     },
     {
       path: '/auth/verify-email',
       name: 'verify-email',
-      component: EmailVerificationConfirmView,
+      component: () => import('@/features/auth/pages/EmailVerificationConfirmView.vue'),
     },
-    { path: '/link/:code', name: 'link', component: LinkView, props: true },
-    { path: '/dashboard', name: 'dashboard', component: DashboardView },
-    { path: '/history', name: 'history', component: HistoryView },
+    {
+      path: '/link/:code',
+      name: 'link',
+      component: () => import('@/features/links/pages/LinkView.vue'),
+      props: true,
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/features/links/pages/DashboardView.vue'),
+    },
+    {
+      path: '/history',
+      name: 'history',
+      component: () => import('@/features/links/pages/HistoryView.vue'),
+    },
     {
       path: '/account',
       name: 'account',
-      component: AccountView,
+      component: () => import('@/features/account/pages/AccountView.vue'),
       meta: { requiresAuth: true },
     },
     {
       path: '/monitoring',
       name: 'monitoring',
-      component: MonitoringView,
+      component: () => import('@/features/monitoring/pages/MonitoringView.vue'),
       meta: { requiresAdmin: true },
     },
   ],

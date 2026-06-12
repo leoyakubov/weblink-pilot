@@ -35,6 +35,13 @@ Repo-level helper:
 
 Netlify needs a SPA fallback for direct route refreshes like `/dashboard`, so the repo includes `public/_redirects` with `/* /index.html 200`.
 
+For demo performance, the repo also ships:
+
+- lazy-loaded route pages for smaller initial bundles
+- cache headers in `public/_headers` for hashed static assets
+- gzip-enabled Nginx config for the container image
+- a bundle inspection script: `npm run analyze:bundle`
+
 ## Test
 
 ```bash

@@ -11,6 +11,7 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "audit": "npm audit --audit-level=high",
+    "analyze:bundle": "node scripts/analyze-bundle.mjs",
     "test": "node scripts/run-vitest.mjs",
     "test:run": "node scripts/run-vitest.mjs",
     "test:coverage": "node scripts/run-vitest.mjs --coverage",
