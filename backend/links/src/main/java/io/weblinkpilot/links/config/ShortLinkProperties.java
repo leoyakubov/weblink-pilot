@@ -3,14 +3,18 @@ package io.weblinkpilot.links.config;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Component
+@Validated
 @ConfigurationProperties(prefix = "app.short-link")
 public class ShortLinkProperties {
 
-  private Duration maxExpiration = Duration.ofDays(365);
-  private Duration cleanupRetention = Duration.ofDays(30);
-  private String cleanupCron = "0 15 3 * * *";
+  @NotNull private Duration maxExpiration;
+  @NotNull private Duration cleanupRetention;
+  @NotBlank private String cleanupCron;
 
   public Duration getMaxExpiration() {
     return maxExpiration;

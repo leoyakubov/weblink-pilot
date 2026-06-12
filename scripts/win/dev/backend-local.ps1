@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
-$envFile = Join-Path $repoRoot '.env.local'
+$envFile = Join-Path $repoRoot 'backend/.env.local'
 
 $previousJavaHome = $env:JAVA_HOME
 $javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot

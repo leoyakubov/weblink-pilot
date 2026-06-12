@@ -178,7 +178,7 @@ On macOS/Linux:
 ```
 
 The scan uses the official Gitleaks Docker image and the repo-level [`gitleaks`](.gitleaks.toml) configuration.
-It scans Git-tracked content, so your local `.env.local` stays private to your machine and does not block the repo gate.
+It scans Git-tracked content, so your local `.env.local` files stay private to your machine and do not block the repo gate.
 
 ## SonarQube / Code Quality
 
@@ -220,14 +220,15 @@ If you prefer not to type the Maven command manually, use the helper scripts:
 - Windows: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
 - Unix: [`scripts/unix/quality/sonar-analysis.sh`](scripts/unix/quality/sonar-analysis.sh)
 
-For a local-only convenience file, copy `.env.example` to `.env.local` at the repo root and fill in the values:
+For a local backend convenience file, copy `backend/.env.example` to `backend/.env.local` and fill in the values:
 
 ```bash
-cp .env.example .env.local
-SONAR_TOKEN=your-token-here
-SONAR_HOST_URL=http://localhost:9001
+cp backend/.env.example backend/.env.local
 JWT_SECRET=your-local-jwt-secret
 ```
+
+Deployment, smoke, and Netlify/Render helper values live under `infra/.env.local`.
+SonarQube helper values live under `infra/sonar/.env.local`.
 
 ## Run Scripts
 
@@ -360,7 +361,7 @@ For a local smoke check, the script defaults to the Docker stack URLs:
 - backend: `http://localhost:8080/actuator/health`
 - frontend: `http://localhost:8081`
 
-To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` in your shell or in the repo root `.env.local`.
+To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` in your shell or in `infra/.env.local`.
 
 Then run:
 

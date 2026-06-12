@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.links.codegen.ShortCodeGenerator;
+import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.event.LinkPublisher;
 import io.weblinkpilot.links.exception.DuplicateAliasException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
@@ -40,6 +41,8 @@ class UrlCreationServiceTest {
 
   @BeforeEach
   void setUp() {
+    ShortLinkProperties shortLinkProperties = new ShortLinkProperties();
+    shortLinkProperties.setMaxExpiration(Duration.ofDays(365));
     service =
         new UrlCreationService(
             repository,
@@ -47,7 +50,7 @@ class UrlCreationServiceTest {
             cacheService,
             linkPublisher,
             publicUrlBuilder,
-            Duration.ofDays(365));
+            shortLinkProperties);
   }
 
   @Test

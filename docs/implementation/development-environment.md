@@ -111,14 +111,53 @@ If you run `dev` outside Docker and still want Mailpit on the host, override the
 
 ## Environment Files
 
-- Keep developer-only values in `.env.local`.
+- Keep backend-only values in `backend/.env.local`.
+- Keep frontend-only values in `frontend/.env.local`.
+- Keep deployment helper values in `infra/.env.local`.
+- Keep Sonar helper values in `infra/sonar/.env.local`.
 - Keep real secrets out of tracked files and git history.
 - Document new required variables in `docs/operations/deployment.md` or the relevant feature doc.
 - Use placeholder values only in tracked examples.
 
+There is no shared repo-root `.env.local` now; use the area-specific files above instead.
+
+### Config Source Map
+
+| Runtime / workflow | Main config sources | Local override file | Dev / demo override source |
+| --- | --- | --- | --- |
+| Backend local | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-local.yml` | `backend/.env.local` | N/A |
+| Backend dev | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-dev.yml` | `backend/.env.local` when running backend scripts manually or through the Docker stack | Docker Compose environment and `infra/.env.local` |
+| Backend demo | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-demo.yml` | none | Render environment variables and GitHub deployment secrets/vars |
+| Frontend local | `frontend/.env.local`, `frontend/vite.config.js` | `frontend/.env.local` | N/A |
+| Frontend dev | `frontend/.env.local`, `frontend/vite.config.js` | `frontend/.env.local` | Docker Compose env or shell overrides |
+| Frontend demo | GitHub Actions / Netlify build env | none | `VITE_API_BASE_URL` passed during Netlify deploy |
+| Deploy smoke | `infra/.env.local` | `infra/.env.local` | GitHub Actions environment and repository secrets |
+| Sonar local | `infra/sonar/.env.local` | `infra/sonar/.env.local` | GitHub Actions disabled for Sonar at the moment |
+
+### Key Variables
+
+| Variable or family | Read by | Source of truth |
+| --- | --- | --- |
+| `JWT_SECRET` | Backend JWT signing | `backend/.env.local` for local runs; Render/GitHub secrets for demo |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Backend GitHub OAuth | shell env, `backend/.env.local`, or Render secrets |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS` | Backend mail sender | `application-local.yml`, `application-dev.yml`, `application-demo.yml` plus env overrides |
+| `APP_AUTH_*` | Backend auth settings | `application.yml` plus env overrides |
+| `BOOTSTRAP_*` | Backend demo seed accounts | `application.yml` and `application-demo.yml` plus demo env overrides |
+| `APP_PUBLIC_BASE_URL` | Backend generated links | `application.yml` and profile overrides |
+| `APP_SHORT_LINK_*` | Backend cleanup and expiry | `application.yml` and env overrides |
+| `APP_CACHE_PROVIDER` | Backend cache mode | `application.yml` and profile overrides |
+| `APP_RATE_LIMIT_*` | Backend rate limiting | `application.yml` and env overrides |
+| `APP_CORS_ALLOWED_ORIGIN_*` / `APP_CORS_ALLOWED_ORIGIN_PATTERNS` | Backend CORS allowlist | `application.yml` and `application-demo.yml` |
+| `VITE_API_BASE_URL` | Frontend API client | `frontend/.env.local` for local runs, Netlify build env for demo |
+| `VITE_DEV_SERVER_PORT` | Frontend Vite dev server | `frontend/.env.local` or the default from `frontend/vite.config.js` |
+| `RENDER_DEPLOY_HOOK_URL`, `RENDER_API_KEY`, `RENDER_BACKEND_SERVICE_ID`, `RENDER_HEALTH_URL`, `FRONTEND_SMOKE_URL`, `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` | Deploy / smoke helpers | `infra/.env.local` |
+| `SONAR_TOKEN`, `SONAR_HOST_URL` | Local Sonar helper | `infra/sonar/.env.local` |
+
 Common environment values include:
 
-- `JWT_SECRET`
+- `APP_AUTH_ISSUER`
+- `APP_AUTH_TOKEN_TTL_MINUTES`
+- `APP_AUTH_REFRESH_TOKEN_TTL_DAYS`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS`
 - `FRONTEND_BASE_URL`
 - `APP_PUBLIC_BASE_URL`

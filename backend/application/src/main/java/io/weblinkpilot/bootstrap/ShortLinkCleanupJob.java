@@ -19,7 +19,7 @@ public class ShortLinkCleanupJob {
     this.shortLinkProperties = shortLinkProperties;
   }
 
-  @Scheduled(cron = "${app.short-link.cleanup-cron:0 15 3 * * *}", zone = "UTC")
+  @Scheduled(cron = "#{@shortLinkProperties.cleanupCron}", zone = "UTC")
   public void purgeExpiredLinks() {
     cleanupService.purgeExpiredLinks(shortLinkProperties.getCleanupRetention());
   }

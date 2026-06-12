@@ -8,7 +8,7 @@ public class PublicUrlBuilder {
 
   private final String baseUrl;
 
-  public PublicUrlBuilder(@Value("${app.public-base-url:http://localhost:8080}") String baseUrl) {
+  public PublicUrlBuilder(@Value("${app.public-base-url}") String baseUrl) {
     this.baseUrl = normalize(baseUrl);
   }
 

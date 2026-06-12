@@ -148,7 +148,7 @@ If you use Render free and want to reduce cold starts, add GitHub repository var
 Then let the scheduled GitHub workflow ping those URLs every 5 minutes.
 
 If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
-For local manual smoke runs, the helper script also reads those values from the repo root `.env.local` automatically.
+For local manual smoke runs, the helper script also reads those values from `infra/.env.local` automatically.
 The smoke output prints the backend HTTP status plus `status=UP`, and the frontend HTTP status plus the app shell marker (`id="app"`). By default, the helper script checks the local Docker stack; set `SMOKE_TARGET=demo` together with `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` to smoke the live demo instead. The PowerShell and Bash scripts also add spacing, color, and start/end banners so the backend and frontend checks are easy to scan separately.
 
 ## Important note

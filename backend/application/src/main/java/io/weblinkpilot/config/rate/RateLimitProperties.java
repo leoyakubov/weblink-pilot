@@ -10,13 +10,11 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "app.rate-limit")
 public class RateLimitProperties {
 
-  private boolean enabled = true;
+  private boolean enabled;
 
-  @Min(1)
-  private int apiPerMinute = 120;
+  @Min(1) private int apiPerMinute;
 
-  @Min(1)
-  private int redirectPerMinute = 300;
+  @Min(1) private int redirectPerMinute;
 
   public boolean isEnabled() {
     return enabled;

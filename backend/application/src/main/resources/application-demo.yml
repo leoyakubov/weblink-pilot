@@ -29,15 +29,15 @@ app:
     frontend-base-url: ${FRONTEND_BASE_URL:${APP_FRONTEND_BASE_URL:https://weblink-pilot.netlify.app}}
     github-client-id: ${GITHUB_CLIENT_ID:}
     github-client-secret: ${GITHUB_CLIENT_SECRET:}
-    github-scope: read:user user:email
-    github-state-cookie-name: weblinkpilot_github_oauth_state
-    github-state-cookie-path: /api/v1/auth/oauth2/github
-    bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:}
-    bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}
-    bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:}
-    bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:}
+    github-scope: ${APP_GITHUB_SCOPE:read:user user:email}
+    github-state-cookie-name: ${APP_AUTH_GITHUB_STATE_COOKIE_NAME:weblinkpilot_github_oauth_state}
+    github-state-cookie-path: ${APP_AUTH_GITHUB_STATE_COOKIE_PATH:/api/v1/auth/oauth2/github}
+    bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
+    bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:admin123}
+    bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:user}
+    bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:user123}
   cache:
-    provider: redis
+    provider: ${APP_CACHE_PROVIDER:redis}
   public-base-url: ${APP_PUBLIC_BASE_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
   cors:
     allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS}

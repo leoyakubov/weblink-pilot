@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $commonScript = Join-Path $repoRoot 'scripts/win/lib/common.ps1'
 . $commonScript
-$envFile = Join-Path $repoRoot '.env.local'
+$infraEnvFile = Join-Path $repoRoot 'infra/.env.local'
 $smokeTarget = if ([string]::IsNullOrWhiteSpace($env:SMOKE_TARGET)) { 'local' } else { $env:SMOKE_TARGET.Trim().ToLowerInvariant() }
 $smokeCheck = if ([string]::IsNullOrWhiteSpace($env:SMOKE_CHECK)) { 'all' } else { $env:SMOKE_CHECK.Trim().ToLowerInvariant() }
 $checksToRun = if ($smokeCheck -eq 'all') { @('backend', 'frontend') } else { @($smokeCheck) }
@@ -12,7 +12,7 @@ $backendHealthUrl = ''
 $frontendSmokeUrl = ''
 
 if ($smokeTarget -eq 'demo') {
-    Import-DotEnv -Path $envFile
+    Import-DotEnv -Path $infraEnvFile
     if ($checksToRun -contains 'backend') {
         $backendHealthUrl = $env:RENDER_HEALTH_URL
     }

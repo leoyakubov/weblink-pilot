@@ -9,11 +9,11 @@ spring:
     port: 1025
 
 app:
+  public-base-url: http://localhost:8080
   cache:
     provider: local
-  public-base-url: http://localhost:8080
   auth:
-    frontend-base-url: http://localhost:8081
+    frontend-base-url: http://localhost:5173
   cors:
     allowed-origin-patterns:
       - http://localhost:5173

@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
-$envFile = Join-Path $repoRoot '.env.local'
+$envFile = Join-Path $repoRoot 'infra/.env.local'
 
 if (Test-Path -LiteralPath $envFile) {
     Import-DotEnv -Path $envFile

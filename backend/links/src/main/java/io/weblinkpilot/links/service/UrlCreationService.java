@@ -4,6 +4,7 @@ import io.weblinkpilot.links.codegen.ShortCodeGenerator;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.event.LinkPublisher;
 import io.weblinkpilot.links.exception.DuplicateAliasException;
+import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import io.weblinkpilot.shared.contracts.CreateLinkRequest;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
@@ -16,7 +17,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,13 +41,13 @@ public class UrlCreationService {
       UrlCacheService cacheService,
       LinkPublisher linkPublisher,
       PublicUrlBuilder publicUrlBuilder,
-      @Value("${app.short-link.max-expiration:365d}") Duration maxExpiration) {
+      ShortLinkProperties shortLinkProperties) {
     this.repository = repository;
     this.shortCodeGenerator = shortCodeGenerator;
     this.cacheService = cacheService;
     this.linkPublisher = linkPublisher;
     this.publicUrlBuilder = publicUrlBuilder;
-    this.maxExpiration = maxExpiration;
+    this.maxExpiration = shortLinkProperties.getMaxExpiration();
   }
 
   @Transactional

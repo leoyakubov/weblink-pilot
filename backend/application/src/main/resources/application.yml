@@ -23,32 +23,49 @@ management:
 
 app:
   auth:
-    issuer: weblink-pilot
-    jwt-secret: ${JWT_SECRET}
-    token-ttl-minutes: 30
-    refresh-token-ttl-days: 30
-    account-action-token-ttl-hours: 24
-    github-login-ticket-ttl-minutes: 10
-    refresh-cookie-name: weblinkpilot_refresh
-    refresh-cookie-path: /api/v1/auth
-    refresh-cookie-same-site: Lax
-    refresh-cookie-secure: false
-    frontend-base-url: http://localhost:5173
+    issuer: ${APP_AUTH_ISSUER:weblink-pilot}
+    jwt-secret: ${JWT_SECRET:}
+    token-ttl-minutes: ${APP_AUTH_TOKEN_TTL_MINUTES:30}
+    refresh-token-ttl-days: ${APP_AUTH_REFRESH_TOKEN_TTL_DAYS:30}
+    account-action-token-ttl-hours: ${APP_AUTH_ACCOUNT_ACTION_TOKEN_TTL_HOURS:24}
+    github-login-ticket-ttl-minutes: ${APP_AUTH_GITHUB_LOGIN_TICKET_TTL_MINUTES:10}
+    refresh-cookie-name: ${APP_AUTH_REFRESH_COOKIE_NAME:weblinkpilot_refresh}
+    refresh-cookie-path: ${APP_AUTH_REFRESH_COOKIE_PATH:/api/v1/auth}
+    refresh-cookie-same-site: ${APP_AUTH_REFRESH_COOKIE_SAME_SITE:Lax}
+    refresh-cookie-secure: ${APP_AUTH_REFRESH_COOKIE_SECURE:false}
+    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
     github-client-id: ${GITHUB_CLIENT_ID:}
     github-client-secret: ${GITHUB_CLIENT_SECRET:}
-    github-scope: read:user user:email
-    github-state-cookie-name: weblinkpilot_github_oauth_state
-    github-state-cookie-path: /api/v1/auth/oauth2/github
+    github-scope: ${APP_GITHUB_SCOPE:read:user user:email}
+    github-state-cookie-name: ${APP_GITHUB_STATE_COOKIE_NAME:weblinkpilot_github_oauth_state}
+    github-state-cookie-path: ${APP_GITHUB_STATE_COOKIE_PATH:/api/v1/auth/oauth2/github}
+    bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
+    bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:admin123}
+    bootstrap-admin-role: ${BOOTSTRAP_ADMIN_ROLE:ADMIN}
+    bootstrap-admin-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@weblinkpilot.local}
+    bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:user}
+    bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:user123}
+    bootstrap-user-role: ${BOOTSTRAP_USER_ROLE:USER}
+    bootstrap-user-email: ${BOOTSTRAP_USER_EMAIL:user@weblinkpilot.local}
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   short-link:
-    max-expiration: 365d
-    cleanup-retention: 30d
-    cleanup-cron: "0 15 3 * * *"
+    max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}
+    cleanup-retention: ${APP_SHORT_LINK_CLEANUP_RETENTION:30d}
+    cleanup-cron: ${APP_SHORT_LINK_CLEANUP_CRON:0 15 3 * * *}
   cache:
-    provider: local
+    provider: ${APP_CACHE_PROVIDER:local}
   rate-limit:
-    enabled: true
-    api-per-minute: 120
-    redirect-per-minute: 300
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
+    api-per-minute: ${APP_RATE_LIMIT_API_PER_MINUTE:120}
+    redirect-per-minute: ${APP_RATE_LIMIT_REDIRECT_PER_MINUTE:300}
+  cors:
+    allowed-origin-patterns:
+      - ${APP_CORS_ALLOWED_ORIGIN_1:http://localhost:5173}
+      - ${APP_CORS_ALLOWED_ORIGIN_2:http://127.0.0.1:5173}
+      - ${APP_CORS_ALLOWED_ORIGIN_3:http://localhost:4173}
+      - ${APP_CORS_ALLOWED_ORIGIN_4:http://127.0.0.1:4173}
+      - ${APP_CORS_ALLOWED_ORIGIN_5:http://localhost:8081}
+      - ${APP_CORS_ALLOWED_ORIGIN_6:http://127.0.0.1:8081}
 
 logging:
   pattern:

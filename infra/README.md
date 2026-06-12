@@ -65,6 +65,12 @@ The frontend should call the backend through the Compose proxy using `/api/v1`.
 
 If you changed the frontend API base URL manually, make sure it still points to the same origin or update the backend CORS allowlist accordingly.
 
+### Environment files
+
+- `backend/.env.local`: local backend secret values such as `JWT_SECRET`
+- `infra/.env.local`: deployment, smoke, and Netlify/Render helper values
+- `infra/sonar/.env.local`: Sonar token and local Sonar host URL
+
 ## Notes
 
 - The Docker stack uses PostgreSQL, while the local script-based backend run still uses the local development configuration.

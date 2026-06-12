@@ -10,42 +10,38 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "app.auth")
 public class AuthProperties {
 
-  @NotBlank private String issuer = AuthDefaults.ISSUER;
+  @NotBlank private String issuer;
   @NotBlank private String jwtSecret;
 
-  @Min(15)
-  private long tokenTtlMinutes = AuthDefaults.TOKEN_TTL_MINUTES;
+  @Min(15) private long tokenTtlMinutes;
 
-  @Min(1)
-  private long refreshTokenTtlDays = AuthDefaults.REFRESH_TOKEN_TTL_DAYS;
+  @Min(1) private long refreshTokenTtlDays;
 
-  @Min(1)
-  private long accountActionTokenTtlHours = AuthDefaults.ACCOUNT_ACTION_TOKEN_TTL_HOURS;
+  @Min(1) private long accountActionTokenTtlHours;
 
-  @Min(1)
-  private long githubLoginTicketTtlMinutes = AuthDefaults.GITHUB_LOGIN_TICKET_TTL_MINUTES;
+  @Min(1) private long githubLoginTicketTtlMinutes;
 
-  @NotBlank private String refreshCookieName = AuthDefaults.REFRESH_COOKIE_NAME;
-  @NotBlank private String refreshCookiePath = AuthDefaults.REFRESH_COOKIE_PATH;
-  @NotBlank private String frontendBaseUrl = AuthDefaults.FRONTEND_BASE_URL;
-  private String githubClientId = AuthDefaults.GITHUB_CLIENT_ID;
-  private String githubClientSecret = AuthDefaults.GITHUB_CLIENT_SECRET;
-  @NotBlank private String githubScope = AuthDefaults.GITHUB_SCOPE;
-  @NotBlank private String githubStateCookieName = AuthDefaults.GITHUB_STATE_COOKIE_NAME;
-  @NotBlank private String githubStateCookiePath = AuthDefaults.GITHUB_STATE_COOKIE_PATH;
+  @NotBlank private String refreshCookieName;
+  @NotBlank private String refreshCookiePath;
+  @NotBlank private String frontendBaseUrl;
+  private String githubClientId;
+  private String githubClientSecret;
+  @NotBlank private String githubScope;
+  @NotBlank private String githubStateCookieName;
+  @NotBlank private String githubStateCookiePath;
 
   @Pattern(regexp = "(?i)STRICT|LAX|NONE")
-  private String refreshCookieSameSite = AuthDefaults.REFRESH_COOKIE_SAME_SITE;
+  private String refreshCookieSameSite;
 
-  private boolean refreshCookieSecure = AuthDefaults.REFRESH_COOKIE_SECURE;
-  private String bootstrapAdminUsername = BootstrapDefaults.ADMIN_USERNAME;
-  private String bootstrapAdminPassword = BootstrapDefaults.ADMIN_PASSWORD;
-  private String bootstrapAdminRole = BootstrapDefaults.ADMIN_ROLE;
-  private String bootstrapAdminEmail = BootstrapDefaults.ADMIN_EMAIL;
-  private String bootstrapUserUsername = BootstrapDefaults.USER_USERNAME;
-  private String bootstrapUserPassword = BootstrapDefaults.USER_PASSWORD;
-  private String bootstrapUserRole = BootstrapDefaults.USER_ROLE;
-  private String bootstrapUserEmail = BootstrapDefaults.USER_EMAIL;
+  private boolean refreshCookieSecure;
+  private String bootstrapAdminUsername;
+  private String bootstrapAdminPassword;
+  private String bootstrapAdminRole;
+  private String bootstrapAdminEmail;
+  private String bootstrapUserUsername;
+  private String bootstrapUserPassword;
+  private String bootstrapUserRole;
+  private String bootstrapUserEmail;
 
   public String getIssuer() {
     return issuer;

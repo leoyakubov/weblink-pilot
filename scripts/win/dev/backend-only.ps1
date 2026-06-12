@@ -22,7 +22,7 @@ if (-not (Test-Path $mvnw)) {
     throw "Maven wrapper not found at $mvnw"
 }
 
-Import-DotEnv (Join-Path $repoRoot '.env.local')
+Import-DotEnv (Join-Path $repoRoot 'backend/.env.local')
 
 Push-Location $backendDir
 try {

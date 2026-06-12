@@ -17,7 +17,9 @@ Create a local env file if needed:
 copy .env.example .env.local
 ```
 
-If you run the backend from the repo root with the helper scripts, also put the shared repo-level secret in the repo root `.env.local`:
+The frontend uses `VITE_API_BASE_URL` for the backend API and `VITE_DEV_SERVER_PORT` for the local Vite port.
+
+If you run the backend with the helper scripts, also put the shared backend secret in `backend/.env.local`:
 
 ```bash
 JWT_SECRET=your-local-jwt-secret

@@ -179,7 +179,7 @@ The backend POM points Sonar at the aggregate JaCoCo XML report:
 
 - `build-support/target/site/jacoco-aggregate/jacoco.xml`
 
-For local SonarQube, the scripts and docs default the host URL to `http://localhost:9001`.
+For local SonarQube, the scripts and docs default the host URL to `http://localhost:9001`, and the helper token file lives in `infra/sonar/.env.local`.
 For GitHub Actions, set `SONAR_HOST_URL` as a repository secret or environment secret that points at the hosted SonarQube server.
 
 ## Dependency Vulnerability Checks

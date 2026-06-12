@@ -4,7 +4,8 @@ Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
-$envFile = Join-Path $repoRoot '.env.local'
+$backendEnvFile = Join-Path $repoRoot 'backend/.env.local'
+$infraEnvFile = Join-Path $repoRoot 'infra/sonar/.env.local'
 
 $previousJavaHome = $env:JAVA_HOME
 $javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot
@@ -16,7 +17,8 @@ $previousJavaToolOptions = Enter-JavaSecurityOverride -JavaHome $javaHome
 
 Push-Location $backendDir
 try {
-    Import-DotEnv -Path $envFile
+    Import-DotEnv -Path $backendEnvFile
+    Import-DotEnv -Path $infraEnvFile
 
     if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
         $env:SONAR_TOKEN = Read-Host 'Enter Sonar token'

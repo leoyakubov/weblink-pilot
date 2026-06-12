@@ -21,7 +21,12 @@ case "$smoke_check" in
     ;;
 esac
 
-if [[ "$smoke_target" == demo && -f "$repo_root/.env.local" ]]; then
+load_env_file() {
+  local env_file="$1"
+  if [[ ! -f "$env_file" ]]; then
+    return
+  fi
+
   while IFS= read -r line || [[ -n "$line" ]]; do
     trimmed="${line#"${line%%[![:space:]]*}"}"
     trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
@@ -44,7 +49,11 @@ if [[ "$smoke_target" == demo && -f "$repo_root/.env.local" ]]; then
     if [[ -z "${!name:-}" ]]; then
       export "$name=$value"
     fi
-  done < "$repo_root/.env.local"
+  done < "$env_file"
+}
+
+if [[ "$smoke_target" == demo ]]; then
+  load_env_file "$repo_root/infra/.env.local"
 fi
 
 backend_health_url="${RENDER_HEALTH_URL:-}"

@@ -4,12 +4,18 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$repo_root/backend"
 
-if [[ -f "$repo_root/.env.local" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  . "$repo_root/.env.local"
-  set +a
-fi
+load_env_file() {
+  local env_file="$1"
+  if [[ -f "$env_file" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$env_file"
+    set +a
+  fi
+}
+
+load_env_file "$repo_root/backend/.env.local"
+load_env_file "$repo_root/infra/sonar/.env.local"
 
 if [[ -z "${SONAR_TOKEN:-}" ]]; then
   read -r -s -p "Enter Sonar token: " SONAR_TOKEN

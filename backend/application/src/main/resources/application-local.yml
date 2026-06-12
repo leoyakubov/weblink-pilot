@@ -21,9 +21,11 @@ spring:
             enable: ${SPRING_MAIL_SMTP_STARTTLS:false}
 
 app:
-  public-base-url: http://localhost:8080
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   auth:
-    frontend-base-url: http://localhost:5173
+    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
+  cache:
+    provider: local
   cors:
     allowed-origin-patterns:
       - http://localhost:5173
