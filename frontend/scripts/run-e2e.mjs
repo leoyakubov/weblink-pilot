@@ -127,7 +127,7 @@ async function main() {
   try {
     await waitForBaseUrl(baseUrl);
 
-    const testFiles = ['tests/e2e/app-flow.spec.mjs'];
+    const testFiles = ['tests/e2e/app-flow.spec.mjs', 'tests/e2e/route-smoke.spec.mjs'];
     process.env.E2E_BASE_URL = baseUrl;
 
     const result = spawn(process.execPath, ['--test', ...testFiles], {

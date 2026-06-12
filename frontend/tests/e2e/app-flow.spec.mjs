@@ -1,27 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { openPage } from './helpers.mjs';
+import { installApiRoutes, openPage } from './helpers.mjs';
 
 const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 
 function apiUrl(path) {
   return `http://localhost:8080/api/v1${path}`;
-}
-
-async function installApiRoutes(page, routeMap) {
-  await page.route('http://localhost:8080/api/v1/**', async (route) => {
-    const url = new URL(route.request().url());
-    const key = `${route.request().method()} ${url.pathname}${url.search}`;
-    const handler = routeMap[key] ?? routeMap[`${route.request().method()} ${url.pathname}`];
-
-    if (!handler) {
-      await route.fulfill({ status: 404, body: 'Not mocked' });
-      return;
-    }
-
-    const result = await handler(route.request(), url);
-    await route.fulfill(result);
-  });
 }
 
 test('guest can create a link and open the details page', async () => {

@@ -1,9 +1,38 @@
+param(
+    [Parameter(Position = 0)]
+    [string]$Mode = 'all'
+)
+
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $commonScript = Join-Path $repoRoot 'scripts/win/lib/common.ps1'
 . $commonScript
+
+function Normalize-RunMode {
+    param([string]$Value)
+
+    $normalizedValue = 'all'
+    if ($Value) {
+        $normalizedValue = $Value.Trim().ToLowerInvariant()
+    }
+
+    switch ($normalizedValue) {
+        'backend' { 'be' }
+        'be' { 'be' }
+        'frontend' { 'fe' }
+        'fe' { 'fe' }
+        'full' { 'all' }
+        'all' { 'all' }
+        default { throw "Unknown run mode '$Value'. Use all, be, or fe." }
+    }
+}
+
+$runMode = Normalize-RunMode $Mode
+$runBackend = $runMode -in @('all', 'be')
+$runFrontend = $runMode -in @('all', 'fe')
+$runSecretScan = $runMode -eq 'all'
 $backendStyleScript = Join-Path $repoRoot 'scripts\win\quality\backend-style.ps1'
 $backendTestsScript = Join-Path $repoRoot 'scripts\win\quality\backend-tests.ps1'
 $secretScanScript = Join-Path $repoRoot 'scripts\win\git\scan-secrets.ps1'
@@ -227,16 +256,18 @@ $results = [ordered]@{
     'frontend build' = $null
 }
 
-$results['backend style'] = Invoke-Check 'Running backend style: formatting (Spotless), API checks (Checkstyle)...' { Invoke-PowerShellScript -ScriptPath $backendStyleScript }
-if ($results['backend style'].ExitCode -eq 0) {
-    $results['backend tests'] = Invoke-Check 'Running backend tests: unit tests (JUnit, Mockito), integration tests (Testcontainers, Docker)...' { Invoke-PowerShellScript -ScriptPath $backendTestsScript }
+if ($runBackend) {
+    $results['backend style'] = Invoke-Check 'Running backend style: formatting (Spotless), API checks (Checkstyle)...' { Invoke-PowerShellScript -ScriptPath $backendStyleScript }
+    if ($results['backend style'].ExitCode -eq 0) {
+        $results['backend tests'] = Invoke-Check 'Running backend tests: unit tests (JUnit, Mockito), integration tests (Testcontainers, Docker)...' { Invoke-PowerShellScript -ScriptPath $backendTestsScript }
+    }
 }
 
-if ($results['backend tests'] -and $results['backend tests'].ExitCode -eq 0) {
+if ($runSecretScan -and $results['backend tests'] -and $results['backend tests'].ExitCode -eq 0) {
     $results['secret scan'] = Invoke-Check 'Running secret scan: repository secrets scan (Gitleaks)...' { Invoke-PowerShellScript -ScriptPath $secretScanScript }
 }
 
-if ($results['secret scan'] -and $results['secret scan'].ExitCode -eq 0) {
+if ($runFrontend -and ((-not $runSecretScan) -or ($results['secret scan'] -and $results['secret scan'].ExitCode -eq 0))) {
     $results['frontend style'] = Invoke-Check 'Running frontend style: linting (ESLint), formatting (Prettier)...' { Invoke-PowerShellScript -ScriptPath $frontendStyleScript }
 }
 
@@ -280,43 +311,48 @@ if ($frontendE2ESummary.Count -gt 0) {
     $frontendE2EDetails = "$($frontendE2ESummary.tests) tests"
 }
 
-$summaryRows = @(
-    [pscustomobject]@{
+$summaryRows = @()
+if ($runBackend) {
+    $summaryRows += [pscustomobject]@{
         Label   = 'backend style'
         Status  = if ($results['backend style']) { if ($results['backend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = ''
     }
-    [pscustomobject]@{
+    $summaryRows += [pscustomobject]@{
         Label   = 'backend tests'
         Status  = if ($results['backend tests']) { if ($results['backend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = $backendTestDetails
     }
-    [pscustomobject]@{
+}
+if ($runSecretScan) {
+    $summaryRows += [pscustomobject]@{
         Label   = 'secret scan'
         Status  = if ($results['secret scan']) { if ($results['secret scan'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = ''
     }
-    [pscustomobject]@{
+}
+if ($runFrontend) {
+    $summaryRows += [pscustomobject]@{
         Label   = 'frontend style'
         Status  = if ($results['frontend style']) { if ($results['frontend style'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = ''
     }
-    [pscustomobject]@{
+    $summaryRows += [pscustomobject]@{
         Label   = 'frontend tests'
         Status  = if ($results['frontend tests']) { if ($results['frontend tests'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = $frontendTestsDetails
     }
-    [pscustomobject]@{
+    $summaryRows += [pscustomobject]@{
         Label   = 'frontend e2e'
         Status  = if ($results['frontend e2e']) { if ($results['frontend e2e'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = $frontendE2EDetails
     }
-    [pscustomobject]@{
+    $summaryRows += [pscustomobject]@{
         Label   = 'frontend build'
         Status  = if ($results['frontend build']) { if ($results['frontend build'].ExitCode -eq 0) { 'PASS' } else { 'FAIL' } } else { 'SKIPPED' }
         Details = ''
     }
-)
+}
 
 $summaryColor = 'Green'
 if ($summaryRows.Status -contains 'FAIL') {
