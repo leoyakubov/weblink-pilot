@@ -1,3 +1,5 @@
+run-name: "Deploy Frontend: ${{ github.event.workflow_run.head_sha || github.sha }}"
+
 name: Deploy Frontend
 
 on:
@@ -7,6 +9,19 @@ on:
     types: [completed]
 
 jobs:
+  skip-ci-failed:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report skipped deploy
+        run: |
+          {
+            echo "## Frontend deploy"
+            echo ""
+            echo "- Status: skipped"
+            echo "- Reason: CI did not succeed"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   deploy:
     permissions:
       contents: write
