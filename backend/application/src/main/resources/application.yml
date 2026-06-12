@@ -24,7 +24,7 @@ management:
 app:
   auth:
     issuer: ${APP_AUTH_ISSUER:weblink-pilot}
-    jwt-secret: ${JWT_SECRET:}
+    jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:}}
     token-ttl-minutes: ${APP_AUTH_TOKEN_TTL_MINUTES:30}
     refresh-token-ttl-days: ${APP_AUTH_REFRESH_TOKEN_TTL_DAYS:30}
     account-action-token-ttl-hours: ${APP_AUTH_ACCOUNT_ACTION_TOKEN_TTL_HOURS:24}

@@ -118,6 +118,7 @@ Create these Render resources:
 Set backend env vars in Render:
 
 - `SPRING_PROFILES_ACTIVE=demo`
+- `JWT_SECRET=<long random secret>` or `APP_AUTH_JWT_SECRET=<long random secret>`
 - `SPRING_DATASOURCE_URL=jdbc:postgresql://<render-postgres-host>:5432/<database>`
 - `SPRING_DATASOURCE_USERNAME=<database-user>`
 - `SPRING_DATASOURCE_PASSWORD=<database-password>`
@@ -128,6 +129,11 @@ Set backend env vars in Render:
 - `BOOTSTRAP_USER_USERNAME=<user-username>`
 - `BOOTSTRAP_USER_PASSWORD=<user-password>`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
+
+Where to get the missing values:
+
+- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For Brevo, open `SMTP & API`, create or copy the SMTP key, and use the SMTP login plus key from there.
+- `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WebLinkPilot.
 
 Optional:
 

@@ -138,7 +138,7 @@ There is no shared repo-root `.env.local` now; use the area-specific files above
 
 | Variable or family | Read by | Source of truth |
 | --- | --- | --- |
-| `JWT_SECRET` | Backend JWT signing | `backend/.env.local` for local runs; Render/GitHub secrets for demo |
+| `JWT_SECRET` / `APP_AUTH_JWT_SECRET` | Backend JWT signing | `backend/.env.local` for local runs; Render/GitHub secrets for demo |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Backend GitHub OAuth | shell env, `backend/.env.local`, or Render secrets |
 | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS` | Backend mail sender | `application-local.yml`, `application-dev.yml`, `application-demo.yml` plus env overrides |
 | `APP_AUTH_*` | Backend auth settings | `application.yml` plus env overrides |

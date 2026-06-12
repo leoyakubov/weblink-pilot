@@ -9,7 +9,7 @@ on:
 
 jobs:
   backend:
-    name: Backend verify
+    name: Verify backend
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         run: ./mvnw -B -Pci clean verify
 
   sonar:
-    name: Sonar
+    name: Scan with Sonar
     runs-on: ubuntu-latest
     needs: [backend, frontend]
     if: ${{ false }}
@@ -54,7 +54,7 @@ jobs:
         run: echo "Sonar analysis is temporarily disabled; run it locally with scripts/win/quality/sonar-analysis.ps1 or scripts/unix/quality/sonar-analysis.sh."
 
   frontend:
-    name: Frontend verify
+    name: Verify frontend
     runs-on: ubuntu-latest
 
     steps:
