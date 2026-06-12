@@ -196,7 +196,10 @@ export function requestAuthVoid(
   return requestVoid(path, init, settings, includeAuth, includeCredentials, allowRefresh);
 }
 
-export function createLinkRequest(request: CreateLinkRequest, settings: ApiSettings = loadSettings()) {
+export function createLinkRequest(
+  request: CreateLinkRequest,
+  settings: ApiSettings = loadSettings(),
+) {
   return requestJson<LinkResponse>(
     '/urls',
     {
@@ -207,7 +210,10 @@ export function createLinkRequest(request: CreateLinkRequest, settings: ApiSetti
   );
 }
 
-export function loginRequest(request: AuthCredentialsRequest, settings: ApiSettings = loadSettings()) {
+export function loginRequest(
+  request: AuthCredentialsRequest,
+  settings: ApiSettings = loadSettings(),
+) {
   return requestJson<AuthResponse>(
     '/auth/login',
     {

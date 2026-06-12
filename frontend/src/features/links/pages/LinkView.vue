@@ -2,10 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Button from 'primevue/button';
-import {
-  ApiRequestError,
-  buildApiBaseUrl,
-} from '@/shared/services/http';
+import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
 import { useCopyAction } from '@/shared/composables/useCopyAction';
 import { isAdminUser } from '@/features/auth/services/auth.service';
 import { loadSettings } from '@/shared/services/settings';
@@ -14,7 +11,11 @@ import {
   getLink,
   getRedirectPreview,
 } from '@/features/links/repositories/link.repository';
-import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/shared/types/api';
+import type {
+  AnalyticsSummaryResponse,
+  LinkResponse,
+  RedirectPreviewResponse,
+} from '@/shared/types/api';
 import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();
@@ -64,8 +65,7 @@ async function load(codeValue: string) {
         analyticsResult.reason instanceof ApiRequestError &&
         analyticsResult.reason.status === 403
       ) {
-        analyticsMessage.value =
-          'Analytics are available only to the link owner or an admin user.';
+        analyticsMessage.value = 'Analytics are available only to the link owner or an admin user.';
       } else {
         analyticsMessage.value =
           analyticsResult.reason instanceof Error

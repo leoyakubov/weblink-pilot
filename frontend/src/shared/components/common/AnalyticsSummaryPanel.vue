@@ -61,7 +61,7 @@ function formatDate(value: string | null) {
       </div>
     </template>
 
-    <div v-if="(props.showTopCountries !== false) && props.summary.topCountries.length" class="stack">
+    <div v-if="props.showTopCountries !== false && props.summary.topCountries.length" class="stack">
       <div>
         <p class="eyebrow">{{ props.eyebrow ?? 'Top countries' }}</p>
         <h4 class="card-title">{{ props.title ?? 'Where clicks are coming from' }}</h4>

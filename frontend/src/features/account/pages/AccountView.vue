@@ -4,7 +4,10 @@ import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
 import { ApiRequestError } from '@/shared/services/http';
-import { changePassword, getAccountProfile } from '@/features/account/repositories/account.repository';
+import {
+  changePassword,
+  getAccountProfile,
+} from '@/features/account/repositories/account.repository';
 import type { AccountProfileResponse } from '@/shared/types/api';
 
 const busy = ref(true);
@@ -230,11 +233,7 @@ onMounted(() => {
               :disabled="saving"
             />
             <RouterLink to="/auth/forgot-password">
-              <Button
-                label="Reset password instead"
-                severity="secondary"
-                variant="outlined"
-              />
+              <Button label="Reset password instead" severity="secondary" variant="outlined" />
             </RouterLink>
           </div>
         </form>

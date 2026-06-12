@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { defaultSettings, loadSettings, normalizeBaseUrl, saveSettings } from '@/shared/services/settings';
+import {
+  defaultSettings,
+  loadSettings,
+  normalizeBaseUrl,
+  saveSettings,
+} from '@/shared/services/settings';
 
 describe('normalizeBaseUrl', () => {
   it('trims whitespace and trailing slashes', () => {

@@ -4,7 +4,12 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Button from 'primevue/button';
 import Drawer from 'primevue/drawer';
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router';
-import { applyAuthResponse, authState, bootstrapAuth, signOut } from '@/features/auth/services/auth.service';
+import {
+  applyAuthResponse,
+  authState,
+  bootstrapAuth,
+  signOut,
+} from '@/features/auth/services/auth.service';
 import type { AuthResponse } from '@/shared/types/api';
 import { getSectionTitle, getPrimaryNavigation } from '@/app/navigation';
 
@@ -17,11 +22,18 @@ type AuthMessage = {
   response?: AuthResponse;
 };
 
-const navItems = computed(() => getPrimaryNavigation(isLoggedIn.value && authState.currentUser?.role === 'ADMIN'));
+const navItems = computed(() =>
+  getPrimaryNavigation(isLoggedIn.value && authState.currentUser?.role === 'ADMIN'),
+);
 const accountLabel = computed(() => authState.currentUser?.username ?? '');
 const isLoggedIn = computed(() => Boolean(authState.currentUser));
 const currentSection = computed(() => getSectionTitle(route.name));
-const showSectionHeader = computed(() => !['home', 'about', 'signin', 'signup', 'github-login-complete', 'account'].includes(String(route.name ?? '')));
+const showSectionHeader = computed(
+  () =>
+    !['home', 'about', 'signin', 'signup', 'github-login-complete', 'account'].includes(
+      String(route.name ?? ''),
+    ),
+);
 
 function closeMenu() {
   menuOpen.value = false;

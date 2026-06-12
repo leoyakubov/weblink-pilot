@@ -85,7 +85,11 @@ function pickDefaultCode() {
 }
 
 async function refreshRecent() {
-  recentLinks.value = await listLinks(8, settings, canSeePreview.value ? creatorFilter.value : undefined);
+  recentLinks.value = await listLinks(
+    8,
+    settings,
+    canSeePreview.value ? creatorFilter.value : undefined,
+  );
   if (!selectedCode.value && recentLinks.value.length > 0) {
     form.code = recentLinks.value[0].code;
   }
@@ -114,8 +118,7 @@ async function load(codeValue: string) {
     } catch (error) {
       summary.value = null;
       if (error instanceof ApiRequestError && error.status === 403) {
-        analyticsMessage.value =
-          'Analytics are available only to the link owner or an admin user.';
+        analyticsMessage.value = 'Analytics are available only to the link owner or an admin user.';
       } else {
         analyticsMessage.value =
           error instanceof Error ? error.message : 'Could not load analytics';

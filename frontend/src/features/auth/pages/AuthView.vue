@@ -262,12 +262,7 @@ async function submit() {
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Forgot your password?</span>
             <RouterLink to="/auth/forgot-password">
-              <Button
-                label="Reset password"
-                severity="secondary"
-                variant="outlined"
-                size="small"
-              />
+              <Button label="Reset password" severity="secondary" variant="outlined" size="small" />
             </RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">

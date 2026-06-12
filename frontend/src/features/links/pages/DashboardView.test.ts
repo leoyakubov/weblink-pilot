@@ -147,7 +147,9 @@ describe('DashboardView', () => {
     });
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Analytics are available only to the link owner or an admin user.');
+    expect(wrapper.text()).toContain(
+      'Analytics are available only to the link owner or an admin user.',
+    );
     expect(wrapper.text()).toContain('github-org');
     expect(wrapper.text()).toContain('Short URL');
   });

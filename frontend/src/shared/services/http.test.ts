@@ -211,9 +211,7 @@ describe('api helpers', () => {
 
   it('passes the creator filter when requesting recent links', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      expect(String(input)).toBe(
-        'http://localhost:8080/api/v1/urls?limit=8&creator=alice',
-      );
+      expect(String(input)).toBe('http://localhost:8080/api/v1/urls?limit=8&creator=alice');
       return new Response(JSON.stringify([]), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },

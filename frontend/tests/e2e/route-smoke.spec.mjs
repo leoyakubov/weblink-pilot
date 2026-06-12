@@ -45,7 +45,9 @@ test('guest can open the public pages and see guard redirects', async () => {
     await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
 
     await page.goto(`${baseUrl}/about`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /built like a small saas, not a classroom demo\./i }).waitFor();
+    await page
+      .getByRole('heading', { name: /built like a small saas, not a classroom demo\./i })
+      .waitFor();
 
     await page.goto(`${baseUrl}/auth/signin`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /sign in/i }).waitFor();
@@ -95,7 +97,9 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.getByRole('button', { name: 'Send verification email' }).click();
     await page.getByText('Verification email sent').waitFor();
 
-    await page.goto(`${baseUrl}/auth/reset-password?token=reset-token`, { waitUntil: 'networkidle' });
+    await page.goto(`${baseUrl}/auth/reset-password?token=reset-token`, {
+      waitUntil: 'networkidle',
+    });
     await page.getByRole('heading', { name: /set new password/i }).waitFor();
     await page.getByLabel('Reset token').fill('reset-token');
     await page.getByLabel('New password').fill('Password1');
@@ -103,11 +107,15 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.getByRole('heading', { name: /sign in/i }).waitFor();
     assert.match(page.url(), /\/auth\/signin$/);
 
-    await page.goto(`${baseUrl}/auth/verify-email?token=verify-token`, { waitUntil: 'networkidle' });
+    await page.goto(`${baseUrl}/auth/verify-email?token=verify-token`, {
+      waitUntil: 'networkidle',
+    });
     await page.getByRole('heading', { name: /confirm email/i }).waitFor();
     await page.getByText('Your email has been verified').waitFor();
 
-    await page.goto(`${baseUrl}/auth/github/complete?ticket=github-ticket`, { waitUntil: 'networkidle' });
+    await page.goto(`${baseUrl}/auth/github/complete?ticket=github-ticket`, {
+      waitUntil: 'networkidle',
+    });
     await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
     await page.getByText('Signed in as github-user', { exact: true }).waitFor();
   } finally {
@@ -298,7 +306,8 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
     await Promise.all([
       page.waitForResponse(
         (response) =>
-          response.url().includes('/api/v1/urls?limit=8&creator=alice') && response.status() === 200,
+          response.url().includes('/api/v1/urls?limit=8&creator=alice') &&
+          response.status() === 200,
       ),
       page.getByRole('button', { name: 'Apply recent filter' }).click(),
     ]);

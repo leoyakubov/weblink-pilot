@@ -142,9 +142,7 @@ describe('LinkView', () => {
       locationHeader: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
     });
 
-    mocks.getAnalyticsSummaryMock.mockRejectedValue(
-      new mocks.ApiRequestError('Forbidden', 403),
-    );
+    mocks.getAnalyticsSummaryMock.mockRejectedValue(new mocks.ApiRequestError('Forbidden', 403));
 
     const wrapper = mount(LinkView);
     await flushPromises();
@@ -153,6 +151,8 @@ describe('LinkView', () => {
       'Analytics are available only to the link owner or an admin user.',
     );
     expect(wrapper.text()).toContain('Code: github-org');
-    expect(wrapper.text()).toContain('https://github.com/weblinkpilot/weblink-pilot/tree/main/docs');
+    expect(wrapper.text()).toContain(
+      'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+    );
   });
 });
