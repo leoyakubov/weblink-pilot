@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { ApiRequestError } from '@/shared/services/http';
 import { confirmEmailVerification } from '@/features/auth/repositories/auth.repository';
 
 const route = useRoute();
+const router = useRouter();
 const busy = ref(true);
 const errorMessage = ref('');
-const successMessage = ref('');
 
 const title = computed(() => 'Confirm email');
 
@@ -31,7 +31,6 @@ function formatError(error: unknown): string {
 async function confirm() {
   busy.value = true;
   errorMessage.value = '';
-  successMessage.value = '';
 
   try {
     const token = getToken();
@@ -40,7 +39,7 @@ async function confirm() {
     }
 
     await confirmEmailVerification({ token });
-    successMessage.value = 'Your email has been verified. You can sign in now.';
+    await router.replace({ path: '/auth/signin', query: { verified: '1' } });
   } catch (error) {
     errorMessage.value = formatError(error);
   } finally {
@@ -62,15 +61,11 @@ onMounted(() => {
           <h3 class="panel-title">{{ title }}</h3>
         </div>
 
-        <p v-if="busy" class="footnote">Verifying your email address...</p>
         <p v-if="errorMessage" class="status error" role="alert" aria-live="polite">
           <span class="status-dot"></span>
           {{ errorMessage }}
         </p>
-        <p v-else-if="successMessage" class="status" role="status" aria-live="polite">
-          <span class="status-dot"></span>
-          {{ successMessage }}
-        </p>
+        <p v-else-if="busy" class="footnote">Verifying your email address...</p>
 
         <div class="auth-switch">
           <span class="footnote">Need to sign in?</span>

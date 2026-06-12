@@ -34,7 +34,7 @@ class AuthServiceTest {
   @Mock private EmailVerificationService emailVerificationService;
 
   @Test
-  void registerIssuesTokenForCreatedAccount() {
+  void registerCreatesAccountAndRequestsVerification() {
     AuthService service =
         new AuthService(
             userAccountService,
@@ -53,16 +53,9 @@ class AuthServiceTest {
             null);
     when(userAccountService.registerUser("alice", "Password1", "alice@example.com"))
         .thenReturn(account);
-    when(jwtService.issueToken("alice", "USER")).thenReturn("token-1");
-    when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-1");
 
-    AuthService.AuthSession response =
-        service.register(new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
+    service.register(new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
 
-    assertThat(response.token()).isEqualTo("token-1");
-    assertThat(response.username()).isEqualTo("alice");
-    assertThat(response.role()).isEqualTo("USER");
-    assertThat(response.refreshToken()).isEqualTo("refresh-1");
     verify(emailVerificationService).requestEmailVerification("alice@example.com");
   }
 

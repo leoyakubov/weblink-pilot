@@ -306,11 +306,7 @@ describe('api helpers', () => {
         },
         settings,
       ),
-    ).resolves.toEqual({
-      token: 'new-token',
-      username: 'alice',
-      role: 'USER',
-    });
+    ).resolves.toBeUndefined();
   });
 
   it('serializes password reset request payload', async () => {

@@ -49,13 +49,12 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthSession register(AuthCredentialsRequest request) {
+  public void register(AuthCredentialsRequest request) {
     UserAccount account =
         userAccountService.registerUser(request.username(), request.password(), request.email());
     if (emailVerificationService != null && account.getEmail() != null) {
       emailVerificationService.requestEmailVerification(account.getEmail());
     }
-    return issueSession(account);
   }
 
   @Transactional

@@ -230,7 +230,7 @@ export function registerRequest(
   request: AuthCredentialsRequest,
   settings: ApiSettings = loadSettings(),
 ) {
-  return requestJson<AuthResponse>(
+  return requestVoid(
     '/auth/register',
     {
       method: 'POST',

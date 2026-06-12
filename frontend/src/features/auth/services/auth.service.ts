@@ -99,22 +99,16 @@ export async function bootstrapAuth() {
 export async function authenticate(
   mode: 'login' | 'register',
   request: AuthCredentialsRequest,
-): Promise<AuthResponse> {
+): Promise<AuthResponse | void> {
   const settings = loadSettings();
   const requestSettings = { ...settings };
-  const response =
-    mode === 'login'
-      ? await login(request, requestSettings)
-      : await register(request, requestSettings);
+  if (mode === 'login') {
+    const response = await login(request, requestSettings);
+    applyAuthResponse(response, `Signed in as ${response.username}`);
+    return response;
+  }
 
-  applyAuthResponse(
-    response,
-    mode === 'login'
-      ? `Signed in as ${response.username}`
-      : `Created ${response.username} and signed in`,
-  );
-
-  return response;
+  await register(request, requestSettings);
 }
 
 export function signOut() {

@@ -4,6 +4,7 @@ import EmailVerificationConfirmView from '@/features/auth/pages/EmailVerificatio
 
 const mocks = vi.hoisted(() => ({
   confirmEmailVerificationMock: vi.fn(),
+  routerReplaceMock: vi.fn(),
 }));
 
 vi.mock('vue-router', () => ({
@@ -13,6 +14,9 @@ vi.mock('vue-router', () => ({
   },
   useRoute: () => ({
     query: { token: 'verify-token' },
+  }),
+  useRouter: () => ({
+    replace: mocks.routerReplaceMock,
   }),
 }));
 
@@ -47,6 +51,9 @@ describe('EmailVerificationConfirmView', () => {
     expect(mocks.confirmEmailVerificationMock).toHaveBeenCalledWith({
       token: 'verify-token',
     });
-    expect(wrapper.text()).toContain('Your email has been verified');
+    expect(mocks.routerReplaceMock).toHaveBeenCalledWith({
+      path: '/auth/signin',
+      query: { verified: '1' },
+    });
   });
 });

@@ -67,10 +67,7 @@ class AuthControllerTest {
   }
 
   @Test
-  void registerSetsRefreshCookieAndReturnsAccessTokenOnly() throws Exception {
-    when(authService.register(
-            new AuthCredentialsRequest("alice", "Password1", "alice@example.com")))
-        .thenReturn(new AuthSession("token-1", "refresh-1", "alice", "USER"));
+  void registerReturnsNoContentAndTriggersVerification() throws Exception {
 
     mockMvc
         .perform(
@@ -80,19 +77,10 @@ class AuthControllerTest {
                     """
                     {"username":"alice","password":"Password1","email":"alice@example.com"}
                     """))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.token").value("token-1"))
-        .andExpect(jsonPath("$.username").value("alice"))
-        .andExpect(jsonPath("$.role").value("USER"))
-        .andExpect(jsonPath("$.refreshToken").doesNotExist())
-        .andExpect(
-            header()
-                .string(
-                    "Set-Cookie",
-                    org.hamcrest.Matchers.allOf(
-                        org.hamcrest.Matchers.containsString("weblinkpilot_refresh=refresh-1"),
-                        org.hamcrest.Matchers.containsString("HttpOnly"),
-                        org.hamcrest.Matchers.containsString("Path=/api/v1/auth"))));
+        .andExpect(status().isNoContent());
+
+    verify(authService).register(
+        new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
   }
 
   @Test

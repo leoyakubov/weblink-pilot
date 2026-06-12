@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
 import { authenticate, authState } from '@/features/auth/services/auth.service';
 import type { AuthCredentialsRequest } from '@/shared/types/api';
+import AuthNoticeModal from '@/features/auth/components/AuthNoticeModal.vue';
 
 const props = defineProps<{
   mode: 'login' | 'register';
 }>();
 
+const route = useRoute();
 const router = useRouter();
 const form = reactive<AuthCredentialsRequest>({
   username: '',
@@ -20,8 +22,12 @@ const form = reactive<AuthCredentialsRequest>({
 });
 const busy = ref(false);
 const errorMessage = ref('');
-const successMessage = ref('');
 const showPassword = ref(false);
+const noticeVisible = ref(false);
+const noticeTitle = ref('');
+const noticeMessage = ref('');
+const noticeActionLabel = ref('');
+const noticeActionHandler = ref<null | (() => unknown)>(null);
 const usernamePattern = /^(?=.*[A-Za-z])[A-Za-z0-9]{4,}$/;
 const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/;
 
@@ -34,14 +40,53 @@ const passwordAutocomplete = computed(() =>
 
 function resetMessages() {
   errorMessage.value = '';
-  successMessage.value = '';
   showPassword.value = false;
+}
+
+function openNotice(
+  title: string,
+  message: string,
+  actionLabel?: string,
+  actionHandler?: () => unknown,
+) {
+  noticeTitle.value = title;
+  noticeMessage.value = message;
+  noticeActionLabel.value = actionLabel ?? '';
+  noticeActionHandler.value = actionHandler ?? null;
+  noticeVisible.value = true;
+}
+
+function closeNotice() {
+  noticeVisible.value = false;
+}
+
+function handleNoticeAction() {
+  const action = noticeActionHandler.value;
+  closeNotice();
+  if (action) {
+    void action();
+  }
 }
 
 watch(
   () => props.mode,
   () => {
     resetMessages();
+  },
+  { immediate: true },
+);
+
+watch(
+  () => route.query.verified,
+  verified => {
+    if (props.mode !== 'login' || verified !== '1') {
+      return;
+    }
+
+    openNotice('Email verified', 'Your email has been verified. You can sign in now.');
+
+    const { verified: _verified, ...remainingQuery } = route.query;
+    void router.replace({ path: route.path, query: remainingQuery });
   },
   { immediate: true },
 );
@@ -144,12 +189,28 @@ async function submit() {
         : form;
 
     await authenticate(props.mode, request);
-    successMessage.value =
-      props.mode === 'login'
-        ? `Signed in as ${authState.currentUser?.username}`
-        : `Created ${authState.currentUser?.username}, signed in, and sent a verification email`;
-    await router.push('/');
+    if (props.mode === 'login') {
+      await router.push('/');
+      return;
+    }
+
+    openNotice(
+      'Account created',
+      'Check your email to verify your account before signing in.',
+      'Go to sign in',
+      () => router.push('/auth/signin'),
+    );
   } catch (error) {
+    if (error instanceof ApiRequestError && (error.status === 403 || error.code === 'EMAIL_NOT_VERIFIED')) {
+      openNotice(
+        'Email not verified',
+        'This account still needs email verification. Open the verification email or request a new link.',
+        'Resend verification',
+        () => router.push('/auth/verify-email/request'),
+      );
+      return;
+    }
+
     errorMessage.value = formatAuthError(error);
   } finally {
     busy.value = false;
@@ -242,10 +303,6 @@ async function submit() {
             <span class="status-dot"></span>
             {{ errorMessage }}
           </p>
-          <p v-else-if="successMessage" class="status" role="status" aria-live="polite">
-            <span class="status-dot"></span>
-            {{ successMessage }}
-          </p>
           <div class="auth-switch">
             <span class="footnote">
               {{ props.mode === 'login' ? 'Need an account?' : 'Already have an account?' }}
@@ -292,4 +349,13 @@ async function submit() {
       </div>
     </article>
   </section>
+
+  <AuthNoticeModal
+    :visible="noticeVisible"
+    :title="noticeTitle"
+    :message="noticeMessage"
+    :action-label="noticeActionLabel"
+    @close="closeNotice"
+    @action="handleNoticeAction"
+  />
 </template>

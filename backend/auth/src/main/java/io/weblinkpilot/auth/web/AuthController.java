@@ -77,14 +77,10 @@ public class AuthController {
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = AuthCredentialsRequest.class))))
-  public ResponseEntity<AuthResponse> register(
+  public ResponseEntity<Void> register(
       @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-    AuthSession session = authService.register(request);
-    return ResponseEntity.ok()
-        .header(
-            HttpHeaders.SET_COOKIE,
-            authCookieService.createRefreshTokenCookie(session.refreshToken()).toString())
-        .body(new AuthResponse(session.token(), session.username(), session.role()));
+    authService.register(request);
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/login")
