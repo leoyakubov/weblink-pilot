@@ -35,4 +35,9 @@ public class UrlService {
       String ownerUsername, boolean admin, int limit) {
     return lookupService.listRecentLinks(ownerUsername, admin, limit);
   }
+
+  public java.util.List<LinkResponse> listRecentLinks(
+      String ownerUsername, boolean admin, String creatorFilter, int limit) {
+    return lookupService.listRecentLinks(ownerUsername, admin, creatorFilter, limit);
+  }
 }

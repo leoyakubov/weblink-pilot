@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -117,6 +119,43 @@ class UrlControllerStandaloneTest {
 
     mockMvc
         .perform(get("/api/v1/urls"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].code").value("two"))
+        .andExpect(jsonPath("$[1].code").value("one"));
+  }
+
+  @Test
+  void adminsCanFilterRecentLinksByCreator() throws Exception {
+    final LinkResponse first =
+        new LinkResponse(
+            "two",
+            "http://localhost:8080/r/two",
+            "http://localhost:8080/api/v1/urls/two/qr",
+            "https://github.com/weblinkpilot/weblink-pilot/two",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            "alice");
+    final LinkResponse second =
+        new LinkResponse(
+            "one",
+            "http://localhost:8080/r/one",
+            "http://localhost:8080/api/v1/urls/one/qr",
+            "https://github.com/weblinkpilot/weblink-pilot/one",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null,
+            0,
+            "alice");
+    when(urlLookupService.listRecentLinks("admin", true, "alice", 10))
+        .thenReturn(List.of(first, second));
+
+    mockMvc
+        .perform(
+            get("/api/v1/urls")
+                .param("creator", "alice")
+                .principal(
+                    new TestingAuthenticationToken(
+                        "admin", "n/a", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].code").value("two"))
         .andExpect(jsonPath("$[1].code").value("one"));

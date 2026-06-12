@@ -59,11 +59,20 @@ public class UrlLookupService {
 
   @Transactional(readOnly = true)
   public List<LinkResponse> listRecentLinks(String ownerUsername, boolean admin, int limit) {
+    return listRecentLinks(ownerUsername, admin, null, limit);
+  }
+
+  @Transactional(readOnly = true)
+  public List<LinkResponse> listRecentLinks(
+      String ownerUsername, boolean admin, String creatorFilter, int limit) {
     int size = Math.max(1, Math.min(limit, 50));
     Sort newestFirst =
         Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
     List<ShortLink> content;
-    if (admin) {
+    String normalizedCreatorFilter = normalizeCreatorFilter(creatorFilter);
+    if (admin && normalizedCreatorFilter != null) {
+      content = loadFilteredByCreator(normalizedCreatorFilter, size, newestFirst);
+    } else if (admin) {
       content =
           repository.findAllByDeletedAtIsNull(PageRequest.of(0, size, newestFirst)).getContent();
     } else if (ownerUsername == null || ownerUsername.isBlank()) {
@@ -82,6 +91,20 @@ public class UrlLookupService {
     List<LinkResponse> links = content.stream().map(this::toResponse).toList();
     log.info("url.link.list.success limit={} returned={}", size, links.size());
     return links;
+  }
+
+  private List<ShortLink> loadFilteredByCreator(String creatorFilter, int size, Sort newestFirst) {
+    if (isAnonymousFilter(creatorFilter)) {
+      return repository
+          .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(PageRequest.of(0, size, newestFirst))
+          .getContent();
+    }
+
+    return repository
+        .findAllByOwnerUsernameAndDeletedAtIsNull(
+            creatorFilter.trim().toLowerCase(java.util.Locale.ROOT),
+            PageRequest.of(0, size, newestFirst))
+        .getContent();
   }
 
   private LinkResponse toResponse(ShortLinkSnapshot snapshot) {
@@ -125,5 +148,18 @@ public class UrlLookupService {
   private String hostOf(String url) {
     String host = java.net.URI.create(url).getHost();
     return host == null ? url : host;
+  }
+
+  private String normalizeCreatorFilter(String creatorFilter) {
+    if (creatorFilter == null) {
+      return null;
+    }
+
+    String normalized = creatorFilter.trim();
+    return normalized.isEmpty() ? null : normalized;
+  }
+
+  private boolean isAnonymousFilter(String creatorFilter) {
+    return "anonymous".equalsIgnoreCase(creatorFilter) || "guest".equalsIgnoreCase(creatorFilter);
   }
 }

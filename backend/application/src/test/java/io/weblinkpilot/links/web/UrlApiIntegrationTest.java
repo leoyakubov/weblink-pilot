@@ -101,9 +101,10 @@ class UrlApiIntegrationTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks("alice", false, 10)).thenReturn(List.of(first, second));
+    when(urlLookupService.listRecentLinks("alice", false, null, 10))
+        .thenReturn(List.of(first, second));
 
-    List<LinkResponse> response = controller.list(auth("alice", "USER"), 10).getBody();
+    List<LinkResponse> response = controller.list(auth("alice", "USER"), 10, null).getBody();
 
     assertEquals("two", response.get(0).code());
     assertEquals("one", response.get(1).code());

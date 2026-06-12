@@ -20,23 +20,26 @@
 
     <properties>
         <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot.run.profiles>local</spring-boot.run.profiles>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-modulith.version>2.0.6</spring-modulith.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <jacoco.version>0.8.15</jacoco.version>
-        <archunit.version>1.4.2</archunit.version>
+
         <testcontainers.version>1.21.4</testcontainers.version>
         <netty.version>4.2.13.Final</netty.version>
         <tomcat.version>11.0.22</tomcat.version>
         <postgresql.version>42.7.11</postgresql.version>
-        <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
+        <jacoco.version>0.8.15</jacoco.version>
+        <archunit.version>1.4.2</archunit.version>
         <dependency-check.version>12.2.2</dependency-check.version>
+        <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
+
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
         <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/build-support/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <spring-boot.run.profiles>local</spring-boot.run.profiles>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
 
     <dependencyManagement>

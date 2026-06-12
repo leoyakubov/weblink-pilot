@@ -3,6 +3,7 @@ package io.weblinkpilot.links.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -126,5 +127,65 @@ class UrlLookupServiceTest {
     assertThat(pageable.getSort())
         .isEqualTo(
             Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id")));
+  }
+
+  @Test
+  void adminsCanFilterRecentLinksByCreator() {
+    final ShortLink first =
+        new ShortLink(
+            "one",
+            "https://github.com/weblinkpilot/weblink-pilot/one",
+            null,
+            "alice",
+            OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
+            null);
+    final ShortLink second =
+        new ShortLink(
+            "two",
+            "https://github.com/weblinkpilot/weblink-pilot/two",
+            null,
+            "alice",
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
+
+    when(repository.findAllByOwnerUsernameAndDeletedAtIsNull(anyString(), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(second, first)));
+    when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
+    when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
+    when(publicUrlBuilder.buildQrCodeUrl("two"))
+        .thenReturn("http://localhost:8080/api/v1/urls/two/qr");
+    when(publicUrlBuilder.buildQrCodeUrl("one"))
+        .thenReturn("http://localhost:8080/api/v1/urls/one/qr");
+
+    final List<LinkResponse> response = service.listRecentLinks("admin", true, "Alice", 99);
+
+    assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
+    final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(repository)
+        .findAllByOwnerUsernameAndDeletedAtIsNull(anyString(), pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(50);
+  }
+
+  @Test
+  void adminsCanFilterAnonymousRecentLinks() {
+    final ShortLink first =
+        new ShortLink(
+            "one",
+            "https://github.com/weblinkpilot/weblink-pilot/one",
+            null,
+            null,
+            OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
+            null);
+
+    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(first)));
+    when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
+    when(publicUrlBuilder.buildQrCodeUrl("one"))
+        .thenReturn("http://localhost:8080/api/v1/urls/one/qr");
+
+    final List<LinkResponse> response = service.listRecentLinks("admin", true, "anonymous", 99);
+
+    assertThat(response).extracting(LinkResponse::code).containsExactly("one");
+    verify(repository).findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class));
   }
 }

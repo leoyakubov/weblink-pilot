@@ -115,12 +115,14 @@ public class UrlController {
 
   @GetMapping
   public ResponseEntity<List<LinkResponse>> list(
-      Authentication authentication, @RequestParam(name = "limit", defaultValue = "10") int limit) {
+      Authentication authentication,
+      @RequestParam(name = "limit", defaultValue = "10") int limit,
+      @RequestParam(name = "creator", required = false) String creator) {
     browseCounter.increment();
     if (isAuthenticated(authentication)) {
       return ResponseEntity.ok(
           urlLookupService.listRecentLinks(
-              currentUsername(authentication), isAdmin(authentication), limit));
+              currentUsername(authentication), isAdmin(authentication), creator, limit));
     }
     return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
   }
