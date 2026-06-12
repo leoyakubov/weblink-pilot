@@ -2,6 +2,7 @@ package io.weblinkpilot.auth.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.weblinkpilot.auth.exception.AccountActionRequestCooldownException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -34,5 +35,22 @@ class AuthExceptionHandlerTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().code()).isEqualTo("INVALID_CREDENTIALS");
     assertThat(response.getBody().message()).isEqualTo("Incorrect username or password");
+  }
+
+  @Test
+  void requestCooldownReturnsTooManyRequestsWithRetryAfter() {
+    HttpServletRequest request =
+        new MockHttpServletRequest("POST", "/api/v1/auth/email-verification/request");
+
+    var response =
+        handler.requestCooldown(
+            new AccountActionRequestCooldownException("verification email", 30), request);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+    assertThat(response.getHeaders().getFirst("Retry-After")).isEqualTo("30");
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().code()).isEqualTo("REQUEST_COOLDOWN");
+    assertThat(response.getBody().message())
+        .isEqualTo("Please wait 30 seconds before requesting another verification email.");
   }
 }

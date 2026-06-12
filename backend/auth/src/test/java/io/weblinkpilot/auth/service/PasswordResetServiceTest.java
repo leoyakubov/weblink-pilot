@@ -34,6 +34,8 @@ class PasswordResetServiceTest {
 
   @Mock private AccountActionTokenService tokenService;
 
+  @Mock private AccountActionRequestCooldownService cooldownService;
+
   @Mock private ApplicationEventPublisher eventPublisher;
 
   private PasswordResetService service;
@@ -49,6 +51,7 @@ class PasswordResetServiceTest {
             userAccountService,
             passwordEncoder,
             tokenService,
+            cooldownService,
             eventPublisher,
             authProperties);
   }
@@ -71,6 +74,7 @@ class PasswordResetServiceTest {
 
     service.requestPasswordReset("alice@example.com");
 
+    verify(cooldownService).enforceCooldown("password reset", "alice@example.com");
     ArgumentCaptor<PasswordResetLinkRequestedEvent> eventCaptor =
         ArgumentCaptor.forClass(PasswordResetLinkRequestedEvent.class);
     verify(eventPublisher).publishEvent(eventCaptor.capture());

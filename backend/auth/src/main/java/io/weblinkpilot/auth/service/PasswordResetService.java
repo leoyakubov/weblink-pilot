@@ -22,6 +22,7 @@ public class PasswordResetService {
   private final UserAccountService userAccountService;
   private final PasswordEncoder passwordEncoder;
   private final AccountActionTokenService tokenService;
+  private final AccountActionRequestCooldownService cooldownService;
   private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
 
@@ -30,12 +31,14 @@ public class PasswordResetService {
       UserAccountService userAccountService,
       PasswordEncoder passwordEncoder,
       AccountActionTokenService tokenService,
+      AccountActionRequestCooldownService cooldownService,
       ApplicationEventPublisher eventPublisher,
       AuthProperties authProperties) {
     this.userAccountRepository = userAccountRepository;
     this.userAccountService = userAccountService;
     this.passwordEncoder = passwordEncoder;
     this.tokenService = tokenService;
+    this.cooldownService = cooldownService;
     this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
   }
@@ -47,7 +50,13 @@ public class PasswordResetService {
       throw new IllegalArgumentException("Email is required.");
     }
 
-    userAccountRepository.findByEmailIgnoreCase(normalizedEmail).ifPresent(this::sendResetLink);
+    userAccountRepository
+        .findByEmailIgnoreCase(normalizedEmail)
+        .ifPresent(
+            account -> {
+              cooldownService.enforceCooldown("password reset", account.getEmail());
+              sendResetLink(account);
+            });
   }
 
   @Transactional

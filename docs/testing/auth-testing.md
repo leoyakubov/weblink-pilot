@@ -46,6 +46,7 @@ The refresh token itself is stored in an `HttpOnly` cookie named:
 ## Mail Setup
 
 The app uses SMTP for password reset and email verification.
+The backend also enforces a short resend cooldown for these links so duplicate clicks do not send multiple emails; repeated requests return `429 Too Many Requests` with a `Retry-After` header.
 
 ### Local
 
@@ -78,26 +79,26 @@ Then start the backend with either the `local` profile or the `dev` profile. Bot
 
 ### Demo
 
-Use Brevo SMTP for the demo environment.
+Use MailerSend SMTP for the demo environment.
 
 Recommended values:
 
 ```env
-SPRING_MAIL_HOST=smtp-relay.brevo.com
+SPRING_MAIL_HOST=smtp.mailersend.net
 SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=<your Brevo SMTP login>
-SPRING_MAIL_PASSWORD=<your Brevo SMTP key>
+SPRING_MAIL_USERNAME=<your MailerSend SMTP login>
+SPRING_MAIL_PASSWORD=<your MailerSend SMTP password>
 SPRING_MAIL_SMTP_AUTH=true
 SPRING_MAIL_SMTP_STARTTLS=true
 ```
 
-Brevo's official docs recommend port `587` as the default SMTP option and note that `465` is the encrypted alternative. Use an SMTP key, not an API key. The sender domain should be authenticated in Brevo before you use the demo mail flow.
+MailerSend provides SMTP relay and a small free trial tier, which makes it easy to wire into the demo without managing a custom mail server. Use the SMTP credentials from the MailerSend dashboard, not an API token. Authenticate the sender domain before you use the demo mail flow.
 
 Useful references:
 
-- [Brevo SMTP relay integration](https://developers.brevo.com/docs/smtp-integration)
-- [Brevo SMTP port guidance](https://help.brevo.com/hc/en-us/articles/10905415650322-Which-SMTP-port-should-I-use-Port-587-465-or-2525)
-- [Brevo free plan limits](https://help.brevo.com/hc/en-us/articles/208580669-What-are-the-limits-of-the-Free-plans)
+- [MailerSend home](https://www.mailersend.com/)
+- [MailerSend SMTP relay](https://www.mailersend.com/)
+- [MailerSend pricing](https://www.mailersend.com/pricing)
 
 ## 1. Sign In
 
@@ -274,7 +275,7 @@ Expected result:
 Manual flow:
 
 1. register a new account with an email address
-2. open Mailpit at `http://localhost:8025` for local testing, or check the Brevo transactional inbox flow in demo
+2. open Mailpit at `http://localhost:8025` for local testing, or check the MailerSend transactional inbox flow in demo
 3. open the verification link
 4. wait for the frontend confirmation page to say the email is verified
 5. sign in again if you were testing the blocked-login flow

@@ -23,6 +23,9 @@ public class AuthProperties {
   private long accountActionTokenTtlHours;
 
   @Min(1)
+  private long accountActionRequestCooldownSeconds = 30;
+
+  @Min(1)
   private long githubLoginTicketTtlMinutes;
 
   @NotBlank private String refreshCookieName;
@@ -85,6 +88,14 @@ public class AuthProperties {
 
   public void setAccountActionTokenTtlHours(long accountActionTokenTtlHours) {
     this.accountActionTokenTtlHours = accountActionTokenTtlHours;
+  }
+
+  public long getAccountActionRequestCooldownSeconds() {
+    return accountActionRequestCooldownSeconds;
+  }
+
+  public void setAccountActionRequestCooldownSeconds(long accountActionRequestCooldownSeconds) {
+    this.accountActionRequestCooldownSeconds = accountActionRequestCooldownSeconds;
   }
 
   public long getGithubLoginTicketTtlMinutes() {

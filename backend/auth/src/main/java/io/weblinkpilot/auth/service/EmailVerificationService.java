@@ -21,16 +21,19 @@ public class EmailVerificationService {
 
   private final UserAccountRepository userAccountRepository;
   private final AccountActionTokenService tokenService;
+  private final AccountActionRequestCooldownService cooldownService;
   private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
 
   public EmailVerificationService(
       UserAccountRepository userAccountRepository,
       AccountActionTokenService tokenService,
+      AccountActionRequestCooldownService cooldownService,
       ApplicationEventPublisher eventPublisher,
       AuthProperties authProperties) {
     this.userAccountRepository = userAccountRepository;
     this.tokenService = tokenService;
+    this.cooldownService = cooldownService;
     this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
   }
@@ -45,7 +48,11 @@ public class EmailVerificationService {
     userAccountRepository
         .findByEmailIgnoreCase(normalizedEmail)
         .filter(account -> !account.isEmailVerified())
-        .ifPresent(this::sendVerificationLink);
+        .ifPresent(
+            account -> {
+              cooldownService.enforceCooldown("verification email", account.getEmail());
+              sendVerificationLink(account);
+            });
   }
 
   @Transactional

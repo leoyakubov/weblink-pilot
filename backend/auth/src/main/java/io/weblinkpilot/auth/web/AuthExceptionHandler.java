@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.web;
 
+import io.weblinkpilot.auth.exception.AccountActionRequestCooldownException;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.EmailAlreadyExistsException;
 import io.weblinkpilot.auth.exception.EmailNotVerifiedException;
@@ -109,15 +110,34 @@ public class AuthExceptionHandler {
         request.getRequestURI());
   }
 
+  @ExceptionHandler(AccountActionRequestCooldownException.class)
+  public ResponseEntity<ApiErrorResponse> requestCooldown(
+      AccountActionRequestCooldownException exception, HttpServletRequest request) {
+    return build(
+        HttpStatus.TOO_MANY_REQUESTS,
+        "REQUEST_COOLDOWN",
+        exception.getMessage(),
+        request.getRequestURI(),
+        exception.getRetryAfterSeconds());
+  }
+
   private ResponseEntity<ApiErrorResponse> build(
       HttpStatus status, String code, String message, String path) {
+    return build(status, code, message, path, null);
+  }
+
+  private ResponseEntity<ApiErrorResponse> build(
+      HttpStatus status, String code, String message, String path, Long retryAfterSeconds) {
     log.warn(
         "request.rejected status={} code={} path={} message={}",
         status.value(),
         code,
         path,
         message);
-    return ResponseEntity.status(status)
-        .body(AuthErrorResponseFactory.create(status, code, message, path));
+    ResponseEntity.BodyBuilder builder = ResponseEntity.status(status);
+    if (retryAfterSeconds != null && retryAfterSeconds > 0) {
+      builder.header("Retry-After", String.valueOf(retryAfterSeconds));
+    }
+    return builder.body(AuthErrorResponseFactory.create(status, code, message, path));
   }
 }

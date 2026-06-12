@@ -22,13 +22,21 @@ export class ApiRequestError extends Error {
   status: number;
   code?: string;
   path?: string;
+  retryAfterSeconds?: number;
 
-  constructor(message: string, status: number, code?: string, path?: string) {
+  constructor(
+    message: string,
+    status: number,
+    code?: string,
+    path?: string,
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
     this.code = code;
     this.path = path;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -80,9 +88,23 @@ async function parseError(response: Response) {
     };
     const message =
       body.message ?? body.error ?? body.code ?? `Request failed with ${response.status}`;
-    return new ApiRequestError(message, response.status, body.code, body.path);
+    const retryAfter = response.headers.get('Retry-After');
+    return new ApiRequestError(
+      message,
+      response.status,
+      body.code,
+      body.path,
+      retryAfter ? Number(retryAfter) : undefined,
+    );
   } catch {
-    return new ApiRequestError(text || `Request failed with ${response.status}`, response.status);
+    const retryAfter = response.headers.get('Retry-After');
+    return new ApiRequestError(
+      text || `Request failed with ${response.status}`,
+      response.status,
+      undefined,
+      undefined,
+      retryAfter ? Number(retryAfter) : undefined,
+    );
   }
 }
 

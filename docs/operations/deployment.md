@@ -132,7 +132,7 @@ Set backend env vars in Render:
 
 Where to get the missing values:
 
-- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For Brevo, open `SMTP & API`, create or copy the SMTP key, and use the SMTP login plus key from there.
+- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For MailerSend, open the SMTP settings in the dashboard, create or copy the SMTP credentials, and use the SMTP login plus password from there.
 - `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WebLinkPilot.
 
 Optional:

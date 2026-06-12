@@ -31,6 +31,8 @@ class EmailVerificationServiceTest {
 
   @Mock private AccountActionTokenService tokenService;
 
+  @Mock private AccountActionRequestCooldownService cooldownService;
+
   @Mock private ApplicationEventPublisher eventPublisher;
 
   private EmailVerificationService service;
@@ -42,7 +44,7 @@ class EmailVerificationServiceTest {
     authProperties.setAccountActionTokenTtlHours(24);
     service =
         new EmailVerificationService(
-            userAccountRepository, tokenService, eventPublisher, authProperties);
+            userAccountRepository, tokenService, cooldownService, eventPublisher, authProperties);
   }
 
   @Test
@@ -63,6 +65,7 @@ class EmailVerificationServiceTest {
 
     service.requestEmailVerification("alice@example.com");
 
+    verify(cooldownService).enforceCooldown("verification email", "alice@example.com");
     ArgumentCaptor<EmailVerificationLinkRequestedEvent> eventCaptor =
         ArgumentCaptor.forClass(EmailVerificationLinkRequestedEvent.class);
     verify(eventPublisher).publishEvent(eventCaptor.capture());
@@ -86,6 +89,7 @@ class EmailVerificationServiceTest {
 
     service.requestEmailVerification("alice@example.com");
 
+    verify(cooldownService, never()).enforceCooldown(any(), any());
     verify(eventPublisher, never()).publishEvent(any());
   }
 
