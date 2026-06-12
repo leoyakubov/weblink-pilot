@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import { loadSettings, saveSettings } from '@/lib/settings';
+import { loadSettings, saveSettings } from '@/shared/services/settings';
 import type { ApiSettings } from '@/types';
 
 const settings = reactive<ApiSettings>(loadSettings());

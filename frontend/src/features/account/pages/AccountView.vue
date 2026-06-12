@@ -3,7 +3,8 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
-import { ApiRequestError, changePassword, getAccountProfile } from '@/lib/api';
+import { ApiRequestError } from '@/shared/services/http';
+import { changePassword, getAccountProfile } from '@/features/account/repositories/account.repository';
 import type { AccountProfileResponse } from '@/types';
 
 const busy = ref(true);
@@ -63,8 +64,12 @@ async function loadAccount() {
   try {
     account.value = await getAccountProfile();
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error ? error.message : 'Unable to load account settings.';
+    if (error instanceof ApiRequestError && error.status === 401) {
+      errorMessage.value = 'Please sign in again to view your account settings.';
+    } else {
+      errorMessage.value =
+        error instanceof Error ? error.message : 'Unable to load account settings.';
+    }
   } finally {
     busy.value = false;
   }

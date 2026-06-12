@@ -2,9 +2,10 @@
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
-import { useCopyAction } from '@/lib/copy-action';
-import { buildApiBaseUrl, listLinks } from '@/lib/api';
-import { loadSettings } from '@/lib/settings';
+import { useCopyAction } from '@/shared/composables/useCopyAction';
+import { buildApiBaseUrl } from '@/shared/services/http';
+import { loadSettings } from '@/shared/services/settings';
+import { listLinks } from '@/features/links/repositories/link.repository';
 import type { LinkResponse } from '@/types';
 
 const settings = loadSettings();

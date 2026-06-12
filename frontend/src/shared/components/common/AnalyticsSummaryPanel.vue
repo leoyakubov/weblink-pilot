@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AnalyticsSummaryResponse } from '@/types';
-import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
+import { countryCodeLabel, countryFlagUrl } from '@/shared/utils/countries';
 
 const props = defineProps<{
   summary: AnalyticsSummaryResponse | null;

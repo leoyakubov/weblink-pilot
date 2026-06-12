@@ -2,8 +2,8 @@
 /* global URLSearchParams */
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { completeGithubLogin } from '@/lib/api';
-import { applyAuthResponse } from '@/lib/auth';
+import { completeGithubLogin } from '@/features/auth/repositories/auth.repository';
+import { applyAuthResponse } from '@/features/auth/services/auth.service';
 import type { AuthResponse } from '@/types';
 
 const router = useRouter();

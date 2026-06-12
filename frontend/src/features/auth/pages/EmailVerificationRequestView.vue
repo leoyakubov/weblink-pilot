@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { ApiRequestError, requestEmailVerification } from '@/lib/api';
+import { ApiRequestError } from '@/shared/services/http';
+import { requestEmailVerification } from '@/features/auth/repositories/auth.repository';
 
 const form = reactive({
   email: '',

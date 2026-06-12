@@ -1,36 +1,48 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
-import { RouterLink } from 'vue-router';
-import { ApiRequestError, requestPasswordReset } from '@/lib/api';
+import { useRoute, RouterLink, useRouter } from 'vue-router';
+import { ApiRequestError } from '@/shared/services/http';
+import { confirmPasswordReset } from '@/features/auth/repositories/auth.repository';
+
+const route = useRoute();
+const router = useRouter();
 
 const form = reactive({
-  email: '',
+  token: String(route.query.token ?? ''),
+  password: '',
 });
 
 const busy = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 
-const title = computed(() => 'Reset password');
+const title = computed(() => 'Set new password');
+const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)\S{6,}$/;
 
 function validateForm(): string {
-  if (!form.email.trim()) {
-    return 'Email is required.';
+  if (!form.token.trim()) {
+    return 'Reset token is required.';
+  }
+  if (!form.password.trim()) {
+    return 'Password is required.';
+  }
+  if (!passwordPattern.test(form.password.trim())) {
+    return 'Password must use at least 6 characters, including 1 letter and 1 number.';
   }
   return '';
 }
 
 function formatError(error: unknown): string {
   if (error instanceof ApiRequestError) {
-    if (error.status === 400) {
-      return 'Enter a valid email address.';
+    if (error.status === 401 || error.status === 400) {
+      return 'This reset link is invalid or expired.';
     }
-    return 'Unable to request a password reset. Please try again.';
+    return 'Unable to change password. Please try again.';
   }
   if (error instanceof Error && error.message) {
     return error.message;
   }
-  return 'Unable to request a password reset.';
+  return 'Unable to change password.';
 }
 
 async function submit() {
@@ -45,9 +57,12 @@ async function submit() {
       return;
     }
 
-    await requestPasswordReset({ email: form.email.trim() });
-    successMessage.value =
-      'If the email exists, a reset link was sent. Check your inbox or the local Mailpit UI.';
+    await confirmPasswordReset({
+      token: form.token.trim(),
+      password: form.password.trim(),
+    });
+    successMessage.value = 'Password updated. You can sign in with the new password now.';
+    await router.push('/auth/signin');
   } catch (error) {
     errorMessage.value = formatError(error);
   } finally {
@@ -67,19 +82,28 @@ async function submit() {
 
         <form class="form-grid" @submit.prevent="submit">
           <label class="form-field">
-            <span class="field-label">Email</span>
+            <span class="field-label">Reset token</span>
             <input
-              v-model="form.email"
+              v-model="form.token"
               class="input"
-              type="email"
-              placeholder="you@example.com"
-              autocomplete="email"
+              type="text"
+              placeholder="Paste token from email"
+            />
+          </label>
+          <label class="form-field">
+            <span class="field-label">New password</span>
+            <input
+              v-model="form.password"
+              class="input"
+              type="password"
+              placeholder="Enter a new password"
+              autocomplete="new-password"
             />
           </label>
 
           <div class="actions">
             <button class="button button-primary" type="submit" :disabled="busy">
-              {{ busy ? 'Working...' : 'Send reset link' }}
+              {{ busy ? 'Working...' : 'Update password' }}
             </button>
           </div>
 
@@ -93,12 +117,12 @@ async function submit() {
           </p>
 
           <div class="auth-switch">
-            <span class="footnote">Remembered it?</span>
+            <span class="footnote">Need a fresh reset link?</span>
             <RouterLink
               class="button button-secondary button-small auth-link-button"
-              to="/auth/signin"
+              to="/auth/forgot-password"
             >
-              Sign in
+              Request again
             </RouterLink>
           </div>
         </form>

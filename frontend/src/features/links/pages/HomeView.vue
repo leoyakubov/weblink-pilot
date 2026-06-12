@@ -4,10 +4,11 @@ import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Tag from 'primevue/tag';
-import { useCopyAction } from '@/lib/copy-action';
-import { authState } from '@/lib/auth';
-import { buildApiBaseUrl, createLink, listLinks } from '@/lib/api';
-import { loadSettings, saveSettings } from '@/lib/settings';
+import { useCopyAction } from '@/shared/composables/useCopyAction';
+import { authState } from '@/features/auth/services/auth.service';
+import { buildApiBaseUrl } from '@/shared/services/http';
+import { loadSettings, saveSettings } from '@/shared/services/settings';
+import { createLink, listLinks } from '@/features/links/repositories/link.repository';
 import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/types';
 
 const settings = reactive<ApiSettings>(loadSettings());
@@ -142,10 +143,14 @@ watch(
           </p>
 
           <div class="hero-badges">
-            <Tag value="Guest demo links" severity="info" />
-            <Tag value="Owned user links" severity="success" />
-            <Tag value="QR scans" severity="warn" />
-            <Tag value="Analytics insights" severity="contrast" />
+            <Tag value="Guest demo links" severity="info" class="hero-chip hero-chip--info" />
+            <Tag value="Owned user links" severity="success" class="hero-chip hero-chip--success" />
+            <Tag value="QR scans" severity="warn" class="hero-chip hero-chip--warn" />
+            <Tag
+              value="Analytics insights"
+              severity="contrast"
+              class="hero-chip hero-chip--contrast"
+            />
           </div>
 
           <div class="hero-points">

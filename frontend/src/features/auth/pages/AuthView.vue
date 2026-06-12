@@ -4,9 +4,8 @@ import { RouterLink, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Tag from 'primevue/tag';
-import { ApiRequestError, buildApiBaseUrl } from '@/lib/api';
-import { authenticate, authState } from '@/lib/auth';
+import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
+import { authenticate, authState } from '@/features/auth/services/auth.service';
 import type { AuthCredentialsRequest } from '@/types';
 
 const props = defineProps<{
@@ -171,13 +170,6 @@ async function submit() {
           Use a password for the local account flow, or switch to GitHub sign-in when you want to
           keep ownership tied to an external identity.
         </p>
-
-        <div class="hero-badges">
-          <Tag value="JWT access tokens" severity="info" />
-          <Tag value="Refresh session" severity="success" />
-          <Tag value="Email reset flow" severity="warn" />
-          <Tag value="GitHub login" severity="contrast" />
-        </div>
 
         <div class="grid-2">
           <div class="list-item">

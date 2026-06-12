@@ -1,0 +1,177 @@
+import { flushPromises, mount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import DashboardView from '@/features/links/pages/DashboardView.vue';
+
+const mocks = vi.hoisted(() => ({
+  listLinksMock: vi.fn(),
+  getLinkMock: vi.fn(),
+  getAnalyticsSummaryMock: vi.fn(),
+  ApiRequestError: class ApiRequestError extends Error {
+    status: number;
+
+    constructor(message: string, status: number) {
+      super(message);
+      this.name = 'ApiRequestError';
+      this.status = status;
+    }
+  },
+  authState: {
+    currentUser: { username: 'admin', role: 'ADMIN' } as null | { username: string; role: string },
+  },
+  openMock: vi.fn(),
+  routeState: {
+    params: {},
+    query: {},
+  },
+}));
+
+vi.mock('vue-router', () => ({
+  RouterLink: {
+    props: ['to'],
+    template: '<a><slot /></a>',
+  },
+  useRoute: () => mocks.routeState,
+  useRouter: () => ({
+    replace: vi.fn(),
+  }),
+}));
+
+vi.mock('@/features/auth/services/auth.service', () => ({
+  isAdminUser: () => mocks.authState.currentUser?.role === 'ADMIN',
+}));
+
+vi.mock('@/shared/services/http', () => ({
+  ApiRequestError: mocks.ApiRequestError,
+  buildApiBaseUrl: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
+}));
+
+vi.mock('@/features/links/repositories/link.repository', () => ({
+  getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
+  getLink: mocks.getLinkMock,
+  listLinks: mocks.listLinksMock,
+}));
+
+vi.mock('@/shared/services/settings', () => ({
+  loadSettings: () => ({
+    apiBaseUrl: 'http://localhost:8080/api/v1',
+    authToken: '',
+    refreshToken: '',
+  }),
+}));
+
+describe('DashboardView', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
+    mocks.routeState.params = {};
+    mocks.routeState.query = {};
+    vi.stubGlobal('open', mocks.openMock);
+    mocks.listLinksMock.mockResolvedValue([
+      {
+        code: 'github-org',
+        shortUrl: 'http://localhost:8080/r/github-org',
+        qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+        originalUrl: 'https://github.com/orgs/github-org',
+        createdAt: '2026-05-23T11:00:00Z',
+        expiresAt: null,
+        clickCount: 3,
+        ownerUsername: 'admin',
+      },
+    ]);
+    mocks.getLinkMock.mockResolvedValue({
+      code: 'github-org',
+      shortUrl: 'http://localhost:8080/r/github-org',
+      qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+      originalUrl: 'https://github.com/orgs/github-org',
+      createdAt: '2026-05-23T11:00:00Z',
+      expiresAt: null,
+      clickCount: 3,
+      ownerUsername: 'admin',
+    });
+    mocks.getAnalyticsSummaryMock.mockResolvedValue({
+      code: 'github-org',
+      totalClicks: 3,
+      redirectClicks: 2,
+      qrScans: 1,
+      uniqueVisitors: 2,
+      lastClickedAt: '2026-05-23T11:05:00Z',
+      lastReferrer: 'https://news.ycombinator.com',
+      lastBrowserFamily: 'CHROME',
+      lastDeviceType: 'DESKTOP',
+      topCountries: [{ country: 'US', clicks: 3 }],
+    });
+  });
+
+  it('loads analytics and opens the QR modal', async () => {
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Inspect clicks for any short code.');
+    expect(wrapper.text()).toContain('Open preview JSON');
+    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('US');
+
+    const buttons = wrapper.findAll('button');
+    await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
+    await flushPromises();
+    expect(document.body.textContent).toContain('QR code');
+    expect(document.body.textContent).toContain('github-org');
+
+    await buttons.find((button) => button.text().includes('preview JSON'))?.trigger('click');
+    expect(mocks.openMock).toHaveBeenCalled();
+  });
+
+  it('keeps link details visible when analytics are forbidden', async () => {
+    mocks.getAnalyticsSummaryMock.mockRejectedValueOnce(
+      new mocks.ApiRequestError('Forbidden', 403),
+    );
+
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Analytics are available only to the link owner or an admin user.');
+    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('Short URL');
+  });
+
+  it('passes an admin creator filter to the recent links request', async () => {
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a><slot /></a>',
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    await wrapper.get('input[placeholder="alice or anonymous"]').setValue('alice');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Apply recent filter'))
+      ?.trigger('click');
+    await flushPromises();
+
+    expect(mocks.listLinksMock).toHaveBeenCalledWith(8, expect.any(Object), 'alice');
+  });
+});

@@ -5,15 +5,17 @@ import Button from 'primevue/button';
 import {
   ApiRequestError,
   buildApiBaseUrl,
+} from '@/shared/services/http';
+import { useCopyAction } from '@/shared/composables/useCopyAction';
+import { isAdminUser } from '@/features/auth/services/auth.service';
+import { loadSettings } from '@/shared/services/settings';
+import {
   getAnalyticsSummary,
   getLink,
   getRedirectPreview,
-} from '@/lib/api';
-import { useCopyAction } from '@/lib/copy-action';
-import { isAdminUser } from '@/lib/auth';
-import { loadSettings } from '@/lib/settings';
+} from '@/features/links/repositories/link.repository';
 import type { AnalyticsSummaryResponse, LinkResponse, RedirectPreviewResponse } from '@/types';
-import AnalyticsSummaryPanel from '@/shared/components/AnalyticsSummaryPanel.vue';
+import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();
 const settings = loadSettings();

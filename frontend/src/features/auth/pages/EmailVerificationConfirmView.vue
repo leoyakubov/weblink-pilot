@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
-import { ApiRequestError, confirmEmailVerification } from '@/lib/api';
+import { ApiRequestError } from '@/shared/services/http';
+import { confirmEmailVerification } from '@/features/auth/repositories/auth.repository';
 
 const route = useRoute();
 const busy = ref(true);

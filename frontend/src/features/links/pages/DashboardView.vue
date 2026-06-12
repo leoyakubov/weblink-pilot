@@ -3,13 +3,18 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import { isAdminUser } from '@/lib/auth';
-import { ApiRequestError, buildApiBaseUrl, getAnalyticsSummary, getLink, listLinks } from '@/lib/api';
-import { useCopyAction } from '@/lib/copy-action';
-import { countryCodeLabel, countryFlagUrl } from '@/lib/countries';
-import { loadSettings } from '@/lib/settings';
+import { isAdminUser } from '@/features/auth/services/auth.service';
+import { ApiRequestError, buildApiBaseUrl } from '@/shared/services/http';
+import { useCopyAction } from '@/shared/composables/useCopyAction';
+import { countryCodeLabel, countryFlagUrl } from '@/shared/utils/countries';
+import { loadSettings } from '@/shared/services/settings';
+import {
+  getAnalyticsSummary,
+  getLink,
+  listLinks,
+} from '@/features/links/repositories/link.repository';
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/types';
-import AnalyticsSummaryPanel from '@/shared/components/AnalyticsSummaryPanel.vue';
+import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,6 +24,7 @@ const form = reactive({
   code: String(route.query.code ?? ''),
 });
 
+const creatorFilter = ref('');
 const link = ref<LinkResponse | null>(null);
 const summary = ref<AnalyticsSummaryResponse | null>(null);
 const loading = ref(false);
@@ -79,7 +85,7 @@ function pickDefaultCode() {
 }
 
 async function refreshRecent() {
-  recentLinks.value = await listLinks(8, settings);
+  recentLinks.value = await listLinks(8, settings, canSeePreview.value ? creatorFilter.value : undefined);
   if (!selectedCode.value && recentLinks.value.length > 0) {
     form.code = recentLinks.value[0].code;
   }
@@ -195,12 +201,31 @@ watch(
             />
           </label>
 
+          <label v-if="canSeePreview" class="form-field">
+            <span class="field-label">Creator filter</span>
+            <InputText
+              v-model="creatorFilter"
+              type="text"
+              placeholder="alice or anonymous"
+              autocomplete="off"
+            />
+          </label>
+
           <div class="actions">
             <Button
               type="submit"
               :label="loading ? 'Loading...' : 'Load analytics'"
               icon="pi pi-chart-line"
               :disabled="loading"
+            />
+            <Button
+              v-if="canSeePreview"
+              type="button"
+              label="Apply recent filter"
+              icon="pi pi-filter"
+              severity="secondary"
+              variant="outlined"
+              @click="refreshRecent"
             />
             <RouterLink to="/">
               <Button
