@@ -13,6 +13,7 @@
 |---|---|---|
 | Backend CI | Done | GitHub Actions runs Maven and frontend validation on push and PR. |
 | Backend deploy workflow | Done | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`. |
+| Backend readiness gate | Done | The backend deploy workflow waits for the new Render deploy to become live before the smoke workflow runs. |
 | Frontend deploy workflow | Done | GitHub Actions builds the Vue app and deploys it to Netlify. |
 | Deployment smoke tests | Done | GitHub Actions checks the live backend health endpoint and frontend home page after deploys with separate backend and frontend smoke workflows. |
 | Render runtime | Done | The backend runs on Render with Postgres and the demo profile. |
@@ -33,6 +34,11 @@
 ## Backend deploy secret
 
 - `RENDER_DEPLOY_HOOK_URL`
+- `RENDER_API_KEY`
+
+## Backend Render service variable
+
+- `RENDER_BACKEND_SERVICE_ID`
 
 ## Backend Render env vars
 
@@ -136,6 +142,7 @@ Add these repository secrets:
 Notes:
 
 - `RENDER_DEPLOY_HOOK_URL` is optional if you rely entirely on Render's built-in Git auto-deploys, but we keep it for a GitHub-triggered deploy path.
+- `RENDER_API_KEY` and `RENDER_BACKEND_SERVICE_ID` are used by the backend deploy workflow to confirm that the new Render deploy is actually live before smoke checks start.
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS` should contain only the exact Netlify origin(s) you trust.
 - `REDIS_URL` should use the Render Key Value instance's internal URL from the Connect menu.
 - The bootstrap env vars seed the shared `admin / admin123` and `user / user123` accounts for demo/local/dev. Leave them empty if you want to opt out in a specific environment.

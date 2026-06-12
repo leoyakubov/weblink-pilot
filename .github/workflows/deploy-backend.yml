@@ -14,6 +14,9 @@ jobs:
 
     env:
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_BACKEND_SERVICE_ID: ${{ vars.RENDER_BACKEND_SERVICE_ID }}
+      RENDER_API_BASE_URL: https://api.render.com/v1
 
     steps:
       - name: Checkout triggering commit
@@ -48,6 +51,30 @@ jobs:
           echo "No backend-relevant files changed; skipping backend deploy."
           exit 0
 
+      - name: Capture current backend deploy id
+        id: baseline
+        if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
+        run: |
+          set -euo pipefail
+
+          response="$(curl --silent --show-error --fail \
+            --header "Authorization: Bearer $RENDER_API_KEY" \
+            --header "Accept: application/json" \
+            "$RENDER_API_BASE_URL/services/$RENDER_BACKEND_SERVICE_ID/deploys")"
+          deploy_id="$(printf '%s' "$response" | jq -r '
+            def deploy_list:
+              if type == "array" then .
+              elif type == "object" then
+                (.deploys // .items // .data // .result // .deployments // .service.deploys // .service.items // [])
+              else [] end;
+
+            deploy_list
+            | map(select(type == "object"))
+            | map(if has("deploy") and (.deploy | type == "object") then .deploy else . end)
+            | .[0].id // .[0].deployId // empty
+          ')"
+          printf 'baseline_deploy_id=%s\n' "$deploy_id" >> "$GITHUB_OUTPUT"
+
       - name: Trigger Render deploy
         if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
         run: |
@@ -61,3 +88,9 @@ jobs:
           deploy_sha="${{ github.event.workflow_run.head_sha || github.sha }}"
           curl --fail --silent --show-error --request POST "${RENDER_DEPLOY_HOOK_URL}&ref=${deploy_sha}" >/dev/null
           echo "Triggered Render deploy for ${deploy_sha}"
+
+      - name: Wait for backend to become ready
+        if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
+        run: sh ./scripts/unix/dev/render-deploy-wait.sh
+        env:
+          BASELINE_DEPLOY_ID: ${{ steps.baseline.outputs.baseline_deploy_id }}
