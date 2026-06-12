@@ -1,4 +1,4 @@
-run-name: Smoke Frontend: ${{ github.event.client_payload.sha || github.sha }}
+run-name: ${{ github.workflow }}: ${{ github.event.client_payload.sha || github.event.action || github.sha }}
 
 name: Smoke Frontend
 
