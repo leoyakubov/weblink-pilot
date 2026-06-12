@@ -8,6 +8,8 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      contents: write
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: demo
@@ -49,6 +51,12 @@ jobs:
         if: steps.manual.outputs.backend_changed != 'true' && steps.changes.outputs.backend_changed != 'true'
         run: |
           echo "No backend-relevant files changed; skipping backend deploy."
+          {
+            echo "## Backend deploy"
+            echo ""
+            echo "- Status: skipped"
+            echo "- Reason: no backend-relevant files changed"
+          } >> "$GITHUB_STEP_SUMMARY"
           exit 0
 
       - name: Capture current backend deploy id
@@ -94,3 +102,28 @@ jobs:
         run: sh ./scripts/unix/dev/render-deploy-wait.sh
         env:
           BASELINE_DEPLOY_ID: ${{ steps.baseline.outputs.baseline_deploy_id }}
+
+      - name: Publish backend deploy smoke dispatch
+        if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          curl --fail --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$(printf '{"event_type":"backend_deployed","client_payload":{"sha":"%s"}}' "$DEPLOY_SHA")" \
+            >/dev/null
+
+          {
+            echo "## Backend deploy"
+            echo ""
+            echo "- Status: deployed"
+            echo "- Commit: ${DEPLOY_SHA}"
+            echo "- Smoke: dispatched"
+          } >> "$GITHUB_STEP_SUMMARY"

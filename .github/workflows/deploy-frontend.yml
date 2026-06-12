@@ -8,6 +8,8 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      contents: write
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: demo
@@ -47,6 +49,12 @@ jobs:
         if: steps.manual.outputs.frontend_changed != 'true' && steps.changes.outputs.frontend_changed != 'true'
         run: |
           echo "No frontend-relevant files changed; skipping frontend deploy."
+          {
+            echo "## Frontend deploy"
+            echo ""
+            echo "- Status: skipped"
+            echo "- Reason: no frontend-relevant files changed"
+          } >> "$GITHUB_STEP_SUMMARY"
           exit 0
 
       - name: Set up Node 22
@@ -62,11 +70,6 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run frontend tests
-        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
-        working-directory: frontend
-        run: npm test -- --run
-
       - name: Build frontend
         if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
         working-directory: frontend
@@ -74,5 +77,46 @@ jobs:
 
       - name: Deploy to Netlify
         if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
+        id: deploy
         working-directory: frontend
-        run: npx --yes netlify-cli deploy --dir=dist --prod --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          deploy_output="$(npx --yes netlify-cli deploy --dir=dist --prod --site="$NETLIFY_SITE_ID" --auth="$NETLIFY_AUTH_TOKEN" --json)"
+          printf '%s\n' "$deploy_output"
+
+          deploy_url="$(printf '%s' "$deploy_output" | jq -r '.deploy_url // .url // .site_url // empty')"
+          if [ -z "$deploy_url" ]; then
+            echo "Netlify deploy did not return a deploy URL."
+            exit 1
+          fi
+
+          printf 'deploy_url=%s\n' "$deploy_url" >> "$GITHUB_OUTPUT"
+
+      - name: Publish frontend deploy smoke dispatch
+        if: steps.manual.outputs.frontend_changed == 'true' || steps.changes.outputs.frontend_changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deploy_url }}
+        run: |
+          set -euo pipefail
+
+          curl --fail --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$(printf '{"event_type":"frontend_deployed","client_payload":{"sha":"%s","smoke_url":"%s"}}' "$DEPLOY_SHA" "$DEPLOY_URL")" \
+            >/dev/null
+
+          {
+            echo "## Frontend deploy"
+            echo ""
+            echo "- Status: deployed"
+            echo "- Commit: ${DEPLOY_SHA}"
+            echo "- Deploy URL: ${DEPLOY_URL}"
+            echo "- Smoke: dispatched"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -2,13 +2,11 @@ name: Smoke Backend
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: [Deploy backend]
-    types: [completed]
+  repository_dispatch:
+    types: [backend_deployed]
 
 jobs:
   smoke:
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: demo
 
@@ -16,13 +14,19 @@ jobs:
       SMOKE_TARGET: demo
       SMOKE_CHECK: backend
       RENDER_HEALTH_URL: ${{ vars.RENDER_HEALTH_URL || secrets.RENDER_HEALTH_URL }}
+      DEPLOY_SHA: ${{ github.event.client_payload.sha || github.sha }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.client_payload.sha || github.sha }}
           fetch-depth: 2
+
+      - name: Report smoke target
+        run: |
+          echo "Smoke triggered for commit ${DEPLOY_SHA}"
+          echo "Backend smoke will check the live Render health endpoint, not a skipped deploy."
 
       - name: Run backend deployment smoke checks
         run: ./scripts/unix/quality/deployment-smoke.sh
