@@ -60,6 +60,22 @@ Use Mailpit in the local Docker stack:
 
 The Docker stack already wires these values through the backend container.
 
+If you want to run the backend on your machine instead of inside Docker, start only Mailpit and point the backend to it:
+
+```powershell
+docker compose -f infra/docker-compose.yml up -d mailpit
+$env:SPRING_MAIL_HOST = "localhost"
+$env:SPRING_MAIL_PORT = "1025"
+```
+
+```bash
+docker compose -f infra/docker-compose.yml up -d mailpit
+export SPRING_MAIL_HOST=localhost
+export SPRING_MAIL_PORT=1025
+```
+
+Then start the backend with either the `local` profile or the `dev` profile. Both can work against Mailpit on `localhost:1025` when you override the SMTP host and port.
+
 ### Demo
 
 Use Brevo SMTP for the demo environment.
@@ -250,7 +266,8 @@ After registering a new account, confirm the email verification link is sent.
 Expected result:
 
 - registration sends a verification email
-- the email link points at `http://localhost:8081/auth/verify-email?token=...` locally
+- the email link points at `http://localhost:5173/auth/verify-email?token=...` when the frontend runs locally
+- the email link points at `http://localhost:8081/auth/verify-email?token=...` in the Docker full stack
 - confirming the link marks the account as verified
 - the login screen can resend a verification email if needed
 

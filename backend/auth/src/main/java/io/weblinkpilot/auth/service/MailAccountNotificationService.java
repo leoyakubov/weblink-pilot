@@ -21,12 +21,44 @@ public class MailAccountNotificationService implements AccountNotificationServic
 
   @Override
   public void sendPasswordResetLink(String email, String link) {
-    send(email, "Reset your WebLinkPilot password", buildBody("password reset", link));
+    send(
+        email,
+        "Reset your WebLinkPilot password",
+        """
+            Hi,
+
+            We received a request to reset the password for your WebLinkPilot account.
+
+            Reset your password here:
+            %s
+
+            If you did not ask for this, you can safely ignore this message.
+
+            Thanks,
+            The WebLinkPilot team
+            """
+            .formatted(link));
   }
 
   @Override
   public void sendEmailVerificationLink(String email, String link) {
-    send(email, "Verify your WebLinkPilot email", buildBody("email verification", link));
+    send(
+        email,
+        "Verify your WebLinkPilot email",
+        """
+            Hi,
+
+            Welcome to WebLinkPilot. To finish creating your account, please verify your email address.
+
+            Verify your email here:
+            %s
+
+            If you did not create this account, you can ignore this email.
+
+            Thanks,
+            The WebLinkPilot team
+            """
+            .formatted(link));
   }
 
   private void send(String email, String subject, String body) {
@@ -43,19 +75,5 @@ public class MailAccountNotificationService implements AccountNotificationServic
     } catch (UnsupportedEncodingException exception) {
       throw new IllegalStateException("Unable to format account notification email", exception);
     }
-  }
-
-  private String buildBody(String action, String link) {
-    return """
-        Hello,
-
-        We received a %s request for your WebLinkPilot account.
-
-        Open this link to continue:
-        %s
-
-        If you did not request this, you can ignore this email.
-        """
-        .formatted(action, link);
   }
 }

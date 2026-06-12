@@ -11,11 +11,19 @@ spring:
   mail:
     host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:1025}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS:false}
 
 app:
   public-base-url: http://localhost:8080
   auth:
-    frontend-base-url: http://localhost:8081
+    frontend-base-url: http://localhost:5173
   cors:
     allowed-origin-patterns:
       - http://localhost:5173

@@ -17,7 +17,7 @@ This document describes the local workflow for building, testing, and maintainin
 
 - `backend/` - Spring Boot modular backend.
 - `frontend/` - Vue SPA.
-- `infra/` - Docker, Prometheus, Grafana, and deployment support.
+- `infra/` - Docker, monitoring, and deployment support.
 - `scripts/win/` - Windows helper scripts.
 - `scripts/unix/` - Unix/macOS/Linux helper scripts.
 - `docs/` - categorized SDLC documentation.
@@ -45,9 +45,69 @@ The full stack includes:
 | Postgres | relational database | `5432` |
 | Redis | cache and refresh-session mirror | `6379` |
 | Backend | Spring Boot API | `8080` |
+| Frontend | Vue SPA | `8081` |
+
+If you want monitoring locally, start it separately:
+
+Windows:
+
+```powershell
+.\scripts\win\dev\monitoring.ps1
+```
+
+Unix/macOS/Linux:
+
+```bash
+./scripts/unix/dev/monitoring.sh
+```
+
+The monitoring stack includes:
+
+| Service | Purpose | Default Port |
+| --- | --- | --- |
 | Prometheus | metrics scraping | `9090` |
 | Grafana | dashboards | `3001` |
-| Frontend | Vue SPA | `8081` |
+
+### Mail testing locally
+
+The project uses Mailpit for local email testing.
+
+If you run the full Docker stack, the backend container is already wired to Mailpit:
+
+- SMTP host: `mailpit`
+- SMTP port: `1025`
+- Mailpit inbox UI: `http://localhost:8025`
+
+If you run the backend on your machine and only want the SMTP catcher in Docker, start Mailpit on its own:
+
+```powershell
+docker compose -f infra/docker-compose.yml up -d mailpit
+```
+
+```bash
+docker compose -f infra/docker-compose.yml up -d mailpit
+```
+
+Then point the backend to localhost Mailpit:
+
+```powershell
+$env:SPRING_MAIL_HOST = "localhost"
+$env:SPRING_MAIL_PORT = "1025"
+```
+
+```bash
+export SPRING_MAIL_HOST=localhost
+export SPRING_MAIL_PORT=1025
+```
+
+Profile defaults:
+
+- `local` uses `localhost:1025` for SMTP and `localhost:5173` for the frontend link target
+- `dev` uses `mailpit:1025` for the Docker stack
+- `demo` uses the external SMTP provider configured through environment variables
+
+If you run the frontend outside Docker and still want local email links to open correctly, make sure the frontend runs on `http://localhost:5173`.
+If you run `dev` outside Docker and still want Mailpit on the host, override the host and port to `localhost:1025`.
 
 ## Environment Files
 
