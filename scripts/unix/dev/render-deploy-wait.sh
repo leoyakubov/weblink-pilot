@@ -90,7 +90,7 @@ wait_for_backend() {
             echo "Backend deployment is live on Render ($latest_deploy_id)"
             return 0
             ;;
-          failed|canceled|deactivated)
+          failed|update_failed|canceled|deactivated)
             echo "Backend deployment ended with status '$status' ($latest_deploy_id)" >&2
             exit 1
             ;;

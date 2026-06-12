@@ -163,6 +163,7 @@ while ($attempt -le $maxAttempts) {
                     return
                 }
                 'failed' { throw "Backend deployment ended with status 'failed' ($latestDeployId)" }
+                'update_failed' { throw "Backend deployment ended with status 'update_failed' ($latestDeployId)" }
                 'canceled' { throw "Backend deployment ended with status 'canceled' ($latestDeployId)" }
                 'deactivated' { throw "Backend deployment ended with status 'deactivated' ($latestDeployId)" }
                 Default {

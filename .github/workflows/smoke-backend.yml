@@ -1,3 +1,5 @@
+run-name: Smoke Backend: ${{ github.event.client_payload.sha || github.sha }}
+
 name: Smoke Backend
 
 on:
