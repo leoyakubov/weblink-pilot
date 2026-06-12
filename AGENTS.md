@@ -85,6 +85,9 @@ npm run test:run -- src/path/to/test.ts
 - Backend change: run the smallest Maven test slice that covers the changed code, plus style when formatting or imports changed.
 - Frontend change: run the affected Vitest tests, then lint/build when user-facing UI or shared client code changed.
 - Cross-surface change: verify both backend and frontend.
+- Frontend-only change: rerun frontend checks only.
+- Backend-only change: rerun backend checks only.
+- Backend and frontend change together: rerun the full verify flow.
 - Docs-only change: run `git diff --check`; no build is required unless links or generated docs are involved.
 - Before committing, run `scripts/*/run-before-push.*` when the change is broad or touches shared behavior.
 - After any code or behavior change, do not claim the change works until the relevant verification command has been run in the current workspace and has passed.

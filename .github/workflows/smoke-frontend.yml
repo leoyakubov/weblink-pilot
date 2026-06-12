@@ -1,6 +1,6 @@
 run-name: "Smoke Frontend - ${{ github.event.client_payload.message || github.event.client_payload.sha || github.sha }}"
 
-name: Smoke Frontend
+name: Smoke frontend
 
 on:
   workflow_dispatch:

@@ -1,6 +1,6 @@
 run-name: "Deploy Backend: ${{ github.event.workflow_run.head_commit.message || github.event.head_commit.message || github.sha }}"
 
-name: Deploy Backend
+name: Deploy backend
 
 on:
   workflow_dispatch:

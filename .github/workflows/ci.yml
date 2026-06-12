@@ -9,7 +9,7 @@ on:
 
 jobs:
   backend:
-    name: Backend
+    name: Backend verify
     runs-on: ubuntu-latest
 
     steps:
@@ -54,7 +54,7 @@ jobs:
         run: echo "Sonar analysis is temporarily disabled; run it locally with scripts/win/quality/sonar-analysis.ps1 or scripts/unix/quality/sonar-analysis.sh."
 
   frontend:
-    name: Frontend
+    name: Frontend verify
     runs-on: ubuntu-latest
 
     steps:
@@ -84,7 +84,7 @@ jobs:
         run: npm run build
 
   secrets:
-    name: Secret Scan
+    name: Scan secrets
     runs-on: ubuntu-latest
 
     steps:

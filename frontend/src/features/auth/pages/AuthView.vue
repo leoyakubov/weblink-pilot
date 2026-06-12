@@ -78,7 +78,7 @@ watch(
 
 watch(
   () => route.query.verified,
-  verified => {
+  (verified) => {
     if (props.mode !== 'login' || verified !== '1') {
       return;
     }
@@ -201,7 +201,10 @@ async function submit() {
       () => router.push('/auth/signin'),
     );
   } catch (error) {
-    if (error instanceof ApiRequestError && (error.status === 403 || error.code === 'EMAIL_NOT_VERIFIED')) {
+    if (
+      error instanceof ApiRequestError &&
+      (error.status === 403 || error.code === 'EMAIL_NOT_VERIFIED')
+    ) {
       openNotice(
         'Email not verified',
         'This account still needs email verification. Open the verification email or request a new link.',
