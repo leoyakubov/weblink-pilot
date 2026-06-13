@@ -8,6 +8,8 @@ import io.weblinkpilot.auth.repository.UserAccountRepository;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PasswordResetService {
 
   private static final String RESET_PATH = "/auth/reset-password";
+  private static final Logger log = LoggerFactory.getLogger(PasswordResetService.class);
 
   private final UserAccountRepository userAccountRepository;
   private final UserAccountService userAccountService;
@@ -50,13 +53,19 @@ public class PasswordResetService {
       throw new IllegalArgumentException("Email is required.");
     }
 
+    log.debug("auth.password-reset.requested email={}", normalizedEmail);
+
     userAccountRepository
         .findByEmailIgnoreCase(normalizedEmail)
-        .ifPresent(
+        .ifPresentOrElse(
             account -> {
               cooldownService.enforceCooldown("password reset", account.getEmail());
               sendResetLink(account);
-            });
+            },
+            () ->
+                log.debug(
+                    "auth.password-reset.skipped reason=account_not_found email={}",
+                    normalizedEmail));
   }
 
   @Transactional
@@ -69,12 +78,20 @@ public class PasswordResetService {
             .getUser();
     account.setPasswordHash(passwordEncoder.encode(newPassword));
     userAccountRepository.save(account);
+    log.info(
+        "auth.password-reset.confirmed username={} email={}",
+        account.getUsername(),
+        account.getEmail());
   }
 
   private void sendResetLink(UserAccount account) {
     String token = tokenService.issueToken(account, AccountActionTokenType.PASSWORD_RESET);
     String link =
         frontendBaseUrl + RESET_PATH + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+    log.debug(
+        "auth.password-reset.queued username={} email={}",
+        account.getUsername(),
+        account.getEmail());
     eventPublisher.publishEvent(new PasswordResetLinkRequestedEvent(account.getEmail(), link));
   }
 

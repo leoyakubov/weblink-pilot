@@ -18,7 +18,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 - Frontend open in a browser
 - For email flows:
   - Local: Mailpit at `http://localhost:8025`
-  - Demo: real SMTP provider configured in the environment
+  - Demo: Mailtrap inbox configured in the environment
 
 ## Quick Test Matrix
 
@@ -48,7 +48,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 
 1. Open the sign-up page.
 2. Register a new account with username, password, and email.
-3. Open Mailpit locally or the demo inbox/SMTP flow in demo.
+3. Open Mailpit locally or the Mailtrap inbox in demo.
 4. Click the email verification link.
 5. Sign in with the new account.
 6. Open DevTools and inspect storage/cookies.
@@ -81,7 +81,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 ### Steps
 
 1. Request a password reset from the login page or reset page.
-2. Open the delivered email in Mailpit locally or your SMTP inbox/provider flow in demo.
+2. Open the delivered email in Mailpit locally or the Mailtrap inbox in demo.
 3. Click the reset link and set a new password.
 4. Request an email verification link for a new account.
 5. Open the verification email and click the link.

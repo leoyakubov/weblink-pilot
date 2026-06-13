@@ -3,8 +3,10 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $backendDir = Join-Path $repoRoot 'backend'
+$composeFile = Join-Path $repoRoot 'infra/docker-compose.yml'
 . (Join-Path $repoRoot 'scripts/win/lib/common.ps1')
 $envFile = Join-Path $repoRoot 'backend/.env.local'
+$smtpEnvFile = Join-Path $repoRoot 'backend/.env.smtp.local'
 
 $previousJavaHome = $env:JAVA_HOME
 $javaHome = Resolve-JavaHome -RepositoryRoot $repoRoot
@@ -15,6 +17,29 @@ $env:JAVA_HOME = $javaHome
 $previousJavaToolOptions = Enter-JavaSecurityOverride -JavaHome $javaHome
 
 Import-DotEnv $envFile
+if (Test-Path $smtpEnvFile) {
+    Import-DotEnv $smtpEnvFile
+}
+
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    throw 'Docker is not available on PATH. Install Docker Desktop and make sure the daemon is running.'
+}
+
+if (-not (Test-Path -LiteralPath $composeFile)) {
+    throw "Docker Compose file not found at $composeFile"
+}
+
+Write-BoxHeader 'Starting Mailpit for local backend:'
+Write-Host '  - mailpit      SMTP catcher on port 1025, inbox UI on port 8025' -ForegroundColor DarkYellow
+Write-Host ''
+
+Push-Location $repoRoot
+try {
+    docker compose -p weblink-pilot -f $composeFile up -d mailpit
+}
+finally {
+    Pop-Location
+}
 
 Push-Location $backendDir
 try {

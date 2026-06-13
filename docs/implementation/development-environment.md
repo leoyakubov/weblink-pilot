@@ -70,48 +70,42 @@ The monitoring stack includes:
 
 ### Mail testing locally
 
-The project uses Mailpit for local email testing.
+For local development we use Mailpit.
 
-If you run the full Docker stack, the backend container is already wired to Mailpit:
+The backend-local scripts load `backend/.env.local` first and then `backend/.env.smtp.local` if it exists. They also start the `mailpit` Docker service before launching the backend so the local mail catcher is available automatically.
 
-- SMTP host: `mailpit`
+If you want to start Mailpit manually, use:
+
+```powershell
+docker compose -f infra/docker-compose.yml up -d mailpit
+```
+
+```bash
+docker compose -f infra/docker-compose.yml up -d mailpit
+```
+
+The local profile uses:
+
+- SMTP host: `localhost`
 - SMTP port: `1025`
-- Mailpit inbox UI: `http://localhost:8025`
+- SMTP auth: `false`
+- STARTTLS: `false`
 
-If you run the backend on your machine and only want the SMTP catcher in Docker, start Mailpit on its own:
+The backend now performs a startup mail connection check in `local` and `dev`, so if Mailpit is not running you should see a clear startup failure or a `mail.server.health status=DOWN` log entry instead of discovering the problem only after the first email request.
 
-```powershell
-docker compose -f infra/docker-compose.yml up -d mailpit
-```
+For the demo environment we use Mailtrap Email Testing, so the team can inspect messages in the Mailtrap inbox and click the links without sending real mail to recipients.
 
-```bash
-docker compose -f infra/docker-compose.yml up -d mailpit
-```
+The demo SMTP values should point to the Mailtrap inbox credentials and host:
 
-Then point the backend to localhost Mailpit:
+- `sandbox.smtp.mailtrap.io`
+- `587`
 
-```powershell
-$env:SPRING_MAIL_HOST = "localhost"
-$env:SPRING_MAIL_PORT = "1025"
-```
-
-```bash
-export SPRING_MAIL_HOST=localhost
-export SPRING_MAIL_PORT=1025
-```
-
-Profile defaults:
-
-- `local` uses `localhost:1025` for SMTP and `localhost:5173` for the frontend link target
-- `dev` uses `mailpit:1025` for the Docker stack
-- `demo` uses the external SMTP provider configured through environment variables
-
-If you run the frontend outside Docker and still want local email links to open correctly, make sure the frontend runs on `http://localhost:5173`.
-If you run `dev` outside Docker and still want Mailpit on the host, override the host and port to `localhost:1025`.
+If you want to try the Mailtrap path locally for comparison, copy `backend/.env.smtp.local.example` to `backend/.env.smtp.local` and fill in the Mailtrap inbox credentials.
 
 ## Environment Files
 
 - Keep backend-only values in `backend/.env.local`.
+- Keep backend SMTP override values in `backend/.env.smtp.local`.
 - Keep frontend-only values in `frontend/.env.local`.
 - Keep deployment helper values in `infra/.env.local`.
 - Keep Sonar helper values in `infra/sonar/.env.local`.

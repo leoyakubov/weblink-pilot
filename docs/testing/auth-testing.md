@@ -50,7 +50,7 @@ The backend also enforces a short resend cooldown for these links so duplicate c
 
 ### Local
 
-Use Mailpit in the local Docker stack:
+Use Mailpit in the local Docker stack. The `backend-local` launcher now starts the `mailpit` service automatically before the backend comes up:
 
 - host: `localhost`
 - port: `1025`
@@ -60,6 +60,8 @@ Use Mailpit in the local Docker stack:
 - STARTTLS: `false`
 
 The Docker stack already wires these values through the backend container.
+
+The local and dev backend profiles also perform a startup mail connection check. If Mailpit is not running, the backend should fail fast or log `mail.server.health status=DOWN` before you try to send any email.
 
 If you want to run the backend on your machine instead of inside Docker, start only Mailpit and point the backend to it:
 
@@ -79,26 +81,25 @@ Then start the backend with either the `local` profile or the `dev` profile. Bot
 
 ### Demo
 
-Use MailerSend SMTP for the demo environment.
+Use Mailtrap Email Testing for the demo environment.
 
 Recommended values:
 
 ```env
-SPRING_MAIL_HOST=smtp.mailersend.net
+SPRING_MAIL_HOST=sandbox.smtp.mailtrap.io
 SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=<your MailerSend SMTP login>
-SPRING_MAIL_PASSWORD=<your MailerSend SMTP password>
+SPRING_MAIL_USERNAME=<your Mailtrap SMTP login>
+SPRING_MAIL_PASSWORD=<your Mailtrap SMTP password>
 SPRING_MAIL_SMTP_AUTH=true
 SPRING_MAIL_SMTP_STARTTLS=true
 ```
 
-MailerSend provides SMTP relay and a small free trial tier, which makes it easy to wire into the demo without managing a custom mail server. Use the SMTP credentials from the MailerSend dashboard, not an API token. Authenticate the sender domain before you use the demo mail flow.
+Mailtrap gives you a browser inbox where you can inspect the message body and click the verification/reset links in a separate tab without sending mail to real recipients. Use the SMTP credentials from the Mailtrap inbox settings, not an API token.
 
 Useful references:
 
-- [MailerSend home](https://www.mailersend.com/)
-- [MailerSend SMTP relay](https://www.mailersend.com/)
-- [MailerSend pricing](https://www.mailersend.com/pricing)
+- [Mailtrap home](https://mailtrap.io/)
+- [Mailtrap Email Testing](https://mailtrap.io/email-testing)
 
 ## 1. Sign In
 
@@ -275,7 +276,7 @@ Expected result:
 Manual flow:
 
 1. register a new account with an email address
-2. open Mailpit at `http://localhost:8025` for local testing, or check the MailerSend transactional inbox flow in demo
+2. open Mailpit at `http://localhost:8025` for local testing, or open the Mailtrap inbox for demo and click the email links from the message preview
 3. open the verification link
 4. wait for the frontend confirmation page to say the email is verified
 5. sign in again if you were testing the blocked-login flow

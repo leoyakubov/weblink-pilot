@@ -132,7 +132,7 @@ Set backend env vars in Render:
 
 Where to get the missing values:
 
-- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For MailerSend, open the SMTP settings in the dashboard, create or copy the SMTP credentials, and use the SMTP login plus password from there.
+- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For the demo Mailtrap inbox, open the SMTP settings in the Mailtrap dashboard, copy the SMTP login and password from the inbox, and use those values in Render.
 - `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WebLinkPilot.
 
 Optional:
@@ -162,6 +162,7 @@ The smoke output prints the backend HTTP status plus `status=UP`, and the fronte
 The Netlify frontend needs a backend URL that is reachable from the browser.
 For a live demo, HTTPS is strongly recommended for the backend endpoint.
 The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` so it picks up PostgreSQL, public URL, and CORS settings from `application-demo.yml`.
+The demo profile disables the built-in mail health indicator so the `/actuator/health` endpoint stays responsive even if the external SMTP provider is slow or temporarily unreachable.
 
 If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted because the backend falls back to `RENDER_EXTERNAL_URL`.
 

@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmailVerificationService {
 
   private static final String VERIFY_PATH = "/auth/verify-email";
+  private static final Logger log = LoggerFactory.getLogger(EmailVerificationService.class);
 
   private final UserAccountRepository userAccountRepository;
   private final AccountActionTokenService tokenService;
@@ -45,14 +48,26 @@ public class EmailVerificationService {
       throw new IllegalArgumentException("Email is required.");
     }
 
+    log.debug("auth.email-verification.requested email={}", normalizedEmail);
+
     userAccountRepository
         .findByEmailIgnoreCase(normalizedEmail)
-        .filter(account -> !account.isEmailVerified())
-        .ifPresent(
+        .ifPresentOrElse(
             account -> {
+              if (account.isEmailVerified()) {
+                log.debug(
+                    "auth.email-verification.skipped reason=already_verified username={} email={}",
+                    account.getUsername(),
+                    account.getEmail());
+                return;
+              }
               cooldownService.enforceCooldown("verification email", account.getEmail());
               sendVerificationLink(account);
-            });
+            },
+            () ->
+                log.debug(
+                    "auth.email-verification.skipped reason=account_not_found email={}",
+                    normalizedEmail));
   }
 
   @Transactional
@@ -64,6 +79,10 @@ public class EmailVerificationService {
             .getUser();
     account.markEmailVerified(nowUtc());
     userAccountRepository.save(account);
+    log.info(
+        "auth.email-verification.confirmed username={} email={}",
+        account.getUsername(),
+        account.getEmail());
   }
 
   private void sendVerificationLink(UserAccount account) {
@@ -73,6 +92,10 @@ public class EmailVerificationService {
             + VERIFY_PATH
             + "?token="
             + URLEncoder.encode(token, StandardCharsets.UTF_8);
+    log.debug(
+        "auth.email-verification.queued username={} email={}",
+        account.getUsername(),
+        account.getEmail());
     eventPublisher.publishEvent(new EmailVerificationLinkRequestedEvent(account.getEmail(), link));
   }
 

@@ -28,6 +28,8 @@ import io.weblinkpilot.shared.contracts.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,6 +46,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequestMapping("/api/v1/auth")
 @SuppressFBWarnings(value = "EI_EXPOSE_REP2")
 public class AuthController {
+
+  private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
   private final AuthService authService;
   private final AccountManagementService accountManagementService;
@@ -117,6 +121,7 @@ public class AuthController {
       responses = {@ApiResponse(responseCode = "204", description = "Reset link queued")})
   public ResponseEntity<Void> requestPasswordReset(
       @Valid @org.springframework.web.bind.annotation.RequestBody PasswordResetRequest request) {
+    log.debug("auth.password-reset.request received email={}", request.email());
     authService.requestPasswordReset(request.email());
     return ResponseEntity.noContent().build();
   }
@@ -153,6 +158,7 @@ public class AuthController {
   public ResponseEntity<Void> requestEmailVerification(
       @Valid @org.springframework.web.bind.annotation.RequestBody
           EmailVerificationRequest request) {
+    log.debug("auth.email-verification.request received email={}", request.email());
     authService.requestEmailVerification(request.email());
     return ResponseEntity.noContent().build();
   }

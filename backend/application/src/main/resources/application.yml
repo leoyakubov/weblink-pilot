@@ -68,5 +68,7 @@ app:
       - ${APP_CORS_ALLOWED_ORIGIN_6:http://127.0.0.1:8081}
 
 logging:
+  level:
+    io.weblinkpilot: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] [%X{requestId}] %logger{36} - %msg%n"
