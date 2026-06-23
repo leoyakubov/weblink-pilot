@@ -215,7 +215,7 @@ The project uses one Bash-only script set on every platform; Windows runs it thr
 From the repo root, the preferred quick-run entrypoints are grouped by area:
 
 - Backend local: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
-- Backend dev only: [`scripts/dev/backend-only.sh`](scripts/dev/backend-only.sh)
+- Backend dev only: [`scripts/dev/backend-dev.sh`](scripts/dev/backend-dev.sh)
 - Backend format: [`scripts/quality/backend-format.sh`](scripts/quality/backend-format.sh)
 - Backend style check: [`scripts/quality/backend-style.sh`](scripts/quality/backend-style.sh)
 - Backend tests: [`scripts/quality/backend-tests.sh`](scripts/quality/backend-tests.sh)
@@ -228,16 +228,16 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend vulnerability check: [`scripts/security/frontend-vulnerabilities.sh`](scripts/security/frontend-vulnerabilities.sh)
 - Frontend coverage: `npm run test:coverage` from `frontend/`
 - Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
-- Frontend smoke test: [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
+- Frontend smoke test: [`scripts/dev/smoke-frontend.sh`](scripts/dev/smoke-frontend.sh)
 - Deployment smoke: [`scripts/quality/deployment-smoke.sh`](scripts/quality/deployment-smoke.sh)
 - Dependency security: [`scripts/security/check-dependencies.sh`](scripts/security/check-dependencies.sh)
 - Secret scanning: [`scripts/git/scan-secrets.sh`](scripts/git/scan-secrets.sh)
-- Dev Docker full stack: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh)
-- Dev monitoring stack: [`scripts/dev/monitoring.sh`](scripts/dev/monitoring.sh)
-- Demo-like local stack: [`scripts/dev/demo-local.sh`](scripts/dev/demo-local.sh)
-- Demo-like local stop: [`scripts/dev/demo-local-stop.sh`](scripts/dev/demo-local-stop.sh)
-- Backend demo mode: [`scripts/dev/backend-demo.sh`](scripts/dev/backend-demo.sh)
-- Frontend demo preview: [`scripts/dev/frontend-demo.sh`](scripts/dev/frontend-demo.sh)
+- Dev Docker full stack: [`scripts/dev/fullstack-dev.sh`](scripts/dev/fullstack-dev.sh)
+- Dev monitoring stack: [`scripts/dev/monitoring-stack.sh`](scripts/dev/monitoring-stack.sh)
+- Demo-like local stack: [`scripts/dev/fullstack-demo-local.sh`](scripts/dev/fullstack-demo-local.sh)
+- Demo-like local stop: [`scripts/dev/fullstack-demo-local-stop.sh`](scripts/dev/fullstack-demo-local-stop.sh)
+- Backend demo mode: [`scripts/dev/backend-demo-local.sh`](scripts/dev/backend-demo-local.sh)
+- Frontend demo preview: [`scripts/dev/frontend-demo-local.sh`](scripts/dev/frontend-demo-local.sh)
 - SonarQube stack: [`scripts/quality/sonar-stack.sh`](scripts/quality/sonar-stack.sh)
 - Sonar analysis: [`scripts/quality/sonar-analysis.sh`](scripts/quality/sonar-analysis.sh)
 - Git hook setup: [`scripts/git/setup-hooks.sh`](scripts/git/setup-hooks.sh)
@@ -250,11 +250,11 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 
 Quick commands:
 
-- Local stack: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh)
-- Demo-like stack: [`scripts/dev/demo-local.sh`](scripts/dev/demo-local.sh)
-- Demo-like stop: [`scripts/dev/demo-local-stop.sh`](scripts/dev/demo-local-stop.sh)
-- Backend demo mode: [`scripts/dev/backend-demo.sh`](scripts/dev/backend-demo.sh)
-- Frontend demo preview: [`scripts/dev/frontend-demo.sh`](scripts/dev/frontend-demo.sh)
+- Local stack: [`scripts/dev/fullstack-dev.sh`](scripts/dev/fullstack-dev.sh)
+- Demo-like stack: [`scripts/dev/fullstack-demo-local.sh`](scripts/dev/fullstack-demo-local.sh)
+- Demo-like stop: [`scripts/dev/fullstack-demo-local-stop.sh`](scripts/dev/fullstack-demo-local-stop.sh)
+- Backend demo mode: [`scripts/dev/backend-demo-local.sh`](scripts/dev/backend-demo-local.sh)
+- Frontend demo preview: [`scripts/dev/frontend-demo-local.sh`](scripts/dev/frontend-demo-local.sh)
 - Backend local with Mailpit: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
 - Frontend local: [`scripts/dev/frontend-local.sh`](scripts/dev/frontend-local.sh)
 - Git hook setup: [`scripts/git/setup-hooks.sh`](scripts/git/setup-hooks.sh)
@@ -288,7 +288,7 @@ If you want the exact test/build shortcuts the project uses day to day:
 - Backend coverage: [`scripts/quality/backend-coverage.sh`](scripts/quality/backend-coverage.sh)
 - Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
 - Frontend coverage: `npm run test:coverage` from `frontend/`
-- Frontend smoke test: [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
+- Frontend smoke test: [`scripts/dev/smoke-frontend.sh`](scripts/dev/smoke-frontend.sh)
 
 ## Docker Stack
 
@@ -348,12 +348,12 @@ You can also select the Maven convenience profiles when running the backend dire
 Quick guide:
 
 - `local`: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
-- `dev`: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh) for the main stack, [`scripts/dev/monitoring.sh`](scripts/dev/monitoring.sh) for dashboards, or [`scripts/dev/backend-only.sh`](scripts/dev/backend-only.sh) after Postgres and Redis are up locally
+- `dev`: [`scripts/dev/fullstack-dev.sh`](scripts/dev/fullstack-dev.sh) for the main stack, [`scripts/dev/monitoring-stack.sh`](scripts/dev/monitoring-stack.sh) for dashboards, or [`scripts/dev/backend-dev.sh`](scripts/dev/backend-dev.sh) after Postgres and Redis are up locally
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:
 
-- [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
+- [`scripts/dev/smoke-frontend.sh`](scripts/dev/smoke-frontend.sh)
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 

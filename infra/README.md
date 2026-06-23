@@ -17,10 +17,10 @@ This folder contains the Docker Compose stack for running the full project local
 From the repository root:
 
 ```bash
-bash ./scripts/dev/docker-full-stack.sh
+bash ./scripts/dev/fullstack-dev.sh
 ```
 
-From Windows PowerShell, run `wsl bash ./scripts/dev/docker-full-stack.sh`.
+From Windows PowerShell, run `wsl bash ./scripts/dev/fullstack-dev.sh`.
 
 Or run Compose directly:
 

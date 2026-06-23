@@ -110,8 +110,10 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.goto(`${baseUrl}/auth/verify-email?token=verify-token`, {
       waitUntil: 'networkidle',
     });
-    await page.getByRole('heading', { name: /confirm email/i }).waitFor();
-    await page.getByText('Your email has been verified').waitFor();
+    await page.getByRole('heading', { name: /sign in/i }).waitFor();
+    await page.getByText('Email verified').waitFor();
+    await page.getByText('Your email has been verified. You can sign in now.').waitFor();
+    assert.match(page.url(), /\/auth\/signin$/);
 
     await page.goto(`${baseUrl}/auth/github/complete?ticket=github-ticket`, {
       waitUntil: 'networkidle',

@@ -76,7 +76,7 @@ if [[ -f "$repo_root/backend/.env.smtp.local" ]]; then
   set +a
 fi
 
-stop_script="$repo_root/scripts/dev/demo-local-stop.sh"
+stop_script="$repo_root/scripts/dev/fullstack-demo-local-stop.sh"
 if [[ -f "$stop_script" ]]; then
   bash "$stop_script" >/dev/null 2>&1 || true
 fi

@@ -29,4 +29,4 @@ cd "$frontend_dir"
 ensure_frontend_dependencies "$frontend_dir"
 
 npm run build
-exec npm run preview -- --host 0.0.0.0 --port 8081 --strictPort
+npm run preview -- --host 0.0.0.0 --port 8081 --strictPort

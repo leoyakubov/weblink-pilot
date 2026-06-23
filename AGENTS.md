@@ -53,7 +53,7 @@ Windows PowerShell through WSL:
 
 ```powershell
 wsl bash ./scripts/run-before-push.sh
-wsl bash ./scripts/dev/docker-full-stack.sh
+wsl bash ./scripts/dev/fullstack-dev.sh
 wsl bash ./scripts/quality/deployment-smoke.sh
 wsl bash ./scripts/security/check-dependencies.sh
 ```
@@ -62,7 +62,7 @@ WSL/Linux/macOS:
 
 ```bash
 bash ./scripts/run-before-push.sh
-bash ./scripts/dev/docker-full-stack.sh
+bash ./scripts/dev/fullstack-dev.sh
 bash ./scripts/quality/deployment-smoke.sh
 bash ./scripts/security/check-dependencies.sh
 ```

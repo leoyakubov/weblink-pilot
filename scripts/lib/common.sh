@@ -149,6 +149,7 @@ remove_stale_docker_containers() {
 ensure_frontend_dependencies() {
   local frontend_dir="$1"
   local vite_probe_status=0
+  local remove_node_modules_status=0
 
   if [ ! -d "$frontend_dir/node_modules" ]; then
     printf 'Frontend dependencies are missing. Installing them for the current platform...\n'
@@ -169,6 +170,16 @@ ensure_frontend_dependencies() {
   fi
 
   printf 'Frontend dependencies do not match the current platform. Refreshing them with npm install...\n'
+  (
+    cd "$frontend_dir"
+    node --input-type=module -e "import fs from 'node:fs'; import path from 'node:path'; const dir = path.resolve('node_modules'); try { fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); process.exit(0); } catch (error) { console.error(error); process.exit(1); }"
+  ) || remove_node_modules_status=$?
+
+  if [ "$remove_node_modules_status" -ne 0 ]; then
+    printf 'Could not remove frontend/node_modules cleanly. Close any process using it, delete the folder manually, and rerun the script.\n' >&2
+    return "$remove_node_modules_status"
+  fi
+
   (
     cd "$frontend_dir"
     npm install --package-lock=false

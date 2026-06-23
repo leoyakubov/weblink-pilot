@@ -49,6 +49,7 @@ public class AuthProperties {
   private String bootstrapUserPassword;
   private String bootstrapUserRole;
   private String bootstrapUserEmail;
+
   @Pattern(regexp = "(?i)SMTP|DEMO_PREVIEW")
   private String mailDeliveryMode = "SMTP";
 

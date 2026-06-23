@@ -14,6 +14,9 @@ spring:
     type: simple
   profiles:
     default: local
+  mail:
+    from-address: ${SPRING_MAIL_FROM_ADDRESS:no-reply@weblinkpilot.local}
+    from-name: ${SPRING_MAIL_FROM_NAME:WebLinkPilot}
 
 management:
   endpoints:
@@ -47,9 +50,6 @@ app:
     bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:user123}
     bootstrap-user-role: ${BOOTSTRAP_USER_ROLE:USER}
     bootstrap-user-email: ${BOOTSTRAP_USER_EMAIL:user@weblinkpilot.local}
-  mail:
-    from-address: ${SPRING_MAIL_FROM_ADDRESS:no-reply@weblinkpilot.local}
-    from-name: ${SPRING_MAIL_FROM_NAME:WebLinkPilot}
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   short-link:
     max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}

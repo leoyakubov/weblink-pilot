@@ -49,13 +49,13 @@ The recommended local flow is the Docker full stack.
 Windows PowerShell:
 
 ```powershell
-wsl bash ./scripts/dev/docker-full-stack.sh
+wsl bash ./scripts/dev/fullstack-dev.sh
 ```
 
 WSL/Linux/macOS:
 
 ```bash
-bash ./scripts/dev/docker-full-stack.sh
+bash ./scripts/dev/fullstack-dev.sh
 ```
 
 The full stack includes:
@@ -72,13 +72,13 @@ If you want monitoring locally, start it separately:
 Windows PowerShell:
 
 ```powershell
-wsl bash ./scripts/dev/monitoring.sh
+wsl bash ./scripts/dev/monitoring-stack.sh
 ```
 
 WSL/Linux/macOS:
 
 ```bash
-bash ./scripts/dev/monitoring.sh
+bash ./scripts/dev/monitoring-stack.sh
 ```
 
 The monitoring stack includes:
@@ -110,15 +110,15 @@ If you want to test the app locally the same way demo behaves on Render, use the
 Windows PowerShell:
 
 ```powershell
-wsl bash ./scripts/dev/demo-local.sh
-wsl bash ./scripts/dev/frontend-demo.sh
+wsl bash ./scripts/dev/fullstack-demo-local.sh
+wsl bash ./scripts/dev/frontend-demo-local.sh
 ```
 
 WSL/Linux/macOS:
 
 ```bash
-bash ./scripts/dev/demo-local.sh
-bash ./scripts/dev/frontend-demo.sh
+bash ./scripts/dev/fullstack-demo-local.sh
+bash ./scripts/dev/frontend-demo-local.sh
 ```
 
 This flow starts:

@@ -96,8 +96,8 @@ The demo profile requires real SMTP credentials for this flow.
 
 If you want to rehearse the demo flow locally before deploying, use:
 
-- Windows PowerShell: `wsl bash ./scripts/dev/demo-local.sh`
-- WSL/Linux/macOS: `bash ./scripts/dev/demo-local.sh`
+- Windows PowerShell: `wsl bash ./scripts/dev/fullstack-demo-local.sh`
+- WSL/Linux/macOS: `bash ./scripts/dev/fullstack-demo-local.sh`
 
 Make sure `backend/.env.smtp.local` contains your Brevo SMTP credentials before you start the demo-local launcher.
 
