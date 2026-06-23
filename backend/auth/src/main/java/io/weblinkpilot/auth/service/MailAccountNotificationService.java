@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.service;
 
+import io.weblinkpilot.auth.config.MailProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
@@ -12,14 +13,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailAccountNotificationService implements AccountNotificationService {
 
-  private static final String FROM_ADDRESS = "no-reply@weblinkpilot.local";
-  private static final String FROM_NAME = "WebLinkPilot";
   private static final Logger log = LoggerFactory.getLogger(MailAccountNotificationService.class);
 
   private final JavaMailSender mailSender;
+  private final MailProperties mailProperties;
 
-  public MailAccountNotificationService(JavaMailSender mailSender) {
+  public MailAccountNotificationService(JavaMailSender mailSender, MailProperties mailProperties) {
     this.mailSender = mailSender;
+    this.mailProperties = mailProperties;
   }
 
   @Override
@@ -69,7 +70,7 @@ public class MailAccountNotificationService implements AccountNotificationServic
       log.debug("auth.mail.sending to={} subject={}", email, subject);
       MimeMessage message = mailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-      helper.setFrom(FROM_ADDRESS, FROM_NAME);
+      helper.setFrom(mailProperties.getFromAddress(), mailProperties.getFromName());
       helper.setTo(email);
       helper.setSubject(subject);
       helper.setText(body, false);

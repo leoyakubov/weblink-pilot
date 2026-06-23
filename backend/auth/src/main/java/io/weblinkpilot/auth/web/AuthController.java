@@ -14,6 +14,7 @@ import io.weblinkpilot.auth.service.AuthService;
 import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.auth.service.GitHubOAuthService;
 import io.weblinkpilot.auth.service.OAuthLoginService;
+import io.weblinkpilot.shared.contracts.AccountActionPreviewResponse;
 import io.weblinkpilot.shared.contracts.AccountProfileResponse;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.AuthResponse;
@@ -80,11 +81,13 @@ public class AuthController {
               content =
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
-                      schema = @Schema(implementation = AuthCredentialsRequest.class))))
-  public ResponseEntity<Void> register(
+                      schema = @Schema(implementation = AuthCredentialsRequest.class))),
+      responses = {@ApiResponse(responseCode = "200", description = "Preview link returned")})
+  public ResponseEntity<AccountActionPreviewResponse> register(
       @Valid @org.springframework.web.bind.annotation.RequestBody AuthCredentialsRequest request) {
-    authService.register(request);
-    return ResponseEntity.noContent().build();
+    String previewLink = authService.register(request);
+    return ResponseEntity.ok(
+        new AccountActionPreviewResponse(authService.isDemoMailboxEnabled() ? previewLink : null));
   }
 
   @PostMapping("/login")
@@ -118,12 +121,13 @@ public class AuthController {
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = PasswordResetRequest.class))),
-      responses = {@ApiResponse(responseCode = "204", description = "Reset link queued")})
-  public ResponseEntity<Void> requestPasswordReset(
+      responses = {@ApiResponse(responseCode = "200", description = "Preview link returned")})
+  public ResponseEntity<AccountActionPreviewResponse> requestPasswordReset(
       @Valid @org.springframework.web.bind.annotation.RequestBody PasswordResetRequest request) {
     log.debug("auth.password-reset.request received email={}", request.email());
-    authService.requestPasswordReset(request.email());
-    return ResponseEntity.noContent().build();
+    String previewLink = authService.requestPasswordReset(request.email());
+    return ResponseEntity.ok(
+        new AccountActionPreviewResponse(authService.isDemoMailboxEnabled() ? previewLink : null));
   }
 
   @PostMapping("/password-reset/confirm")
@@ -154,13 +158,14 @@ public class AuthController {
                   @Content(
                       mediaType = MediaType.APPLICATION_JSON_VALUE,
                       schema = @Schema(implementation = EmailVerificationRequest.class))),
-      responses = {@ApiResponse(responseCode = "204", description = "Verification link queued")})
-  public ResponseEntity<Void> requestEmailVerification(
+      responses = {@ApiResponse(responseCode = "200", description = "Preview link returned")})
+  public ResponseEntity<AccountActionPreviewResponse> requestEmailVerification(
       @Valid @org.springframework.web.bind.annotation.RequestBody
           EmailVerificationRequest request) {
     log.debug("auth.email-verification.request received email={}", request.email());
-    authService.requestEmailVerification(request.email());
-    return ResponseEntity.noContent().build();
+    String previewLink = authService.requestEmailVerification(request.email());
+    return ResponseEntity.ok(
+        new AccountActionPreviewResponse(authService.isDemoMailboxEnabled() ? previewLink : null));
   }
 
   @PostMapping("/email-verification/confirm")

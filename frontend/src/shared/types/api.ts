@@ -33,6 +33,10 @@ export interface AuthResponse {
   role: string;
 }
 
+export interface AccountActionPreviewResponse {
+  previewLink: string | null;
+}
+
 export interface RefreshTokenRequest {
   refreshToken: string;
 }

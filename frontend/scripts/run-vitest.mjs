@@ -1,10 +1,16 @@
+import { ensureFrontendDependencies } from './ensure-frontend-deps.mjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import vue from '@vitejs/plugin-vue';
-import { startVitest } from 'vitest/node';
 
 const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
 const coverageEnabled = process.argv.includes('--coverage');
+
+ensureFrontendDependencies(frontendRoot);
+
+const [{ default: vue }, { startVitest }] = await Promise.all([
+  import('@vitejs/plugin-vue'),
+  import('vitest/node'),
+]);
 
 const testConfig = {
   environment: 'jsdom',

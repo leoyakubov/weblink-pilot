@@ -1,6 +1,7 @@
 package io.weblinkpilot.config;
 
 import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.config.MailProperties;
 import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.web.JwtAuthenticationFilter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,7 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(AuthProperties.class)
+@EnableConfigurationProperties({AuthProperties.class, MailProperties.class})
 public class SecurityConfiguration {
 
   @Bean

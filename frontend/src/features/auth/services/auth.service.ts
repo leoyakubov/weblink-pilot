@@ -1,5 +1,10 @@
 import { reactive } from 'vue';
-import type { AuthCredentialsRequest, AuthResponse, UserProfileResponse } from '@/shared/types/api';
+import type {
+  AccountActionPreviewResponse,
+  AuthCredentialsRequest,
+  AuthResponse,
+  UserProfileResponse,
+} from '@/shared/types/api';
 import {
   clearSessionActive,
   hasSessionActiveHint,
@@ -96,10 +101,19 @@ export async function bootstrapAuth() {
   return bootstrapPromise;
 }
 
+export function authenticate(mode: 'login', request: AuthCredentialsRequest): Promise<AuthResponse>;
+export function authenticate(
+  mode: 'register',
+  request: AuthCredentialsRequest,
+): Promise<AccountActionPreviewResponse>;
+export function authenticate(
+  mode: 'login' | 'register',
+  request: AuthCredentialsRequest,
+): Promise<AuthResponse | AccountActionPreviewResponse>;
 export async function authenticate(
   mode: 'login' | 'register',
   request: AuthCredentialsRequest,
-): Promise<AuthResponse | void> {
+): Promise<AuthResponse | AccountActionPreviewResponse> {
   const settings = loadSettings();
   const requestSettings = { ...settings };
   if (mode === 'login') {
@@ -108,7 +122,7 @@ export async function authenticate(
     return response;
   }
 
-  await register(request, requestSettings);
+  return register(request, requestSettings);
 }
 
 export function signOut() {

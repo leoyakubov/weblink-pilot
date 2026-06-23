@@ -1,3 +1,4 @@
+import { ensureFrontendDependencies } from './ensure-frontend-deps.mjs';
 import { spawnSync, spawn } from 'node:child_process';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -8,6 +9,7 @@ import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
+ensureFrontendDependencies(frontendRoot);
 const viteBin = path.join(frontendRoot, 'node_modules', 'vite', 'bin', 'vite.js');
 const baseUrl = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173';
 

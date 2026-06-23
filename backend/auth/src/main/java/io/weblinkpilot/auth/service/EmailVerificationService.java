@@ -27,6 +27,7 @@ public class EmailVerificationService {
   private final AccountActionRequestCooldownService cooldownService;
   private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
+  private final boolean demoMailboxEnabled;
 
   public EmailVerificationService(
       UserAccountRepository userAccountRepository,
@@ -39,10 +40,11 @@ public class EmailVerificationService {
     this.cooldownService = cooldownService;
     this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
+    this.demoMailboxEnabled = authProperties.isDemoMailboxEnabled();
   }
 
   @Transactional
-  public void requestEmailVerification(String email) {
+  public String requestEmailVerification(String email) {
     String normalizedEmail = normalizeEmail(email);
     if (normalizedEmail.isBlank()) {
       throw new IllegalArgumentException("Email is required.");
@@ -50,24 +52,23 @@ public class EmailVerificationService {
 
     log.debug("auth.email-verification.requested email={}", normalizedEmail);
 
-    userAccountRepository
-        .findByEmailIgnoreCase(normalizedEmail)
-        .ifPresentOrElse(
-            account -> {
-              if (account.isEmailVerified()) {
-                log.debug(
-                    "auth.email-verification.skipped reason=already_verified username={} email={}",
-                    account.getUsername(),
-                    account.getEmail());
-                return;
-              }
-              cooldownService.enforceCooldown("verification email", account.getEmail());
-              sendVerificationLink(account);
-            },
-            () ->
-                log.debug(
-                    "auth.email-verification.skipped reason=account_not_found email={}",
-                    normalizedEmail));
+    UserAccount account = userAccountRepository.findByEmailIgnoreCase(normalizedEmail).orElse(null);
+    if (account == null) {
+      log.debug(
+          "auth.email-verification.skipped reason=account_not_found email={}", normalizedEmail);
+      return null;
+    }
+
+    if (account.isEmailVerified()) {
+      log.debug(
+          "auth.email-verification.skipped reason=already_verified username={} email={}",
+          account.getUsername(),
+          account.getEmail());
+      return null;
+    }
+
+    cooldownService.enforceCooldown("verification email", account.getEmail());
+    return sendVerificationLink(account);
   }
 
   @Transactional
@@ -85,7 +86,7 @@ public class EmailVerificationService {
         account.getEmail());
   }
 
-  private void sendVerificationLink(UserAccount account) {
+  private String sendVerificationLink(UserAccount account) {
     String token = tokenService.issueToken(account, AccountActionTokenType.EMAIL_VERIFICATION);
     String link =
         frontendBaseUrl
@@ -96,7 +97,17 @@ public class EmailVerificationService {
         "auth.email-verification.queued username={} email={}",
         account.getUsername(),
         account.getEmail());
+    if (demoMailboxEnabled) {
+      log.info(
+          "auth.email-verification.demo-preview username={} email={} link={}",
+          account.getUsername(),
+          account.getEmail(),
+          link);
+      return link;
+    }
+
     eventPublisher.publishEvent(new EmailVerificationLinkRequestedEvent(account.getEmail(), link));
+    return link;
   }
 
   private OffsetDateTime nowUtc() {

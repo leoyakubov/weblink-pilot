@@ -1,5 +1,6 @@
 import type {
   ApiSettings,
+  AccountActionPreviewResponse,
   AuthCredentialsRequest,
   AuthResponse,
   EmailVerificationConfirmRequest,
@@ -78,4 +79,9 @@ export function completeGithubLogin(
   return completeGithubLoginRequest(request, settings);
 }
 
-export type { AuthCredentialsRequest, AuthResponse, UserProfileResponse };
+export type {
+  AccountActionPreviewResponse,
+  AuthCredentialsRequest,
+  AuthResponse,
+  UserProfileResponse,
+};

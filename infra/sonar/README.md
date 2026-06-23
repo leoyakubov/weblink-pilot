@@ -51,8 +51,8 @@ The Maven build already knows where the aggregate JaCoCo XML report lives:
 
 If you do not want to type the Maven command manually, use the helper script from the repo root:
 
-- Windows: `.\scripts\win\quality\sonar-analysis.ps1`
-- Unix: `./scripts\quality\sonar-analysis.sh`
+- WSL/Linux/macOS: `bash ./scripts/quality/sonar-analysis.sh`
+- Windows PowerShell: `wsl bash ./scripts/quality/sonar-analysis.sh`
 
 You can also put the token in a local-only `infra/sonar/.env.local` file:
 

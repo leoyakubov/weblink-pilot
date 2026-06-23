@@ -68,6 +68,10 @@ class AuthControllerTest {
 
   @Test
   void registerReturnsNoContentAndTriggersVerification() throws Exception {
+    when(authService.isDemoMailboxEnabled()).thenReturn(true);
+    when(authService.register(
+            new AuthCredentialsRequest("alice", "Password1", "alice@example.com")))
+        .thenReturn("http://localhost:8081/auth/verify-email?token=verification-token");
 
     mockMvc
         .perform(
@@ -77,7 +81,10 @@ class AuthControllerTest {
                     """
                     {"username":"alice","password":"Password1","email":"alice@example.com"}
                     """))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.previewLink")
+                .value("http://localhost:8081/auth/verify-email?token=verification-token"));
 
     verify(authService)
         .register(new AuthCredentialsRequest("alice", "Password1", "alice@example.com"));
@@ -127,6 +134,10 @@ class AuthControllerTest {
 
   @Test
   void requestPasswordResetReturnsNoContent() throws Exception {
+    when(authService.isDemoMailboxEnabled()).thenReturn(true);
+    when(authService.requestPasswordReset("alice@example.com"))
+        .thenReturn("http://localhost:8081/auth/reset-password?token=reset-token");
+
     mockMvc
         .perform(
             post("/api/v1/auth/password-reset/request")
@@ -135,7 +146,10 @@ class AuthControllerTest {
                     """
                     {"email":"alice@example.com"}
                     """))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.previewLink")
+                .value("http://localhost:8081/auth/reset-password?token=reset-token"));
 
     verify(authService).requestPasswordReset("alice@example.com");
   }
@@ -157,6 +171,10 @@ class AuthControllerTest {
 
   @Test
   void requestEmailVerificationReturnsNoContent() throws Exception {
+    when(authService.isDemoMailboxEnabled()).thenReturn(true);
+    when(authService.requestEmailVerification("alice@example.com"))
+        .thenReturn("http://localhost:8081/auth/verify-email?token=verification-token");
+
     mockMvc
         .perform(
             post("/api/v1/auth/email-verification/request")
@@ -165,7 +183,10 @@ class AuthControllerTest {
                     """
                     {"email":"alice@example.com"}
                     """))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.previewLink")
+                .value("http://localhost:8081/auth/verify-email?token=verification-token"));
 
     verify(authService).requestEmailVerification("alice@example.com");
   }

@@ -63,7 +63,8 @@ class EmailVerificationServiceTest {
     when(tokenService.issueToken(account, AccountActionTokenType.EMAIL_VERIFICATION))
         .thenReturn("verification-token");
 
-    service.requestEmailVerification("alice@example.com");
+    assertThat(service.requestEmailVerification("alice@example.com"))
+        .isEqualTo("http://localhost:8081/auth/verify-email?token=verification-token");
 
     verify(cooldownService).enforceCooldown("verification email", "alice@example.com");
     ArgumentCaptor<EmailVerificationLinkRequestedEvent> eventCaptor =
@@ -87,7 +88,7 @@ class EmailVerificationServiceTest {
     when(userAccountRepository.findByEmailIgnoreCase("alice@example.com"))
         .thenReturn(Optional.of(account));
 
-    service.requestEmailVerification("alice@example.com");
+    assertThat(service.requestEmailVerification("alice@example.com")).isNull();
 
     verify(cooldownService, never()).enforceCooldown(any(), any());
     verify(eventPublisher, never()).publishEvent(any());

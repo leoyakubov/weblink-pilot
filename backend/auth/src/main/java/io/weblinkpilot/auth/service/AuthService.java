@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.service;
 
+import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
 import io.weblinkpilot.shared.contracts.UserProfileResponse;
@@ -18,6 +19,7 @@ public class AuthService {
   private final RefreshTokenService refreshTokenService;
   private final PasswordResetService passwordResetService;
   private final EmailVerificationService emailVerificationService;
+  private final boolean demoMailboxEnabled;
 
   @Autowired
   public AuthService(
@@ -25,12 +27,29 @@ public class AuthService {
       JwtService jwtService,
       RefreshTokenService refreshTokenService,
       PasswordResetService passwordResetService,
-      EmailVerificationService emailVerificationService) {
+      EmailVerificationService emailVerificationService,
+      AuthProperties authProperties) {
     this.userAccountService = userAccountService;
     this.jwtService = jwtService;
     this.refreshTokenService = refreshTokenService;
     this.passwordResetService = passwordResetService;
     this.emailVerificationService = emailVerificationService;
+    this.demoMailboxEnabled = authProperties.isDemoMailboxEnabled();
+  }
+
+  public AuthService(
+      UserAccountService userAccountService,
+      JwtService jwtService,
+      RefreshTokenService refreshTokenService,
+      PasswordResetService passwordResetService,
+      EmailVerificationService emailVerificationService) {
+    this(
+        userAccountService,
+        jwtService,
+        refreshTokenService,
+        passwordResetService,
+        emailVerificationService,
+        new AuthProperties());
   }
 
   public AuthService(
@@ -49,12 +68,13 @@ public class AuthService {
   }
 
   @Transactional
-  public void register(AuthCredentialsRequest request) {
+  public String register(AuthCredentialsRequest request) {
     UserAccount account =
         userAccountService.registerUser(request.username(), request.password(), request.email());
     if (emailVerificationService != null && account.getEmail() != null) {
-      emailVerificationService.requestEmailVerification(account.getEmail());
+      return emailVerificationService.requestEmailVerification(account.getEmail());
     }
+    return null;
   }
 
   @Transactional
@@ -80,11 +100,11 @@ public class AuthService {
   }
 
   @Transactional
-  public void requestPasswordReset(String email) {
+  public String requestPasswordReset(String email) {
     if (passwordResetService == null) {
       throw new IllegalStateException("Password reset service is not configured");
     }
-    passwordResetService.requestPasswordReset(email);
+    return passwordResetService.requestPasswordReset(email);
   }
 
   @Transactional
@@ -96,11 +116,11 @@ public class AuthService {
   }
 
   @Transactional
-  public void requestEmailVerification(String email) {
+  public String requestEmailVerification(String email) {
     if (emailVerificationService == null) {
       throw new IllegalStateException("Email verification service is not configured");
     }
-    emailVerificationService.requestEmailVerification(email);
+    return emailVerificationService.requestEmailVerification(email);
   }
 
   @Transactional
@@ -129,5 +149,9 @@ public class AuthService {
         refreshToken,
         account.getUsername(),
         account.getRoleName());
+  }
+
+  public boolean isDemoMailboxEnabled() {
+    return demoMailboxEnabled;
   }
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import { loadSettings, saveSettings } from '@/shared/services/settings';
@@ -8,6 +9,7 @@ import type { ApiSettings } from '@/shared/types/api';
 const settings = reactive<ApiSettings>(loadSettings());
 const saved = ref(false);
 const canEditBackendUrl = !import.meta.env.PROD;
+const router = useRouter();
 
 function saveBaseUrl() {
   saveSettings(settings);
@@ -15,6 +17,10 @@ function saveBaseUrl() {
   window.setTimeout(() => {
     saved.value = false;
   }, 1500);
+}
+
+function resetBrowserSettings() {
+  router.push({ name: 'settings-reset' });
 }
 </script>
 
@@ -61,6 +67,19 @@ function saveBaseUrl() {
             demo: Netlify frontend with Render backend, Postgres, and Redis
           </p>
         </div>
+
+        <div class="list-item">
+          <strong>Mail delivery mode</strong>
+          <p>
+            local: SMTP through Mailpit
+            <br />
+            dev: SMTP through the Docker Mailpit service
+            <br />
+            local demo: SMTP through Brevo
+            <br />
+            demo: SMTP through Brevo
+          </p>
+        </div>
       </div>
     </article>
 
@@ -75,6 +94,27 @@ function saveBaseUrl() {
           </p>
         </div>
 
+        <div class="section-row about-toolbar">
+          <div class="about-toolbar__copy">
+            <p class="eyebrow about-toolbar__eyebrow">Browser tools</p>
+            <p class="help-text">
+              Clear saved browser state if the demo is pointing at stale settings.
+            </p>
+          </div>
+
+          <div class="actions">
+            <Button
+              type="button"
+              label="Reset saved settings"
+              severity="warning"
+              outlined
+              icon="pi pi-refresh"
+              data-testid="reset-browser-settings"
+              @click="resetBrowserSettings"
+            />
+          </div>
+        </div>
+
         <template v-if="canEditBackendUrl">
           <label class="form-field">
             <span class="field-label">API base URL</span>
@@ -87,7 +127,13 @@ function saveBaseUrl() {
           </label>
 
           <div class="actions">
-            <Button type="button" label="Save settings" icon="pi pi-save" @click="saveBaseUrl" />
+            <Button
+              type="button"
+              label="Save settings"
+              icon="pi pi-save"
+              data-testid="save-settings"
+              @click="saveBaseUrl"
+            />
           </div>
         </template>
         <div v-else class="list-item">

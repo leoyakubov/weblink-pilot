@@ -82,7 +82,7 @@ Use these for very fast end-to-end confidence:
 - live deployment smoke checks
 
 This repo has a browser smoke test for the Docker stack in `frontend/scripts/smoke-docker.mjs`.
-For local Docker smoke, use `scripts/win/quality/deployment-smoke.ps1` or `scripts/unix/quality/deployment-smoke.sh` with the default local targets.
+For local Docker smoke, use `bash ./scripts/quality/deployment-smoke.sh` with the default local targets. On Windows PowerShell, prefix the command with `wsl`.
 For the deployed demo, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL`.
 The smoke output prints the backend HTTP status and `status=UP`, plus the frontend HTTP status and the app shell marker (`id="app"`).
 
@@ -134,17 +134,9 @@ The backend build now produces:
 - an aggregate multi-module report in `backend/build-support`
 - a dedicated Maven `ci` profile for verification runs in CI and manual coverage runs
 
-Run the backend test suite from the repo root:
+Run the backend test suite from the repo root with `bash ./scripts/quality/backend-tests.sh`.
 
-```powershell
-.\scripts\backend\test-backend.ps1
-```
-
-Run the backend coverage build from the repo root when you want coverage:
-
-```powershell
-.\scripts\backend\coverage.ps1
-```
+Run the backend coverage build with `bash ./scripts/quality/backend-coverage.sh`.
 
 Run the aggregate coverage build from `backend/`:
 
@@ -161,11 +153,7 @@ The HTML report is generated under:
 The repo also has a local SonarQube stack under `infra/sonar/`.
 GitHub Actions Sonar is temporarily disabled for now; use the local stack and helper script below.
 
-Start it from the repo root:
-
-```powershell
-.\scripts\win\quality\sonar-stack.ps1
-```
+Start it from the repo root with `bash ./scripts/quality/sonar-stack.sh`.
 
 Then run the analysis from `backend/` with a Sonar token:
 
@@ -189,16 +177,8 @@ The repo now provides dependency vulnerability checks for both the backend and f
 - Backend: OWASP Dependency-Check on the Maven reactor
 - Frontend: `npm audit --audit-level=high`
 
-Run the combined security gate from the repo root when you want to check dependencies manually:
-
-```powershell
-.\scripts\win\security\check-dependencies.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/security/check-dependencies.sh
+bash ./scripts/security/check-dependencies.sh
 ```
 
 You can also run the backend and frontend checks separately with the helper scripts listed in the README.
@@ -207,16 +187,8 @@ You can also run the backend and frontend checks separately with the helper scri
 
 The repo also runs a Gitleaks-based secret scan to catch hardcoded credentials and tokens before they leave the machine or reach CI.
 
-Run it from the repo root:
-
-```powershell
-.\scripts\win\git\scan-secrets.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/git/scan-secrets.sh
+bash ./scripts/git/scan-secrets.sh
 ```
 
 ## Current Rule of Thumb

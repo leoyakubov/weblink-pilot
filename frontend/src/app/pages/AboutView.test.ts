@@ -16,6 +16,13 @@ vi.mock('@/shared/services/settings', () => ({
   saveSettings: mocks.saveSettingsMock,
 }));
 
+const routerPushMock = vi.fn();
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: routerPushMock,
+  }),
+}));
+
 describe('AboutView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,7 +40,7 @@ describe('AboutView', () => {
 
     const input = wrapper.get('input[type="url"]');
     await input.setValue('http://localhost:9090/api/v1');
-    await wrapper.get('button[type="button"]').trigger('click');
+    await wrapper.get('[data-testid="save-settings"]').trigger('click');
     await flushPromises();
 
     expect(mocks.saveSettingsMock).toHaveBeenCalledWith({
@@ -42,5 +49,13 @@ describe('AboutView', () => {
       refreshToken: '',
     });
     expect(wrapper.text()).toContain('Saved for this browser');
+  });
+
+  it('navigates to browser reset when requested', async () => {
+    const wrapper = mount(AboutView);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="reset-browser-settings"]').trigger('click');
+    expect(routerPushMock).toHaveBeenCalledWith({ name: 'settings-reset' });
   });
 });

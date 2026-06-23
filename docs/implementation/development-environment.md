@@ -10,32 +10,52 @@ This document describes the local workflow for building, testing, and maintainin
 - Node.js 24.16.0 LTS
 - npm 11.13.0
 - Docker Desktop or compatible Docker runtime
-- PowerShell on Windows
-- Bash-compatible shell on Unix/macOS/Linux
+- WSL 2 with a Linux distribution on Windows
+- Bash-compatible shell on Linux/macOS
+- Docker Desktop WSL integration when developing on Windows
+
+### Windows and WSL
+
+Install WSL once from an elevated PowerShell terminal:
+
+```powershell
+wsl --install
+```
+
+Inside the WSL distribution, install Java 21, Node.js/npm, Git, and the small CLI tools used by the scripts (`curl`, `jq`, and `lsof`). Enable the distribution under Docker Desktop **Settings > Resources > WSL integration**.
+
+PowerShell can invoke a script directly:
+
+```powershell
+wsl bash ./scripts/run-before-push.sh
+```
+
+Alternatively, enter WSL with `wsl`, open the repository, and use the Bash commands shown below. Keeping the clone in the WSL filesystem (for example `~/projects/weblink-pilot`) gives better filesystem performance than `/mnt/c/...`, but both layouts are supported.
+If you reuse a Windows-created `frontend/node_modules` tree from WSL, the frontend scripts will refresh the frontend dependencies automatically the next time they run.
+For Playwright-based browser tests in WSL, the scripts can drive a Windows Chrome/Edge executable through Playwright CDP if it is installed in the standard Windows location. You can still set `PLAYWRIGHT_BROWSER_PATH` to a Linux executable if you prefer a browser inside WSL.
 
 ## Repository Layout
 
 - `backend/` - Spring Boot modular backend.
 - `frontend/` - Vue SPA.
 - `infra/` - Docker, monitoring, and deployment support.
-- `scripts/win/` - Windows helper scripts.
-- `scripts/unix/` - Unix/macOS/Linux helper scripts.
+- `scripts/` - shared Bash automation grouped into `dev`, `git`, `lib`, `quality`, and `security`.
 - `docs/` - categorized SDLC documentation.
 
 ## Local Runtime
 
 The recommended local flow is the Docker full stack.
 
-Windows:
+Windows PowerShell:
 
 ```powershell
-.\scripts\win\dev\docker-full-stack.ps1
+wsl bash ./scripts/dev/docker-full-stack.sh
 ```
 
-Unix/macOS/Linux:
+WSL/Linux/macOS:
 
 ```bash
-./scripts/unix/dev/docker-full-stack.sh
+bash ./scripts/dev/docker-full-stack.sh
 ```
 
 The full stack includes:
@@ -49,16 +69,16 @@ The full stack includes:
 
 If you want monitoring locally, start it separately:
 
-Windows:
+Windows PowerShell:
 
 ```powershell
-.\scripts\win\dev\monitoring.ps1
+wsl bash ./scripts/dev/monitoring.sh
 ```
 
-Unix/macOS/Linux:
+WSL/Linux/macOS:
 
 ```bash
-./scripts/unix/dev/monitoring.sh
+bash ./scripts/dev/monitoring.sh
 ```
 
 The monitoring stack includes:
@@ -70,37 +90,49 @@ The monitoring stack includes:
 
 ### Mail testing locally
 
-For local development we use Mailpit.
-
 The backend-local scripts load `backend/.env.local` first and then `backend/.env.smtp.local` if it exists. They also start the `mailpit` Docker service before launching the backend so the local mail catcher is available automatically.
 
-If you want to start Mailpit manually, use:
+| Profile | Mail mode | SMTP host | SMTP auth | From address | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `local` | `SMTP` | `localhost:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker or a manual local Mailpit instance. |
+| `dev` | `SMTP` | `mailpit:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Docker Compose Mailpit service. |
+| `local demo` | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Use Brevo credentials from `backend/.env.smtp.local`. |
+| `demo` (Render) | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Render demo with Brevo SMTP and a verified sender. |
+
+The backend performs a startup mail connection check in `local` and `dev`, so if Mailpit is not running you should see a clear startup failure or a `mail.server.health status=DOWN` log entry instead of discovering the problem only after the first email request.
+
+If you ever need the old preview-mailbox behavior again for a one-off test, set `APP_AUTH_MAIL_DELIVERY_MODE=DEMO_PREVIEW` manually before starting the backend. The switch is still available, but the default demo path now uses SMTP.
+
+### Demo-like local run
+
+If you want to test the app locally the same way demo behaves on Render, use the demo-local launcher with Brevo SMTP credentials instead of the Mailpit flow:
+
+Windows PowerShell:
 
 ```powershell
-docker compose -f infra/docker-compose.yml up -d mailpit
+wsl bash ./scripts/dev/demo-local.sh
+wsl bash ./scripts/dev/frontend-demo.sh
 ```
+
+WSL/Linux/macOS:
 
 ```bash
-docker compose -f infra/docker-compose.yml up -d mailpit
+bash ./scripts/dev/demo-local.sh
+bash ./scripts/dev/frontend-demo.sh
 ```
 
-The local profile uses:
+This flow starts:
 
-- SMTP host: `localhost`
-- SMTP port: `1025`
-- SMTP auth: `false`
-- STARTTLS: `false`
+- PostgreSQL
+- Redis
+- backend in `demo` profile
+- frontend in production-like preview mode on `http://localhost:8081`
 
-The backend now performs a startup mail connection check in `local` and `dev`, so if Mailpit is not running you should see a clear startup failure or a `mail.server.health status=DOWN` log entry instead of discovering the problem only after the first email request.
+In this mode:
 
-For the demo environment we use Mailtrap Email Testing, so the team can inspect messages in the Mailtrap inbox and click the links without sending real mail to recipients.
-
-The demo SMTP values should point to the Mailtrap inbox credentials and host:
-
-- `sandbox.smtp.mailtrap.io`
-- `587`
-
-If you want to try the Mailtrap path locally for comparison, copy `backend/.env.smtp.local.example` to `backend/.env.smtp.local` and fill in the Mailtrap inbox credentials.
+- the backend sends real verification and password reset emails through Brevo
+- the frontend shows the regular success flow and the email opens in your real inbox
+- Mailpit is not used
 
 ## Environment Files
 
@@ -135,6 +167,7 @@ There is no shared repo-root `.env.local` now; use the area-specific files above
 | `JWT_SECRET` / `APP_AUTH_JWT_SECRET` | Backend JWT signing | `backend/.env.local` for local runs; Render/GitHub secrets for demo |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Backend GitHub OAuth | shell env, `backend/.env.local`, or Render secrets |
 | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS` | Backend mail sender | `application-local.yml`, `application-dev.yml`, `application-demo.yml` plus env overrides |
+| `SPRING_MAIL_FROM_ADDRESS`, `SPRING_MAIL_FROM_NAME` | Backend mail sender identity | `application.yml` plus env overrides |
 | `APP_AUTH_*` | Backend auth settings | `application.yml` plus env overrides |
 | `BOOTSTRAP_*` | Backend demo seed accounts | `application.yml` and `application-demo.yml` plus demo env overrides |
 | `APP_PUBLIC_BASE_URL` | Backend generated links | `application.yml` and profile overrides |
@@ -166,31 +199,31 @@ Common environment values include:
 Start the backend only:
 
 ```powershell
-.\scripts\win\dev\backend-local.ps1
+wsl bash ./scripts/dev/backend-local.sh
 ```
 
 ```bash
-./scripts/unix/dev/backend-local.sh
+bash ./scripts/dev/backend-local.sh
 ```
 
 Start the frontend only:
 
 ```powershell
-.\scripts\win\dev\frontend-local.ps1
+wsl bash ./scripts/dev/frontend-local.sh
 ```
 
 ```bash
-./scripts/unix/dev/frontend-local.sh
+bash ./scripts/dev/frontend-local.sh
 ```
 
 Run local smoke checks:
 
 ```powershell
-.\scripts\win\quality\deployment-smoke.ps1
+wsl bash ./scripts/quality/deployment-smoke.sh
 ```
 
 ```bash
-./scripts/unix/quality/deployment-smoke.sh
+bash ./scripts/quality/deployment-smoke.sh
 ```
 
 ## Verification Commands
@@ -198,51 +231,51 @@ Run local smoke checks:
 Fast pre-push gate:
 
 ```powershell
-.\scripts\win\run-before-push.ps1
+wsl bash ./scripts/run-before-push.sh
 ```
 
 ```bash
-./scripts/unix/run-before-push.sh
+bash ./scripts/run-before-push.sh
 ```
 
 Backend checks:
 
 ```powershell
-.\scripts\win\quality\backend-style.ps1
-.\scripts\win\quality\backend-tests.ps1
+wsl bash ./scripts/quality/backend-style.sh
+wsl bash ./scripts/quality/backend-tests.sh
 ```
 
 ```bash
-./scripts/unix/quality/backend-style.sh
-./scripts/unix/quality/backend-tests.sh
+bash ./scripts/quality/backend-style.sh
+bash ./scripts/quality/backend-tests.sh
 ```
 
 Frontend checks:
 
 ```powershell
-.\scripts\win\quality\frontend-style.ps1
-.\scripts\win\quality\frontend-tests.ps1
-.\scripts\win\dev\frontend-build.ps1
+wsl bash ./scripts/quality/frontend-style.sh
+wsl bash ./scripts/quality/frontend-tests.sh
+wsl bash ./scripts/dev/frontend-build.sh
 ```
 
 ```bash
-./scripts/unix/quality/frontend-style.sh
-./scripts/unix/quality/frontend-tests.sh
-./scripts/unix/dev/frontend-build.sh
+bash ./scripts/quality/frontend-style.sh
+bash ./scripts/quality/frontend-tests.sh
+bash ./scripts/dev/frontend-build.sh
 ```
 
 Manual coverage and security checks:
 
 ```powershell
-.\scripts\win\quality\backend-coverage.ps1
-.\scripts\win\quality\frontend-coverage.ps1
-.\scripts\win\security\check-dependencies.ps1
+wsl bash ./scripts/quality/backend-coverage.sh
+wsl bash ./scripts/quality/frontend-coverage.sh
+wsl bash ./scripts/security/check-dependencies.sh
 ```
 
 ```bash
-./scripts/unix/quality/backend-coverage.sh
-./scripts/unix/quality/frontend-coverage.sh
-./scripts/unix/security/check-dependencies.sh
+bash ./scripts/quality/backend-coverage.sh
+bash ./scripts/quality/frontend-coverage.sh
+bash ./scripts/security/check-dependencies.sh
 ```
 
 ## Testing Policy

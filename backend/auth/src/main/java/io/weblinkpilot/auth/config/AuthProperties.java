@@ -49,6 +49,8 @@ public class AuthProperties {
   private String bootstrapUserPassword;
   private String bootstrapUserRole;
   private String bootstrapUserEmail;
+  @Pattern(regexp = "(?i)SMTP|DEMO_PREVIEW")
+  private String mailDeliveryMode = "SMTP";
 
   public String getIssuer() {
     return issuer;
@@ -248,6 +250,18 @@ public class AuthProperties {
 
   public void setBootstrapUserEmail(String bootstrapUserEmail) {
     this.bootstrapUserEmail = bootstrapUserEmail;
+  }
+
+  public String getMailDeliveryMode() {
+    return mailDeliveryMode;
+  }
+
+  public void setMailDeliveryMode(String mailDeliveryMode) {
+    this.mailDeliveryMode = mailDeliveryMode;
+  }
+
+  public boolean isDemoMailboxEnabled() {
+    return "DEMO_PREVIEW".equalsIgnoreCase(mailDeliveryMode);
   }
 
   public boolean isGithubConfigured() {

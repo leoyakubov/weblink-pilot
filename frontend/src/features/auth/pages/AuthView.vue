@@ -68,6 +68,13 @@ function handleNoticeAction() {
   }
 }
 
+function openPreviewLink(previewLink: string) {
+  const popup = window.open(previewLink, '_blank', 'noopener');
+  if (popup) {
+    popup.focus();
+  }
+}
+
 watch(
   () => props.mode,
   () => {
@@ -188,9 +195,21 @@ async function submit() {
           }
         : form;
 
-    await authenticate(props.mode, request);
+    const response = await authenticate(props.mode, request);
+
     if (props.mode === 'login') {
       await router.push('/');
+      return;
+    }
+
+    if (response && 'previewLink' in response && response.previewLink) {
+      const previewLink = response.previewLink;
+      openNotice(
+        'Demo email ready',
+        'Use the preview link to verify the account and continue the demo flow.',
+        'Open verification link',
+        () => openPreviewLink(previewLink),
+      );
       return;
     }
 

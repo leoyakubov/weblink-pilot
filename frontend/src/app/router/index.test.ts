@@ -32,6 +32,7 @@ describe('router', () => {
       expect.arrayContaining([
         'home',
         'about',
+        'settings-reset',
         'signin',
         'signup',
         'link',

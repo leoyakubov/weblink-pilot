@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$repo_root/scripts/lib/common.sh"
+frontend_dir="$repo_root/frontend"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js is not available on PATH. Install Node.js 24.16.0 LTS before running this script." >&2
+  exit 1
+fi
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm is not available on PATH. Install npm 11.13.0 before running this script." >&2
+  exit 1
+fi
+
+cd "$frontend_dir"
+ensure_frontend_dependencies "$frontend_dir"
+
+exec npm run dev

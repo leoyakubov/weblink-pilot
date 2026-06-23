@@ -48,6 +48,13 @@ The refresh token itself is stored in an `HttpOnly` cookie named:
 The app uses SMTP for password reset and email verification.
 The backend also enforces a short resend cooldown for these links so duplicate clicks do not send multiple emails; repeated requests return `429 Too Many Requests` with a `Retry-After` header.
 
+| Profile | Mail mode | SMTP host | SMTP auth | From address | Notes |
+| --- | --- | --- | --- | --- | --- |
+| `local` | `SMTP` | `localhost:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in the local Docker stack. |
+| `dev` | `SMTP` | `mailpit:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker Compose. |
+| `local demo` | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for local demo rehearsals. |
+| `demo` (Render) | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for the live demo. |
+
 ### Local
 
 Use Mailpit in the local Docker stack. The `backend-local` launcher now starts the `mailpit` service automatically before the backend comes up:
@@ -81,25 +88,18 @@ Then start the backend with either the `local` profile or the `dev` profile. Bot
 
 ### Demo
 
-Use Mailtrap Email Testing for the demo environment.
+Use real SMTP in the demo profile for public demo testing.
 
-Recommended values:
+In this mode the backend sends verification and reset emails through Brevo, and the tester opens the message in their real inbox.
 
-```env
-SPRING_MAIL_HOST=sandbox.smtp.mailtrap.io
-SPRING_MAIL_PORT=587
-SPRING_MAIL_USERNAME=<your Mailtrap SMTP login>
-SPRING_MAIL_PASSWORD=<your Mailtrap SMTP password>
-SPRING_MAIL_SMTP_AUTH=true
-SPRING_MAIL_SMTP_STARTTLS=true
-```
+The demo profile requires real SMTP credentials for this flow.
 
-Mailtrap gives you a browser inbox where you can inspect the message body and click the verification/reset links in a separate tab without sending mail to real recipients. Use the SMTP credentials from the Mailtrap inbox settings, not an API token.
+If you want to rehearse the demo flow locally before deploying, use:
 
-Useful references:
+- Windows PowerShell: `wsl bash ./scripts/dev/demo-local.sh`
+- WSL/Linux/macOS: `bash ./scripts/dev/demo-local.sh`
 
-- [Mailtrap home](https://mailtrap.io/)
-- [Mailtrap Email Testing](https://mailtrap.io/email-testing)
+Make sure `backend/.env.smtp.local` contains your Brevo SMTP credentials before you start the demo-local launcher.
 
 ## 1. Sign In
 
@@ -276,7 +276,7 @@ Expected result:
 Manual flow:
 
 1. register a new account with an email address
-2. open Mailpit at `http://localhost:8025` for local testing, or open the Mailtrap inbox for demo and click the email links from the message preview
+2. open Mailpit at `http://localhost:8025` for local testing, or open the message in your real inbox for demo and click the link from there
 3. open the verification link
 4. wait for the frontend confirmation page to say the email is verified
 5. sign in again if you were testing the blocked-login flow
@@ -408,7 +408,7 @@ If you want one clean smoke path after making auth changes, run these in order:
 
 1. start the local stack
 2. register a new account with an email address
-3. confirm the verification email arrives in Mailpit
+3. confirm the verification email arrives in Mailpit locally, or in your inbox for demo
 4. open the verification link and confirm the account is verified
 5. log in with `admin / admin123` or the new account
 6. confirm access token in session storage

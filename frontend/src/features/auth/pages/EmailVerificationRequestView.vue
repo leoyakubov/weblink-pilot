@@ -3,6 +3,7 @@ import { computed, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { ApiRequestError } from '@/shared/services/http';
 import { requestEmailVerification } from '@/features/auth/repositories/auth.repository';
+import AuthNoticeModal from '@/features/auth/components/AuthNoticeModal.vue';
 
 const form = reactive({
   email: '',
@@ -10,6 +11,11 @@ const form = reactive({
 const busy = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+const noticeVisible = ref(false);
+const noticeTitle = ref('');
+const noticeMessage = ref('');
+const noticeActionLabel = ref('');
+const noticeActionHandler = ref<null | (() => unknown)>(null);
 
 const title = computed(() => 'Verify email');
 
@@ -33,6 +39,31 @@ function formatError(error: unknown): string {
   return 'Unable to send verification email';
 }
 
+function openNotice(
+  title: string,
+  message: string,
+  actionLabel?: string,
+  actionHandler?: () => unknown,
+) {
+  noticeTitle.value = title;
+  noticeMessage.value = message;
+  noticeActionLabel.value = actionLabel ?? '';
+  noticeActionHandler.value = actionHandler ?? null;
+  noticeVisible.value = true;
+}
+
+function closeNotice() {
+  noticeVisible.value = false;
+}
+
+function handleNoticeAction() {
+  const action = noticeActionHandler.value;
+  closeNotice();
+  if (action) {
+    void action();
+  }
+}
+
 async function submit() {
   busy.value = true;
   errorMessage.value = '';
@@ -45,7 +76,20 @@ async function submit() {
       return;
     }
 
-    await requestEmailVerification({ email: form.email });
+    const response = await requestEmailVerification({ email: form.email });
+    if (response.previewLink) {
+      openNotice(
+        'Demo email ready',
+        'Open the verification link to continue the demo flow.',
+        'Open verification link',
+        () => {
+          const popup = window.open(response.previewLink ?? '', '_blank', 'noopener');
+          popup?.focus();
+        },
+      );
+      return;
+    }
+
     successMessage.value = 'Verification email sent. Please check your inbox.';
   } catch (error) {
     errorMessage.value = formatError(error);
@@ -104,4 +148,13 @@ async function submit() {
       </div>
     </article>
   </section>
+
+  <AuthNoticeModal
+    :visible="noticeVisible"
+    :title="noticeTitle"
+    :message="noticeMessage"
+    :action-label="noticeActionLabel"
+    @close="closeNotice"
+    @action="handleNoticeAction"
+  />
 </template>

@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/run-dev.mjs",
     "build": "node scripts/run-build.mjs",
-    "preview": "vite preview",
+    "preview": "node scripts/run-preview.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",

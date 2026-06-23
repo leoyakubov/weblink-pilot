@@ -16,13 +16,11 @@ This folder contains the Docker Compose stack for running the full project local
 
 From the repository root:
 
-```powershell
-.\scripts\win\dev\docker-full-stack.ps1
+```bash
+bash ./scripts/dev/docker-full-stack.sh
 ```
 
-```bash
-./scripts/unix/dev/docker-full-stack.sh
-```
+From Windows PowerShell, run `wsl bash ./scripts/dev/docker-full-stack.sh`.
 
 Or run Compose directly:
 
@@ -41,7 +39,7 @@ docker compose -p weblink-pilot -f infra/docker-compose.yml down
 - Frontend: `http://localhost:8081`
 - Backend API: `http://localhost:8080/api/v1`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
-- Monitoring stack: `docker compose -p weblink-pilot -f infra/docker-compose.monitoring.yml up --build`
+- Monitoring stack: `docker compose -p weblink-pilot-monitoring -f infra/monitoring/docker-compose.monitoring.yml up --build`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
 

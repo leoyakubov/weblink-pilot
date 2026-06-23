@@ -31,4 +31,4 @@ jobs:
           echo "Frontend smoke will check the freshly deployed Netlify URL when available."
 
       - name: Run frontend deployment smoke checks
-        run: ./scripts/unix/quality/deployment-smoke.sh
+        run: bash ./scripts/quality/deployment-smoke.sh

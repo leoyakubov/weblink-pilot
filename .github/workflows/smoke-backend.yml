@@ -31,4 +31,4 @@ jobs:
           echo "Backend smoke will check the live Render health endpoint, not a skipped deploy."
 
       - name: Run backend deployment smoke checks
-        run: ./scripts/unix/quality/deployment-smoke.sh
+        run: bash ./scripts/quality/deployment-smoke.sh

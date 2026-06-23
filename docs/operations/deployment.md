@@ -129,10 +129,20 @@ Set backend env vars in Render:
 - `BOOTSTRAP_USER_USERNAME=<user-username>`
 - `BOOTSTRAP_USER_PASSWORD=<user-password>`
 - `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
+- `SPRING_MAIL_HOST=smtp-relay.brevo.com`
+- `SPRING_MAIL_PORT=587`
+- `SPRING_MAIL_USERNAME=<brevo-smtp-username>`
+- `SPRING_MAIL_PASSWORD=<brevo-smtp-password>`
+- `SPRING_MAIL_SMTP_AUTH=true`
+- `SPRING_MAIL_SMTP_STARTTLS=true`
+- `SPRING_MAIL_FROM_ADDRESS=<brevo-verified-sender>`
+- `SPRING_MAIL_FROM_NAME=WebLinkPilot`
+- `APP_AUTH_MAIL_DELIVERY_MODE=SMTP`
 
 Where to get the missing values:
 
-- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from your SMTP provider. For the demo Mailtrap inbox, open the SMTP settings in the Mailtrap dashboard, copy the SMTP login and password from the inbox, and use those values in Render.
+- `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from Brevo's SMTP settings page for your sender or SMTP key.
+- `SPRING_MAIL_FROM_ADDRESS` must be a sender address or domain that Brevo accepts for that account.
 - `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WebLinkPilot.
 
 Optional:
@@ -161,8 +171,8 @@ The smoke output prints the backend HTTP status plus `status=UP`, and the fronte
 
 The Netlify frontend needs a backend URL that is reachable from the browser.
 For a live demo, HTTPS is strongly recommended for the backend endpoint.
-The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` so it picks up PostgreSQL, public URL, and CORS settings from `application-demo.yml`.
-The demo profile disables the built-in mail health indicator so the `/actuator/health` endpoint stays responsive even if the external SMTP provider is slow or temporarily unreachable.
+The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` so it picks up PostgreSQL, public URL, CORS, and SMTP settings from `application-demo.yml`.
+The demo profile keeps the mail health indicator disabled so the `/actuator/health` endpoint stays responsive even if the external SMTP provider is slow or temporarily unreachable.
 
 If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted because the backend falls back to `RENDER_EXTERNAL_URL`.
 

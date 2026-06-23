@@ -28,6 +28,7 @@ public class PasswordResetService {
   private final AccountActionRequestCooldownService cooldownService;
   private final ApplicationEventPublisher eventPublisher;
   private final String frontendBaseUrl;
+  private final boolean demoMailboxEnabled;
 
   public PasswordResetService(
       UserAccountRepository userAccountRepository,
@@ -44,10 +45,11 @@ public class PasswordResetService {
     this.cooldownService = cooldownService;
     this.eventPublisher = eventPublisher;
     this.frontendBaseUrl = authProperties.getFrontendBaseUrl();
+    this.demoMailboxEnabled = authProperties.isDemoMailboxEnabled();
   }
 
   @Transactional
-  public void requestPasswordReset(String email) {
+  public String requestPasswordReset(String email) {
     String normalizedEmail = normalizeEmail(email);
     if (normalizedEmail.isBlank()) {
       throw new IllegalArgumentException("Email is required.");
@@ -55,17 +57,14 @@ public class PasswordResetService {
 
     log.debug("auth.password-reset.requested email={}", normalizedEmail);
 
-    userAccountRepository
-        .findByEmailIgnoreCase(normalizedEmail)
-        .ifPresentOrElse(
-            account -> {
-              cooldownService.enforceCooldown("password reset", account.getEmail());
-              sendResetLink(account);
-            },
-            () ->
-                log.debug(
-                    "auth.password-reset.skipped reason=account_not_found email={}",
-                    normalizedEmail));
+    UserAccount account = userAccountRepository.findByEmailIgnoreCase(normalizedEmail).orElse(null);
+    if (account == null) {
+      log.debug("auth.password-reset.skipped reason=account_not_found email={}", normalizedEmail);
+      return null;
+    }
+
+    cooldownService.enforceCooldown("password reset", account.getEmail());
+    return sendResetLink(account);
   }
 
   @Transactional
@@ -84,7 +83,7 @@ public class PasswordResetService {
         account.getEmail());
   }
 
-  private void sendResetLink(UserAccount account) {
+  private String sendResetLink(UserAccount account) {
     String token = tokenService.issueToken(account, AccountActionTokenType.PASSWORD_RESET);
     String link =
         frontendBaseUrl + RESET_PATH + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
@@ -92,7 +91,17 @@ public class PasswordResetService {
         "auth.password-reset.queued username={} email={}",
         account.getUsername(),
         account.getEmail());
+    if (demoMailboxEnabled) {
+      log.info(
+          "auth.password-reset.demo-preview username={} email={} link={}",
+          account.getUsername(),
+          account.getEmail(),
+          link);
+      return link;
+    }
+
     eventPublisher.publishEvent(new PasswordResetLinkRequestedEvent(account.getEmail(), link));
+    return link;
   }
 
   private String normalizeEmail(String email) {

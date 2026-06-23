@@ -27,6 +27,12 @@ const navItems = computed(() =>
 );
 const accountLabel = computed(() => authState.currentUser?.username ?? '');
 const isLoggedIn = computed(() => Boolean(authState.currentUser));
+const canResetBrowserSettings = computed(
+  () =>
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '::1',
+);
 const currentSection = computed(() => getSectionTitle(route.name));
 const showSectionHeader = computed(
   () =>
@@ -103,6 +109,13 @@ onBeforeUnmount(() => {
 
       <div class="topbar-actions">
         <div class="auth-links">
+          <RouterLink
+            v-if="canResetBrowserSettings"
+            to="/settings/reset"
+            class="button button-secondary auth-link-button auth-link-button--accent demo-reset-link"
+          >
+            Reset demo settings
+          </RouterLink>
           <RouterLink
             v-if="!isLoggedIn"
             to="/auth/signin"
@@ -191,6 +204,14 @@ onBeforeUnmount(() => {
         </nav>
 
         <div class="drawer-actions">
+          <RouterLink
+            v-if="canResetBrowserSettings"
+            to="/settings/reset"
+            class="button button-secondary drawer-action drawer-action--accent"
+            @click="closeMenu"
+          >
+            Reset demo settings
+          </RouterLink>
           <RouterLink
             v-if="!isLoggedIn"
             to="/auth/signin"

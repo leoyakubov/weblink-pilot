@@ -18,7 +18,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 - Frontend open in a browser
 - For email flows:
   - Local: Mailpit at `http://localhost:8025`
-  - Demo: Mailtrap inbox configured in the environment
+  - Demo: real SMTP through Brevo, with messages arriving in the tester's mailbox
 
 ## Quick Test Matrix
 
@@ -26,7 +26,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 |---|---|---|
 | Authentication | Sign up, verify email, sign in, use GitHub login, open account settings, change password, refresh the page, sign out | Access token is issued, refresh cookie is set, social login works, account profile loads, password change works, bootstrap refresh works, logout clears session |
 | Remember me | Sign in with and without the remember-me option once it is added | Trusted-device sessions last longer only when the user opts in, while the default sign-in remains short-lived |
-| Email workflow | Request password reset, confirm reset, request email verification, confirm verification | Reset and verification emails are sent, links work, the account state updates |
+| Email workflow | Request password reset, confirm reset, request email verification, confirm verification | Reset and verification flows arrive in Mailpit locally or in the tester's inbox for demo, links work, the account state updates |
 | Link creation | Create a short link with and without alias | Link is created, alias rules are enforced, expiration is accepted or rejected correctly |
 | Redirect flow | Open the short URL and QR path | Redirect happens fast, click count increments, analytics source is recorded |
 | Analytics | Open link analytics and summary pages | Click totals and breakdowns match what the link received |
@@ -48,7 +48,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 
 1. Open the sign-up page.
 2. Register a new account with username, password, and email.
-3. Open Mailpit locally or the Mailtrap inbox in demo.
+3. Open Mailpit locally or the received email in your inbox for demo.
 4. Click the email verification link.
 5. Sign in with the new account.
 6. Open DevTools and inspect storage/cookies.
@@ -81,7 +81,7 @@ Use it when you want to verify a specific user journey end to end, not just the 
 ### Steps
 
 1. Request a password reset from the login page or reset page.
-2. Open the delivered email in Mailpit locally or the Mailtrap inbox in demo.
+2. Open the delivered email in Mailpit locally or the received email in your inbox for demo.
 3. Click the reset link and set a new password.
 4. Request an email verification link for a new account.
 5. Open the verification email and click the link.

@@ -3,6 +3,7 @@ import type {
   AdminOverviewResponse,
   AnalyticsSummaryResponse,
   ApiSettings,
+  AccountActionPreviewResponse,
   AuthCredentialsRequest,
   AuthResponse,
   CreateLinkRequest,
@@ -252,7 +253,7 @@ export function registerRequest(
   request: AuthCredentialsRequest,
   settings: ApiSettings = loadSettings(),
 ) {
-  return requestVoid(
+  return requestJson<AccountActionPreviewResponse>(
     '/auth/register',
     {
       method: 'POST',
@@ -302,7 +303,7 @@ export function requestPasswordResetRequest(
   request: PasswordResetRequest,
   settings: ApiSettings = loadSettings(),
 ) {
-  return requestVoid(
+  return requestJson<AccountActionPreviewResponse>(
     '/auth/password-reset/request',
     {
       method: 'POST',
@@ -334,7 +335,7 @@ export function requestEmailVerificationRequest(
   request: EmailVerificationRequest,
   settings: ApiSettings = loadSettings(),
 ) {
-  return requestVoid(
+  return requestJson<AccountActionPreviewResponse>(
     '/auth/email-verification/request',
     {
       method: 'POST',

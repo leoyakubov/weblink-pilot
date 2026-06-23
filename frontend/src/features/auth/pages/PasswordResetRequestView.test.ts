@@ -19,7 +19,9 @@ vi.mock('@/features/auth/repositories/auth.repository', () => ({
 
 describe('PasswordResetRequestView', () => {
   it('requests a password reset link', async () => {
-    mocks.requestPasswordResetMock.mockResolvedValue(undefined);
+    mocks.requestPasswordResetMock.mockResolvedValue({
+      previewLink: 'http://localhost:8081/auth/reset-password?token=demo-token',
+    });
 
     const wrapper = mount(PasswordResetRequestView, {
       global: {
@@ -38,6 +40,6 @@ describe('PasswordResetRequestView', () => {
     expect(mocks.requestPasswordResetMock).toHaveBeenCalledWith({
       email: 'alice@example.com',
     });
-    expect(wrapper.text()).toContain('reset link was sent');
+    expect(wrapper.text()).toContain('Demo email ready');
   });
 });

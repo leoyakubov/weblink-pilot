@@ -61,6 +61,16 @@ export function saveSettings(settings: ApiSettings) {
   }
 }
 
+export function clearSettings() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.sessionStorage.removeItem(SESSION_KEY);
+  window.sessionStorage.removeItem(SESSION_HINT_KEY);
+}
+
 export function markSessionActive() {
   if (typeof window === 'undefined') {
     return;

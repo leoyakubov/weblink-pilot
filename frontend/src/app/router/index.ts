@@ -7,6 +7,11 @@ const router = createRouter({
     { path: '/', name: 'home', component: () => import('@/features/links/pages/HomeView.vue') },
     { path: '/about', name: 'about', component: () => import('@/app/pages/AboutView.vue') },
     {
+      path: '/settings/reset',
+      name: 'settings-reset',
+      component: () => import('@/app/pages/BrowserSettingsResetView.vue'),
+    },
+    {
       path: '/auth/signin',
       name: 'signin',
       component: () => import('@/features/auth/pages/AuthView.vue'),

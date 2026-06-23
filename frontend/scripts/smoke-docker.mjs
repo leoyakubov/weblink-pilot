@@ -1,51 +1,8 @@
-import { chromium } from 'playwright-core'
-import fs from 'node:fs'
+import { launchHeadlessBrowser } from './browser-paths.mjs'
 import path from 'node:path'
 import process from 'node:process'
 
 const baseUrl = process.env.SMOKE_BASE_URL ?? 'http://localhost:8081'
-
-function browserCandidates() {
-  if (process.env.PLAYWRIGHT_BROWSER_PATH) {
-    return [process.env.PLAYWRIGHT_BROWSER_PATH]
-  }
-
-  const candidates = []
-
-  if (process.platform === 'win32') {
-    candidates.push(
-      'C:/Program Files/Google/Chrome/Application/chrome.exe',
-      'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-      'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
-      'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-    )
-  } else if (process.platform === 'darwin') {
-    candidates.push(
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-    )
-  } else {
-    candidates.push(
-      '/usr/bin/google-chrome',
-      '/usr/bin/google-chrome-stable',
-      '/usr/bin/chromium',
-      '/usr/bin/chromium-browser',
-      '/usr/bin/microsoft-edge',
-    )
-  }
-
-  return candidates
-}
-
-function findBrowserExecutable() {
-  for (const candidate of browserCandidates()) {
-    if (candidate && fs.existsSync(candidate)) {
-      return candidate
-    }
-  }
-
-  return null
-}
 
 function assert(condition, message) {
   if (!condition) {
@@ -54,17 +11,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const executablePath = findBrowserExecutable()
-  if (!executablePath) {
-    throw new Error(
-      'No browser executable found. Install Chrome/Edge locally or set PLAYWRIGHT_BROWSER_PATH to a browser executable.',
-    )
-  }
-
-  const browser = await chromium.launch({
-    executablePath,
-    headless: true,
-  })
+  const { browser, executablePath } = await launchHeadlessBrowser()
 
   const page = await browser.newPage()
 

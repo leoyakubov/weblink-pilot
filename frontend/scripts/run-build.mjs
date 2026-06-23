@@ -1,10 +1,10 @@
+import { ensureFrontendDependencies } from './ensure-frontend-deps.mjs';
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const frontendRoot = fileURLToPath(new URL('..', import.meta.url));
+ensureFrontendDependencies(frontendRoot);
 const viteBin = path.join(frontendRoot, 'node_modules', 'vite', 'bin', 'vite.js');
 const vueTscBin = path.join(frontendRoot, 'node_modules', 'vue-tsc', 'bin', 'vue-tsc.js');
 
@@ -14,6 +14,13 @@ function runNodeScript(script, args) {
     env: process.env,
     encoding: 'utf8',
   });
+
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
 
   return result.status ?? 1;
 }
@@ -26,34 +33,24 @@ if (typecheckStatus !== 0) {
 const distBuild = spawnSync(process.execPath, [viteBin, 'build', '--configLoader', 'runner'], {
   cwd: frontendRoot,
   env: process.env,
-  encoding: 'utf8',
-});
-
-if (distBuild.status === 0) {
-  if (distBuild.stdout) {
-    process.stdout.write(distBuild.stdout);
-  }
-  if (distBuild.stderr) {
-    process.stderr.write(distBuild.stderr);
-  }
-  process.exit(0);
-}
-
-const fallbackOutDir = fs.mkdtempSync(path.join(os.tmpdir(), 'weblink-pilot-frontend-build-'));
-console.log(`Falling back to temporary build output: ${fallbackOutDir}`);
-const fallbackBuild = spawnSync(process.execPath, [
-  viteBin,
-  'build',
-  '--configLoader',
-  'runner',
-  '--outDir',
-  fallbackOutDir,
-  '--emptyOutDir',
-  'false',
-], {
-  cwd: frontendRoot,
-  env: process.env,
   stdio: 'inherit',
 });
 
-process.exit(fallbackBuild.status ?? 1);
+if (distBuild.status === 0) {
+  process.exit(0);
+}
+
+console.warn(
+  'Could not clean the existing dist directory. Rebuilding in place without removing old hashed assets.',
+);
+const inPlaceBuild = spawnSync(
+  process.execPath,
+  [viteBin, 'build', '--configLoader', 'runner', '--emptyOutDir', 'false'],
+  {
+    cwd: frontendRoot,
+    env: process.env,
+    stdio: 'inherit',
+  },
+);
+
+process.exit(inPlaceBuild.status ?? 1);

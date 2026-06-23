@@ -72,7 +72,8 @@ class PasswordResetServiceTest {
     when(tokenService.issueToken(account, AccountActionTokenType.PASSWORD_RESET))
         .thenReturn("reset-token");
 
-    service.requestPasswordReset("alice@example.com");
+    assertThat(service.requestPasswordReset("alice@example.com"))
+        .isEqualTo("http://localhost:8081/auth/reset-password?token=reset-token");
 
     verify(cooldownService).enforceCooldown("password reset", "alice@example.com");
     ArgumentCaptor<PasswordResetLinkRequestedEvent> eventCaptor =

@@ -136,45 +136,30 @@ The HTML report is written to `backend/build-support/target/site/jacoco-aggregat
 
 Helper script:
 
-- Windows: [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
-- Unix: [`scripts/unix/quality/backend-coverage.sh`](scripts/unix/quality/backend-coverage.sh)
+- [`scripts/quality/backend-coverage.sh`](scripts/quality/backend-coverage.sh)
 
 ## Dependency Security
 
 Run the dependency vulnerability checks from the repo root when you want the manual security gate:
 
-```powershell
-.\scripts\win\security\check-dependencies.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/security/check-dependencies.sh
+bash ./scripts/security/check-dependencies.sh
 ```
 
 Backend-only check:
 
-- Windows: [`scripts/win/security/backend-vulnerabilities.ps1`](scripts/win/security/backend-vulnerabilities.ps1)
-- Unix: [`scripts/unix/security/backend-vulnerabilities.sh`](scripts/unix/security/backend-vulnerabilities.sh)
+- [`scripts/security/backend-vulnerabilities.sh`](scripts/security/backend-vulnerabilities.sh)
 
 Frontend-only check:
 
-- Windows: [`scripts/win/security/frontend-vulnerabilities.ps1`](scripts/win/security/frontend-vulnerabilities.ps1)
-- Unix: [`scripts/unix/security/frontend-vulnerabilities.sh`](scripts/unix/security/frontend-vulnerabilities.sh)
+- [`scripts/security/frontend-vulnerabilities.sh`](scripts/security/frontend-vulnerabilities.sh)
 
 ## Secret Scanning
 
 Run the repo-wide secret scan from the repo root:
 
-```powershell
-.\scripts\win\git\scan-secrets.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/git/scan-secrets.sh
+bash ./scripts/git/scan-secrets.sh
 ```
 
 The scan uses the official Gitleaks Docker image and the repo-level [`gitleaks`](.gitleaks.toml) configuration.
@@ -187,14 +172,8 @@ GitHub Actions Sonar is currently disabled for now; run Sonar locally with the h
 
 Start it from the repo root:
 
-```powershell
-.\scripts\win\quality\sonar-stack.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/quality/sonar-stack.sh
+bash ./scripts/quality/sonar-stack.sh
 ```
 
 Then run analysis from `backend/`:
@@ -217,8 +196,7 @@ The default local SonarQube UI is available at `http://localhost:9001`.
 
 If you prefer not to type the Maven command manually, use the helper scripts:
 
-- Windows: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
-- Unix: [`scripts/unix/quality/sonar-analysis.sh`](scripts/unix/quality/sonar-analysis.sh)
+- [`scripts/quality/sonar-analysis.sh`](scripts/quality/sonar-analysis.sh)
 
 For a local backend convenience file, copy `backend/.env.example` to `backend/.env.local` and fill in the values:
 
@@ -232,37 +210,61 @@ SonarQube helper values live under `infra/sonar/.env.local`.
 
 ## Run Scripts
 
+The project uses one Bash-only script set on every platform; Windows runs it through WSL. See [`scripts/README.md`](scripts/README.md) for setup and usage.
+
 From the repo root, the preferred quick-run entrypoints are grouped by area:
 
-- Backend local: [`scripts/win/dev/backend-local.ps1`](scripts/win/dev/backend-local.ps1)
-- Backend dev only: [`scripts/win/dev/backend-only.ps1`](scripts/win/dev/backend-only.ps1)
-- Backend format: [`scripts/win/quality/backend-format.ps1`](scripts/win/quality/backend-format.ps1)
-- Backend style check: [`scripts/win/quality/backend-style.ps1`](scripts/win/quality/backend-style.ps1)
-- Backend tests only: [`scripts/win/quality/backend-tests.ps1`](scripts/win/quality/backend-tests.ps1)
-- Backend tests: [`scripts/win/quality/backend-tests.ps1`](scripts/win/quality/backend-tests.ps1)
-- Backend coverage: [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
-- Backend vulnerability check: [`scripts/win/security/backend-vulnerabilities.ps1`](scripts/win/security/backend-vulnerabilities.ps1)
-- Frontend local: [`scripts/win/dev/frontend-local.ps1`](scripts/win/dev/frontend-local.ps1)
-- Frontend format: [`scripts/win/quality/frontend-format.ps1`](scripts/win/quality/frontend-format.ps1)
-- Frontend style check: [`scripts/win/quality/frontend-style.ps1`](scripts/win/quality/frontend-style.ps1)
-- Frontend tests: [`scripts/win/quality/frontend-tests.ps1`](scripts/win/quality/frontend-tests.ps1)
-- Frontend vulnerability check: [`scripts/win/security/frontend-vulnerabilities.ps1`](scripts/win/security/frontend-vulnerabilities.ps1)
+- Backend local: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
+- Backend dev only: [`scripts/dev/backend-only.sh`](scripts/dev/backend-only.sh)
+- Backend format: [`scripts/quality/backend-format.sh`](scripts/quality/backend-format.sh)
+- Backend style check: [`scripts/quality/backend-style.sh`](scripts/quality/backend-style.sh)
+- Backend tests: [`scripts/quality/backend-tests.sh`](scripts/quality/backend-tests.sh)
+- Backend coverage: [`scripts/quality/backend-coverage.sh`](scripts/quality/backend-coverage.sh)
+- Backend vulnerability check: [`scripts/security/backend-vulnerabilities.sh`](scripts/security/backend-vulnerabilities.sh)
+- Frontend local: [`scripts/dev/frontend-local.sh`](scripts/dev/frontend-local.sh)
+- Frontend format: [`scripts/quality/frontend-format.sh`](scripts/quality/frontend-format.sh)
+- Frontend style check: [`scripts/quality/frontend-style.sh`](scripts/quality/frontend-style.sh)
+- Frontend tests: [`scripts/quality/frontend-tests.sh`](scripts/quality/frontend-tests.sh)
+- Frontend vulnerability check: [`scripts/security/frontend-vulnerabilities.sh`](scripts/security/frontend-vulnerabilities.sh)
 - Frontend coverage: `npm run test:coverage` from `frontend/`
-- Frontend build: [`scripts/win/dev/frontend-build.ps1`](scripts/win/dev/frontend-build.ps1)
-- Frontend smoke test: [`scripts/win/dev/frontend-smoke.ps1`](scripts/win/dev/frontend-smoke.ps1)
-- Deployment smoke: [`scripts/win/quality/deployment-smoke.ps1`](scripts/win/quality/deployment-smoke.ps1)
-- Dependency security: [`scripts/win/security/check-dependencies.ps1`](scripts/win/security/check-dependencies.ps1)
-- Secret scanning: [`scripts/win/git/scan-secrets.ps1`](scripts/win/git/scan-secrets.ps1)
-- Dev Docker full stack: [`scripts/win/dev/docker-full-stack.ps1`](scripts/win/dev/docker-full-stack.ps1)
-- Dev monitoring stack: [`scripts/win/dev/monitoring.ps1`](scripts/win/dev/monitoring.ps1)
-- SonarQube stack: [`scripts/win/quality/sonar-stack.ps1`](scripts/win/quality/sonar-stack.ps1)
-- Sonar analysis: [`scripts/win/quality/sonar-analysis.ps1`](scripts/win/quality/sonar-analysis.ps1)
-- Git hook setup: [`scripts/win/git/setup-hooks.ps1`](scripts/win/git/setup-hooks.ps1)
-- Git hook setup (Unix): [`scripts/unix/git/setup-hooks.sh`](scripts/unix/git/setup-hooks.sh)
-- Before push check: [`scripts/win/run-before-push.ps1`](scripts/win/run-before-push.ps1)
-- Before push check (Unix): [`scripts/unix/run-before-push.sh`](scripts/unix/run-before-push.sh)
+- Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
+- Frontend smoke test: [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
+- Deployment smoke: [`scripts/quality/deployment-smoke.sh`](scripts/quality/deployment-smoke.sh)
+- Dependency security: [`scripts/security/check-dependencies.sh`](scripts/security/check-dependencies.sh)
+- Secret scanning: [`scripts/git/scan-secrets.sh`](scripts/git/scan-secrets.sh)
+- Dev Docker full stack: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh)
+- Dev monitoring stack: [`scripts/dev/monitoring.sh`](scripts/dev/monitoring.sh)
+- Demo-like local stack: [`scripts/dev/demo-local.sh`](scripts/dev/demo-local.sh)
+- Demo-like local stop: [`scripts/dev/demo-local-stop.sh`](scripts/dev/demo-local-stop.sh)
+- Backend demo mode: [`scripts/dev/backend-demo.sh`](scripts/dev/backend-demo.sh)
+- Frontend demo preview: [`scripts/dev/frontend-demo.sh`](scripts/dev/frontend-demo.sh)
+- SonarQube stack: [`scripts/quality/sonar-stack.sh`](scripts/quality/sonar-stack.sh)
+- Sonar analysis: [`scripts/quality/sonar-analysis.sh`](scripts/quality/sonar-analysis.sh)
+- Git hook setup: [`scripts/git/setup-hooks.sh`](scripts/git/setup-hooks.sh)
 
-Windows scripts live under `scripts/win/{dev,git,quality,security}` and Unix scripts live under `scripts/unix/{dev,git,quality,security}`, with the same names ending in `.ps1` and `.sh`.
+## Local, Demo, and Dev Modes
+
+- `local`: use the full Docker stack or the backend-local launcher. Mailpit is the inbox catcher.
+- `demo`: use the demo-local launcher to mimic Render more closely. The backend runs in `demo` profile and the frontend opens preview links in the simulated mailbox modal.
+- `dev`: use the backend-only or frontend-local scripts when you want to run pieces independently during development.
+
+Quick commands:
+
+- Local stack: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh)
+- Demo-like stack: [`scripts/dev/demo-local.sh`](scripts/dev/demo-local.sh)
+- Demo-like stop: [`scripts/dev/demo-local-stop.sh`](scripts/dev/demo-local-stop.sh)
+- Backend demo mode: [`scripts/dev/backend-demo.sh`](scripts/dev/backend-demo.sh)
+- Frontend demo preview: [`scripts/dev/frontend-demo.sh`](scripts/dev/frontend-demo.sh)
+- Backend local with Mailpit: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
+- Frontend local: [`scripts/dev/frontend-local.sh`](scripts/dev/frontend-local.sh)
+- Git hook setup: [`scripts/git/setup-hooks.sh`](scripts/git/setup-hooks.sh)
+- Before-push check: [`scripts/run-before-push.sh`](scripts/run-before-push.sh)
+
+The project has one Bash-only script set. On Windows, run it through WSL, for example:
+
+```powershell
+wsl bash ./scripts/run-before-push.sh
+```
 
 To disable the pre-push hook in the current clone, run:
 
@@ -272,21 +274,21 @@ git config --unset core.hooksPath
 
 To enable it again:
 
-```powershell
-.\scripts\win\git\setup-hooks.ps1
+```bash
+bash ./scripts/git/setup-hooks.sh
 ```
 
-The platform-grouped scripts are the canonical entrypoints, and `run-before-push` is available as a convenience wrapper in both `scripts/win/` and `scripts/unix/`.
+The scripts under `scripts/` are the canonical local and CI entrypoints.
 
 Note: stop any already running backend instance before starting dev mode, otherwise port `8080` will already be in use.
 
 If you want the exact test/build shortcuts the project uses day to day:
 
-- Frontend tests: [`scripts/win/quality/frontend-tests.ps1`](scripts/win/quality/frontend-tests.ps1)
-- Backend coverage: [`scripts/win/quality/backend-coverage.ps1`](scripts/win/quality/backend-coverage.ps1)
-- Frontend build: [`scripts/win/dev/frontend-build.ps1`](scripts/win/dev/frontend-build.ps1)
+- Frontend tests: [`scripts/quality/frontend-tests.sh`](scripts/quality/frontend-tests.sh)
+- Backend coverage: [`scripts/quality/backend-coverage.sh`](scripts/quality/backend-coverage.sh)
+- Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
 - Frontend coverage: `npm run test:coverage` from `frontend/`
-- Frontend smoke test: [`scripts/win/dev/frontend-smoke.ps1`](scripts/win/dev/frontend-smoke.ps1)
+- Frontend smoke test: [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
 
 ## Docker Stack
 
@@ -315,7 +317,7 @@ Services:
 Start monitoring separately when you need it:
 
 ```bash
-docker compose -p weblink-pilot -f infra/docker-compose.monitoring.yml up --build
+docker compose -p weblink-pilot-monitoring -f infra/monitoring/docker-compose.monitoring.yml up --build
 ```
 
 Monitoring services:
@@ -345,14 +347,13 @@ You can also select the Maven convenience profiles when running the backend dire
 
 Quick guide:
 
-- `local`: [`scripts/win/dev/backend-local.ps1`](scripts/win/dev/backend-local.ps1)
-- `dev`: [`scripts/win/dev/docker-full-stack.ps1`](scripts/win/dev/docker-full-stack.ps1) for the main stack, [`scripts/win/dev/monitoring.ps1`](scripts/win/dev/monitoring.ps1) for dashboards, or [`scripts/win/dev/backend-only.ps1`](scripts/win/dev/backend-only.ps1) after Postgres and Redis are up locally
+- `local`: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
+- `dev`: [`scripts/dev/docker-full-stack.sh`](scripts/dev/docker-full-stack.sh) for the main stack, [`scripts/dev/monitoring.sh`](scripts/dev/monitoring.sh) for dashboards, or [`scripts/dev/backend-only.sh`](scripts/dev/backend-only.sh) after Postgres and Redis are up locally
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:
 
-- Windows: [`scripts/win/dev/frontend-smoke.ps1`](scripts/win/dev/frontend-smoke.ps1)
-- Unix: [`scripts/unix/dev/frontend-smoke.sh`](scripts/unix/dev/frontend-smoke.sh)
+- [`scripts/dev/frontend-smoke.sh`](scripts/dev/frontend-smoke.sh)
 
 It expects the Docker stack to be up and a local Chrome or Edge executable to be available, or `PLAYWRIGHT_BROWSER_PATH` to be set.
 
@@ -365,14 +366,8 @@ To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEAL
 
 Then run:
 
-```powershell
-.\scripts\win\quality\deployment-smoke.ps1
-```
-
-On macOS/Linux:
-
 ```bash
-./scripts/unix/quality/deployment-smoke.sh
+bash ./scripts/quality/deployment-smoke.sh
 ```
 
 ## Frontend Quick Start

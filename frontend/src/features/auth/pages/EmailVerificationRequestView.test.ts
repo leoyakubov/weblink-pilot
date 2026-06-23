@@ -19,7 +19,9 @@ vi.mock('@/features/auth/repositories/auth.repository', () => ({
 
 describe('EmailVerificationRequestView', () => {
   it('requests a verification email', async () => {
-    mocks.requestEmailVerificationMock.mockResolvedValue(undefined);
+    mocks.requestEmailVerificationMock.mockResolvedValue({
+      previewLink: 'http://localhost:8081/auth/verify-email?token=demo-token',
+    });
 
     const wrapper = mount(EmailVerificationRequestView, {
       global: {
@@ -38,6 +40,6 @@ describe('EmailVerificationRequestView', () => {
     expect(mocks.requestEmailVerificationMock).toHaveBeenCalledWith({
       email: 'alice@example.com',
     });
-    expect(wrapper.text()).toContain('Verification email sent');
+    expect(wrapper.text()).toContain('Demo email ready');
   });
 });

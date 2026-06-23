@@ -284,9 +284,7 @@ describe('api helpers', () => {
 
       return new Response(
         JSON.stringify({
-          token: 'new-token',
-          username: 'alice',
-          role: 'USER',
+          previewLink: 'http://localhost:8081/auth/verify-email?token=demo-token',
         }),
         {
           status: 200,
@@ -306,7 +304,9 @@ describe('api helpers', () => {
         },
         settings,
       ),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({
+      previewLink: 'http://localhost:8081/auth/verify-email?token=demo-token',
+    });
   });
 
   it('serializes password reset request payload', async () => {
@@ -316,14 +316,22 @@ describe('api helpers', () => {
       expect(headers.get('Authorization')).toBeNull();
       expect(init?.credentials).toBe('include');
       expect(init?.body).toBe(JSON.stringify({ email: 'alice@example.com' }));
-      return new Response(null, { status: 204 });
+      return new Response(
+        JSON.stringify({
+          previewLink: 'http://localhost:8081/auth/reset-password?token=demo-token',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     });
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(
-      requestPasswordReset({ email: 'alice@example.com' }, settings),
-    ).resolves.toBeUndefined();
+    await expect(requestPasswordReset({ email: 'alice@example.com' }, settings)).resolves.toEqual({
+      previewLink: 'http://localhost:8081/auth/reset-password?token=demo-token',
+    });
   });
 
   it('serializes password reset confirm payload', async () => {
@@ -350,14 +358,24 @@ describe('api helpers', () => {
       expect(headers.get('Authorization')).toBeNull();
       expect(init?.credentials).toBe('include');
       expect(init?.body).toBe(JSON.stringify({ email: 'alice@example.com' }));
-      return new Response(null, { status: 204 });
+      return new Response(
+        JSON.stringify({
+          previewLink: 'http://localhost:8081/auth/verify-email?token=demo-token',
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
     });
 
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(
       requestEmailVerification({ email: 'alice@example.com' }, settings),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({
+      previewLink: 'http://localhost:8081/auth/verify-email?token=demo-token',
+    });
   });
 
   it('serializes email verification confirm payload', async () => {
