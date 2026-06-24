@@ -198,15 +198,17 @@ If you prefer not to type the Maven command manually, use the helper scripts:
 
 - [`scripts/quality/sonar-analysis.sh`](scripts/quality/sonar-analysis.sh)
 
-For a local backend convenience file, copy `backend/.env.example` to `backend/.env.local` and fill in the values:
+For a local backend convenience file, copy `backend/.env.local.example` to `backend/.env.local` and fill in the values:
 
 ```bash
-cp backend/.env.example backend/.env.local
-JWT_SECRET=your-local-jwt-secret
+cp backend/.env.local.local.example backend/.env.local.local
+APP_AUTH_JWT_SECRET=your-local-jwt-secret
 ```
 
-Deployment, smoke, and Netlify/Render helper values live under `infra/.env.local`.
-SonarQube helper values live under `infra/sonar/.env.local`.
+The backend reads `APP_AUTH_JWT_SECRET` first, then `JWT_SECRET`. The local and dev profiles also fall back to a built-in non-blank placeholder if neither variable is set, so local startup does not fail on an empty secret. Demo and production-style runs still require a real secret from the environment.
+
+Deployment, smoke, and Netlify/Render helper values live under `infra/.env.local`. Use `infra/.env.local.example` as the starter file.
+SonarQube helper values live under `infra/sonar/.env.local`. Use `infra/sonar/.env.local.example` as the starter file.
 
 ## Run Scripts
 

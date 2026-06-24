@@ -28,6 +28,7 @@ management:
 app:
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   auth:
+    jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:local-dev-jwt-secret-change-me-please-0001}}
     frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
   cache:
     provider: local

@@ -14,7 +14,7 @@ Requires Node.js 24.16.0 LTS and npm 11.13.0.
 Create a local env file if needed:
 
 ```bash
-copy .env.example .env.local
+copy .env.local.example .env.local
 ```
 
 The frontend uses `VITE_API_BASE_URL` for the backend API and `VITE_DEV_SERVER_PORT` for the local Vite port.

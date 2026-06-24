@@ -136,11 +136,11 @@ In this mode:
 
 ## Environment Files
 
-- Keep backend-only values in `backend/.env.local`.
-- Keep backend SMTP override values in `backend/.env.smtp.local`.
-- Keep frontend-only values in `frontend/.env.local`.
-- Keep deployment helper values in `infra/.env.local`.
-- Keep Sonar helper values in `infra/sonar/.env.local`.
+- Keep backend-only values in `backend/.env.local`. Start from `backend/.env.local.example`.
+- Keep backend SMTP override values in `backend/.env.smtp.local`. Start from `backend/.env.smtp.local.example`.
+- Keep frontend-only values in `frontend/.env.local`. Start from `frontend/.env.local.example`.
+- Keep deployment helper values in `infra/.env.local`. Start from `infra/.env.local.example`.
+- Keep Sonar helper values in `infra/sonar/.env.local`. Start from `infra/sonar/.env.local.example`.
 - Keep real secrets out of tracked files and git history.
 - Document new required variables in `docs/operations/deployment.md` or the relevant feature doc.
 - Use placeholder values only in tracked examples.
@@ -164,7 +164,7 @@ There is no shared repo-root `.env.local` now; use the area-specific files above
 
 | Variable or family | Read by | Source of truth |
 | --- | --- | --- |
-| `JWT_SECRET` / `APP_AUTH_JWT_SECRET` | Backend JWT signing | `backend/.env.local` for local runs; Render/GitHub secrets for demo |
+| `JWT_SECRET` / `APP_AUTH_JWT_SECRET` | Backend JWT signing | `backend/application/src/main/resources/application.yml` reads `APP_AUTH_JWT_SECRET` first, then `JWT_SECRET`; `application-local.yml` and `application-dev.yml` add a non-blank local fallback; `backend/.env.local` is the convenient place to set either value |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Backend GitHub OAuth | shell env, `backend/.env.local`, or Render secrets |
 | `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS` | Backend mail sender | `application-local.yml`, `application-dev.yml`, `application-demo.yml` plus env overrides |
 | `SPRING_MAIL_FROM_ADDRESS`, `SPRING_MAIL_FROM_NAME` | Backend mail sender identity | `application.yml` plus env overrides |
@@ -193,6 +193,19 @@ Common environment values include:
 - `SPRING_MAIL_HOST`
 - `SPRING_MAIL_USERNAME`
 - `SPRING_MAIL_PASSWORD`
+
+### JWT Secret Resolution
+
+The backend resolves the JWT secret in this order:
+
+1. `APP_AUTH_JWT_SECRET` from the environment or `backend/.env.local`
+2. `JWT_SECRET` from the environment or `backend/.env.local`
+3. A built-in non-blank placeholder only in the `local` and `dev` profiles
+
+That means:
+
+- `local` and `dev` can start even if neither variable is set, although you should still put a real secret in `backend/.env.local` for normal use.
+- `demo` and production-style runs still require a real secret and will fail fast if it is missing or blank.
 
 ## Development Commands
 

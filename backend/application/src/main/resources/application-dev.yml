@@ -29,6 +29,7 @@ app:
   cache:
     provider: redis
   auth:
+    jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:local-dev-jwt-secret-change-me-please-0001}}
     frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:8081}
   cors:
     allowed-origin-patterns:
