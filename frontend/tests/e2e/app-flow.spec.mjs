@@ -10,28 +10,17 @@ function apiUrl(path) {
 
 test('guest can create a link and open the details page', async () => {
   const { browser, page } = await openPage();
+  let created = false;
 
   try {
     await installApiRoutes(page, {
-      'POST /api/v1/urls': async () => ({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          code: 'openai-docs',
-          shortUrl: 'http://localhost:8080/r/openai-docs',
-          qrCodeUrl: apiUrl('/urls/openai-docs/qr'),
-          originalUrl: 'https://openai.com/docs',
-          createdAt: '2026-06-12T10:00:00Z',
-          expiresAt: null,
-          clickCount: 0,
-          ownerUsername: null,
-        }),
-      }),
-      'GET /api/v1/urls?limit=5': async () => ({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify([
-          {
+      'POST /api/v1/urls': async () => {
+        created = true;
+
+        return {
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
             code: 'openai-docs',
             shortUrl: 'http://localhost:8080/r/openai-docs',
             qrCodeUrl: apiUrl('/urls/openai-docs/qr'),
@@ -40,8 +29,28 @@ test('guest can create a link and open the details page', async () => {
             expiresAt: null,
             clickCount: 0,
             ownerUsername: null,
-          },
-        ]),
+          }),
+        };
+      },
+      'GET /api/v1/urls?limit=5': async () => ({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(
+          created
+            ? [
+                {
+                  code: 'openai-docs',
+                  shortUrl: 'http://localhost:8080/r/openai-docs',
+                  qrCodeUrl: apiUrl('/urls/openai-docs/qr'),
+                  originalUrl: 'https://openai.com/docs',
+                  createdAt: '2026-06-12T10:00:00Z',
+                  expiresAt: null,
+                  clickCount: 0,
+                  ownerUsername: null,
+                },
+              ]
+            : [],
+        ),
       }),
       'GET /api/v1/urls/openai-docs/preview': async () => ({
         status: 200,
@@ -150,7 +159,7 @@ test('signed-in user can log in and open the account page', async () => {
 
     await page.getByText('Signed in as alice', { exact: true }).waitFor();
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /your profile/i }).waitFor();
+    await page.getByRole('heading', { name: /^profile$/i }).waitFor();
 
     assert.match(page.url(), /\/account$/);
     await page.getByText('alice@example.com').waitFor();

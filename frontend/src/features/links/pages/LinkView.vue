@@ -17,6 +17,10 @@ import type {
   RedirectPreviewResponse,
 } from '@/shared/types/api';
 import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
+import HelpTooltip from '@/shared/components/common/HelpTooltip.vue';
+import PageIntro from '@/shared/components/common/PageIntro.vue';
+import PanelCard from '@/shared/components/common/PanelCard.vue';
+import QrCodeModal from '@/shared/components/common/QrCodeModal.vue';
 
 const route = useRoute();
 const settings = loadSettings();
@@ -115,14 +119,19 @@ function formatDate(value: string | null) {
 </script>
 
 <template>
-  <section class="page-grid two-col compact-detail">
-    <article class="card">
-      <div class="card-inner stack">
-        <div>
-          <p class="eyebrow">Link detail</p>
-          <h3 class="panel-title">Code: {{ code }}</h3>
-        </div>
+  <section class="page-grid compact-detail">
+    <PageIntro
+      eyebrow="Link detail"
+      :title="`Code: ${code}`"
+      description="Review the short link target, ownership, QR code, redirect preview, and analytics summary."
+    />
 
+    <div class="page-grid two-col">
+      <PanelCard
+        eyebrow="Link detail"
+        title="Overview"
+        description="Core metadata and quick actions for this short link."
+      >
         <p v-if="loading" class="help-text">Loading the link from the backend...</p>
         <p v-else-if="errorMessage" class="status error">
           <span class="status-dot"></span>
@@ -149,31 +158,39 @@ function formatDate(value: string | null) {
             </div>
           </div>
 
-          <div class="list-item">
-            <strong>Short URL</strong>
-            <p>{{ link.shortUrl }}</p>
-            <p class="help-text">
-              Short URLs are generated randomly unless you choose a custom alias.
-            </p>
-          </div>
-          <div class="list-item">
-            <strong>Target URL</strong>
-            <p>{{ link.originalUrl }}</p>
-          </div>
-          <div class="list-item">
-            <strong>Owner</strong>
-            <p>{{ link.ownerUsername ?? 'Anonymous demo' }}</p>
-          </div>
-          <div class="list-item-meta">
-            <span>Created: {{ formatDate(link.createdAt) }}</span>
-            <span>Expires: {{ formatDate(link.expiresAt) }}</span>
-          </div>
-          <div class="list-item">
-            <strong>Preview</strong>
-            <p>{{ preview?.locationHeader ?? 'Preview not loaded yet' }}</p>
-          </div>
+          <dl class="detail-list detail-list--link-detail">
+            <div class="form-field--with-popover">
+              <dt>
+                Short URL
+                <HelpTooltip button-label="Toggle short URL help">
+                  Short URLs are generated randomly unless you choose a custom alias.
+                </HelpTooltip>
+              </dt>
+              <dd>{{ link.shortUrl }}</dd>
+            </div>
+            <div>
+              <dt>Target URL</dt>
+              <dd>{{ link.originalUrl }}</dd>
+            </div>
+            <div>
+              <dt>Owner</dt>
+              <dd>{{ link.ownerUsername ?? 'Anonymous demo' }}</dd>
+            </div>
+            <div>
+              <dt>Created</dt>
+              <dd>{{ formatDate(link.createdAt) }}</dd>
+            </div>
+            <div>
+              <dt>Expires</dt>
+              <dd>{{ formatDate(link.expiresAt) }}</dd>
+            </div>
+            <div>
+              <dt>Preview</dt>
+              <dd>{{ preview?.locationHeader ?? 'Preview not loaded yet' }}</dd>
+            </div>
+          </dl>
 
-          <div class="actions">
+          <div class="actions link-detail-actions">
             <Button
               type="button"
               :label="isCopied('link-short') ? 'Short URL copied' : 'Copy short URL'"
@@ -201,17 +218,14 @@ function formatDate(value: string | null) {
             />
           </div>
         </template>
-      </div>
-    </article>
+      </PanelCard>
 
-    <div class="stack">
-      <article class="card">
-        <div class="card-inner stack">
-          <div>
-            <p class="eyebrow">QR</p>
-            <h3 class="panel-title">Scan-ready output</h3>
-          </div>
-
+      <div class="stack">
+        <PanelCard
+          eyebrow="QR"
+          title="Scan-ready output"
+          description="Use this QR code in slides, printouts, or mobile sharing."
+        >
           <figure v-if="link" class="compact-figure">
             <img
               class="qr-image qr-image--compact"
@@ -238,16 +252,13 @@ function formatDate(value: string | null) {
               @click="openQrModal(link.qrCodeUrl, link.code)"
             />
           </div>
-        </div>
-      </article>
+        </PanelCard>
 
-      <article class="card">
-        <div class="card-inner stack">
-          <div>
-            <p class="eyebrow">Analytics</p>
-            <h3 class="panel-title">Click breakdown</h3>
-          </div>
-
+        <PanelCard
+          eyebrow="Analytics"
+          title="Analytics from backend"
+          description="Loaded from the analytics summary API for this short code. Shows redirect clicks, QR scans, unique visitors, and country data when available."
+        >
           <div v-if="analytics" class="stack">
             <AnalyticsSummaryPanel :summary="analytics" />
           </div>
@@ -256,40 +267,15 @@ function formatDate(value: string | null) {
             <span class="status-dot"></span>
             {{ analyticsMessage }}
           </p>
-        </div>
-      </article>
+        </PanelCard>
+      </div>
     </div>
 
-    <teleport to="body">
-      <Transition name="session-notice">
-        <div v-if="qrModalUrl" class="modal-backdrop" @click.self="closeQrModal">
-          <div class="modal-card card">
-            <div class="card-inner stack">
-              <div class="section-row">
-                <div>
-                  <p class="eyebrow">QR code</p>
-                  <h3 class="panel-title">{{ qrModalTitle }}</h3>
-                </div>
-                <Button
-                  type="button"
-                  label="Close"
-                  icon="pi pi-times"
-                  severity="secondary"
-                  variant="text"
-                  size="small"
-                  @click="closeQrModal"
-                />
-              </div>
-
-              <img
-                class="qr-image qr-image--compact modal-qr"
-                :src="qrModalUrl"
-                :alt="`QR code for ${qrModalTitle}`"
-              />
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </teleport>
+    <QrCodeModal
+      :visible="Boolean(qrModalUrl)"
+      :title="qrModalTitle"
+      :url="qrModalUrl"
+      @close="closeQrModal"
+    />
   </section>
 </template>

@@ -45,9 +45,7 @@ test('guest can open the public pages and see guard redirects', async () => {
     await page.getByRole('heading', { name: /web link shortener/i }).waitFor();
 
     await page.goto(`${baseUrl}/about`, { waitUntil: 'networkidle' });
-    await page
-      .getByRole('heading', { name: /built like a small saas, not a classroom demo\./i })
-      .waitFor();
+    await page.getByRole('heading', { name: /weblinkpilot/i }).waitFor();
 
     await page.goto(`${baseUrl}/auth/signin`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /sign in/i }).waitFor();
@@ -200,22 +198,25 @@ test('signed-in user can open dashboard, history, and account routes', async () 
     });
 
     await page.goto(`${baseUrl}/dashboard?code=openai-docs`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /inspect clicks for any short code\./i }).waitFor();
+    await page.getByRole('heading', { name: /link analytics/i }).waitFor();
     assert.equal(await page.getByLabel('Short code').inputValue(), 'openai-docs');
     await page.getByText('US').waitFor();
 
     await page.goto(`${baseUrl}/history`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { level: 1, name: /recent links/i }).waitFor();
-    await page.getByText('openai-docs').waitFor();
+    await page.locator('.recent-link-code', { hasText: 'openai-docs' }).waitFor();
 
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /your profile/i }).waitFor();
+    await page.getByRole('heading', { name: /^profile$/i }).waitFor();
     await page.getByText('alice@example.com').waitFor();
     const linkedAccount = page.locator('.linked-account').first();
     await linkedAccount.waitFor();
     const linkedAccountText = await linkedAccount.textContent();
     assert.ok(linkedAccountText);
     assert.match(linkedAccountText, /GITHUB/i);
+
+    await page.goto(`${baseUrl}/account/security`, { waitUntil: 'networkidle' });
+    await page.getByRole('heading', { name: /^security$/i }).waitFor();
   } finally {
     await browser.close();
   }
@@ -300,7 +301,7 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
     });
 
     await page.goto(`${baseUrl}/dashboard?code=github-org`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /inspect clicks for any short code\./i }).waitFor();
+    await page.getByRole('heading', { name: /link analytics/i }).waitFor();
     await page.getByLabel('Creator filter').waitFor();
     assert.equal(await page.getByLabel('Short code').inputValue(), 'github-org');
 
@@ -316,7 +317,7 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
     assert.ok(requestedUrls.some((value) => value.includes('creator=alice')));
 
     await page.goto(`${baseUrl}/monitoring`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /system overview and ownership mix\./i }).waitFor();
+    await page.getByRole('heading', { name: /admin monitoring/i }).waitFor();
     await page.getByText('Total users').waitFor();
     await page.getByText('Local stack').waitFor();
   } finally {

@@ -115,7 +115,7 @@ describe('DashboardView', () => {
     });
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Inspect clicks for any short code.');
+    expect(wrapper.text()).toContain('Inspect a short code');
     expect(wrapper.text()).toContain('Open preview JSON');
     expect(wrapper.text()).toContain('github-org');
     expect(wrapper.text()).toContain('US');

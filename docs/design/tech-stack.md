@@ -89,15 +89,16 @@ Why:
 
 ### Styling
 
-- PrimeVue
-- Sakai template
-- CSS overrides
+- PrimeVue controls
+- PrimeVue Nora theme preset
+- Custom CSS visual system
 
 Why:
 
-- PrimeVue gives us a rich Vue 3 component set for tables, forms, dialogs, menus, and dashboard blocks
-- Sakai provides a free, ready-made Vue 3 admin/dashboard template that fits our demo style
-- CSS overrides keep the UI flexible without locking us into a heavy custom design system
+- PrimeVue gives us stable Vue 3 controls for forms, buttons, drawers, and common action patterns.
+- The Nora theme preset provides the PrimeVue token baseline used by those controls.
+- The app presentation stays custom and product-specific instead of adopting a Sakai template migration.
+- Custom CSS tokens and shared components keep the UI flexible without locking us into a template.
 
 ## Infra and delivery
 

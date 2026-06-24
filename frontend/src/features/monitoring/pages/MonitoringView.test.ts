@@ -4,6 +4,13 @@ import MonitoringView from '@/features/monitoring/pages/MonitoringView.vue';
 
 const mocks = vi.hoisted(() => ({
   getAdminOverviewMock: vi.fn(),
+  saveSettingsMock: vi.fn(),
+  routerPushMock: vi.fn(),
+  settingsState: {
+    apiBaseUrl: '/api/v1',
+    authToken: '',
+    refreshToken: '',
+  },
 }));
 
 vi.mock('@/features/monitoring/repositories/monitoring.repository', () => ({
@@ -11,17 +18,21 @@ vi.mock('@/features/monitoring/repositories/monitoring.repository', () => ({
 }));
 
 vi.mock('@/shared/services/settings', () => ({
-  loadSettings: () => ({
-    apiBaseUrl: '/api/v1',
-    authToken: '',
-    refreshToken: '',
-  }),
+  loadSettings: () => ({ ...mocks.settingsState }),
+  saveSettings: mocks.saveSettingsMock,
   normalizeBaseUrl: (value: string) => value.trim().replace(/\/+$/, ''),
+}));
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: mocks.routerPushMock,
+  }),
 }));
 
 describe('MonitoringView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.settingsState.apiBaseUrl = '/api/v1';
     mocks.getAdminOverviewMock.mockResolvedValue({
       totalUsers: 5,
       adminUsers: 1,
@@ -55,5 +66,25 @@ describe('MonitoringView', () => {
     expect(wrapper.text()).toContain('Local stack');
     expect(wrapper.find('a[href="http://localhost:9090"]').exists()).toBe(true);
     expect(wrapper.find('a[href="http://localhost:3001"]').exists()).toBe(true);
+  });
+
+  it('saves backend browser settings and opens reset flow', async () => {
+    const wrapper = mount(MonitoringView);
+    await flushPromises();
+
+    const input = wrapper.get('input[type="url"]');
+    await input.setValue('http://localhost:9090/api/v1');
+    await wrapper.get('[data-testid="save-settings"]').trigger('click');
+    await flushPromises();
+
+    expect(mocks.saveSettingsMock).toHaveBeenCalledWith({
+      apiBaseUrl: 'http://localhost:9090/api/v1',
+      authToken: '',
+      refreshToken: '',
+    });
+    expect(wrapper.text()).toContain('Saved for this browser');
+
+    await wrapper.get('[data-testid="reset-browser-settings"]').trigger('click');
+    expect(mocks.routerPushMock).toHaveBeenCalledWith({ name: 'settings-reset' });
   });
 });

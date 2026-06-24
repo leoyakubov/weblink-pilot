@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
 import { getAdminOverview } from '@/features/monitoring/repositories/monitoring.repository';
 import { buildMonitoringLinks } from '@/features/monitoring/services/monitoring.service';
-import { loadSettings } from '@/shared/services/settings';
-import type { AdminOverviewResponse } from '@/shared/types/api';
+import PageIntro from '@/shared/components/common/PageIntro.vue';
+import PanelCard from '@/shared/components/common/PanelCard.vue';
+import RefreshButton from '@/shared/components/common/RefreshButton.vue';
+import { loadSettings, saveSettings } from '@/shared/services/settings';
+import type { AdminOverviewResponse, ApiSettings } from '@/shared/types/api';
 
-const settings = loadSettings();
+const settings = reactive<ApiSettings>(loadSettings());
+const canEditBackendUrl = !import.meta.env.PROD;
+const router = useRouter();
 const monitoringLinks = buildMonitoringLinks(settings);
 const overview = ref<AdminOverviewResponse | null>(null);
 const loading = ref(false);
 const errorMessage = ref('');
+const saved = ref(false);
 const backendLinks = computed(() => [
   {
     label: 'Health',
@@ -64,30 +72,40 @@ async function refresh() {
   }
 }
 
+function saveBaseUrl() {
+  saveSettings(settings);
+  saved.value = true;
+  window.setTimeout(() => {
+    saved.value = false;
+  }, 1500);
+}
+
+function resetBrowserSettings() {
+  router.push({ name: 'settings-reset' });
+}
+
 onMounted(() => {
   refresh();
 });
 </script>
 
 <template>
-  <section class="page-grid two-col">
-    <article class="card">
-      <div class="card-inner stack">
-        <div class="section-row">
-          <div>
-            <p class="eyebrow">Admin monitoring</p>
-            <h3 class="panel-title">System overview and ownership mix.</h3>
-          </div>
-          <Button
-            type="button"
-            :label="loading ? 'Refreshing...' : 'Refresh'"
-            icon="pi pi-refresh"
-            severity="secondary"
-            variant="outlined"
-            :disabled="loading"
-            @click="refresh"
-          />
-        </div>
+  <section class="page-grid">
+    <PageIntro
+      eyebrow="Monitoring"
+      title="Admin monitoring"
+      description="Review system totals, open operational endpoints, and adjust local browser/backend settings from one place."
+    />
+
+    <div class="page-grid two-col">
+      <PanelCard
+        eyebrow="Admin overview"
+        title="System overview"
+        description="User totals and link ownership counts show how the app is being used."
+      >
+        <template #actions>
+          <RefreshButton :loading="loading" @refresh="refresh" />
+        </template>
 
         <p class="help-text">
           This page is for admins only. It combines user totals and link ownership counts so you can
@@ -125,69 +143,121 @@ onMounted(() => {
             <span class="value">{{ overview.anonymousLinks }}</span>
           </div>
         </div>
-      </div>
-    </article>
+      </PanelCard>
 
-    <article class="card">
-      <div class="card-inner stack">
-        <div class="section-row">
-          <div>
-            <p class="eyebrow">Live backend</p>
-            <h3 class="panel-title">Actuator endpoints and metrics.</h3>
-          </div>
-        </div>
-
-        <p class="help-text">
-          These links point at the live backend actuator endpoints for the current environment. In
-          the local Docker stack, the frontend proxy serves them from the same origin.
-        </p>
-
+      <PanelCard
+        eyebrow="Live backend"
+        title="Actuator endpoints"
+        description="Open backend health, info, metrics, and scrape endpoints for the current environment."
+      >
         <div class="list">
-          <div v-for="link in backendLinks" :key="link.label" class="list-item">
+          <div v-for="link in backendLinks" :key="link.label" class="list-item monitoring-link">
             <div class="section-row">
               <div>
                 <strong>{{ link.label }}</strong>
                 <p>{{ link.description }}</p>
               </div>
               <a :href="link.href" target="_blank" rel="noreferrer">
-                <Button label="Open" severity="secondary" variant="outlined" />
+                <Button label="Open" icon="pi pi-external-link" severity="secondary" />
               </a>
             </div>
           </div>
         </div>
-      </div>
-    </article>
-  </section>
+      </PanelCard>
+    </div>
 
-  <section v-if="monitoringLinks.showLocalStack" class="page-grid">
-    <article class="card">
-      <div class="card-inner stack">
-        <div class="section-row">
-          <div>
-            <p class="eyebrow">Local stack</p>
-            <h3 class="panel-title">Prometheus and Grafana for Docker dev.</h3>
+    <div class="page-grid two-col">
+      <PanelCard
+        eyebrow="Frontend settings"
+        title="Backend base URL"
+        description="Use these browser-local settings when testing a different backend endpoint."
+      >
+        <div class="section-row about-toolbar">
+          <div class="about-toolbar__copy">
+            <p class="eyebrow about-toolbar__eyebrow">Browser tools</p>
+            <p class="help-text">
+              Clear saved browser state when the demo points at stale settings.
+            </p>
+          </div>
+
+          <div class="actions">
+            <Button
+              type="button"
+              label="Reset saved settings"
+              severity="warning"
+              icon="pi pi-refresh"
+              data-testid="reset-browser-settings"
+              @click="resetBrowserSettings"
+            />
           </div>
         </div>
 
-        <p class="help-text">
-          When you start the Docker full stack, Prometheus scrapes the backend and Grafana reads
-          from Prometheus without any extra setup.
+        <template v-if="canEditBackendUrl">
+          <label class="form-field">
+            <span class="field-label">API base URL</span>
+            <InputText
+              v-model="settings.apiBaseUrl"
+              type="url"
+              placeholder="http://localhost:8080/api/v1"
+              fluid
+            />
+          </label>
+
+          <div class="actions">
+            <Button
+              type="button"
+              label="Save settings"
+              icon="pi pi-save"
+              data-testid="save-settings"
+              @click="saveBaseUrl"
+            />
+          </div>
+        </template>
+
+        <dl v-else class="detail-list">
+          <div>
+            <dt>API base URL</dt>
+            <dd>{{ settings.apiBaseUrl }}</dd>
+          </div>
+        </dl>
+
+        <p v-if="saved" class="status">
+          <span class="status-dot"></span>
+          Saved for this browser
         </p>
 
+        <dl class="detail-list">
+          <div>
+            <dt>Current backend</dt>
+            <dd>{{ settings.apiBaseUrl }}</dd>
+          </div>
+          <div>
+            <dt>Demo accounts</dt>
+            <dd>admin / admin123, user / user123</dd>
+          </div>
+        </dl>
+      </PanelCard>
+
+      <PanelCard
+        v-if="monitoringLinks.showLocalStack"
+        eyebrow="Local stack"
+        title="Prometheus and Grafana"
+        description="When you start the Docker full stack, Prometheus scrapes the backend and Grafana reads from Prometheus without extra setup."
+      >
         <div class="list">
-          <div v-for="link in localStackLinks" :key="link.label" class="list-item">
+          <div v-for="link in localStackLinks" :key="link.label" class="list-item monitoring-link">
             <div class="section-row">
               <div>
                 <strong>{{ link.label }}</strong>
                 <p>{{ link.description }}</p>
               </div>
               <a :href="link.href" target="_blank" rel="noreferrer">
-                <Button label="Open" severity="secondary" variant="outlined" />
+                <Button label="Open" icon="pi pi-external-link" severity="secondary" />
               </a>
             </div>
           </div>
         </div>
-      </div>
-    </article>
+      </PanelCard>
+    </div>
   </section>
 </template>

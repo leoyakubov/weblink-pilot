@@ -3,9 +3,13 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
+import LinkList from '@/features/links/components/LinkList.vue';
 import FeatureCard from '@/shared/components/common/FeatureCard.vue';
 import PageIntro from '@/shared/components/common/PageIntro.vue';
 import PanelCard from '@/shared/components/common/PanelCard.vue';
+import RefreshButton from '@/shared/components/common/RefreshButton.vue';
+import HelpTooltip from '@/shared/components/common/HelpTooltip.vue';
+import QrCodeModal from '@/shared/components/common/QrCodeModal.vue';
 import { useCopyAction } from '@/shared/composables/useCopyAction';
 import { authState } from '@/features/auth/services/auth.service';
 import { buildApiBaseUrl } from '@/shared/services/http';
@@ -13,10 +17,12 @@ import { loadSettings, saveSettings } from '@/shared/services/settings';
 import { createLink, listLinks } from '@/features/links/repositories/link.repository';
 import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/shared/types/api';
 
+const CREATE_COOLDOWN_MS = 1500;
+
 const settings = reactive<ApiSettings>(loadSettings());
 const form = reactive<CreateLinkRequest>({
-  originalUrl: 'https://github.com/weblinkpilot/',
-  customAlias: 'wlpilot',
+  originalUrl: 'https://github.com/leoyakubov/weblink-pilot',
+  customAlias: '',
   expiresAt: '',
 });
 
@@ -27,12 +33,10 @@ const recentError = ref('');
 const errorMessage = ref('');
 const successMessage = ref('');
 const submitting = ref(false);
+const createCooldownUntil = ref(0);
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
-const openHelp = reactive({
-  alias: false,
-  expiration: false,
-});
+const createdModalOpen = ref(false);
 
 const userStatus = computed(() =>
   authState.currentUser
@@ -46,11 +50,26 @@ const linkPreviewUrl = computed(() =>
   createdLink.value ? buildApiBaseUrl(`/urls/${createdLink.value.code}/preview`, settings) : '',
 );
 
-const dashboardUrl = computed(() =>
-  createdLink.value ? { name: 'dashboard', query: { code: createdLink.value.code } } : '/',
-);
-
 const { copy, isCopied } = useCopyAction();
+
+function normalizeComparableUrl(value: string) {
+  try {
+    return new URL(value.trim()).href;
+  } catch {
+    return value.trim();
+  }
+}
+
+function findExistingLink(originalUrl: string) {
+  const currentOwner = authState.currentUser?.username ?? null;
+  const normalizedOriginalUrl = normalizeComparableUrl(originalUrl);
+
+  return recentLinks.value.find(
+    (link) =>
+      normalizeComparableUrl(link.originalUrl) === normalizedOriginalUrl &&
+      (link.ownerUsername ?? null) === currentOwner,
+  );
+}
 
 function syncSettings() {
   saveSettings(settings);
@@ -73,7 +92,6 @@ async function refreshRecent() {
 async function submit() {
   errorMessage.value = '';
   successMessage.value = '';
-  submitting.value = true;
 
   try {
     syncSettings();
@@ -81,14 +99,29 @@ async function submit() {
     const originalUrl = form.originalUrl.trim();
     new URL(originalUrl);
 
+    const now = Date.now();
+    if (now < createCooldownUntil.value) {
+      errorMessage.value = 'Please wait a moment before shortening another link.';
+      return;
+    }
+
+    const existingLink = findExistingLink(originalUrl);
+    if (existingLink) {
+      errorMessage.value = `This full URL already has a short link for ${existingLink.ownerUsername ?? 'anonymous demo'}: ${existingLink.shortUrl}`;
+      return;
+    }
+
     const payload: CreateLinkRequest = {
       originalUrl,
       customAlias: form.customAlias?.trim() || undefined,
       expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
     };
 
+    submitting.value = true;
+    createCooldownUntil.value = Date.now() + CREATE_COOLDOWN_MS;
     createdLink.value = await createLink(payload, settings);
     successMessage.value = `Created ${createdLink.value.code} successfully`;
+    createdModalOpen.value = true;
     await refreshRecent();
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Something went wrong';
@@ -111,19 +144,8 @@ function closeQrModal() {
   qrModalTitle.value = '';
 }
 
-function toggleHelp(field: keyof typeof openHelp) {
-  openHelp[field] = !openHelp[field];
-}
-
-function formatDate(value: string | null) {
-  if (!value) {
-    return 'Never';
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value));
+function closeCreatedModal() {
+  createdModalOpen.value = false;
 }
 
 onMounted(() => {
@@ -143,33 +165,40 @@ watch(
     <PageIntro
       eyebrow="Link management"
       title="Web link shortener"
-      description="Fast, branded short links for demos, teams, and shared workflows."
+      description="Fast, branded short links for personal demos, saved history, and everyday sharing."
     />
 
     <div class="page-grid two-col home-top-grid">
       <PanelCard
         eyebrow="Fast start"
-        title="Why teams use it"
+        title="Fast, personal links"
         description="Create a demo link in seconds, or sign in to keep ownership and revisit your private history later. Redirects stay fast, QR scans are built in, and analytics are ready when you need them."
       >
-        <div class="quick-list">
-          <div class="quick-chip-row">
-            <span class="quick-chip quick-chip--blue">Guest demo links</span>
-            <span class="quick-chip quick-chip--green">Owned user links</span>
-            <span class="quick-chip quick-chip--amber">QR scans</span>
-            <span class="quick-chip quick-chip--light">Analytics</span>
-          </div>
-
-          <div class="quick-card-grid">
-            <div class="quick-item quick-item--teal">
-              <strong>Simple start</strong>
-              <p>Create a link now, no account required.</p>
-            </div>
-            <div class="quick-item quick-item--slate">
-              <strong>Signed-in mode</strong>
-              <p>Keep links owned and revisit them later.</p>
-            </div>
-          </div>
+        <div class="feature-grid feature-grid--compact">
+          <FeatureCard
+            tone="info"
+            eyebrow="Guest demo links"
+            title="Create without friction"
+            description="Make a short URL in seconds when you only need a quick personal demo."
+          />
+          <FeatureCard
+            tone="success"
+            eyebrow="Owned user links"
+            title="Keep ownership and history"
+            description="Sign in when you want private links, saved history, and easy revisits later."
+          />
+          <FeatureCard
+            tone="warn"
+            eyebrow="QR scans"
+            title="Works on phones and print"
+            description="Every link is ready for scanning from your phone, printouts, posters, and slides."
+          />
+          <FeatureCard
+            tone="contrast"
+            eyebrow="Analytics insights"
+            title="See clicks in context"
+            description="Track performance without leaving the link workflow or opening extra tools."
+          />
         </div>
       </PanelCard>
 
@@ -184,58 +213,41 @@ watch(
             <InputText
               v-model="form.originalUrl"
               type="url"
-              placeholder="https://github.com/weblinkpilot/"
+              placeholder="https://github.com/leoyakubov/weblink-pilot"
               required
             />
           </label>
 
-          <div class="form-field">
+          <div class="form-field form-field--with-popover">
             <div class="field-label-row">
-              <label class="field-label" for="custom-alias">Custom alias</label>
-              <Button
-                type="button"
-                class="field-help-button"
-                icon="pi pi-question-circle"
-                severity="secondary"
-                variant="text"
-                size="small"
-                aria-label="Toggle custom alias help"
-                :aria-expanded="openHelp.alias"
-                @click="toggleHelp('alias')"
-              />
+              <div class="field-label-group">
+                <label class="field-label" for="custom-alias">Custom alias (optional)</label>
+                <HelpTooltip button-label="Toggle custom alias help">
+                  Choose a short, memorable word for the end of your link, like
+                  <strong>portfolio</strong> or <strong>launch-notes</strong>. Leave it empty when
+                  you want WebLinkPilot to create one automatically.
+                </HelpTooltip>
+              </div>
             </div>
             <InputText
               id="custom-alias"
               v-model="form.customAlias"
               type="text"
-              placeholder="wlpilot"
+              placeholder="weblinkpilot"
             />
-            <p v-if="openHelp.alias" class="help-text help-text--large">
-              Optional, and the demo starts with <strong>wlpilot</strong> so you can see a clean
-              branded short link right away.
-            </p>
           </div>
 
-          <div class="form-field">
+          <div class="form-field form-field--with-popover">
             <div class="field-label-row">
-              <label class="field-label" for="expiration">Expiration</label>
-              <Button
-                type="button"
-                class="field-help-button"
-                icon="pi pi-question-circle"
-                severity="secondary"
-                variant="text"
-                size="small"
-                aria-label="Toggle expiration help"
-                :aria-expanded="openHelp.expiration"
-                @click="toggleHelp('expiration')"
-              />
+              <div class="field-label-group">
+                <label class="field-label" for="expiration">Expiration (optional)</label>
+                <HelpTooltip button-label="Toggle expiration help">
+                  Leave this blank for no expiration. If you choose a date, the backend still caps
+                  the maximum lifetime so your links do not run forever by accident.
+                </HelpTooltip>
+              </div>
             </div>
             <InputText id="expiration" v-model="form.expiresAt" type="datetime-local" />
-            <p v-if="openHelp.expiration" class="help-text help-text--large">
-              Leave this blank for no expiration. If you choose a date, the backend still caps the
-              maximum lifetime so demo links do not run forever by accident.
-            </p>
           </div>
 
           <div class="actions">
@@ -266,21 +278,12 @@ watch(
     </div>
 
     <PanelCard
-      eyebrow="Recent links"
-      title="Recent links"
-      description="The latest saved links from the backend, ready to open, copy, or inspect."
+      eyebrow="Saved history"
+      title="Latest links"
+      description="Fresh links from the backend, ready to open, copy, or inspect."
     >
       <template #actions>
-        <Button
-          type="button"
-          class="refresh-button"
-          :label="loadingRecent ? 'Refreshing...' : 'Refresh'"
-          icon="pi pi-refresh"
-          severity="secondary"
-          variant="text"
-          :disabled="loadingRecent"
-          @click="refreshRecent"
-        />
+        <RefreshButton :loading="loadingRecent" @refresh="refreshRecent" />
       </template>
 
       <p v-if="recentError" class="status error">
@@ -288,218 +291,84 @@ watch(
         {{ recentError }}
       </p>
 
-      <div v-if="recentLinks.length" class="list">
-        <div v-for="item in recentLinks" :key="item.code" class="list-item">
-          <div class="section-row">
-            <div>
-              <strong>{{ item.code }}</strong>
-              <p>{{ item.shortUrl }}</p>
-            </div>
-            <div class="list-item-meta list-item-meta--stacked list-item-meta--large">
-              <span>{{ item.ownerUsername ?? 'Anonymous demo' }}</span>
-              <span>Created: {{ formatDate(item.createdAt) }}</span>
-              <span>Expires: {{ formatDate(item.expiresAt) }}</span>
-            </div>
-          </div>
-          <p class="footnote">{{ item.clickCount }} clicks</p>
-          <div class="actions">
-            <RouterLink :to="{ name: 'link', params: { code: item.code } }">
-              <Button label="Details" icon="pi pi-external-link" />
-            </RouterLink>
-            <RouterLink :to="{ name: 'dashboard', query: { code: item.code } }">
-              <Button
-                label="Analytics"
-                icon="pi pi-chart-line"
-                severity="secondary"
-                variant="outlined"
-              />
-            </RouterLink>
-            <Button
-              type="button"
-              :label="isCopied(`recent-${item.code}`) ? 'Short URL copied' : 'Copy short URL'"
-              :icon="isCopied(`recent-${item.code}`) ? 'pi pi-check' : 'pi pi-copy'"
-              severity="secondary"
-              variant="outlined"
-              @click="copy(item.shortUrl, `recent-${item.code}`)"
-            />
-            <Button
-              type="button"
-              label="Open QR"
-              icon="pi pi-qrcode"
-              severity="secondary"
-              variant="outlined"
-              @click="openQrModal(item.qrCodeUrl, item.code)"
-            />
-          </div>
-        </div>
-      </div>
+      <LinkList
+        v-if="recentLinks.length"
+        :links="recentLinks"
+        copy-key-prefix="recent"
+        @open-qr="(item) => openQrModal(item.qrCodeUrl, item.code)"
+      />
 
       <div v-else class="empty-state">
         <p class="eyebrow">No history yet</p>
         <h4 class="card-title">Create your first short link and it will appear here.</h4>
-        <p class="muted">
-          Recent links come from the backend, so this section always reflects the latest saved data.
-        </p>
+        <p class="muted">This section reflects the latest saved data from the backend.</p>
       </div>
     </PanelCard>
 
-    <PanelCard
-      eyebrow="Link management features"
-      title="Link management features"
-      description="A few quick reasons the product works well for demos and everyday link sharing."
-    >
-      <div class="feature-grid">
-        <FeatureCard
-          tone="info"
-          eyebrow="Guest demo links"
-          title="Create without friction"
-          description="Make a short URL in seconds when you only need a public demo."
-        />
-        <FeatureCard
-          tone="success"
-          eyebrow="Owned user links"
-          title="Keep ownership and history"
-          description="Sign in when you want private links, saved history, and account access."
-        />
-        <FeatureCard
-          tone="warn"
-          eyebrow="QR scans"
-          title="Works on phones and print"
-          description="Every link is ready for scanning, slides, posters, and quick handoffs."
-        />
-        <FeatureCard
-          tone="contrast"
-          eyebrow="Analytics insights"
-          title="See clicks in context"
-          description="Track performance without leaving the link workflow."
-        />
-        <FeatureCard
-          tone="accent"
-          eyebrow="Simple start"
-          title="Ready on first load"
-          description="The demo opens with sensible defaults so you can try it immediately."
-        />
-        <FeatureCard
-          tone="muted"
-          eyebrow="Signed-in mode"
-          title="Return later with confidence"
-          description="Your account keeps the link list, so revisits stay predictable."
-        />
-      </div>
-    </PanelCard>
-
-    <section v-if="createdLink" class="page-grid two-col">
-      <PanelCard eyebrow="Created link" title="Share card">
-        <div class="list-item">
-          <strong>{{ createdLink.shortUrl }}</strong>
-          <p>Short URL ready to copy, open, or share.</p>
-        </div>
-        <div class="list-item">
-          <strong class="list-item--large">
-            {{ createdLink.ownerUsername ?? 'Guest mode (ready for anonymous links)' }}
-          </strong>
-          <p>Ownership for this link.</p>
-        </div>
-        <div class="list-item-meta list-item-meta--large">
-          <span>Created: {{ formatDate(createdLink.createdAt) }}</span>
-          <span>Expires: {{ formatDate(createdLink.expiresAt) }}</span>
-        </div>
-        <div class="actions">
-          <RouterLink :to="{ name: 'link', params: { code: createdLink.code } }">
-            <Button label="View details page" icon="pi pi-external-link" />
-          </RouterLink>
-          <RouterLink :to="dashboardUrl">
-            <Button
-              label="Open analytics"
-              icon="pi pi-chart-bar"
-              severity="secondary"
-              variant="outlined"
-            />
-          </RouterLink>
-          <Button
-            type="button"
-            :label="isCopied('created-short') ? 'Short URL copied' : 'Copy short URL'"
-            :icon="isCopied('created-short') ? 'pi pi-check' : 'pi pi-copy'"
-            @click="copy(createdLink.shortUrl, 'created-short')"
-          />
-          <Button
-            type="button"
-            label="Open redirect"
-            icon="pi pi-arrow-right"
-            severity="secondary"
-            variant="outlined"
-            @click="openExternal(createdLink.shortUrl)"
-          />
-          <Button
-            v-if="canSeePreview"
-            type="button"
-            :label="isCopied('created-preview') ? 'Preview URL copied' : 'Copy preview URL'"
-            :icon="isCopied('created-preview') ? 'pi pi-check' : 'pi pi-copy'"
-            severity="secondary"
-            variant="outlined"
-            @click="copy(linkPreviewUrl, 'created-preview')"
-          />
-        </div>
-      </PanelCard>
-
-      <PanelCard eyebrow="QR output" title="Mobile scan ready">
-        <figure class="compact-figure">
-          <img
-            class="qr-image"
-            :src="createdLink.qrCodeUrl"
-            :alt="`QR code for ${createdLink.code}`"
-          />
-        </figure>
-
-        <div class="grid-2">
-          <Button
-            type="button"
-            :label="isCopied('created-qr') ? 'QR URL copied' : 'Copy QR URL'"
-            :icon="isCopied('created-qr') ? 'pi pi-check' : 'pi pi-copy'"
-            @click="copy(createdLink.qrCodeUrl, 'created-qr')"
-          />
-          <Button
-            type="button"
-            label="Open QR"
-            icon="pi pi-qrcode"
-            severity="secondary"
-            variant="outlined"
-            @click="openQrModal(createdLink.qrCodeUrl, createdLink.code)"
-          />
-        </div>
-
-        <p class="help-text">
-          QR code endpoint: <span class="inline-code">{{ createdLink.qrCodeUrl }}</span>
-        </p>
-      </PanelCard>
-    </section>
+    <QrCodeModal
+      :visible="Boolean(qrModalUrl)"
+      :title="qrModalTitle"
+      :url="qrModalUrl"
+      @close="closeQrModal"
+    />
 
     <teleport to="body">
       <Transition name="session-notice">
-        <div v-if="qrModalUrl" class="modal-backdrop" @click.self="closeQrModal">
-          <div class="modal-card card">
+        <div
+          v-if="createdLink && createdModalOpen"
+          class="modal-backdrop"
+          @click.self="closeCreatedModal"
+        >
+          <div class="modal-card modal-card--wide card">
             <div class="card-inner stack">
               <div class="section-row">
                 <div>
-                  <p class="eyebrow">QR code</p>
-                  <h3 class="panel-title">{{ qrModalTitle }}</h3>
+                  <p class="eyebrow">Created link</p>
+                  <h3 class="panel-title">{{ createdLink.code }}</h3>
                 </div>
                 <Button
                   type="button"
                   label="Close"
                   icon="pi pi-times"
+                  class="modal-close-button"
                   severity="secondary"
-                  variant="text"
-                  size="small"
-                  @click="closeQrModal"
+                  @click="closeCreatedModal"
                 />
               </div>
 
-              <img
-                class="qr-image qr-image--compact modal-qr"
-                :src="qrModalUrl"
-                :alt="`QR code for ${qrModalTitle}`"
-              />
+              <div class="created-link-result">
+                <p class="recent-link-label">Short URL</p>
+                <strong>{{ createdLink.shortUrl }}</strong>
+              </div>
+
+              <div class="actions">
+                <RouterLink :to="{ name: 'link', params: { code: createdLink.code } }">
+                  <Button label="View details page" icon="pi pi-external-link" />
+                </RouterLink>
+                <Button
+                  type="button"
+                  :label="isCopied('created-short') ? 'Short URL copied' : 'Copy short URL'"
+                  :icon="isCopied('created-short') ? 'pi pi-check' : 'pi pi-copy'"
+                  @click="copy(createdLink.shortUrl, 'created-short')"
+                />
+                <Button
+                  type="button"
+                  label="Open redirect"
+                  icon="pi pi-arrow-right"
+                  severity="secondary"
+                  variant="outlined"
+                  @click="openExternal(createdLink.shortUrl)"
+                />
+                <Button
+                  v-if="canSeePreview"
+                  type="button"
+                  :label="isCopied('created-preview') ? 'Preview URL copied' : 'Copy preview URL'"
+                  :icon="isCopied('created-preview') ? 'pi pi-check' : 'pi pi-copy'"
+                  severity="secondary"
+                  variant="outlined"
+                  @click="copy(linkPreviewUrl, 'created-preview')"
+                />
+              </div>
             </div>
           </div>
         </div>

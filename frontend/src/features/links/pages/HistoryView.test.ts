@@ -4,7 +4,6 @@ import HistoryView from '@/features/links/pages/HistoryView.vue';
 
 const mocks = vi.hoisted(() => ({
   listLinksMock: vi.fn(),
-  openMock: vi.fn(),
 }));
 
 vi.mock('vue-router', () => ({
@@ -30,7 +29,6 @@ vi.mock('@/shared/services/settings', () => ({
 describe('HistoryView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubGlobal('open', mocks.openMock);
   });
 
   it('renders recent links and opens quick actions', async () => {
@@ -66,6 +64,8 @@ describe('HistoryView', () => {
 
     const buttons = wrapper.findAll('button');
     await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
-    expect(mocks.openMock).toHaveBeenCalled();
+    await flushPromises();
+    expect(document.body.textContent).toContain('QR code');
+    expect(document.body.textContent).toContain('github-org');
   });
 });

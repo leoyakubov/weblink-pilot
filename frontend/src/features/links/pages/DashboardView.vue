@@ -15,6 +15,9 @@ import {
 } from '@/features/links/repositories/link.repository';
 import type { AnalyticsSummaryResponse, LinkResponse } from '@/shared/types/api';
 import AnalyticsSummaryPanel from '@/shared/components/common/AnalyticsSummaryPanel.vue';
+import PageIntro from '@/shared/components/common/PageIntro.vue';
+import PanelCard from '@/shared/components/common/PanelCard.vue';
+import QrCodeModal from '@/shared/components/common/QrCodeModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -184,14 +187,19 @@ watch(
 </script>
 
 <template>
-  <section class="page-grid two-col">
-    <article class="card">
-      <div class="card-inner stack">
-        <div>
-          <p class="eyebrow">Analytics dashboard</p>
-          <h3 class="panel-title">Inspect clicks for any short code.</h3>
-        </div>
+  <section class="page-grid">
+    <PageIntro
+      eyebrow="Analytics dashboard"
+      title="Link analytics"
+      description="Inspect clicks, QR scans, visitors, and country signals for any short code you can access."
+    />
 
+    <div class="page-grid two-col">
+      <PanelCard
+        eyebrow="Analytics dashboard"
+        title="Inspect a short code"
+        description="Load analytics manually or start from one of the latest links."
+      >
         <form class="form-grid" @submit.prevent="load(form.code)">
           <label class="form-field">
             <span class="field-label">Short code</span>
@@ -319,16 +327,13 @@ watch(
         </div>
 
         <AnalyticsSummaryPanel :summary="summary" :show-top-countries="false" />
-      </div>
-    </article>
+      </PanelCard>
 
-    <article class="card">
-      <div class="card-inner stack">
-        <div>
-          <p class="eyebrow">Selected link</p>
-          <h3 class="panel-title">Details and quick actions</h3>
-        </div>
-
+      <PanelCard
+        eyebrow="Selected link"
+        title="Details and quick actions"
+        description="Open, copy, scan, preview, or drill into the selected link."
+      >
         <template v-if="link">
           <div class="list-item">
             <strong>{{ link.shortUrl }}</strong>
@@ -417,39 +422,14 @@ watch(
         </div>
 
         <AnalyticsSummaryPanel :summary="summary" :show-metrics="false" />
-      </div>
-    </article>
+      </PanelCard>
+    </div>
   </section>
 
-  <teleport to="body">
-    <Transition name="session-notice">
-      <div v-if="qrModalUrl" class="modal-backdrop" @click.self="closeQrModal">
-        <div class="modal-card card">
-          <div class="card-inner stack">
-            <div class="section-row">
-              <div>
-                <p class="eyebrow">QR code</p>
-                <h3 class="panel-title">{{ qrModalTitle }}</h3>
-              </div>
-              <Button
-                type="button"
-                label="Close"
-                icon="pi pi-times"
-                severity="secondary"
-                variant="text"
-                size="small"
-                @click="closeQrModal"
-              />
-            </div>
-
-            <img
-              class="qr-image qr-image--compact modal-qr"
-              :src="qrModalUrl"
-              :alt="`QR code for ${qrModalTitle}`"
-            />
-          </div>
-        </div>
-      </div>
-    </Transition>
-  </teleport>
+  <QrCodeModal
+    :visible="Boolean(qrModalUrl)"
+    :title="qrModalTitle"
+    :url="qrModalUrl"
+    @close="closeQrModal"
+  />
 </template>

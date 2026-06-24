@@ -5,33 +5,33 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 ## Status Overview
 
-| # | Status | Area | Notes |
-|---|---|---|---|
-| 0 | &#x1F7E2; Done | [Project bootstrap](#phase-0-repo-readiness) | Repo layout, baseline docs, naming, and initial tooling are in place. |
-| 1 | &#x1F7E2; Done | [Backend foundation](#phase-1-backend-foundation) | Modular backend, persistence, security, cache, actuator, logging, and observability are in place. |
-| 2 | &#x1F7E2; Done | [Tests, code quality, Sonar](#phase-2-tests-code-quality-sonar) | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place. |
-| 3 | &#x1F7E2; Done | [Docker](#phase-3-docker) | Local and dev Docker workflows are in place for the full stack and backend support services. |
-| 4 | &#x1F7E2; Done | [URL lifecycle](#phase-4-url-lifecycle) | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented. |
-| 5 | &#x1F7E2; Done | [QR code support](#phase-5-qr-code-support) | QR generation and the QR endpoint are in place for the core link journey. |
-| 6 | &#x1F7E2; Done | [Analytics](#phase-6-analytics) | Click events are tracked by source (redirect and QR), with summaries and enrichment. |
-| 7 | &#x1F7E2; Done | [Frontend foundation](#phase-7-frontend-foundation) | Vue app shell and backend integration are in place. |
-| 8 | &#x1F7E2; Done | [Frontend feature set](#phase-8-frontend-feature-set) | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place. |
-| 9 | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control) | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place. |
-| 10 | &#x1F7E2; Done | [Production hardening](#phase-10-production-hardening) | Logging, metrics, documentation polish, release checks, and deploy safety are in place. |
-| 11 | &#x1F7E2; Done | [Environment profiles and scripts](#phase-11-environment-profiles-and-scripts) | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place. |
-| 12 | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching) | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place, and the broader cache map lives in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
-| 13 | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring) | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana. |
-| 14 | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion) | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow. |
-| 15 | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration) | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place. |
-| 16 | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens) | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
-| 17 | &#x1F7E2; Done | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs. |
-| 18 | &#x1F7E2; Done | [Frontend redesign](#phase-18-frontend-redesign) | Redesign the main frontend pages and forms with a Vue 3 admin/dashboard UI foundation, moving toward full Sakai adoption while preserving the current design as a rollback path. |
-| 19 | Planned | [Demo visit analytics](#phase-19-demo-visit-analytics) | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first. |
-| 20 | Planned | [Security hardening follow-up](#phase-20-security-hardening-follow-up) | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls. |
-| 21 | Planned | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish) | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format. |
-| 22 | Planned | [Codebase refactoring and security review](#phase-22-codebase-refactoring-and-security-review) | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps. |
-| 23 | Planned | [RabbitMQ async messaging](#phase-23-rabbitmq-async-messaging) | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread. |
-| 24 | Planned | [Expiry reminder emails](#phase-24-expiry-reminder-emails) | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user. |
+| #   | Status         | Area                                                                                               | Notes                                                                                                                                                                                                                     |
+| --- | -------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | &#x1F7E2; Done | [Project bootstrap](#phase-0-repo-readiness)                                                       | Repo layout, baseline docs, naming, and initial tooling are in place.                                                                                                                                                     |
+| 1   | &#x1F7E2; Done | [Backend foundation](#phase-1-backend-foundation)                                                  | Modular backend, persistence, security, cache, actuator, logging, and observability are in place.                                                                                                                         |
+| 2   | &#x1F7E2; Done | [Tests, code quality, Sonar](#phase-2-tests-code-quality-sonar)                                    | Tests, coverage, ArchUnit, Testcontainers, and SonarQube coverage checks are in place.                                                                                                                                    |
+| 3   | &#x1F7E2; Done | [Docker](#phase-3-docker)                                                                          | Local and dev Docker workflows are in place for the full stack and backend support services.                                                                                                                              |
+| 4   | &#x1F7E2; Done | [URL lifecycle](#phase-4-url-lifecycle)                                                            | Create, read, redirect, custom alias, expiration, preview, QR, anonymous demo links, and signed-in owned links are implemented.                                                                                           |
+| 5   | &#x1F7E2; Done | [QR code support](#phase-5-qr-code-support)                                                        | QR generation and the QR endpoint are in place for the core link journey.                                                                                                                                                 |
+| 6   | &#x1F7E2; Done | [Analytics](#phase-6-analytics)                                                                    | Click events are tracked by source (redirect and QR), with summaries and enrichment.                                                                                                                                      |
+| 7   | &#x1F7E2; Done | [Frontend foundation](#phase-7-frontend-foundation)                                                | Vue app shell and backend integration are in place.                                                                                                                                                                       |
+| 8   | &#x1F7E2; Done | [Frontend feature set](#phase-8-frontend-feature-set)                                              | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place.                                                                                                                                |
+| 9   | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control)                    | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place.                        |
+| 10  | &#x1F7E2; Done | [Production hardening](#phase-10-production-hardening)                                             | Logging, metrics, documentation polish, release checks, and deploy safety are in place.                                                                                                                                   |
+| 11  | &#x1F7E2; Done | [Environment profiles and scripts](#phase-11-environment-profiles-and-scripts)                     | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place.                                                                                                           |
+| 12  | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching)                                                             | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place, and the broader cache map lives in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md).                              |
+| 13  | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring)                                               | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana.                                                                                    |
+| 14  | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion)                                                         | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow.                                     |
+| 15  | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration)                                   | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place.                                                                                                 |
+| 16  | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens)                                 | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
+| 17  | &#x1F7E2; Done | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs.                          |
+| 18  | &#x1F7E2; Done | [Frontend redesign](#phase-18-frontend-redesign)                                                   | Redesign the main frontend pages and forms with a custom mobile-first SaaS UI, shared page/panel/link components, and PrimeVue controls where they are useful.                                                            |
+| 19  | Planned        | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first.                                                              |
+| 20  | Planned        | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls.                                            |
+| 21  | Planned        | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format.                                                               |
+| 22  | Planned        | [Codebase refactoring and security review](#phase-22-codebase-refactoring-and-security-review)     | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps.    |
+| 23  | Planned        | [RabbitMQ async messaging](#phase-23-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                   |
+| 24  | Planned        | [Expiry reminder emails](#phase-24-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                             |
 
 ## Execution Checklist
 
@@ -471,15 +471,16 @@ Checklist:
 Goals:
 
 - redesign the main frontend pages and forms for a more polished demo presentation
-- use PrimeVue as the component library and Sakai as the preferred free template/theme base
-- keep the current design available as a rollback path while we move toward full Sakai adoption
-- ship a visible legacy/Sakai switch so we can validate the new presentation safely
+- keep the visual direction custom and product-specific instead of migrating to a Sakai template
+- use PrimeVue only as the Vue control library for buttons, drawers, inputs, and password fields
 - keep the mobile-first experience strong while improving hierarchy, spacing, and visual clarity
 - update the core screens so the demo feels more intentional and less like a scaffold
 - preserve the existing app behavior while refreshing the look and feel
-- remove wrapper and compatibility layers once the Sakai migration stabilizes
+- remove wrapper, template-mode, and compatibility layers that are no longer part of the chosen design direction
 - unify the frontend `lib` and `shared/services` conventions
 - extract repeated UI blocks from the larger pages into smaller components
+- make page structure consistent: top navigation, page intro, then reusable panels
+- keep operational frontend/backend settings on Monitoring rather than About
 
 Exit criteria:
 
@@ -487,13 +488,13 @@ Exit criteria:
 - the redesign remains mobile-first and responsive
 - existing frontend flows continue to work
 - the visual system is documented well enough to keep future pages consistent
-- the fallback design path is preserved until the Sakai version is stable
+- the abandoned Sakai/template migration path is removed from active docs and CSS
 - the frontend structure is cleaner and less duplicated than before
 
 Checklist:
 
-- [x] Pick PrimeVue as the frontend UI foundation
-- [x] Pick Sakai as the free template/theme base
+- [x] Keep PrimeVue as the control library already used by the app
+- [x] Cancel the Sakai/template migration path
 - [x] Redesign the main frontend pages
 - [x] Redesign the core forms
 - [x] Keep the mobile-first layout intact
@@ -502,6 +503,11 @@ Checklist:
 - [x] Remove the remaining wrapper and compatibility layers
 - [x] Unify `lib` vs `shared/services`
 - [x] Extract repeated UI blocks into smaller components
+- [x] Extract page intro, panel, feature card, refresh button, and link list components
+- [x] Move backend/browser settings from About to Monitoring
+- [x] Split Profile and Security into separate account pages
+- [x] Make QR actions use modal behavior consistently from history and home
+- [x] Remove stale Sakai CSS mode and migration documentation
 
 ### Phase 19 - Demo visit analytics
 

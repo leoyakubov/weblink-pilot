@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import AccountView from '@/features/account/pages/AccountView.vue';
+import SecurityView from '@/features/account/pages/SecurityView.vue';
 
 const mocks = vi.hoisted(() => ({
   getAccountProfileMock: vi.fn(),
@@ -20,8 +21,8 @@ vi.mock('@/features/auth/services/auth.service', () => ({
   authState: { currentUser: { username: 'alice', role: 'USER' } },
 }));
 
-function mountView() {
-  return mount(AccountView, {
+function mountView(component = AccountView) {
+  return mount(component, {
     global: {
       stubs: {
         RouterLink: mocks.routerLinkStub,
@@ -48,9 +49,10 @@ describe('AccountView', () => {
     expect(wrapper.text()).toContain('alice@example.com');
     expect(wrapper.text()).toContain('GITHUB');
     expect(wrapper.text()).toContain('alice-github');
+    expect(wrapper.text()).not.toContain('Change password');
   });
 
-  it('submits a password change request', async () => {
+  it('submits a password change request from the security page', async () => {
     mocks.getAccountProfileMock.mockResolvedValue({
       username: 'alice',
       role: 'USER',
@@ -62,7 +64,7 @@ describe('AccountView', () => {
     });
     mocks.changePasswordMock.mockResolvedValue(undefined);
 
-    const wrapper = mountView();
+    const wrapper = mountView(SecurityView);
     await flushPromises();
 
     await wrapper.get('input[placeholder="Current password"]').setValue('Oldpass1');

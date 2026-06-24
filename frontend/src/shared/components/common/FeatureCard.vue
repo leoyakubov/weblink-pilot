@@ -10,7 +10,9 @@ const props = defineProps<{
 <template>
   <article class="feature-card" :class="`feature-card--${props.tone}`">
     <p class="feature-card__eyebrow">{{ props.eyebrow }}</p>
-    <h3>{{ props.title }}</h3>
-    <p>{{ props.description }}</p>
+    <p class="feature-card__summary">
+      <strong>{{ props.title }}:</strong>
+      {{ props.description }}
+    </p>
   </article>
 </template>

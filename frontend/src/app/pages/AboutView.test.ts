@@ -1,61 +1,20 @@
-import { flushPromises, mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { describe, expect, it } from 'vitest';
 import AboutView from '@/app/pages/AboutView.vue';
 
-const mocks = vi.hoisted(() => ({
-  saveSettingsMock: vi.fn(),
-  settingsState: {
-    apiBaseUrl: 'http://localhost:8080/api/v1',
-    authToken: '',
-    refreshToken: '',
-  },
-}));
-
-vi.mock('@/shared/services/settings', () => ({
-  loadSettings: () => ({ ...mocks.settingsState }),
-  saveSettings: mocks.saveSettingsMock,
-}));
-
-const routerPushMock = vi.fn();
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: routerPushMock,
-  }),
-}));
-
 describe('AboutView', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mocks.settingsState.apiBaseUrl = 'http://localhost:8080/api/v1';
-    mocks.settingsState.authToken = '';
-  });
-
-  it('renders product details and saves backend settings', async () => {
+  it('renders product details without editable operational settings', () => {
     const wrapper = mount(AboutView);
-    await flushPromises();
 
-    expect(wrapper.text()).toContain('Built like a small SaaS, not a classroom demo.');
+    expect(wrapper.text()).toContain('WebLinkPilot');
     expect(wrapper.text()).toContain('Vue 3');
-    expect(wrapper.text()).toContain('Demo accounts');
-
-    const input = wrapper.get('input[type="url"]');
-    await input.setValue('http://localhost:9090/api/v1');
-    await wrapper.get('[data-testid="save-settings"]').trigger('click');
-    await flushPromises();
-
-    expect(mocks.saveSettingsMock).toHaveBeenCalledWith({
-      apiBaseUrl: 'http://localhost:9090/api/v1',
-      authToken: '',
-      refreshToken: '',
-    });
-    expect(wrapper.text()).toContain('Saved for this browser');
-  });
-
-  it('navigates to browser reset when requested', async () => {
-    const wrapper = mount(AboutView);
-    await flushPromises();
-
-    await wrapper.get('[data-testid="reset-browser-settings"]').trigger('click');
-    expect(routerPushMock).toHaveBeenCalledWith({ name: 'settings-reset' });
+    expect(wrapper.text()).toContain('Profiles and environments');
+    expect(wrapper.text()).toContain('Default users');
+    expect(wrapper.text()).toContain('admin123');
+    expect(wrapper.text()).toContain('Demo links');
+    expect(wrapper.text()).toContain('docs');
+    expect(wrapper.text()).toContain('Account access');
+    expect(wrapper.text()).toContain('Monitoring page');
+    expect(wrapper.find('[data-testid="save-settings"]').exists()).toBe(false);
   });
 });

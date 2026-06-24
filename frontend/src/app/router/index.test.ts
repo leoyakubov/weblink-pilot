@@ -38,6 +38,8 @@ describe('router', () => {
         'link',
         'dashboard',
         'history',
+        'account',
+        'account-security',
         'monitoring',
       ]),
     );

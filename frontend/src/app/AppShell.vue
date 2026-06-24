@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/* global MessageEvent */
+/* global MessageEvent, MouseEvent */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Button from 'primevue/button';
 import Drawer from 'primevue/drawer';
@@ -16,6 +16,7 @@ import { getPrimaryNavigation } from '@/app/navigation';
 const route = useRoute();
 const router = useRouter();
 const menuOpen = ref(false);
+const accountMenuOpen = ref(false);
 
 type AuthMessage = {
   type?: string;
@@ -29,6 +30,17 @@ const accountLabel = computed(() => authState.currentUser?.username ?? '');
 const isLoggedIn = computed(() => Boolean(authState.currentUser));
 function closeMenu() {
   menuOpen.value = false;
+}
+
+function closeAccountMenu() {
+  accountMenuOpen.value = false;
+}
+
+function handleSignOut() {
+  signOut();
+  closeMenu();
+  closeAccountMenu();
+  void router.push('/');
 }
 
 function handleAuthMessage(event: MessageEvent) {
@@ -45,13 +57,25 @@ function handleAuthMessage(event: MessageEvent) {
   void router.push('/');
 }
 
+function closeAccountMenuOnOutsideClick(event: MouseEvent) {
+  const target = event.target as { closest?: (selector: string) => unknown } | null;
+
+  if (target?.closest?.('.account-menu')) {
+    return;
+  }
+
+  closeAccountMenu();
+}
+
 onMounted(() => {
   bootstrapAuth();
   window.addEventListener('message', handleAuthMessage);
+  document.addEventListener('click', closeAccountMenuOnOutsideClick);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('message', handleAuthMessage);
+  document.removeEventListener('click', closeAccountMenuOnOutsideClick);
 });
 </script>
 
@@ -102,16 +126,40 @@ onBeforeUnmount(() => {
           >
             Log in
           </RouterLink>
-          <RouterLink v-else to="/account" class="account-pill" aria-label="Signed in account">
-            <span class="account-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="presentation" focusable="false">
-                <path
-                  d="M12 12.5c2.9 0 5.25-2.46 5.25-5.5S14.9 1.5 12 1.5 6.75 3.96 6.75 7s2.35 5.5 5.25 5.5Zm0 2.25c-4.36 0-7.95 2.75-8.45 6.25h16.9c-.5-3.5-4.09-6.25-8.45-6.25Z"
-                />
-              </svg>
-            </span>
-            <span class="account-name">{{ accountLabel }}</span>
-          </RouterLink>
+          <div v-else class="account-menu">
+            <button
+              type="button"
+              class="account-pill"
+              aria-label="Open account menu"
+              :aria-expanded="accountMenuOpen"
+              @click.stop="accountMenuOpen = !accountMenuOpen"
+            >
+              <span class="account-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="presentation" focusable="false">
+                  <path
+                    d="M12 12.5c2.9 0 5.25-2.46 5.25-5.5S14.9 1.5 12 1.5 6.75 3.96 6.75 7s2.35 5.5 5.25 5.5Zm0 2.25c-4.36 0-7.95 2.75-8.45 6.25h16.9c-.5-3.5-4.09-6.25-8.45-6.25Z"
+                  />
+                </svg>
+              </span>
+              <span class="account-name">{{ accountLabel }}</span>
+              <i class="pi pi-angle-down account-menu__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div v-if="accountMenuOpen" class="account-menu__panel">
+              <RouterLink to="/account" class="account-menu__item" @click="closeAccountMenu">
+                <i class="pi pi-user" aria-hidden="true"></i>
+                <span>Profile</span>
+              </RouterLink>
+              <RouterLink
+                to="/account/security"
+                class="account-menu__item"
+                @click="closeAccountMenu"
+              >
+                <i class="pi pi-shield" aria-hidden="true"></i>
+                <span>Security</span>
+              </RouterLink>
+            </div>
+          </div>
 
           <RouterLink
             v-if="!isLoggedIn"
@@ -123,11 +171,12 @@ onBeforeUnmount(() => {
           <Button
             v-else
             type="button"
-            class="button button-secondary auth-link-button"
+            class="button button-secondary auth-link-button sign-out-button"
             label="Sign out"
+            icon="pi pi-sign-out"
             severity="secondary"
             variant="outlined"
-            @click="signOut()"
+            @click="handleSignOut"
           />
         </div>
       </div>
@@ -202,11 +251,12 @@ onBeforeUnmount(() => {
           <Button
             v-else
             type="button"
-            class="button button-secondary drawer-action"
+            class="button button-secondary drawer-action sign-out-button"
             label="Sign out"
+            icon="pi pi-sign-out"
             severity="secondary"
             variant="outlined"
-            @click="signOut()"
+            @click="handleSignOut"
           />
         </div>
       </div>
@@ -215,5 +265,17 @@ onBeforeUnmount(() => {
     <main class="shell">
       <RouterView />
     </main>
+
+    <footer class="page-footer app-footer">
+      <div>
+        <p class="page-footer__brand">WebLinkPilot</p>
+        <p>Personal short links, QR codes, and click history in one fast workspace.</p>
+      </div>
+      <div class="page-footer__links">
+        <RouterLink to="/history">History</RouterLink>
+        <RouterLink to="/dashboard">Analytics</RouterLink>
+        <RouterLink to="/about">About</RouterLink>
+      </div>
+    </footer>
   </div>
 </template>

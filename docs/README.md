@@ -13,6 +13,7 @@ This repo keeps one documentation tree with a small set of categories so it is e
 - [Backend Module Plan](design/backend-module-plan.md) - backend modules, dependencies, and data flow.
 - [Spring Modulith Migration Plan](design/spring-modulith-migration.md) - the step-by-step plan for moving the backend toward standard Spring Modulith boundaries.
 - [Frontend Plan](design/frontend-plan.md) - Vue app structure, pages, components, and state plan.
+- [Frontend Visual System](design/frontend-visual-system.md) - current custom UI direction, shared components, and the cancelled Sakai migration path.
 - [Architecture Decisions](design/adr.md) - the decisions we have already accepted and why.
 - [Tech Stack](design/tech-stack.md) - the approved baseline stack for backend, frontend, and infrastructure.
 - [Repository Structure](design/repo-structure.md) - the intended folder layout for the monorepo.

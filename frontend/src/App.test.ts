@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   },
   bootstrapAuthMock: vi.fn(),
   signOutMock: vi.fn(),
+  routerPushMock: vi.fn(),
 }));
 
 vi.mock('vue-router', () => ({
@@ -25,7 +26,7 @@ vi.mock('vue-router', () => ({
   },
   useRoute: () => mocks.routeState,
   useRouter: () => ({
-    push: vi.fn(),
+    push: mocks.routerPushMock,
   }),
 }));
 
@@ -41,6 +42,7 @@ describe('App', () => {
   beforeEach(() => {
     mocks.bootstrapAuthMock.mockClear();
     mocks.signOutMock.mockClear();
+    mocks.routerPushMock.mockClear();
     mocks.authState.currentUser = null;
     mocks.authState.sessionNotice = '';
     mocks.routeState.name = 'home';
@@ -57,10 +59,11 @@ describe('App', () => {
     expect(wrapper.text()).toContain('About');
     expect(wrapper.text()).toContain('Log in');
     expect(wrapper.text()).toContain('Sign up');
+    expect(wrapper.text()).toContain('Personal short links, QR codes, and click history');
     expect(wrapper.text()).not.toContain('Monitoring');
   });
 
-  it('renders the dashboard section for admins', () => {
+  it('renders the dashboard section for admins', async () => {
     mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
     mocks.routeState.name = 'dashboard';
     mocks.routeState.path = '/dashboard';
@@ -70,5 +73,13 @@ describe('App', () => {
     expect(wrapper.text()).toContain('Monitoring');
     expect(wrapper.text()).toContain('admin');
     expect(wrapper.text()).toContain('Sign out');
+
+    await wrapper.get('button[aria-label="Open account menu"]').trigger('click');
+    expect(wrapper.text()).toContain('Profile');
+    expect(wrapper.text()).toContain('Security');
+
+    await wrapper.get('button.sign-out-button').trigger('click');
+    expect(mocks.signOutMock).toHaveBeenCalled();
+    expect(mocks.routerPushMock).toHaveBeenCalledWith('/');
   });
 });

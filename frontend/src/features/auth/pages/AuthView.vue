@@ -241,37 +241,7 @@ async function submit() {
 </script>
 
 <template>
-  <section class="page-grid two-col auth-layout">
-    <article class="card">
-      <div class="card-inner stack">
-        <div class="auth-heading">
-          <p class="eyebrow">Account access</p>
-          <h3 class="panel-title">Move between guest mode and saved ownership.</h3>
-        </div>
-
-        <p class="hero-note">
-          Use a password for the local account flow, or switch to GitHub sign-in when you want to
-          keep ownership tied to an external identity.
-        </p>
-
-        <div class="grid-2">
-          <div class="list-item">
-            <strong>Fast sign-in</strong>
-            <p>Use your existing account to get back to owned links and analytics.</p>
-          </div>
-          <div class="list-item">
-            <strong>Recovery ready</strong>
-            <p>Reset email and verification flows stay available from the same page.</p>
-          </div>
-        </div>
-
-        <div class="list-item">
-          <strong>Current mode</strong>
-          <p>{{ props.mode === 'login' ? 'Sign in to your account' : 'Create a new account' }}</p>
-        </div>
-      </div>
-    </article>
-
+  <section class="page-grid auth-layout auth-layout--centered">
     <article class="card auth-card">
       <div class="card-inner stack">
         <div class="auth-heading">
@@ -312,12 +282,19 @@ async function submit() {
             />
           </label>
 
-          <div class="actions">
+          <div class="actions auth-primary-actions">
             <Button
               type="submit"
               :label="busy ? 'Working...' : submitLabel"
               icon="pi pi-lock"
               :disabled="busy"
+            />
+            <Button
+              type="button"
+              label="Continue with GitHub"
+              icon="pi pi-github"
+              severity="secondary"
+              @click="openGithubLogin"
             />
           </div>
 
@@ -354,18 +331,6 @@ async function submit() {
                 size="small"
               />
             </RouterLink>
-          </div>
-          <div v-if="props.mode === 'login'" class="auth-switch">
-            <span class="footnote">Prefer GitHub?</span>
-            <Button
-              type="button"
-              label="Continue with GitHub"
-              icon="pi pi-github"
-              severity="secondary"
-              variant="outlined"
-              size="small"
-              @click="openGithubLogin"
-            />
           </div>
         </form>
       </div>

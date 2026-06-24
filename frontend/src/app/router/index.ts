@@ -71,6 +71,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/account/security',
+      name: 'account-security',
+      component: () => import('@/features/account/pages/SecurityView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/monitoring',
       name: 'monitoring',
       component: () => import('@/features/monitoring/pages/MonitoringView.vue'),
