@@ -6,6 +6,18 @@ const SESSION_HINT_KEY = 'weblinkpilot.frontend.session.active';
 
 const defaultApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 
+function getStorage<T extends Storage>(storageName: 'localStorage' | 'sessionStorage'): T | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    return window[storageName] as T;
+  } catch {
+    return null;
+  }
+}
+
 export function defaultSettings(): ApiSettings {
   return {
     apiBaseUrl: normalizeBaseUrl(defaultApiBaseUrl),
@@ -15,13 +27,11 @@ export function defaultSettings(): ApiSettings {
 }
 
 export function loadSettings(): ApiSettings {
-  if (typeof window === 'undefined') {
-    return defaultSettings();
-  }
-
   const fallback = defaultSettings();
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  const sessionToken = window.sessionStorage.getItem(SESSION_KEY);
+  const localStorage = getStorage<Storage>('localStorage');
+  const sessionStorage = getStorage<Storage>('sessionStorage');
+  const raw = localStorage?.getItem(STORAGE_KEY);
+  const sessionToken = sessionStorage?.getItem(SESSION_KEY);
   if (!raw) {
     return {
       ...fallback,
@@ -45,54 +55,40 @@ export function loadSettings(): ApiSettings {
 }
 
 export function saveSettings(settings: ApiSettings) {
-  if (typeof window === 'undefined') {
-    return;
-  }
+  const localStorage = getStorage<Storage>('localStorage');
+  const sessionStorage = getStorage<Storage>('sessionStorage');
 
-  window.localStorage.setItem(
+  localStorage?.setItem(
     STORAGE_KEY,
     JSON.stringify({
       apiBaseUrl: normalizeBaseUrl(settings.apiBaseUrl),
     }),
   );
-  window.sessionStorage.setItem(SESSION_KEY, settings.authToken);
+  sessionStorage?.setItem(SESSION_KEY, settings.authToken);
   if (settings.authToken) {
-    window.sessionStorage.setItem(SESSION_HINT_KEY, '1');
+    sessionStorage?.setItem(SESSION_HINT_KEY, '1');
   }
 }
 
 export function clearSettings() {
-  if (typeof window === 'undefined') {
-    return;
-  }
+  const localStorage = getStorage<Storage>('localStorage');
+  const sessionStorage = getStorage<Storage>('sessionStorage');
 
-  window.localStorage.removeItem(STORAGE_KEY);
-  window.sessionStorage.removeItem(SESSION_KEY);
-  window.sessionStorage.removeItem(SESSION_HINT_KEY);
+  localStorage?.removeItem(STORAGE_KEY);
+  sessionStorage?.removeItem(SESSION_KEY);
+  sessionStorage?.removeItem(SESSION_HINT_KEY);
 }
 
 export function markSessionActive() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(SESSION_HINT_KEY, '1');
+  getStorage<Storage>('sessionStorage')?.setItem(SESSION_HINT_KEY, '1');
 }
 
 export function clearSessionActive() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.removeItem(SESSION_HINT_KEY);
+  getStorage<Storage>('sessionStorage')?.removeItem(SESSION_HINT_KEY);
 }
 
 export function hasSessionActiveHint() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return window.sessionStorage.getItem(SESSION_HINT_KEY) === '1';
+  return getStorage<Storage>('sessionStorage')?.getItem(SESSION_HINT_KEY) === '1';
 }
 
 export function normalizeBaseUrl(value: string) {

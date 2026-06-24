@@ -42,7 +42,7 @@ test('guest can open the public pages and see guard redirects', async () => {
 
   try {
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
+    await page.getByRole('heading', { name: /web link shortener/i }).waitFor();
 
     await page.goto(`${baseUrl}/about`, { waitUntil: 'networkidle' });
     await page
@@ -61,7 +61,7 @@ test('guest can open the public pages and see guard redirects', async () => {
     assert.match(page.url(), /\/auth\/signin$/);
 
     await page.goto(`${baseUrl}/monitoring`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
+    await page.getByRole('heading', { name: /web link shortener/i }).waitFor();
     assert.match(page.url(), /\/$/);
   } finally {
     await browser.close();
@@ -118,7 +118,7 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.goto(`${baseUrl}/auth/github/complete?ticket=github-ticket`, {
       waitUntil: 'networkidle',
     });
-    await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
+    await page.getByRole('heading', { name: /web link shortener/i }).waitFor();
     await page.getByText('Signed in as github-user', { exact: true }).waitFor();
   } finally {
     await browser.close();
@@ -205,7 +205,7 @@ test('signed-in user can open dashboard, history, and account routes', async () 
     await page.getByText('US').waitFor();
 
     await page.goto(`${baseUrl}/history`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /recent links from the backend\./i }).waitFor();
+    await page.getByRole('heading', { level: 1, name: /recent links/i }).waitFor();
     await page.getByText('openai-docs').waitFor();
 
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });

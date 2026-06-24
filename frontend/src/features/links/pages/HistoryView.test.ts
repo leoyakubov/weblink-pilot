@@ -59,7 +59,8 @@ describe('HistoryView', () => {
     });
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Recent links from the backend.');
+    expect(wrapper.text()).toContain('Link history');
+    expect(wrapper.text()).toContain('Recent links');
     expect(wrapper.text()).toContain('github-org');
     expect(wrapper.text()).toContain('3 clicks');
 

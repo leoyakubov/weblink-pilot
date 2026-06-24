@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   clearSettings,
   defaultSettings,
+  hasSessionActiveHint,
   loadSettings,
   normalizeBaseUrl,
   saveSettings,
@@ -16,9 +17,49 @@ describe('normalizeBaseUrl', () => {
 });
 
 describe('settings storage', () => {
+  let localStorageMock: Storage;
+  let sessionStorageMock: Storage;
+  let localStorageSpy: ReturnType<typeof vi.spyOn>;
+  let sessionStorageSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(() => {
-    window.localStorage.clear();
-    window.sessionStorage.clear();
+    const createStorage = (): Storage => {
+      const entries = new Map<string, string>();
+
+      return {
+        get length() {
+          return entries.size;
+        },
+        clear() {
+          entries.clear();
+        },
+        getItem(key: string) {
+          return entries.has(key) ? entries.get(key)! : null;
+        },
+        key(index: number) {
+          return Array.from(entries.keys())[index] ?? null;
+        },
+        removeItem(key: string) {
+          entries.delete(key);
+        },
+        setItem(key: string, value: string) {
+          entries.set(key, value);
+        },
+      } as Storage;
+    };
+
+    localStorageMock = createStorage();
+    sessionStorageMock = createStorage();
+    localStorageSpy = vi.spyOn(window, 'localStorage', 'get').mockReturnValue(localStorageMock);
+    sessionStorageSpy = vi
+      .spyOn(window, 'sessionStorage', 'get')
+      .mockReturnValue(sessionStorageMock);
+  });
+
+  afterEach(() => {
+    localStorageSpy.mockRestore();
+    sessionStorageSpy.mockRestore();
+    vi.restoreAllMocks();
   });
 
   it('returns defaults when storage is empty', () => {
@@ -58,5 +99,29 @@ describe('settings storage', () => {
     expect(window.localStorage.getItem('weblinkpilot.frontend.settings')).toBeNull();
     expect(window.sessionStorage.getItem('weblinkpilot.frontend.session')).toBeNull();
     expect(window.sessionStorage.getItem('weblinkpilot.frontend.session.active')).toBeNull();
+  });
+
+  it('falls back when browser storage is unavailable', () => {
+    localStorageSpy.mockRestore();
+    sessionStorageSpy.mockRestore();
+
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+      throw new DOMException('Cannot initialize local storage', 'SecurityError');
+    });
+    vi.spyOn(window, 'sessionStorage', 'get').mockImplementation(() => {
+      throw new DOMException('Cannot initialize session storage', 'SecurityError');
+    });
+
+    expect(loadSettings()).toEqual(defaultSettings());
+
+    expect(() =>
+      saveSettings({
+        apiBaseUrl: 'http://localhost:8080/api/v1',
+        authToken: 'jwt-token',
+        refreshToken: 'refresh-token',
+      }),
+    ).not.toThrow();
+    expect(() => clearSettings()).not.toThrow();
+    expect(hasSessionActiveHint()).toBe(false);
   });
 });

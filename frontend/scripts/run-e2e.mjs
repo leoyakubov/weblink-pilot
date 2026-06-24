@@ -66,7 +66,7 @@ function startStaticServer(rootDir) {
 
   return new Promise((resolve, reject) => {
     server.once('error', reject);
-    server.listen(4173, '127.0.0.1', () => {
+    server.listen(0, '127.0.0.1', () => {
       server.off('error', reject);
       resolve(server);
     });
@@ -112,6 +112,11 @@ async function main() {
   }
 
   const server = await startStaticServer(tempOutDir);
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    throw new Error('Failed to determine the e2e server address');
+  }
+  const actualBaseUrl = `http://${address.address}:${address.port}`;
 
   const stopServer = () => {
     server.close();
@@ -127,10 +132,10 @@ async function main() {
   });
 
   try {
-    await waitForBaseUrl(baseUrl);
+    await waitForBaseUrl(actualBaseUrl);
 
     const testFiles = ['tests/e2e/app-flow.spec.mjs', 'tests/e2e/route-smoke.spec.mjs'];
-    process.env.E2E_BASE_URL = baseUrl;
+    process.env.E2E_BASE_URL = actualBaseUrl;
 
     const result = spawn(process.execPath, ['--test', ...testFiles], {
       cwd: frontendRoot,

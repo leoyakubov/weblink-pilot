@@ -58,10 +58,11 @@ describe('HomeView', () => {
     const wrapper = mountHome();
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Short links, QR, analytics.');
-    expect(wrapper.text()).toContain('Quick create');
+    expect(wrapper.text()).toContain('Link management');
+    expect(wrapper.text()).toContain('Shorten link');
+    expect(wrapper.text()).toContain('Guest demo links');
     expect(wrapper.text()).toContain('Recent links');
-    expect(wrapper.text()).toContain('Guest mode ready for demo links');
+    expect(wrapper.text()).toContain('Guest mode (ready for anonymous links)');
   });
 
   it('creates a random-code link when the alias is left blank', async () => {
@@ -69,7 +70,7 @@ describe('HomeView', () => {
       code: 'abc1234',
       shortUrl: 'http://localhost:8080/r/abc1234',
       qrCodeUrl: 'http://localhost:8080/api/v1/urls/abc1234/qr',
-      originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+      originalUrl: 'https://github.com/weblinkpilot/',
       createdAt: '2026-05-23T11:00:00Z',
       expiresAt: null,
       clickCount: 0,
@@ -79,16 +80,19 @@ describe('HomeView', () => {
     const wrapper = mountHome();
     await flushPromises();
 
-    await wrapper
-      .get('input[type="url"]')
-      .setValue(' https://github.com/weblinkpilot/weblink-pilot/tree/main/docs ');
-    await wrapper.get('input[type="text"]').setValue(' ');
+    expect((wrapper.get('input[type="url"]').element as HTMLInputElement).value).toBe(
+      'https://github.com/weblinkpilot/',
+    );
+    expect((wrapper.get('input[type="text"]').element as HTMLInputElement).value).toBe('wlpilot');
+
+    await wrapper.get('input[type="url"]').setValue(' https://github.com/weblinkpilot/ ');
+    await wrapper.get('input[type="text"]').setValue('');
     await wrapper.find('form').trigger('submit.prevent');
     await flushPromises();
 
     expect(mocks.createLinkMock).toHaveBeenCalledWith(
       {
-        originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
+        originalUrl: 'https://github.com/weblinkpilot/',
         customAlias: undefined,
         expiresAt: null,
       },
@@ -128,7 +132,7 @@ describe('HomeView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Signed in as admin (ADMIN)');
-    expect(wrapper.text()).toContain('Your Recent Links');
+    expect(wrapper.text()).toContain('Recent links');
     expect(wrapper.text()).toContain('admin');
     expect(wrapper.text()).toContain('Details');
     expect(wrapper.text()).toContain('Analytics');

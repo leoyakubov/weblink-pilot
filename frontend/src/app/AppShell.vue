@@ -11,7 +11,7 @@ import {
   signOut,
 } from '@/features/auth/services/auth.service';
 import type { AuthResponse } from '@/shared/types/api';
-import { getSectionTitle, getPrimaryNavigation } from '@/app/navigation';
+import { getPrimaryNavigation } from '@/app/navigation';
 
 const route = useRoute();
 const router = useRouter();
@@ -27,20 +27,6 @@ const navItems = computed(() =>
 );
 const accountLabel = computed(() => authState.currentUser?.username ?? '');
 const isLoggedIn = computed(() => Boolean(authState.currentUser));
-const canResetBrowserSettings = computed(
-  () =>
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === '::1',
-);
-const currentSection = computed(() => getSectionTitle(route.name));
-const showSectionHeader = computed(
-  () =>
-    !['home', 'about', 'signin', 'signup', 'github-login-complete', 'account'].includes(
-      String(route.name ?? ''),
-    ),
-);
-
 function closeMenu() {
   menuOpen.value = false;
 }
@@ -109,13 +95,6 @@ onBeforeUnmount(() => {
 
       <div class="topbar-actions">
         <div class="auth-links">
-          <RouterLink
-            v-if="canResetBrowserSettings"
-            to="/settings/reset"
-            class="button button-secondary auth-link-button auth-link-button--accent demo-reset-link"
-          >
-            Reset demo settings
-          </RouterLink>
           <RouterLink
             v-if="!isLoggedIn"
             to="/auth/signin"
@@ -205,14 +184,6 @@ onBeforeUnmount(() => {
 
         <div class="drawer-actions">
           <RouterLink
-            v-if="canResetBrowserSettings"
-            to="/settings/reset"
-            class="button button-secondary drawer-action drawer-action--accent"
-            @click="closeMenu"
-          >
-            Reset demo settings
-          </RouterLink>
-          <RouterLink
             v-if="!isLoggedIn"
             to="/auth/signin"
             class="button button-secondary drawer-action"
@@ -242,15 +213,6 @@ onBeforeUnmount(() => {
     </Drawer>
 
     <main class="shell">
-      <section v-if="showSectionHeader" class="section-header">
-        <p class="eyebrow">Frontend foundation</p>
-        <h1>{{ currentSection }}</h1>
-        <p class="lede">
-          Vue 3 app wired for short links, QR previews, and future analytics. Built to feel good on
-          a phone first.
-        </p>
-      </section>
-
       <RouterView />
     </main>
   </div>

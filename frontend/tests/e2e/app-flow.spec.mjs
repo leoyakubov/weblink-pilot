@@ -87,11 +87,11 @@ test('guest can create a link and open the details page', async () => {
     });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /short links, qr, analytics\./i }).waitFor();
+    await page.getByRole('heading', { name: /web link shortener/i }).waitFor();
 
     await page.getByLabel('Original URL').fill('https://openai.com/docs');
-    await page.getByLabel('Custom alias').fill('openai-docs');
-    await page.getByRole('button', { name: 'Create short link' }).click();
+    await page.getByRole('textbox', { name: 'Custom alias' }).fill('openai-docs');
+    await page.getByRole('button', { name: 'Shorten link' }).click();
 
     await page.getByText('Created openai-docs successfully').waitFor();
     await page.getByRole('link', { name: 'View details page' }).click();
