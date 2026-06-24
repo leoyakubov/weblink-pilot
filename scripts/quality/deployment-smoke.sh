@@ -3,9 +3,9 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 smoke_target="${SMOKE_TARGET:-local}"
-smoke_target="${smoke_target,,}"
+smoke_target="$(printf '%s' "$smoke_target" | tr '[:upper:]' '[:lower:]')"
 smoke_check="${SMOKE_CHECK:-all}"
-smoke_check="${smoke_check,,}"
+smoke_check="$(printf '%s' "$smoke_check" | tr '[:upper:]' '[:lower:]')"
 checks_to_run=()
 
 case "$smoke_check" in

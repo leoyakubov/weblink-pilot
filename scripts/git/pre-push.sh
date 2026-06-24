@@ -5,7 +5,8 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$repo_root/scripts/lib/common.sh"
 
 mode="${1:-all}"
-case "${mode,,}" in
+mode_lc="$(printf '%s' "$mode" | tr '[:upper:]' '[:lower:]')"
+case "$mode_lc" in
   all|full)
     run_backend=1
     run_frontend=1
