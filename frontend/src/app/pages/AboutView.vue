@@ -10,13 +10,13 @@ const productItems = [
 ];
 
 const stackItems = [
-  ['Frontend', 'Vue 3 app shell, routed pages, PrimeVue controls, and Vitest coverage.'],
-  [
-    'Backend',
-    'Spring Boot API with authentication, ownership, redirects, QR codes, and analytics.',
-  ],
-  ['Persistence', 'Postgres stores users, links, and analytics events.'],
-  ['Cache', 'Redis keeps hot redirects fast and supports production-like demo behavior.'],
+  ['Frontend', 'Vue 3, Vue Router, PrimeVue controls, TypeScript, and Vite.'],
+  ['Backend', 'Spring Boot modular API with auth, ownership, redirects, QR codes, and analytics.'],
+  ['Data', 'PostgreSQL persistence, Redis cache, H2 local profile, and Flyway migrations.'],
+  ['Testing', 'Vitest, Vue Test Utils, Playwright, JUnit, Mockito, and JaCoCo.'],
+  ['Quality', 'ESLint, Prettier, Maven verification gates, and Docker Compose smoke flows.'],
+  ['Delivery', 'GitHub Actions CI/CD, Netlify frontend hosting, and Render backend services.'],
+  ['Email', 'Mailpit for local testing and Brevo SMTP for demo email delivery.'],
 ];
 
 const runtimeItems = [
@@ -27,13 +27,23 @@ const runtimeItems = [
 ];
 
 const demoUsers = [
-  ['admin', 'admin123', 'Administrator account for monitoring and full demo access.'],
-  ['user', 'user123', 'Standard user account for owned links and private history.'],
+  [
+    'admin',
+    'Administrator account for monitoring and full demo access.',
+    'Credentials: admin / admin123',
+  ],
+  [
+    'user',
+    'Standard user account for owned links and private history.',
+    'Credentials: user / user123',
+  ],
 ];
 
 const seededLinks = [
-  ['docs', 'Project documentation link used for link detail, QR, and analytics demos.'],
-  ['github-org', 'GitHub-style demo link used by dashboard and e2e analytics flows.'],
+  ['/spring-boot', 'https://spring.io/projects/spring-boot', 'anonymous'],
+  ['/vue-js', 'https://vuejs.org/guide/introduction.html', 'anonymous'],
+  ['/postgres', 'https://www.postgresql.org/about/', 'user'],
+  ['/redis', 'https://redis.io/docs/latest/develop/', 'user'],
 ];
 
 const accountItems = [
@@ -51,20 +61,69 @@ const accountItems = [
       description="A compact short-link workspace with guest links, signed-in ownership, QR codes, analytics, and production-shaped deployment settings."
     />
 
-    <PanelCard
-      eyebrow="Product"
-      title="What it does"
-      description="WebLinkPilot keeps link creation quick while still supporting account ownership and operational visibility."
-    >
-      <dl class="detail-list detail-list--about-product">
-        <div v-for="[label, value] in productItems" :key="label">
-          <dt>{{ label }}</dt>
-          <dd>{{ value }}</dd>
-        </div>
-      </dl>
-    </PanelCard>
+    <div class="page-grid two-col about-card-row">
+      <PanelCard
+        eyebrow="Product"
+        title="What it does"
+        description="WebLinkPilot keeps link creation quick while still supporting account ownership and operational visibility."
+      >
+        <dl class="detail-list detail-list--about-horizontal">
+          <div v-for="[label, value] in productItems" :key="label">
+            <dt>{{ label }}</dt>
+            <dd>{{ value }}</dd>
+          </div>
+        </dl>
+      </PanelCard>
 
-    <div class="page-grid two-col">
+      <PanelCard
+        eyebrow="Account access"
+        title="Guest, user, and admin flows"
+        description="The same app supports quick anonymous use, signed-in ownership, and administrator monitoring."
+      >
+        <dl class="detail-list detail-list--about-horizontal">
+          <div v-for="[label, value] in accountItems" :key="label">
+            <dt>{{ label }}</dt>
+            <dd>{{ value }}</dd>
+          </div>
+        </dl>
+      </PanelCard>
+    </div>
+
+    <div class="page-grid two-col about-card-row">
+      <PanelCard
+        eyebrow="Seeded data"
+        title="Default users"
+        description="Local and demo profiles can seed these accounts so the app is immediately explorable."
+      >
+        <dl class="detail-list">
+          <div v-for="[username, description, credentials] in demoUsers" :key="username">
+            <dt>{{ username }}</dt>
+            <dd>
+              <span>{{ description }}</span>
+              <strong class="footnote">{{ credentials }}</strong>
+            </dd>
+          </div>
+        </dl>
+      </PanelCard>
+
+      <PanelCard
+        eyebrow="Seeded data"
+        title="Demo links"
+        description="These links help open details, QR codes, and analytics without creating fresh data first."
+      >
+        <dl class="detail-list">
+          <div v-for="[path, url, owner] in seededLinks" :key="path">
+            <dt>{{ path }}</dt>
+            <dd>
+              <strong>{{ url }}</strong>
+              <span class="footnote">by {{ owner }}</span>
+            </dd>
+          </div>
+        </dl>
+      </PanelCard>
+    </div>
+
+    <div class="page-grid two-col about-card-row">
       <PanelCard
         eyebrow="Tech stack"
         title="Implementation"
@@ -91,49 +150,5 @@ const accountItems = [
         </dl>
       </PanelCard>
     </div>
-
-    <div class="page-grid two-col">
-      <PanelCard
-        eyebrow="Seeded data"
-        title="Default users"
-        description="Local and demo profiles can seed these accounts so the app is immediately explorable."
-      >
-        <dl class="detail-list">
-          <div v-for="[username, password, description] in demoUsers" :key="username">
-            <dt>{{ username }}</dt>
-            <dd>
-              <strong>{{ password }}</strong>
-              <span class="footnote">{{ description }}</span>
-            </dd>
-          </div>
-        </dl>
-      </PanelCard>
-
-      <PanelCard
-        eyebrow="Seeded data"
-        title="Demo links"
-        description="These links help open details, QR codes, and analytics without creating fresh data first."
-      >
-        <dl class="detail-list">
-          <div v-for="[alias, description] in seededLinks" :key="alias">
-            <dt>{{ alias }}</dt>
-            <dd>{{ description }}</dd>
-          </div>
-        </dl>
-      </PanelCard>
-    </div>
-
-    <PanelCard
-      eyebrow="Account access"
-      title="Guest, user, and admin flows"
-      description="The same app supports quick anonymous use, signed-in ownership, and administrator monitoring."
-    >
-      <dl class="detail-list detail-list--about-product">
-        <div v-for="[label, value] in accountItems" :key="label">
-          <dt>{{ label }}</dt>
-          <dd>{{ value }}</dd>
-        </div>
-      </dl>
-    </PanelCard>
   </section>
 </template>

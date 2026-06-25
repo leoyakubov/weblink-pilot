@@ -4,7 +4,7 @@ import PageIntro from '@/shared/components/common/PageIntro.vue';
 import PanelCard from '@/shared/components/common/PanelCard.vue';
 import { useAccountProfile } from '@/features/account/composables/useAccountProfile';
 
-const { account, busy, errorMessage, linkedAccounts, loadAccount } = useAccountProfile();
+const { account, busy, errorMessage, loadAccount } = useAccountProfile();
 
 function formatDateTime(value: string | null | undefined) {
   if (!value) {
@@ -27,14 +27,15 @@ onMounted(() => {
     <PageIntro
       eyebrow="Account"
       title="Profile"
-      description="Review your signed-in identity, role, email state, and linked providers."
+      description="Review your signed-in identity, role, email state, and recent account activity."
     />
 
-    <div class="page-grid two-col account-settings-grid">
+    <div class="page-grid account-settings-grid account-settings-grid--single">
       <PanelCard
         eyebrow="Profile"
         title="Account details"
         description="Compact account metadata for the current signed-in session."
+        class="account-form-card"
       >
         <p v-if="busy" class="footnote">Loading account details...</p>
         <dl v-else-if="account" class="detail-list detail-list--compact">
@@ -68,24 +69,6 @@ onMounted(() => {
           <span class="status-dot"></span>
           {{ errorMessage }}
         </p>
-      </PanelCard>
-
-      <PanelCard
-        eyebrow="Linked accounts"
-        title="Identity providers"
-        description="External sign-in methods connected to this account."
-      >
-        <div v-if="linkedAccounts.length" class="stack">
-          <div
-            v-for="identity in linkedAccounts"
-            :key="`${identity.provider}-${identity.providerLogin}`"
-            class="linked-account"
-          >
-            <strong>{{ identity.provider }}</strong>
-            <span class="footnote">{{ identity.providerLogin }}</span>
-          </div>
-        </div>
-        <p v-else class="footnote">No social accounts linked yet.</p>
       </PanelCard>
     </div>
   </section>

@@ -54,8 +54,8 @@ describe('App', () => {
 
     expect(mocks.bootstrapAuthMock).toHaveBeenCalled();
     expect(wrapper.text()).toContain('Home');
-    expect(wrapper.text()).toContain('Dashboard');
-    expect(wrapper.text()).toContain('History');
+    expect(wrapper.text()).toContain('Links');
+    expect(wrapper.text()).toContain('Analytics');
     expect(wrapper.text()).toContain('About');
     expect(wrapper.text()).toContain('Log in');
     expect(wrapper.text()).toContain('Sign up');
@@ -63,22 +63,25 @@ describe('App', () => {
     expect(wrapper.text()).not.toContain('Monitoring');
   });
 
-  it('renders the dashboard section for admins', async () => {
+  it('renders the analytics section for admins', async () => {
     mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
-    mocks.routeState.name = 'dashboard';
-    mocks.routeState.path = '/dashboard';
+    mocks.routeState.name = 'analytics';
+    mocks.routeState.path = '/analytics';
 
     const wrapper = mount(App);
 
-    expect(wrapper.text()).toContain('Monitoring');
     expect(wrapper.text()).toContain('admin');
-    expect(wrapper.text()).toContain('Sign out');
 
     await wrapper.get('button[aria-label="Open account menu"]').trigger('click');
     expect(wrapper.text()).toContain('Profile');
     expect(wrapper.text()).toContain('Security');
+    expect(wrapper.text()).toContain('Monitoring');
+    expect(wrapper.text()).toContain('Sign out');
 
-    await wrapper.get('button.sign-out-button').trigger('click');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Sign out'))
+      ?.trigger('click');
     expect(mocks.signOutMock).toHaveBeenCalled();
     expect(mocks.routerPushMock).toHaveBeenCalledWith('/');
   });

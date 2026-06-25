@@ -16,7 +16,7 @@ const emit = defineEmits<{
   <teleport to="body">
     <Transition name="session-notice">
       <div v-if="visible" class="modal-backdrop" @click.self="emit('close')">
-        <div class="modal-card card">
+        <div class="modal-card modal-card--qr card">
           <div class="card-inner stack">
             <div class="section-row">
               <div>
@@ -25,10 +25,10 @@ const emit = defineEmits<{
               </div>
               <Button
                 type="button"
-                label="Close"
                 icon="pi pi-times"
-                class="modal-close-button"
+                class="modal-close-button modal-close-button--icon"
                 severity="secondary"
+                aria-label="Close QR code"
                 @click="emit('close')"
               />
             </div>

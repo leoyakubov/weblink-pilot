@@ -108,12 +108,13 @@ describe('HomeView', () => {
       },
     );
     expect(mocks.saveSettingsMock).toHaveBeenCalled();
-    expect(wrapper.text()).toContain('Created abc1234 successfully');
-    expect(document.body.textContent).toContain('View details page');
+    expect(wrapper.text()).not.toContain('Created abc1234 successfully');
+    expect(document.body.textContent).toContain('Created link');
+    expect(document.body.textContent).toContain('View details');
     expect(document.body.textContent).toContain('http://localhost:8080/r/abc1234');
   });
 
-  it('shows a duplicate message for the same anonymous full URL', async () => {
+  it('opens the existing-link modal for the same anonymous full URL', async () => {
     mocks.listLinksMock.mockResolvedValue([
       {
         code: 'docs',
@@ -134,9 +135,12 @@ describe('HomeView', () => {
     await flushPromises();
 
     expect(mocks.createLinkMock).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain(
-      'This full URL already has a short link for anonymous demo: http://localhost:8080/r/docs',
+    expect(wrapper.text()).not.toContain('This full URL already has a short link');
+    expect(document.body.textContent).toContain('Shortened link exists');
+    expect(document.body.textContent).toContain(
+      'This URL already has a short link for anonymous demo.',
     );
+    expect(document.body.textContent).toContain('http://localhost:8080/r/docs');
   });
 
   it('shows signed-in status and owned links when the user is authenticated', async () => {

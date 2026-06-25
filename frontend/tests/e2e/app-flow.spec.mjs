@@ -93,6 +93,21 @@ test('guest can create a link and open the details page', async () => {
           topCountries: [],
         }),
       }),
+      'GET /api/v1/analytics/openai-docs/details': async () => ({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'openai-docs',
+          timelineByDay: [],
+          timelineByHour: [],
+          browserBreakdown: [],
+          deviceBreakdown: [],
+          referrerBreakdown: [],
+          recentEvents: [],
+          sourceTrendByDay: [],
+          visitorTrendByDay: [],
+        }),
+      }),
     });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
@@ -102,12 +117,12 @@ test('guest can create a link and open the details page', async () => {
     await page.getByRole('textbox', { name: 'Custom alias' }).fill('openai-docs');
     await page.getByRole('button', { name: 'Shorten link' }).click();
 
-    await page.getByText('Created openai-docs successfully').waitFor();
-    await page.getByRole('link', { name: 'View details page' }).click();
-    await page.getByRole('heading', { name: /code: openai-docs/i }).waitFor();
+    await page.getByText('Created link').waitFor();
+    await page.getByRole('link', { name: 'View details' }).click();
+    await page.getByRole('heading', { name: /details of "openai-docs"/i }).waitFor();
 
     assert.match(page.url(), /\/link\/openai-docs$/);
-    await page.getByText('Open redirect').waitFor();
+    await page.getByRole('button', { name: 'Open', exact: true }).waitFor();
   } finally {
     await browser.close();
   }

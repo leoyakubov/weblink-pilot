@@ -1,7 +1,6 @@
 <script setup lang="ts">
 /* global HTMLElement, MouseEvent */
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import Button from 'primevue/button';
 
 defineProps<{
   buttonLabel: string;
@@ -33,17 +32,15 @@ onBeforeUnmount(() => {
 
 <template>
   <span ref="root" class="help-popover">
-    <Button
+    <button
       type="button"
       class="field-help-button"
-      label="?"
-      severity="secondary"
-      variant="text"
-      size="small"
       :aria-label="buttonLabel"
       :aria-expanded="open"
       @click.stop="toggle"
-    />
+    >
+      ?
+    </button>
     <span v-if="open" class="help-text help-text--tooltip" role="tooltip">
       <slot />
     </span>

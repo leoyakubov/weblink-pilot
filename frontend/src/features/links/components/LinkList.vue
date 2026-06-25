@@ -68,8 +68,11 @@ async function shareLink(item: LinkResponse) {
     <div v-for="item in props.links" :key="item.code" class="list-item">
       <div class="recent-link-row">
         <div class="recent-link-heading">
-          {{ formatCreatedHeading(item.createdAt) }} by
-          {{ item.ownerUsername ?? 'Anonymous' }}
+          <span>{{ formatCreatedHeading(item.createdAt) }}</span>
+          <span class="recent-link-owner">
+            <span>created by</span>
+            <strong>{{ item.ownerUsername ?? 'anonymous' }}</strong>
+          </span>
         </div>
         <div class="recent-link-main">
           <div class="recent-link-pair">
@@ -86,7 +89,9 @@ async function shareLink(item: LinkResponse) {
           </div>
         </div>
         <div class="recent-link-meta">
-          <span>Expires: {{ formatDate(item.expiresAt) }}</span>
+          <span
+            >Expires: <strong>{{ formatDate(item.expiresAt) }}</strong></span
+          >
           <span class="recent-link-clicks">{{ item.clickCount }} clicks</span>
         </div>
       </div>
@@ -94,7 +99,7 @@ async function shareLink(item: LinkResponse) {
         <RouterLink :to="{ name: 'link', params: { code: item.code } }">
           <Button label="Details" icon="pi pi-external-link" />
         </RouterLink>
-        <RouterLink :to="{ name: 'dashboard', query: { code: item.code } }">
+        <RouterLink :to="{ name: 'analytics-detail', params: { code: item.code } }">
           <Button
             label="Analytics"
             icon="pi pi-chart-line"

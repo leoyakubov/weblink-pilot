@@ -97,7 +97,7 @@ onMounted(() => {
       description="Review system totals, open operational endpoints, and adjust local browser/backend settings from one place."
     />
 
-    <div class="page-grid two-col">
+    <div class="page-grid two-col monitoring-card-row">
       <PanelCard
         eyebrow="Admin overview"
         title="System overview"
@@ -117,59 +117,40 @@ onMounted(() => {
           {{ errorMessage }}
         </p>
 
-        <div v-if="overview" class="grid-2">
-          <div class="metric">
-            <span class="label">Total users</span>
-            <span class="value">{{ overview.totalUsers }}</span>
+        <dl
+          v-if="overview"
+          class="detail-list detail-list--link-detail detail-list--analytics monitoring-overview-list"
+        >
+          <div>
+            <dt>Total users</dt>
+            <dd>{{ overview.totalUsers }}</dd>
           </div>
-          <div class="metric">
-            <span class="label">Admin users</span>
-            <span class="value">{{ overview.adminUsers }}</span>
+          <div>
+            <dt>Admin users</dt>
+            <dd>{{ overview.adminUsers }}</dd>
           </div>
-          <div class="metric">
-            <span class="label">Total links</span>
-            <span class="value">{{ overview.totalLinks }}</span>
+          <div>
+            <dt>Total links</dt>
+            <dd>{{ overview.totalLinks }}</dd>
           </div>
-          <div class="metric">
-            <span class="label">Total clicks</span>
-            <span class="value">{{ overview.totalClicks }}</span>
+          <div>
+            <dt>Total clicks</dt>
+            <dd>{{ overview.totalClicks }}</dd>
           </div>
-          <div class="metric">
-            <span class="label">Owned links</span>
-            <span class="value">{{ overview.ownedLinks }}</span>
+          <div>
+            <dt>Owned links</dt>
+            <dd>{{ overview.ownedLinks }}</dd>
           </div>
-          <div class="metric">
-            <span class="label">Anonymous links</span>
-            <span class="value">{{ overview.anonymousLinks }}</span>
+          <div>
+            <dt>anonymous links</dt>
+            <dd>{{ overview.anonymousLinks }}</dd>
           </div>
-        </div>
+        </dl>
       </PanelCard>
 
-      <PanelCard
-        eyebrow="Live backend"
-        title="Actuator endpoints"
-        description="Open backend health, info, metrics, and scrape endpoints for the current environment."
-      >
-        <div class="list">
-          <div v-for="link in backendLinks" :key="link.label" class="list-item monitoring-link">
-            <div class="section-row">
-              <div>
-                <strong>{{ link.label }}</strong>
-                <p>{{ link.description }}</p>
-              </div>
-              <a :href="link.href" target="_blank" rel="noreferrer">
-                <Button label="Open" icon="pi pi-external-link" severity="secondary" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </PanelCard>
-    </div>
-
-    <div class="page-grid two-col">
       <PanelCard
         eyebrow="Frontend settings"
-        title="Backend base URL"
+        title="Settings"
         description="Use these browser-local settings when testing a different backend endpoint."
       >
         <div class="section-row about-toolbar">
@@ -226,7 +207,7 @@ onMounted(() => {
           Saved for this browser
         </p>
 
-        <dl class="detail-list">
+        <dl class="detail-list detail-list--settings">
           <div>
             <dt>Current backend</dt>
             <dd>{{ settings.apiBaseUrl }}</dd>
@@ -236,6 +217,28 @@ onMounted(() => {
             <dd>admin / admin123, user / user123</dd>
           </div>
         </dl>
+      </PanelCard>
+    </div>
+
+    <div class="page-grid two-col monitoring-card-row">
+      <PanelCard
+        eyebrow="Live backend"
+        title="Actuator endpoints"
+        description="Open backend health, info, metrics, and scrape endpoints for the current environment."
+      >
+        <div class="list">
+          <div v-for="link in backendLinks" :key="link.label" class="list-item monitoring-link">
+            <div class="section-row">
+              <div>
+                <strong>{{ link.label }}</strong>
+                <p>{{ link.description }}</p>
+              </div>
+              <a :href="link.href" target="_blank" rel="noreferrer">
+                <Button label="Open" icon="pi pi-external-link" severity="secondary" />
+              </a>
+            </div>
+          </div>
+        </div>
       </PanelCard>
 
       <PanelCard

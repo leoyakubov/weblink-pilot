@@ -276,7 +276,7 @@ async function submit() {
               v-model="form.password"
               :feedback="false"
               toggle-mask
-              :placeholder="'Enter your password'"
+              :placeholder="'Your password'"
               :autocomplete="passwordAutocomplete"
               fluid
             />

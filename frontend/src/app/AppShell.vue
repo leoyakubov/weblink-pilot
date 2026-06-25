@@ -23,11 +23,10 @@ type AuthMessage = {
   response?: AuthResponse;
 };
 
-const navItems = computed(() =>
-  getPrimaryNavigation(isLoggedIn.value && authState.currentUser?.role === 'ADMIN'),
-);
+const navItems = computed(() => getPrimaryNavigation());
 const accountLabel = computed(() => authState.currentUser?.username ?? '');
 const isLoggedIn = computed(() => Boolean(authState.currentUser));
+const isAdmin = computed(() => isLoggedIn.value && authState.currentUser?.role === 'ADMIN');
 function closeMenu() {
   menuOpen.value = false;
 }
@@ -97,10 +96,16 @@ onBeforeUnmount(() => {
           @click="menuOpen = true"
         />
         <RouterLink to="/" class="brand">
-          <span class="brand-mark">WP</span>
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+              <path d="M17.2 27.2 13 31.4a6.8 6.8 0 0 1-9.6-9.6l5.2-5.2a6.8 6.8 0 0 1 9.6 0" />
+              <path d="M30.8 20.8 35 16.6a6.8 6.8 0 1 1 9.6 9.6l-5.2 5.2a6.8 6.8 0 0 1-9.6 0" />
+              <path d="M18 30 30 18" />
+            </svg>
+          </span>
           <span class="brand-copy">
             <strong>WebLinkPilot</strong>
-            <small>Mobile-first short link cockpit</small>
+            <small>Personal short link workspace</small>
           </span>
         </RouterLink>
       </div>
@@ -158,6 +163,19 @@ onBeforeUnmount(() => {
                 <i class="pi pi-shield" aria-hidden="true"></i>
                 <span>Security</span>
               </RouterLink>
+              <RouterLink
+                v-if="isAdmin"
+                to="/monitoring"
+                class="account-menu__item"
+                @click="closeAccountMenu"
+              >
+                <i class="pi pi-chart-bar" aria-hidden="true"></i>
+                <span>Monitoring</span>
+              </RouterLink>
+              <button type="button" class="account-menu__item" @click="handleSignOut">
+                <i class="pi pi-sign-out" aria-hidden="true"></i>
+                <span>Sign out</span>
+              </button>
             </div>
           </div>
 
@@ -168,16 +186,6 @@ onBeforeUnmount(() => {
           >
             Sign up
           </RouterLink>
-          <Button
-            v-else
-            type="button"
-            class="button button-secondary auth-link-button sign-out-button"
-            label="Sign out"
-            icon="pi pi-sign-out"
-            severity="secondary"
-            variant="outlined"
-            @click="handleSignOut"
-          />
         </div>
       </div>
 
@@ -199,10 +207,16 @@ onBeforeUnmount(() => {
       <div class="drawer-panel">
         <div class="drawer-header">
           <RouterLink to="/" class="brand" @click="closeMenu">
-            <span class="brand-mark">WP</span>
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+                <path d="M17.2 27.2 13 31.4a6.8 6.8 0 0 1-9.6-9.6l5.2-5.2a6.8 6.8 0 0 1 9.6 0" />
+                <path d="M30.8 20.8 35 16.6a6.8 6.8 0 1 1 9.6 9.6l-5.2 5.2a6.8 6.8 0 0 1-9.6 0" />
+                <path d="M18 30 30 18" />
+              </svg>
+            </span>
             <span class="brand-copy">
               <strong>WebLinkPilot</strong>
-              <small>Mobile-first short link cockpit</small>
+              <small>Personal short link workspace</small>
             </span>
           </RouterLink>
 
@@ -248,8 +262,16 @@ onBeforeUnmount(() => {
           >
             Sign up
           </RouterLink>
+          <RouterLink
+            v-if="isAdmin"
+            to="/monitoring"
+            class="button button-secondary drawer-action"
+            @click="closeMenu"
+          >
+            Monitoring
+          </RouterLink>
           <Button
-            v-else
+            v-if="isLoggedIn"
             type="button"
             class="button button-secondary drawer-action sign-out-button"
             label="Sign out"
@@ -272,8 +294,8 @@ onBeforeUnmount(() => {
         <p>Personal short links, QR codes, and click history in one fast workspace.</p>
       </div>
       <div class="page-footer__links">
-        <RouterLink to="/history">History</RouterLink>
-        <RouterLink to="/dashboard">Analytics</RouterLink>
+        <RouterLink to="/links">Links</RouterLink>
+        <RouterLink to="/analytics">Analytics</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </div>
     </footer>

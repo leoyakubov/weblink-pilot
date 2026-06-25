@@ -37,6 +37,7 @@ const createCooldownUntil = ref(0);
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
 const createdModalOpen = ref(false);
+const createdModalMode = ref<'created' | 'existing'>('created');
 
 const userStatus = computed(() =>
   authState.currentUser
@@ -107,7 +108,9 @@ async function submit() {
 
     const existingLink = findExistingLink(originalUrl);
     if (existingLink) {
-      errorMessage.value = `This full URL already has a short link for ${existingLink.ownerUsername ?? 'anonymous demo'}: ${existingLink.shortUrl}`;
+      createdLink.value = existingLink;
+      createdModalMode.value = 'existing';
+      createdModalOpen.value = true;
       return;
     }
 
@@ -120,6 +123,7 @@ async function submit() {
     submitting.value = true;
     createCooldownUntil.value = Date.now() + CREATE_COOLDOWN_MS;
     createdLink.value = await createLink(payload, settings);
+    createdModalMode.value = 'created';
     successMessage.value = `Created ${createdLink.value.code} successfully`;
     createdModalOpen.value = true;
     await refreshRecent();
@@ -203,11 +207,11 @@ watch(
       </PanelCard>
 
       <PanelCard
-        eyebrow="Create links"
+        eyebrow="Create link"
         title="Shorten link"
         description="Use the defaults for a fast demo, or swap in your own URL, alias, and expiration. Leave expiration blank to keep the link active."
       >
-        <form class="form-grid" @submit.prevent="submit">
+        <form class="form-grid create-link-form" @submit.prevent="submit">
           <label class="form-field">
             <span class="field-label">Original URL</span>
             <InputText
@@ -221,7 +225,9 @@ watch(
           <div class="form-field form-field--with-popover">
             <div class="field-label-row">
               <div class="field-label-group">
-                <label class="field-label" for="custom-alias">Custom alias (optional)</label>
+                <label class="field-label" for="custom-alias">
+                  Custom alias <span class="field-label-optional">(optional)</span>
+                </label>
                 <HelpTooltip button-label="Toggle custom alias help">
                   Choose a short, memorable word for the end of your link, like
                   <strong>portfolio</strong> or <strong>launch-notes</strong>. Leave it empty when
@@ -240,10 +246,13 @@ watch(
           <div class="form-field form-field--with-popover">
             <div class="field-label-row">
               <div class="field-label-group">
-                <label class="field-label" for="expiration">Expiration (optional)</label>
+                <label class="field-label" for="expiration">
+                  Expiration <span class="field-label-optional">(optional)</span>
+                </label>
                 <HelpTooltip button-label="Toggle expiration help">
-                  Leave this blank for no expiration. If you choose a date, the backend still caps
-                  the maximum lifetime so your links do not run forever by accident.
+                  Leave blank to keep this link active without an expiration date. Choose a date if
+                  you want redirects to stop automatically. By default, selected expiration dates
+                  cannot be more than 365 days in the future.
                 </HelpTooltip>
               </div>
             </div>
@@ -253,6 +262,7 @@ watch(
           <div class="actions">
             <Button
               type="submit"
+              class="shorten-submit-button"
               :label="submitting ? 'Creating...' : 'Shorten link'"
               icon="pi pi-link"
               :disabled="submitting"
@@ -263,10 +273,6 @@ watch(
             <p v-if="errorMessage" class="status error">
               <span class="status-dot"></span>
               {{ errorMessage }}
-            </p>
-            <p v-else-if="successMessage" class="status">
-              <span class="status-dot"></span>
-              {{ successMessage }}
             </p>
             <p class="status warning create-status">
               <span class="status-dot"></span>
@@ -323,32 +329,55 @@ watch(
             <div class="card-inner stack">
               <div class="section-row">
                 <div>
-                  <p class="eyebrow">Created link</p>
-                  <h3 class="panel-title">{{ createdLink.code }}</h3>
+                  <p class="eyebrow">
+                    {{ createdModalMode === 'created' ? 'Created link' : 'Shortened link exists' }}
+                  </p>
+                  <h3 class="panel-title created-modal-title">
+                    <i
+                      v-if="createdModalMode === 'existing'"
+                      class="pi pi-exclamation-triangle"
+                      aria-hidden="true"
+                    ></i>
+                    <span>{{ createdLink.code }}</span>
+                  </h3>
                 </div>
                 <Button
                   type="button"
-                  label="Close"
                   icon="pi pi-times"
-                  class="modal-close-button"
+                  class="modal-close-button modal-close-button--icon"
                   severity="secondary"
+                  aria-label="Close"
                   @click="closeCreatedModal"
                 />
               </div>
+
+              <p v-if="createdModalMode === 'existing'" class="status warning">
+                <span class="status-dot"></span>
+                This URL already has a short link for
+                {{ createdLink.ownerUsername ?? 'anonymous demo' }}. Use the existing link below
+                instead of creating a duplicate.
+              </p>
 
               <div class="created-link-result">
                 <p class="recent-link-label">Short URL</p>
                 <strong>{{ createdLink.shortUrl }}</strong>
               </div>
 
-              <div class="actions">
+              <div class="actions recent-link-actions created-link-actions">
                 <RouterLink :to="{ name: 'link', params: { code: createdLink.code } }">
-                  <Button label="View details page" icon="pi pi-external-link" />
+                  <Button
+                    label="View details"
+                    icon="pi pi-external-link"
+                    severity="secondary"
+                    variant="outlined"
+                  />
                 </RouterLink>
                 <Button
                   type="button"
                   :label="isCopied('created-short') ? 'Short URL copied' : 'Copy short URL'"
                   :icon="isCopied('created-short') ? 'pi pi-check' : 'pi pi-copy'"
+                  severity="secondary"
+                  variant="outlined"
                   @click="copy(createdLink.shortUrl, 'created-short')"
                 />
                 <Button

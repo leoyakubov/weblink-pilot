@@ -50,7 +50,7 @@ describe('MonitoringView', () => {
     expect(wrapper.text()).toContain('Admin monitoring');
     expect(wrapper.text()).toContain('Total users');
     expect(wrapper.text()).toContain('99');
-    expect(wrapper.text()).toContain('Anonymous links');
+    expect(wrapper.text()).toContain('anonymous links');
   });
 
   it('renders live backend and local stack links', async () => {

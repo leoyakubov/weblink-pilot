@@ -19,6 +19,12 @@ export interface LinkResponse {
   expiresAt: string | null;
   clickCount: number;
   ownerUsername: string | null;
+  ownerRole?: string | null;
+}
+
+export interface LinkCreatorOptionResponse {
+  username: string;
+  role: string;
 }
 
 export interface AuthCredentialsRequest {
@@ -120,4 +126,38 @@ export interface AnalyticsSummaryResponse {
   lastBrowserFamily: string | null;
   lastDeviceType: string | null;
   topCountries: AnalyticsCountryStat[];
+}
+
+export interface AnalyticsBucketStat {
+  bucket: string;
+  totalClicks: number;
+  redirectClicks: number;
+  qrScans: number;
+  uniqueVisitors: number;
+}
+
+export interface AnalyticsBreakdownStat {
+  label: string;
+  clicks: number;
+}
+
+export interface AnalyticsEventResponse {
+  clickedAt: string | null;
+  eventSource: 'REDIRECT' | 'QR_SCAN';
+  referrer: string | null;
+  country: string | null;
+  browserFamily: string | null;
+  deviceType: string | null;
+}
+
+export interface AnalyticsDetailsResponse {
+  code: string;
+  timelineByDay: AnalyticsBucketStat[];
+  timelineByHour: AnalyticsBucketStat[];
+  browserBreakdown: AnalyticsBreakdownStat[];
+  deviceBreakdown: AnalyticsBreakdownStat[];
+  referrerBreakdown: AnalyticsBreakdownStat[];
+  recentEvents: AnalyticsEventResponse[];
+  sourceTrendByDay: AnalyticsBucketStat[];
+  visitorTrendByDay: AnalyticsBucketStat[];
 }

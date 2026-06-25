@@ -101,6 +101,7 @@ onMounted(() => {
         eyebrow="Security"
         title="Change password"
         description="Use a password with at least 6 characters, including one letter and one number."
+        class="account-form-card"
       >
         <form class="form-grid" @submit.prevent="submitPasswordChange">
           <label class="form-field">

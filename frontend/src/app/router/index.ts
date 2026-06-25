@@ -55,15 +55,25 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
+      path: '/analytics',
+      name: 'analytics',
+      component: () => import('@/features/links/pages/AnalyticsView.vue'),
+    },
+    {
+      path: '/analytics/:code',
+      name: 'analytics-detail',
       component: () => import('@/features/links/pages/DashboardView.vue'),
     },
     {
-      path: '/history',
-      name: 'history',
+      path: '/dashboard',
+      redirect: (to) => ({ path: '/analytics', query: to.query }),
+    },
+    {
+      path: '/links',
+      name: 'links',
       component: () => import('@/features/links/pages/HistoryView.vue'),
     },
+    { path: '/history', redirect: '/links' },
     {
       path: '/account',
       name: 'account',

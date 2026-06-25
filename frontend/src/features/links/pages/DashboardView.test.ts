@@ -4,8 +4,8 @@ import DashboardView from '@/features/links/pages/DashboardView.vue';
 
 const mocks = vi.hoisted(() => ({
   listLinksMock: vi.fn(),
-  getLinkMock: vi.fn(),
   getAnalyticsSummaryMock: vi.fn(),
+  getAnalyticsDetailsMock: vi.fn(),
   ApiRequestError: class ApiRequestError extends Error {
     status: number;
 
@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => ({
   },
   openMock: vi.fn(),
   routeState: {
-    params: {},
+    params: { code: 'github-org' },
     query: {},
   },
 }));
@@ -46,8 +46,8 @@ vi.mock('@/shared/services/http', () => ({
 }));
 
 vi.mock('@/features/links/repositories/link.repository', () => ({
+  getAnalyticsDetails: mocks.getAnalyticsDetailsMock,
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
-  getLink: mocks.getLinkMock,
   listLinks: mocks.listLinksMock,
 }));
 
@@ -63,7 +63,7 @@ describe('DashboardView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
-    mocks.routeState.params = {};
+    mocks.routeState.params = { code: 'github-org' };
     mocks.routeState.query = {};
     vi.stubGlobal('open', mocks.openMock);
     mocks.listLinksMock.mockResolvedValue([
@@ -78,16 +78,6 @@ describe('DashboardView', () => {
         ownerUsername: 'admin',
       },
     ]);
-    mocks.getLinkMock.mockResolvedValue({
-      code: 'github-org',
-      shortUrl: 'http://localhost:8080/r/github-org',
-      qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-      originalUrl: 'https://github.com/orgs/github-org',
-      createdAt: '2026-05-23T11:00:00Z',
-      expiresAt: null,
-      clickCount: 3,
-      ownerUsername: 'admin',
-    });
     mocks.getAnalyticsSummaryMock.mockResolvedValue({
       code: 'github-org',
       totalClicks: 3,
@@ -100,9 +90,61 @@ describe('DashboardView', () => {
       lastDeviceType: 'DESKTOP',
       topCountries: [{ country: 'US', clicks: 3 }],
     });
+    mocks.getAnalyticsDetailsMock.mockResolvedValue({
+      code: 'github-org',
+      timelineByDay: [
+        {
+          bucket: '2026-05-23',
+          totalClicks: 3,
+          redirectClicks: 2,
+          qrScans: 1,
+          uniqueVisitors: 2,
+        },
+      ],
+      timelineByHour: [
+        {
+          bucket: '2026-05-23 11:00',
+          totalClicks: 3,
+          redirectClicks: 2,
+          qrScans: 1,
+          uniqueVisitors: 2,
+        },
+      ],
+      browserBreakdown: [{ label: 'CHROME', clicks: 3 }],
+      deviceBreakdown: [{ label: 'DESKTOP', clicks: 3 }],
+      referrerBreakdown: [{ label: 'news.ycombinator.com', clicks: 3 }],
+      recentEvents: [
+        {
+          clickedAt: '2026-05-23T11:05:00Z',
+          eventSource: 'REDIRECT',
+          referrer: 'https://news.ycombinator.com',
+          country: 'US',
+          browserFamily: 'CHROME',
+          deviceType: 'DESKTOP',
+        },
+      ],
+      sourceTrendByDay: [
+        {
+          bucket: '2026-05-23',
+          totalClicks: 3,
+          redirectClicks: 2,
+          qrScans: 1,
+          uniqueVisitors: 2,
+        },
+      ],
+      visitorTrendByDay: [
+        {
+          bucket: '2026-05-23',
+          totalClicks: 3,
+          redirectClicks: 2,
+          qrScans: 1,
+          uniqueVisitors: 2,
+        },
+      ],
+    });
   });
 
-  it('loads analytics and opens the QR modal', async () => {
+  it('loads detailed analytics for the route code', async () => {
     const wrapper = mount(DashboardView, {
       global: {
         stubs: {
@@ -115,22 +157,31 @@ describe('DashboardView', () => {
     });
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Inspect a short code');
-    expect(wrapper.text()).toContain('Open preview JSON');
-    expect(wrapper.text()).toContain('github-org');
+    expect(wrapper.text()).toContain('Analytics for "github-org"');
+    expect(wrapper.text()).toContain('Interaction summary');
+    expect(wrapper.text()).toContain('Redirects vs QR scans');
+    expect(wrapper.text()).toContain('Latest captured context');
+    expect(wrapper.text()).toContain('Country distribution');
+    expect(wrapper.text()).toContain('Timeline by day/hour');
+    expect(wrapper.text()).toContain('Browser breakdown');
+    expect(wrapper.text()).toContain('Device breakdown');
+    expect(wrapper.text()).toContain('Referrer breakdown');
+    expect(wrapper.text()).toContain('Recent interactions');
+    expect(wrapper.text()).toContain('Unique vs returning visitors');
+    expect(wrapper.text()).toContain('QR vs redirect trend');
+    expect(wrapper.text()).toContain('Refresh');
     expect(wrapper.text()).toContain('US');
-
-    const buttons = wrapper.findAll('button');
-    await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
-    await flushPromises();
-    expect(document.body.textContent).toContain('QR code');
-    expect(document.body.textContent).toContain('github-org');
-
-    await buttons.find((button) => button.text().includes('preview JSON'))?.trigger('click');
-    expect(mocks.openMock).toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain('Basic link');
+    expect(wrapper.text()).not.toContain('Link details');
+    expect(wrapper.text()).not.toContain('All analytics');
+    expect(wrapper.text()).not.toContain('Target URL');
+    expect(wrapper.text()).not.toContain('Open preview JSON');
+    expect(wrapper.text()).not.toContain('Open QR');
+    expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('github-org', expect.any(Object));
+    expect(mocks.getAnalyticsDetailsMock).toHaveBeenCalledWith('github-org', expect.any(Object));
   });
 
-  it('keeps link details visible when analytics are forbidden', async () => {
+  it('shows an analytics access message when analytics are forbidden', async () => {
     mocks.getAnalyticsSummaryMock.mockRejectedValueOnce(
       new mocks.ApiRequestError('Forbidden', 403),
     );
@@ -150,30 +201,7 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain(
       'Analytics are available only to the link owner or an admin user.',
     );
-    expect(wrapper.text()).toContain('github-org');
-    expect(wrapper.text()).toContain('Short URL');
-  });
-
-  it('passes an admin creator filter to the recent links request', async () => {
-    const wrapper = mount(DashboardView, {
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ['to'],
-            template: '<a><slot /></a>',
-          },
-        },
-      },
-    });
-    await flushPromises();
-
-    await wrapper.get('input[placeholder="alice or anonymous"]').setValue('alice');
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Apply recent filter'))
-      ?.trigger('click');
-    await flushPromises();
-
-    expect(mocks.listLinksMock).toHaveBeenCalledWith(8, expect.any(Object), 'alice');
+    expect(wrapper.text()).not.toContain('Interaction summary');
+    expect(mocks.getAnalyticsDetailsMock).toHaveBeenCalledWith('github-org', expect.any(Object));
   });
 });

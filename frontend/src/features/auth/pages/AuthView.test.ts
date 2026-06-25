@@ -62,7 +62,7 @@ describe('AuthView', () => {
 
     const wrapper = mountAuth('login');
     await wrapper.get('input[placeholder="Your username"]').setValue('user');
-    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('input[placeholder="Your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 
@@ -80,7 +80,7 @@ describe('AuthView', () => {
 
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
     await wrapper.get('input[placeholder="you@example.com"]').setValue('user1@example.com');
-    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('input[placeholder="Your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 
@@ -93,7 +93,7 @@ describe('AuthView', () => {
     const wrapper = mountAuth('register');
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
     await wrapper.get('input[placeholder="you@example.com"]').setValue('user1@example.com');
-    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('input[placeholder="Your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 
@@ -113,7 +113,7 @@ describe('AuthView', () => {
 
     const wrapper = mountAuth('login');
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
-    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('input[placeholder="Your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 
@@ -136,7 +136,7 @@ describe('AuthView', () => {
     const wrapper = mountAuth('register');
 
     await wrapper.get('input[placeholder="Your username"]').setValue('user1');
-    await wrapper.get('input[placeholder="Enter your password"]').setValue('user123');
+    await wrapper.get('input[placeholder="Your password"]').setValue('user123');
     await wrapper.get('form').trigger('submit.prevent');
     await flushPromises();
 

@@ -1,6 +1,7 @@
 import type {
   AccountProfileResponse,
   AdminOverviewResponse,
+  AnalyticsDetailsResponse,
   AnalyticsSummaryResponse,
   ApiSettings,
   AccountActionPreviewResponse,
@@ -9,6 +10,7 @@ import type {
   CreateLinkRequest,
   EmailVerificationConfirmRequest,
   EmailVerificationRequest,
+  LinkCreatorOptionResponse,
   LinkResponse,
   OAuthLoginCompleteRequest,
   PasswordChangeRequest,
@@ -418,11 +420,23 @@ export function listLinksRequest(
   limit: number = 10,
   settings: ApiSettings = loadSettings(),
   creator?: string | null,
+  ownerRole?: string | null,
 ) {
+  const params = new URLSearchParams({ limit: String(limit) });
   const creatorQuery = creator?.trim();
-  const creatorSuffix = creatorQuery ? `&creator=${encodeURIComponent(creatorQuery)}` : '';
-  return requestJson<LinkResponse[]>(
-    `/urls?limit=${encodeURIComponent(String(limit))}${creatorSuffix}`,
+  const ownerRoleQuery = ownerRole?.trim();
+  if (creatorQuery) {
+    params.set('creator', creatorQuery);
+  }
+  if (ownerRoleQuery) {
+    params.set('ownerRole', ownerRoleQuery);
+  }
+  return requestJson<LinkResponse[]>(`/urls?${params.toString()}`, { method: 'GET' }, settings);
+}
+
+export function getLinkCreatorOptionsRequest(settings: ApiSettings = loadSettings()) {
+  return requestJson<LinkCreatorOptionResponse[]>(
+    '/admin/link-creators',
     { method: 'GET' },
     settings,
   );
@@ -452,6 +466,14 @@ export function getAnalyticsSummaryRequest(code: string, settings: ApiSettings =
   );
 }
 
+export function getAnalyticsDetailsRequest(code: string, settings: ApiSettings = loadSettings()) {
+  return requestJson<AnalyticsDetailsResponse>(
+    `/analytics/${encodeURIComponent(code)}/details`,
+    { method: 'GET' },
+    settings,
+  );
+}
+
 export const createLink = createLinkRequest;
 export const login = loginRequest;
 export const register = registerRequest;
@@ -466,7 +488,9 @@ export const completeGithubLogin = completeGithubLoginRequest;
 export const getAccountProfile = getAccountProfileRequest;
 export const changePassword = changePasswordRequest;
 export const getAdminOverview = getAdminOverviewRequest;
+export const getLinkCreatorOptions = getLinkCreatorOptionsRequest;
 export const listLinks = listLinksRequest;
 export const getLink = getLinkRequest;
 export const getRedirectPreview = getRedirectPreviewRequest;
 export const getAnalyticsSummary = getAnalyticsSummaryRequest;
+export const getAnalyticsDetails = getAnalyticsDetailsRequest;

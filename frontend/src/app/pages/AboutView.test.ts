@@ -12,7 +12,8 @@ describe('AboutView', () => {
     expect(wrapper.text()).toContain('Default users');
     expect(wrapper.text()).toContain('admin123');
     expect(wrapper.text()).toContain('Demo links');
-    expect(wrapper.text()).toContain('docs');
+    expect(wrapper.text()).toContain('spring-boot');
+    expect(wrapper.text()).toContain('https://spring.io/projects/spring-boot');
     expect(wrapper.text()).toContain('Account access');
     expect(wrapper.text()).toContain('Monitoring page');
     expect(wrapper.find('[data-testid="save-settings"]').exists()).toBe(false);

@@ -4,19 +4,13 @@ export type PrimaryNavItem = {
   to: string;
 };
 
-export function getPrimaryNavigation(isAdmin = false): PrimaryNavItem[] {
-  const items: PrimaryNavItem[] = [
+export function getPrimaryNavigation(): PrimaryNavItem[] {
+  return [
     { label: 'Home', icon: 'pi pi-home', to: '/' },
-    { label: 'Dashboard', icon: 'pi pi-chart-bar', to: '/dashboard' },
-    { label: 'History', icon: 'pi pi-history', to: '/history' },
+    { label: 'Links', icon: 'pi pi-link', to: '/links' },
+    { label: 'Analytics', icon: 'pi pi-chart-bar', to: '/analytics' },
     { label: 'About', icon: 'pi pi-info-circle', to: '/about' },
   ];
-
-  if (isAdmin) {
-    items.push({ label: 'Monitoring', icon: 'pi pi-shield', to: '/monitoring' });
-  }
-
-  return items;
 }
 
 export function getSectionTitle(routeName: string | symbol | undefined) {
@@ -24,12 +18,16 @@ export function getSectionTitle(routeName: string | symbol | undefined) {
     return 'Link details';
   }
 
-  if (routeName === 'dashboard') {
-    return 'Analytics shell';
+  if (routeName === 'analytics') {
+    return 'Analytics';
   }
 
-  if (routeName === 'history') {
-    return 'Link history';
+  if (routeName === 'analytics-detail') {
+    return 'Link analytics';
+  }
+
+  if (routeName === 'links') {
+    return 'Links';
   }
 
   if (routeName === 'monitoring') {

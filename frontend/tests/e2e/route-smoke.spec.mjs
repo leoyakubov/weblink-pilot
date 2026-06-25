@@ -37,6 +37,43 @@ function makeLink(overrides = {}) {
   };
 }
 
+function makeAnalyticsDetails(code = 'openai-docs') {
+  return {
+    code,
+    timelineByDay: [
+      { bucket: '2026-06-12', totalClicks: 9, redirectClicks: 7, qrScans: 2, uniqueVisitors: 4 },
+    ],
+    timelineByHour: [
+      {
+        bucket: '2026-06-12 10:00',
+        totalClicks: 9,
+        redirectClicks: 7,
+        qrScans: 2,
+        uniqueVisitors: 4,
+      },
+    ],
+    browserBreakdown: [{ label: 'CHROME', clicks: 9 }],
+    deviceBreakdown: [{ label: 'DESKTOP', clicks: 9 }],
+    referrerBreakdown: [{ label: 'news.ycombinator.com', clicks: 9 }],
+    recentEvents: [
+      {
+        clickedAt: '2026-06-12T10:30:00Z',
+        eventSource: 'REDIRECT',
+        referrer: 'https://news.ycombinator.com',
+        country: 'US',
+        browserFamily: 'CHROME',
+        deviceType: 'DESKTOP',
+      },
+    ],
+    sourceTrendByDay: [
+      { bucket: '2026-06-12', totalClicks: 9, redirectClicks: 7, qrScans: 2, uniqueVisitors: 4 },
+    ],
+    visitorTrendByDay: [
+      { bucket: '2026-06-12', totalClicks: 9, redirectClicks: 7, qrScans: 2, uniqueVisitors: 4 },
+    ],
+  };
+}
+
 test('guest can open the public pages and see guard redirects', async () => {
   const { browser, page } = await openPage();
 
@@ -123,7 +160,7 @@ test('auth recovery routes and the GitHub callback work', async () => {
   }
 });
 
-test('signed-in user can open dashboard, history, and account routes', async () => {
+test('signed-in user can open analytics, links, and account routes', async () => {
   const { browser, page } = await openPage();
 
   try {
@@ -185,6 +222,8 @@ test('signed-in user can open dashboard, history, and account routes', async () 
           lastDeviceType: 'DESKTOP',
           topCountries: [{ country: 'US', clicks: 9 }],
         }),
+      'GET /api/v1/analytics/openai-docs/details': async () =>
+        jsonResponse(makeAnalyticsDetails('openai-docs')),
       'GET /api/v1/auth/account': async () =>
         jsonResponse({
           username: 'alice',
@@ -197,32 +236,31 @@ test('signed-in user can open dashboard, history, and account routes', async () 
         }),
     });
 
-    await page.goto(`${baseUrl}/dashboard?code=openai-docs`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /link analytics/i }).waitFor();
-    assert.equal(await page.getByLabel('Short code').inputValue(), 'openai-docs');
-    await page.getByText('US').waitFor();
+    await page.goto(`${baseUrl}/analytics/openai-docs`, { waitUntil: 'networkidle' });
+    await page.getByRole('heading', { name: /analytics for "openai-docs"/i }).waitFor();
+    await page.getByText('US', { exact: true }).waitFor();
 
-    await page.goto(`${baseUrl}/history`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { level: 1, name: /recent links/i }).waitFor();
+    await page.goto(`${baseUrl}/links`, { waitUntil: 'networkidle' });
+    await page.getByRole('heading', { level: 1, name: /saved links/i }).waitFor();
     await page.locator('.recent-link-code', { hasText: 'openai-docs' }).waitFor();
 
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /^profile$/i }).waitFor();
     await page.getByText('alice@example.com').waitFor();
+
+    await page.goto(`${baseUrl}/account/security`, { waitUntil: 'networkidle' });
+    await page.getByRole('heading', { name: /^security$/i }).waitFor();
     const linkedAccount = page.locator('.linked-account').first();
     await linkedAccount.waitFor();
     const linkedAccountText = await linkedAccount.textContent();
     assert.ok(linkedAccountText);
     assert.match(linkedAccountText, /GITHUB/i);
-
-    await page.goto(`${baseUrl}/account/security`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /^security$/i }).waitFor();
   } finally {
     await browser.close();
   }
 });
 
-test('admin can open monitoring and filter dashboard links by creator', async () => {
+test('admin can open monitoring and filter analytics links by creator', async () => {
   const { browser, page } = await openPage();
   const requestedUrls = [];
 
@@ -243,7 +281,13 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
           ownedLinks: 5,
           totalClicks: 99,
         }),
-      'GET /api/v1/urls?limit=8': async (request, url) => {
+      'GET /api/v1/admin/link-creators': async () =>
+        jsonResponse([
+          { username: 'anonymous', role: 'ANONYMOUS' },
+          { username: 'admin', role: 'ADMIN' },
+          { username: 'alice', role: 'USER' },
+        ]),
+      'GET /api/v1/urls?limit=20': async (request, url) => {
         requestedUrls.push(url.pathname + url.search);
         return jsonResponse([
           makeLink({
@@ -255,7 +299,7 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
           }),
         ]);
       },
-      'GET /api/v1/urls?limit=8&creator=alice': async (request, url) => {
+      'GET /api/v1/urls?limit=20&creator=alice': async (request, url) => {
         requestedUrls.push(url.pathname + url.search);
         return jsonResponse([
           makeLink({
@@ -267,6 +311,21 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
           }),
         ]);
       },
+      'GET /api/v1/analytics/openai-docs': async () =>
+        jsonResponse({
+          code: 'openai-docs',
+          totalClicks: 9,
+          redirectClicks: 7,
+          qrScans: 2,
+          uniqueVisitors: 4,
+          lastClickedAt: '2026-06-12T10:30:00Z',
+          lastReferrer: 'https://news.ycombinator.com',
+          lastBrowserFamily: 'CHROME',
+          lastDeviceType: 'DESKTOP',
+          topCountries: [{ country: 'US', clicks: 9 }],
+        }),
+      'GET /api/v1/analytics/openai-docs/details': async () =>
+        jsonResponse(makeAnalyticsDetails('openai-docs')),
       'GET /api/v1/urls/github-org': async () =>
         jsonResponse(
           makeLink({
@@ -290,6 +349,8 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
           lastDeviceType: 'DESKTOP',
           topCountries: [{ country: 'US', clicks: 3 }],
         }),
+      'GET /api/v1/analytics/github-org/details': async () =>
+        jsonResponse(makeAnalyticsDetails('github-org')),
       'GET /api/v1/urls/github-org/preview': async () =>
         jsonResponse({
           code: 'github-org',
@@ -300,19 +361,19 @@ test('admin can open monitoring and filter dashboard links by creator', async ()
         }),
     });
 
-    await page.goto(`${baseUrl}/dashboard?code=github-org`, { waitUntil: 'networkidle' });
+    await page.goto(`${baseUrl}/analytics?code=github-org`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /link analytics/i }).waitFor();
-    await page.getByLabel('Creator filter').waitFor();
-    assert.equal(await page.getByLabel('Short code').inputValue(), 'github-org');
+    await page.getByLabel('Creator').waitFor();
+    await page.getByLabel('Owner group').waitFor();
 
-    await page.getByLabel('Creator filter').fill('alice');
+    await page.getByLabel('Creator').selectOption('alice');
     await Promise.all([
       page.waitForResponse(
         (response) =>
-          response.url().includes('/api/v1/urls?limit=8&creator=alice') &&
+          response.url().includes('/api/v1/urls?limit=20&creator=alice') &&
           response.status() === 200,
       ),
-      page.getByRole('button', { name: 'Apply recent filter' }).click(),
+      page.getByRole('button', { name: 'Apply filters' }).click(),
     ]);
     assert.ok(requestedUrls.some((value) => value.includes('creator=alice')));
 

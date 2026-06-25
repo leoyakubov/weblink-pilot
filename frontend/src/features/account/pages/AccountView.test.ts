@@ -32,7 +32,7 @@ function mountView(component = AccountView) {
 }
 
 describe('AccountView', () => {
-  it('renders account details and linked providers', async () => {
+  it('renders account details without security-only providers', async () => {
     mocks.getAccountProfileMock.mockResolvedValue({
       username: 'alice',
       role: 'USER',
@@ -47,9 +47,28 @@ describe('AccountView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('alice@example.com');
+    expect(wrapper.text()).not.toContain('GITHUB');
+    expect(wrapper.text()).not.toContain('alice-github');
+    expect(wrapper.text()).not.toContain('Change password');
+  });
+
+  it('renders linked providers on the security page', async () => {
+    mocks.getAccountProfileMock.mockResolvedValue({
+      username: 'alice',
+      role: 'USER',
+      email: 'alice@example.com',
+      emailVerified: true,
+      createdAt: '2026-05-30T10:00:00Z',
+      lastLoginAt: '2026-05-30T12:00:00Z',
+      socialIdentities: [{ provider: 'GITHUB', providerLogin: 'alice-github' }],
+    });
+
+    const wrapper = mountView(SecurityView);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Connected sign-ins');
     expect(wrapper.text()).toContain('GITHUB');
     expect(wrapper.text()).toContain('alice-github');
-    expect(wrapper.text()).not.toContain('Change password');
   });
 
   it('submits a password change request from the security page', async () => {
