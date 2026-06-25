@@ -6,8 +6,10 @@ import io.weblinkpilot.links.exception.UrlNotFoundException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import java.util.List;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -21,14 +23,25 @@ public class UrlLookupService {
   private final ShortLinkRepository repository;
   private final UrlCacheService cacheService;
   private final PublicUrlBuilder publicUrlBuilder;
+  private final LinkOwnerMetadataService linkOwnerMetadataService;
+
+  @Autowired
+  public UrlLookupService(
+      ShortLinkRepository repository,
+      UrlCacheService cacheService,
+      PublicUrlBuilder publicUrlBuilder,
+      LinkOwnerMetadataService linkOwnerMetadataService) {
+    this.repository = repository;
+    this.cacheService = cacheService;
+    this.publicUrlBuilder = publicUrlBuilder;
+    this.linkOwnerMetadataService = linkOwnerMetadataService;
+  }
 
   public UrlLookupService(
       ShortLinkRepository repository,
       UrlCacheService cacheService,
       PublicUrlBuilder publicUrlBuilder) {
-    this.repository = repository;
-    this.cacheService = cacheService;
-    this.publicUrlBuilder = publicUrlBuilder;
+    this(repository, cacheService, publicUrlBuilder, new LinkOwnerMetadataService() {});
   }
 
   @Transactional(readOnly = true)
@@ -65,13 +78,22 @@ public class UrlLookupService {
   @Transactional(readOnly = true)
   public List<LinkResponse> listRecentLinks(
       String ownerUsername, boolean admin, String creatorFilter, int limit) {
+    return listRecentLinks(ownerUsername, admin, creatorFilter, null, limit);
+  }
+
+  @Transactional(readOnly = true)
+  public List<LinkResponse> listRecentLinks(
+      String ownerUsername, boolean admin, String creatorFilter, String ownerRole, int limit) {
     int size = Math.max(1, Math.min(limit, 50));
     Sort newestFirst =
         Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
     List<ShortLink> content;
     String normalizedCreatorFilter = normalizeCreatorFilter(creatorFilter);
+    String normalizedOwnerRole = normalizeRoleFilter(ownerRole);
     if (admin && normalizedCreatorFilter != null) {
       content = loadFilteredByCreator(normalizedCreatorFilter, size, newestFirst);
+    } else if (admin && normalizedOwnerRole != null) {
+      content = loadFilteredByRole(normalizedOwnerRole, size, newestFirst);
     } else if (admin) {
       content =
           repository.findAllByDeletedAtIsNull(PageRequest.of(0, size, newestFirst)).getContent();
@@ -84,7 +106,7 @@ public class UrlLookupService {
       content =
           repository
               .findAllByOwnerUsernameAndDeletedAtIsNull(
-                  ownerUsername.trim().toLowerCase(java.util.Locale.ROOT),
+                  ownerUsername.trim().toLowerCase(Locale.ROOT),
                   PageRequest.of(0, size, newestFirst))
               .getContent();
     }
@@ -102,8 +124,28 @@ public class UrlLookupService {
 
     return repository
         .findAllByOwnerUsernameAndDeletedAtIsNull(
-            creatorFilter.trim().toLowerCase(java.util.Locale.ROOT),
-            PageRequest.of(0, size, newestFirst))
+            creatorFilter.trim().toLowerCase(Locale.ROOT), PageRequest.of(0, size, newestFirst))
+        .getContent();
+  }
+
+  private List<ShortLink> loadFilteredByRole(String ownerRole, int size, Sort newestFirst) {
+    if ("ANONYMOUS".equalsIgnoreCase(ownerRole)) {
+      return repository
+          .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(PageRequest.of(0, size, newestFirst))
+          .getContent();
+    }
+
+    List<String> usernames =
+        linkOwnerMetadataService.usernamesByRole(ownerRole).stream()
+            .map(username -> username.trim().toLowerCase(Locale.ROOT))
+            .filter(username -> !username.isBlank())
+            .toList();
+    if (usernames.isEmpty()) {
+      return List.of();
+    }
+
+    return repository
+        .findAllByOwnerUsernameInAndDeletedAtIsNull(usernames, PageRequest.of(0, size, newestFirst))
         .getContent();
   }
 
@@ -142,7 +184,8 @@ public class UrlLookupService {
         createdAt,
         expiresAt,
         clickCount,
-        ownerUsername);
+        ownerUsername,
+        ownerUsername == null ? "ANONYMOUS" : linkOwnerMetadataService.roleForOwner(ownerUsername));
   }
 
   private String hostOf(String url) {
@@ -161,5 +204,16 @@ public class UrlLookupService {
 
   private boolean isAnonymousFilter(String creatorFilter) {
     return "anonymous".equalsIgnoreCase(creatorFilter) || "guest".equalsIgnoreCase(creatorFilter);
+  }
+
+  private String normalizeRoleFilter(String ownerRole) {
+    if (ownerRole == null) {
+      return null;
+    }
+
+    String normalized = ownerRole.trim();
+    return normalized.isEmpty() || "ALL".equalsIgnoreCase(normalized)
+        ? null
+        : normalized.toUpperCase(Locale.ROOT);
   }
 }

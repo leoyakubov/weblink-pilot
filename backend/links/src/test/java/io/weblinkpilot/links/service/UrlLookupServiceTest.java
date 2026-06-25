@@ -34,6 +34,8 @@ class UrlLookupServiceTest {
 
   @Mock private PublicUrlBuilder publicUrlBuilder;
 
+  @Mock private LinkOwnerMetadataService linkOwnerMetadataService;
+
   @InjectMocks private UrlLookupService service;
 
   @Test

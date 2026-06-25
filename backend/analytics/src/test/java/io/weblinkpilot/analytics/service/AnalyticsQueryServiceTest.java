@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
+import io.weblinkpilot.shared.contracts.AnalyticsDetailsResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.time.OffsetDateTime;
@@ -107,5 +108,46 @@ class AnalyticsQueryServiceTest {
     assertThat(summary.uniqueVisitors()).isZero();
     assertThat(summary.lastClickedAt()).isNull();
     assertThat(summary.topCountries()).isEmpty();
+  }
+
+  @Test
+  void buildsDetailedBreakdownsFromClickEvents() {
+    OffsetDateTime first = OffsetDateTime.parse("2026-06-25T10:15:00Z");
+    OffsetDateTime second = OffsetDateTime.parse("2026-06-25T11:20:00Z");
+    when(repository.findByShortCodeOrderByClickedAtAsc("demo"))
+        .thenReturn(
+            List.of(
+                new ClickEvent(
+                    "demo",
+                    first,
+                    LinkTrackingSource.REDIRECT,
+                    "127.0.0.1",
+                    "Mozilla/5.0 Chrome",
+                    "https://github.com/weblinkpilot",
+                    "US",
+                    "CHROME",
+                    "DESKTOP"),
+                new ClickEvent(
+                    "demo",
+                    second,
+                    LinkTrackingSource.QR_SCAN,
+                    "127.0.0.2",
+                    "Mozilla/5.0 Safari",
+                    null,
+                    "ES",
+                    "SAFARI",
+                    "MOBILE")));
+
+    AnalyticsDetailsResponse details = service.details("demo");
+
+    assertThat(details.code()).isEqualTo("demo");
+    assertThat(details.timelineByDay()).hasSize(1);
+    assertThat(details.timelineByDay().getFirst().totalClicks()).isEqualTo(2L);
+    assertThat(details.timelineByHour()).hasSize(2);
+    assertThat(details.browserBreakdown()).extracting("label").contains("CHROME", "SAFARI");
+    assertThat(details.deviceBreakdown()).extracting("label").contains("DESKTOP", "MOBILE");
+    assertThat(details.referrerBreakdown()).extracting("label").contains("github.com", "DIRECT / NONE");
+    assertThat(details.recentEvents()).hasSize(2);
+    assertThat(details.recentEvents().getFirst().eventSource()).isEqualTo(LinkTrackingSource.QR_SCAN);
   }
 }

@@ -22,6 +22,7 @@ class CacheConfigurationTest {
     assertThat(cacheManager.getCache("shortLinks")).isNotNull();
     assertThat(cacheManager.getCache("analyticsCounts")).isNotNull();
     assertThat(cacheManager.getCache("analyticsSummaries")).isNotNull();
+    assertThat(cacheManager.getCache("analyticsDetails")).isNotNull();
   }
 
   @Test
@@ -34,6 +35,7 @@ class CacheConfigurationTest {
     assertThat(cacheManager.getCache("shortLinks")).isNotNull();
     assertThat(cacheManager.getCache("analyticsCounts")).isNotNull();
     assertThat(cacheManager.getCache("analyticsSummaries")).isNotNull();
+    assertThat(cacheManager.getCache("analyticsDetails")).isNotNull();
   }
 
   @Test

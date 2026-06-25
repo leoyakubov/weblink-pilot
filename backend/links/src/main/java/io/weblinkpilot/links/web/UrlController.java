@@ -117,12 +117,13 @@ public class UrlController {
   public ResponseEntity<List<LinkResponse>> list(
       Authentication authentication,
       @RequestParam(name = "limit", defaultValue = "10") int limit,
-      @RequestParam(name = "creator", required = false) String creator) {
+      @RequestParam(name = "creator", required = false) String creator,
+      @RequestParam(name = "ownerRole", required = false) String ownerRole) {
     browseCounter.increment();
     if (isAuthenticated(authentication)) {
       return ResponseEntity.ok(
           urlLookupService.listRecentLinks(
-              currentUsername(authentication), isAdmin(authentication), creator, limit));
+              currentUsername(authentication), isAdmin(authentication), creator, ownerRole, limit));
     }
     return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
   }

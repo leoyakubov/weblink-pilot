@@ -40,7 +40,8 @@ public class CacheConfiguration {
   @Bean
   @ConditionalOnProperty(name = "app.cache.provider", havingValue = "local", matchIfMissing = true)
   public CacheManager localCacheManager() {
-    return new ConcurrentMapCacheManager("shortLinks", "analyticsCounts", "analyticsSummaries");
+    return new ConcurrentMapCacheManager(
+        "shortLinks", "analyticsCounts", "analyticsSummaries", "analyticsDetails");
   }
 
   @Bean
@@ -60,6 +61,7 @@ public class CacheConfiguration {
         .withCacheConfiguration("shortLinks", defaults.entryTtl(Duration.ofMinutes(30)))
         .withCacheConfiguration("analyticsCounts", defaults.entryTtl(Duration.ofSeconds(30)))
         .withCacheConfiguration("analyticsSummaries", defaults.entryTtl(Duration.ofSeconds(30)))
+        .withCacheConfiguration("analyticsDetails", defaults.entryTtl(Duration.ofSeconds(30)))
         .build();
   }
 }

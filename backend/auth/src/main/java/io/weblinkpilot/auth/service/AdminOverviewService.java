@@ -4,6 +4,9 @@ import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.links.service.UrlStatisticsService;
 import io.weblinkpilot.shared.contracts.AdminOverviewResponse;
+import io.weblinkpilot.shared.contracts.LinkCreatorOptionResponse;
+import java.util.Comparator;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,5 +30,19 @@ public class AdminOverviewService {
     long totalClicks = urlStatisticsService.sumClickCount();
     return new AdminOverviewResponse(
         totalUsers, adminUsers, totalLinks, anonymousLinks, ownedLinks, totalClicks);
+  }
+
+  public List<LinkCreatorOptionResponse> linkCreators() {
+    List<LinkCreatorOptionResponse> users =
+        userAccountRepository.findAll().stream()
+            .map(
+                account ->
+                    new LinkCreatorOptionResponse(account.getUsername(), account.getRoleName()))
+            .sorted(Comparator.comparing(LinkCreatorOptionResponse::username))
+            .toList();
+    return java.util.stream.Stream.concat(
+            java.util.stream.Stream.of(new LinkCreatorOptionResponse("anonymous", "ANONYMOUS")),
+            users.stream())
+        .toList();
   }
 }

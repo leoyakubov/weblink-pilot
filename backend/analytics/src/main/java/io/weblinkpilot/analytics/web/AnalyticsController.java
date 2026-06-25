@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
 import io.weblinkpilot.links.service.UrlService;
+import io.weblinkpilot.shared.contracts.AnalyticsDetailsResponse;
 import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,20 @@ public class AnalyticsController {
         code,
         response.totalClicks(),
         response.uniqueVisitors());
+    return response;
+  }
+
+  @GetMapping("/{code}/details")
+  public AnalyticsDetailsResponse details(
+      Authentication authentication, @PathVariable("code") String code) {
+    assertCanReadAnalytics(authentication, code);
+    summaryCounter.increment();
+    AnalyticsDetailsResponse response = analyticsQueryService.details(code);
+    log.info(
+        "analytics.api.details code={} timelineDays={} recentEvents={}",
+        code,
+        response.timelineByDay().size(),
+        response.recentEvents().size());
     return response;
   }
 

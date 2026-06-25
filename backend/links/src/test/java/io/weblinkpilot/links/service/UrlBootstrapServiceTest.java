@@ -28,20 +28,28 @@ class UrlBootstrapServiceTest {
 
   @Test
   void seedsDefaultLinksWhenMissing() {
-    when(shortLinkRepository.existsByCode("welcome")).thenReturn(false);
-    when(shortLinkRepository.existsByCode("docs")).thenReturn(false);
-    when(shortLinkRepository.existsByCode("user-home")).thenReturn(false);
-    when(shortLinkRepository.existsByCode("admin-home")).thenReturn(false);
+    when(shortLinkRepository.existsByCode("spring-boot")).thenReturn(false);
+    when(shortLinkRepository.existsByCode("vue-js")).thenReturn(false);
+    when(shortLinkRepository.existsByCode("postgres")).thenReturn(false);
+    when(shortLinkRepository.existsByCode("redis")).thenReturn(false);
 
-    service.seedDefaultLinks("User", "Admin");
+    service.seedDefaultLinks("User");
 
     ArgumentCaptor<ShortLink> captor = ArgumentCaptor.forClass(ShortLink.class);
     verify(shortLinkRepository, times(4)).save(captor.capture());
 
     assertThat(captor.getAllValues())
         .extracting(ShortLink::getCode)
-        .containsExactly("welcome", "docs", "user-home", "admin-home");
-    assertThat(captor.getAllValues().get(2).getOwnerUsername()).isEqualTo("user");
-    assertThat(captor.getAllValues().get(3).getOwnerUsername()).isEqualTo("admin");
+        .containsExactly("spring-boot", "vue-js", "postgres", "redis");
+    assertThat(captor.getAllValues())
+        .extracting(ShortLink::getOriginalUrl)
+        .containsExactly(
+            "https://spring.io/projects/spring-boot",
+            "https://vuejs.org/guide/introduction.html",
+            "https://www.postgresql.org/about/",
+            "https://redis.io/docs/latest/develop/");
+    assertThat(captor.getAllValues())
+        .extracting(ShortLink::getOwnerUsername)
+        .containsExactly(null, null, "user", "user");
   }
 }

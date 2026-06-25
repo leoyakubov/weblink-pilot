@@ -19,6 +19,8 @@ public interface ClickEventRepository extends JpaRepository<ClickEvent, Long> {
 
   Optional<ClickEvent> findFirstByShortCodeOrderByClickedAtDesc(String shortCode);
 
+  List<ClickEvent> findByShortCodeOrderByClickedAtAsc(String shortCode);
+
   @Query(
       value =
           """

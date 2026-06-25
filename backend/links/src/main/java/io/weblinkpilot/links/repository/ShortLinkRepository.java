@@ -25,6 +25,9 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
   Page<ShortLink> findAllByOwnerUsernameAndDeletedAtIsNull(String ownerUsername, Pageable pageable);
 
+  Page<ShortLink> findAllByOwnerUsernameInAndDeletedAtIsNull(
+      List<String> ownerUsernames, Pageable pageable);
+
   long countByDeletedAtIsNull();
 
   long countByOwnerUsernameIsNullAndDeletedAtIsNull();

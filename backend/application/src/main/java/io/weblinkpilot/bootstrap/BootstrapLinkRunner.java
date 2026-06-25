@@ -2,6 +2,7 @@ package io.weblinkpilot.bootstrap;
 
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.service.UserAccountService;
+import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
 import io.weblinkpilot.links.service.UrlBootstrapService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,19 +21,23 @@ public class BootstrapLinkRunner implements ApplicationRunner {
 
   private final UserAccountService userAccountService;
   private final UrlBootstrapService urlBootstrapService;
+  private final AnalyticsBootstrapService analyticsBootstrapService;
 
   public BootstrapLinkRunner(
-      UserAccountService userAccountService, UrlBootstrapService urlBootstrapService) {
+      UserAccountService userAccountService,
+      UrlBootstrapService urlBootstrapService,
+      AnalyticsBootstrapService analyticsBootstrapService) {
     this.userAccountService = userAccountService;
     this.urlBootstrapService = urlBootstrapService;
+    this.analyticsBootstrapService = analyticsBootstrapService;
   }
 
   @Override
   public void run(ApplicationArguments args) {
     UserAccount admin = userAccountService.ensureBootstrapAdmin();
     UserAccount user = userAccountService.ensureBootstrapUser();
-    urlBootstrapService.seedDefaultLinks(
-        user == null ? null : user.getUsername(), admin == null ? null : admin.getUsername());
+    urlBootstrapService.seedDefaultLinks(user == null ? null : user.getUsername());
+    analyticsBootstrapService.seedDefaultAnalytics();
 
     log.info(
         "bootstrap.links.seeded user={} admin={}",

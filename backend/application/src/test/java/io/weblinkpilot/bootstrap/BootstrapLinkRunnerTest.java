@@ -3,6 +3,7 @@ package io.weblinkpilot.bootstrap;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.service.UserAccountService;
@@ -20,11 +21,14 @@ class BootstrapLinkRunnerTest {
 
   @Mock private UrlBootstrapService urlBootstrapService;
 
+  @Mock private AnalyticsBootstrapService analyticsBootstrapService;
+
   private BootstrapLinkRunner runner;
 
   @BeforeEach
   void setUp() {
-    runner = new BootstrapLinkRunner(userAccountService, urlBootstrapService);
+    runner =
+        new BootstrapLinkRunner(userAccountService, urlBootstrapService, analyticsBootstrapService);
   }
 
   @Test
@@ -40,6 +44,7 @@ class BootstrapLinkRunnerTest {
 
     verify(userAccountService).ensureBootstrapAdmin();
     verify(userAccountService).ensureBootstrapUser();
-    verify(urlBootstrapService).seedDefaultLinks("user", "admin");
+    verify(urlBootstrapService).seedDefaultLinks("user");
+    verify(analyticsBootstrapService).seedDefaultAnalytics();
   }
 }

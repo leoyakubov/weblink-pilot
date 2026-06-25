@@ -14,7 +14,8 @@ public class AnalyticsCacheService {
   @Caching(
       evict = {
         @CacheEvict(cacheNames = "analyticsCounts", key = "#code"),
-        @CacheEvict(cacheNames = "analyticsSummaries", key = "#code")
+        @CacheEvict(cacheNames = "analyticsSummaries", key = "#code"),
+        @CacheEvict(cacheNames = "analyticsDetails", key = "#code")
       })
   public void evict(String code) {
     log.debug("analytics.cache.evict code={}", code);

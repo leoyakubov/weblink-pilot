@@ -21,22 +21,21 @@ public class UrlBootstrapService {
   }
 
   @Transactional
-  public void seedDefaultLinks(String bootstrapUserUsername, String bootstrapAdminUsername) {
+  public void seedDefaultLinks(String bootstrapUserUsername) {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    seedLink("welcome", "https://github.com/weblinkpilot/weblink-pilot", null, null, now);
+    seedLink("spring-boot", "https://spring.io/projects/spring-boot", null, null, now);
+    seedLink("vue-js", "https://vuejs.org/guide/introduction.html", null, null, now);
     seedLink(
-        "docs", "https://github.com/weblinkpilot/weblink-pilot/tree/main/docs", null, null, now);
-    seedLink(
-        "user-home",
-        "https://github.com/weblinkpilot/weblink-pilot/issues",
+        "postgres",
+        "https://www.postgresql.org/about/",
         null,
         normalizeUsername(bootstrapUserUsername),
         now);
     seedLink(
-        "admin-home",
-        "https://github.com/weblinkpilot/weblink-pilot/actions",
+        "redis",
+        "https://redis.io/docs/latest/develop/",
         null,
-        normalizeUsername(bootstrapAdminUsername),
+        normalizeUsername(bootstrapUserUsername),
         now);
   }
 

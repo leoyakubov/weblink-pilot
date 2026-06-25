@@ -146,7 +146,7 @@ class UrlControllerStandaloneTest {
             null,
             0,
             "alice");
-    when(urlLookupService.listRecentLinks("admin", true, "alice", 10))
+    when(urlLookupService.listRecentLinks("admin", true, "alice", null, 10))
         .thenReturn(List.of(first, second));
 
     mockMvc
