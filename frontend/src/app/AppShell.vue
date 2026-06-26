@@ -97,11 +97,7 @@ onBeforeUnmount(() => {
         />
         <RouterLink to="/" class="brand">
           <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" role="presentation" focusable="false">
-              <path d="M17.2 27.2 13 31.4a6.8 6.8 0 0 1-9.6-9.6l5.2-5.2a6.8 6.8 0 0 1 9.6 0" />
-              <path d="M30.8 20.8 35 16.6a6.8 6.8 0 1 1 9.6 9.6l-5.2 5.2a6.8 6.8 0 0 1-9.6 0" />
-              <path d="M18 30 30 18" />
-            </svg>
+            <img src="/icons/weblinkpilot-icon.png" alt="" />
           </span>
           <span class="brand-copy">
             <strong>WebLinkPilot</strong>
@@ -208,11 +204,7 @@ onBeforeUnmount(() => {
         <div class="drawer-header">
           <RouterLink to="/" class="brand" @click="closeMenu">
             <span class="brand-mark" aria-hidden="true">
-              <svg viewBox="0 0 48 48" role="presentation" focusable="false">
-                <path d="M17.2 27.2 13 31.4a6.8 6.8 0 0 1-9.6-9.6l5.2-5.2a6.8 6.8 0 0 1 9.6 0" />
-                <path d="M30.8 20.8 35 16.6a6.8 6.8 0 1 1 9.6 9.6l-5.2 5.2a6.8 6.8 0 0 1-9.6 0" />
-                <path d="M18 30 30 18" />
-              </svg>
+              <img src="/icons/weblinkpilot-icon.png" alt="" />
             </span>
             <span class="brand-copy">
               <strong>WebLinkPilot</strong>
@@ -222,6 +214,7 @@ onBeforeUnmount(() => {
 
           <Button
             type="button"
+            class="drawer-close-button"
             icon="pi pi-times"
             severity="secondary"
             variant="text"
@@ -229,6 +222,16 @@ onBeforeUnmount(() => {
             aria-label="Close navigation"
             @click="closeMenu"
           />
+        </div>
+
+        <div class="drawer-session">
+          <p class="eyebrow">Workspace</p>
+          <strong>{{ isLoggedIn ? accountLabel : 'Guest mode' }}</strong>
+          <span>{{
+            isLoggedIn
+              ? 'Private links, saved history, and analytics are available.'
+              : 'Create demo links now, or sign in to keep history.'
+          }}</span>
         </div>
 
         <nav class="drawer-nav" aria-label="Primary">
@@ -252,7 +255,8 @@ onBeforeUnmount(() => {
             class="button button-secondary drawer-action"
             @click="closeMenu"
           >
-            Log in
+            <i class="pi pi-sign-in" aria-hidden="true"></i>
+            <span>Log in</span>
           </RouterLink>
           <RouterLink
             v-if="!isLoggedIn"
@@ -260,7 +264,8 @@ onBeforeUnmount(() => {
             class="button button-primary drawer-action drawer-action--accent"
             @click="closeMenu"
           >
-            Sign up
+            <i class="pi pi-user-plus" aria-hidden="true"></i>
+            <span>Sign up</span>
           </RouterLink>
           <RouterLink
             v-if="isAdmin"
@@ -268,7 +273,8 @@ onBeforeUnmount(() => {
             class="button button-secondary drawer-action"
             @click="closeMenu"
           >
-            Monitoring
+            <i class="pi pi-chart-bar" aria-hidden="true"></i>
+            <span>Monitoring</span>
           </RouterLink>
           <Button
             v-if="isLoggedIn"
