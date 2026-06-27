@@ -40,9 +40,7 @@ function formatProvider(provider: string) {
     return 'GitHub';
   }
 
-  return provider
-    .toLowerCase()
-    .replace(/(^|[-_\s])\w/g, (match) => match.toUpperCase());
+  return provider.toLowerCase().replace(/(^|[-_\s])\w/g, (match) => match.toUpperCase());
 }
 
 function resetPasswordMessages() {
