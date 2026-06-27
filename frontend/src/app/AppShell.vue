@@ -295,14 +295,53 @@ onBeforeUnmount(() => {
     </main>
 
     <footer class="page-footer app-footer">
-      <div>
-        <p class="page-footer__brand">WebLinkPilot</p>
-        <p>Personal short links, QR codes, and click history in one fast workspace.</p>
+      <div class="page-footer__brand-block">
+        <RouterLink to="/" class="brand page-footer__brand-link">
+          <span class="brand-mark" aria-hidden="true">
+            <img src="/icons/weblinkpilot-icon.png" alt="" />
+          </span>
+          <span class="brand-copy">
+            <strong>WebLinkPilot</strong>
+            <small>Personal short link workspace</small>
+          </span>
+        </RouterLink>
+        <p>Clean short links, QR codes, and click history for everyday sharing.</p>
+        <p class="page-footer__copyright">
+          © 2026 WebLinkPilot. Built for fast personal link sharing.
+        </p>
       </div>
-      <div class="page-footer__links">
-        <RouterLink to="/links">Links</RouterLink>
-        <RouterLink to="/analytics">Analytics</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+
+      <div class="page-footer__section">
+        <p class="page-footer__heading">Navigate</p>
+        <div class="page-footer__links">
+          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/links">Links</RouterLink>
+          <RouterLink to="/analytics">Analytics</RouterLink>
+          <RouterLink to="/about">About</RouterLink>
+        </div>
+      </div>
+
+      <div class="page-footer__section">
+        <p class="page-footer__heading">Project</p>
+        <div class="page-footer__links">
+          <a href="https://github.com/leoyakubov/weblink-pilot" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <a
+            href="https://github.com/leoyakubov/weblink-pilot/blob/main/docs/README.md"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Docs
+          </a>
+          <a
+            href="https://github.com/leoyakubov/weblink-pilot/blob/main/docs/planning/roadmap.md"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Roadmap
+          </a>
+        </div>
       </div>
     </footer>
   </div>

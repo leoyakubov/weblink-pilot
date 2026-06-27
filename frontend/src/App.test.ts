@@ -59,7 +59,9 @@ describe('App', () => {
     expect(wrapper.text()).toContain('About');
     expect(wrapper.text()).toContain('Log in');
     expect(wrapper.text()).toContain('Sign up');
-    expect(wrapper.text()).toContain('Personal short links, QR codes, and click history');
+    expect(wrapper.text()).toContain('Clean short links, QR codes, and click history');
+    expect(wrapper.text()).toContain('Roadmap');
+    expect(wrapper.text()).not.toContain('Start here');
     expect(wrapper.text()).not.toContain('Monitoring');
   });
 
