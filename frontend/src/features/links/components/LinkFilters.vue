@@ -15,6 +15,8 @@ const props = withDefaults(
   }>(),
   {
     showAdminFilters: false,
+    loading: false,
+    applyLabel: 'Apply filters',
   },
 );
 
