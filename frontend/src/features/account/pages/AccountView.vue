@@ -27,14 +27,14 @@ onMounted(() => {
     <PageIntro
       eyebrow="Account"
       title="Profile"
-      description="Review your signed-in identity, role, email state, and recent account activity."
+      description="Review the identity, role, email status, and recent activity for your signed-in account."
     />
 
     <div class="page-grid account-settings-grid account-settings-grid--single">
       <PanelCard
         eyebrow="Profile"
         title="Account details"
-        description="Compact account metadata for the current signed-in session."
+        description="The key details currently connected to your session."
         class="account-form-card"
       >
         <p v-if="busy" class="footnote">Loading account details...</p>

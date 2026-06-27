@@ -116,13 +116,13 @@ function closeQrModal() {
     <PageIntro
       eyebrow="Links"
       title="Saved links"
-      description="Browse links saved on the backend, open QR codes, copy short URLs, share links, or jump into analytics."
+      description="Manage the links available to you, copy short URLs, open QR codes, and review activity."
     />
 
     <PanelCard
-      eyebrow="Link list"
+      eyebrow="Library"
       title="Latest links"
-      :description="`Showing ${scopeLabel()} from the Spring Boot browse endpoint.`"
+      :description="`Showing ${scopeLabel()} with quick actions for sharing and analytics.`"
     >
       <template #actions>
         <RefreshButton :loading="loading" @refresh="refresh" />
@@ -152,10 +152,7 @@ function closeQrModal() {
       <div v-else class="empty-state">
         <p class="eyebrow">No links yet</p>
         <h4 class="card-title">Create a link first and it will appear here.</h4>
-        <p class="muted">
-          The links list is backed by the URL browse endpoint, so there is no separate client-side
-          state to manage.
-        </p>
+        <p class="muted">Saved links appear here as soon as they are created.</p>
         <RouterLink to="/">
           <Button label="Create link" icon="pi pi-plus" />
         </RouterLink>

@@ -78,6 +78,7 @@ async function submit() {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
+          <p class="help-text">Use the reset token from your email to choose a new password.</p>
         </div>
 
         <form class="form-grid" @submit.prevent="submit">

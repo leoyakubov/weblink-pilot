@@ -158,9 +158,9 @@ describe('DashboardView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Analytics for "github-org"');
-    expect(wrapper.text()).toContain('Interaction summary');
-    expect(wrapper.text()).toContain('Redirects vs QR scans');
-    expect(wrapper.text()).toContain('Latest captured context');
+    expect(wrapper.text()).toContain('What happened');
+    expect(wrapper.text()).toContain('Traffic channels');
+    expect(wrapper.text()).toContain('Latest activity');
     expect(wrapper.text()).toContain('Country distribution');
     expect(wrapper.text()).toContain('Timeline by day/hour');
     expect(wrapper.text()).toContain('Browser breakdown');

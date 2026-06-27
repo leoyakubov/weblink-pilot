@@ -98,7 +98,7 @@ describe('AuthView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Account created');
-    expect(wrapper.text()).toContain('Check your email to verify your account before signing in.');
+    expect(wrapper.text()).toContain('Verify your email before signing in.');
     expect(mocks.routerPushMock).not.toHaveBeenCalled();
   });
 

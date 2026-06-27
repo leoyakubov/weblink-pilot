@@ -169,39 +169,39 @@ watch(
     <PageIntro
       eyebrow="Link management"
       title="Web link shortener"
-      description="Fast, branded short links for personal demos, saved history, and everyday sharing."
+      description="A personal workspace for clean links, QR sharing, and lightweight analytics."
     />
 
     <div class="page-grid two-col home-top-grid">
       <PanelCard
-        eyebrow="Fast start"
-        title="Fast, personal links"
-        description="Create a demo link in seconds, or sign in to keep ownership and revisit your private history later. Redirects stay fast, QR scans are built in, and analytics are ready when you need them."
+        eyebrow="How it works"
+        title="Create once, share anywhere"
+        description="Paste a URL, choose an optional alias, and WebLinkPilot prepares a short redirect with QR access and tracking."
       >
         <div class="feature-grid feature-grid--compact">
           <FeatureCard
             tone="info"
-            eyebrow="Guest demo links"
-            title="Create without friction"
-            description="Make a short URL in seconds when you only need a quick personal demo."
+            eyebrow="Anonymous mode"
+            title="Start instantly"
+            description="Create a quick link without signing in."
           />
           <FeatureCard
             tone="success"
-            eyebrow="Owned user links"
-            title="Keep ownership and history"
-            description="Sign in when you want private links, saved history, and easy revisits later."
+            eyebrow="Saved workspace"
+            title="Keep your links"
+            description="Sign in to return to your private link list later."
           />
           <FeatureCard
             tone="warn"
-            eyebrow="QR scans"
-            title="Works on phones and print"
-            description="Every link is ready for scanning from your phone, printouts, posters, and slides."
+            eyebrow="QR included"
+            title="Share offline"
+            description="Open a QR code for slides, notes, or phone sharing."
           />
           <FeatureCard
             tone="contrast"
-            eyebrow="Analytics insights"
-            title="See clicks in context"
-            description="Track performance without leaving the link workflow or opening extra tools."
+            eyebrow="Useful signals"
+            title="See what happened"
+            description="Review clicks, scans, countries, and recent activity."
           />
         </div>
       </PanelCard>
@@ -209,7 +209,7 @@ watch(
       <PanelCard
         eyebrow="Create link"
         title="Shorten link"
-        description="Use the defaults for a fast demo, or swap in your own URL, alias, and expiration. Leave expiration blank to keep the link active."
+        description="Use the defaults, or add your own URL, alias, and expiration."
       >
         <form class="form-grid create-link-form" @submit.prevent="submit">
           <label class="form-field">
@@ -286,7 +286,7 @@ watch(
     <PanelCard
       eyebrow="Saved history"
       title="Latest links"
-      description="Fresh links from the backend, ready to open, copy, or inspect."
+      description="Recently created links from your current session or account."
     >
       <template #actions>
         <RefreshButton :loading="loadingRecent" @refresh="refreshRecent" />

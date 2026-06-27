@@ -98,7 +98,7 @@ describe('AnalyticsView', () => {
     const wrapper = mount(AnalyticsView);
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Analytics by link');
+    expect(wrapper.text()).toContain('Performance by link');
     expect(wrapper.text()).toContain('Owner group');
     expect(wrapper.text()).toContain('redis');
     expect(wrapper.text()).toContain('Total');

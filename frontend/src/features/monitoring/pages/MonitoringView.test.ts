@@ -57,7 +57,7 @@ describe('MonitoringView', () => {
     const wrapper = mount(MonitoringView);
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Live backend');
+    expect(wrapper.text()).toContain('Operational links');
     expect(wrapper.find('a[href="/actuator/health"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/actuator/info"]').exists()).toBe(true);
     expect(wrapper.find('a[href="/actuator/metrics"]').exists()).toBe(true);

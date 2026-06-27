@@ -59,13 +59,14 @@ onMounted(() => {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
+          <p class="help-text">We are checking the verification link from your email.</p>
         </div>
 
         <p v-if="errorMessage" class="status error" role="alert" aria-live="polite">
           <span class="status-dot"></span>
           {{ errorMessage }}
         </p>
-        <p v-else-if="busy" class="footnote">Verifying your email address...</p>
+        <p v-else-if="busy" class="footnote">Verifying your email...</p>
 
         <div class="auth-switch">
           <span class="footnote">Need to sign in?</span>

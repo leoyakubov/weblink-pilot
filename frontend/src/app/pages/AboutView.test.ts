@@ -15,7 +15,7 @@ describe('AboutView', () => {
     expect(wrapper.text()).toContain('spring-boot');
     expect(wrapper.text()).toContain('https://spring.io/projects/spring-boot');
     expect(wrapper.text()).toContain('Account access');
-    expect(wrapper.text()).toContain('Monitoring page');
+    expect(wrapper.text()).toContain('Profiles and environments');
     expect(wrapper.find('[data-testid="save-settings"]').exists()).toBe(false);
   });
 });

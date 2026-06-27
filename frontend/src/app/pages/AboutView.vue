@@ -3,10 +3,10 @@ import PageIntro from '@/shared/components/common/PageIntro.vue';
 import PanelCard from '@/shared/components/common/PanelCard.vue';
 
 const productItems = [
-  ['Guest links', 'Create public demo links without signing in.'],
-  ['Owned links', 'Sign in to keep private history and revisit saved links.'],
-  ['Public redirects', 'Short URLs, QR URLs, and preview endpoints remain fast and public.'],
-  ['Analytics', 'Inspect clicks, QR scans, unique visitors, and country breakdowns.'],
+  ['Guest links', 'Create a shareable link without an account.'],
+  ['Owned links', 'Sign in to save private history and return later.'],
+  ['Public sharing', 'Short URLs and QR codes stay easy to open.'],
+  ['Analytics', 'See clicks, scans, visitors, and country signals.'],
 ];
 
 const stackItems = [
@@ -58,14 +58,14 @@ const accountItems = [
     <PageIntro
       eyebrow="About"
       title="WebLinkPilot"
-      description="A compact short-link workspace with guest links, signed-in ownership, QR codes, analytics, and production-shaped deployment settings."
+      description="A small short-link workspace for personal sharing, saved history, QR codes, and analytics."
     />
 
     <div class="page-grid two-col about-card-row">
       <PanelCard
         eyebrow="Product"
         title="What it does"
-        description="WebLinkPilot keeps link creation quick while still supporting account ownership and operational visibility."
+        description="WebLinkPilot keeps link creation quick, with optional ownership and insight when you need it."
       >
         <dl class="detail-list detail-list--about-horizontal">
           <div v-for="[label, value] in productItems" :key="label">
@@ -78,7 +78,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Account access"
         title="Guest, user, and admin flows"
-        description="The same app supports quick anonymous use, signed-in ownership, and administrator monitoring."
+        description="Use it anonymously, sign in for your own workspace, or inspect the demo as an admin."
       >
         <dl class="detail-list detail-list--about-horizontal">
           <div v-for="[label, value] in accountItems" :key="label">
@@ -93,7 +93,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Seeded data"
         title="Default users"
-        description="Local and demo profiles can seed these accounts so the app is immediately explorable."
+        description="Demo accounts are available so you can try ownership and admin-only views right away."
       >
         <dl class="detail-list">
           <div v-for="[username, description, credentials] in demoUsers" :key="username">
@@ -109,7 +109,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Seeded data"
         title="Demo links"
-        description="These links help open details, QR codes, and analytics without creating fresh data first."
+        description="Starter links make details, QR codes, and analytics visible immediately."
       >
         <dl class="detail-list">
           <div v-for="[path, url, owner] in seededLinks" :key="path">
@@ -127,7 +127,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Tech stack"
         title="Implementation"
-        description="The stack is split by responsibility so UI, API, data, and cache behavior stay easy to reason about."
+        description="The project is split into clear frontend, backend, data, testing, and delivery layers."
       >
         <dl class="detail-list">
           <div v-for="[label, value] in stackItems" :key="label">
@@ -140,7 +140,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Runtime"
         title="Profiles and environments"
-        description="Each mode keeps the same product behavior while swapping infrastructure details. Editable backend and browser settings now live on the Monitoring page."
+        description="Each mode keeps the same app experience while changing local or hosted infrastructure."
       >
         <dl class="detail-list">
           <div v-for="[label, value] in runtimeItems" :key="label">

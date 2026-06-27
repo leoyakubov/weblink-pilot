@@ -81,7 +81,7 @@ async function submit() {
     if (response.previewLink) {
       openNotice(
         'Demo email ready',
-        'Open the password reset link to continue the demo flow.',
+        'Open the reset link to choose a new password.',
         'Open reset link',
         () => {
           const popup = window.open(response.previewLink ?? '', '_blank', 'noopener');
@@ -91,8 +91,7 @@ async function submit() {
       return;
     }
 
-    successMessage.value =
-      'If the email exists, a reset link was sent. Check your inbox or the local Mailpit UI.';
+    successMessage.value = 'If the email exists, a reset link was sent. Check your inbox.';
   } catch (error) {
     errorMessage.value = formatError(error);
   } finally {
@@ -108,6 +107,7 @@ async function submit() {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
+          <p class="help-text">Enter your email and we will send a password reset link.</p>
         </div>
 
         <form class="form-grid" @submit.prevent="submit">

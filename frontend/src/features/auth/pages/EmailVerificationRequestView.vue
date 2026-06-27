@@ -80,7 +80,7 @@ async function submit() {
     if (response.previewLink) {
       openNotice(
         'Demo email ready',
-        'Open the verification link to continue the demo flow.',
+        'Open the verification link to activate the account.',
         'Open verification link',
         () => {
           const popup = window.open(response.previewLink ?? '', '_blank', 'noopener');
@@ -90,7 +90,7 @@ async function submit() {
       return;
     }
 
-    successMessage.value = 'Verification email sent. Please check your inbox.';
+    successMessage.value = 'Verification email sent. Check your inbox.';
   } catch (error) {
     errorMessage.value = formatError(error);
   } finally {
@@ -106,6 +106,7 @@ async function submit() {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
+          <p class="help-text">Request a fresh verification link for your account email.</p>
         </div>
 
         <form class="form-grid" @submit.prevent="submit">

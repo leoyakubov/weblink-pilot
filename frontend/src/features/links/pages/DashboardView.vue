@@ -197,7 +197,7 @@ watch(
     <PageIntro
       eyebrow="Analytics"
       :title="`Analytics for &quot;${selectedCode}&quot;`"
-      description="Inspect traffic sources, visitor signals, last interaction context, and country distribution for this short code."
+      description="Inspect how this link is used across redirects, QR scans, visitors, countries, and recent activity."
     />
 
     <p v-if="errorMessage" class="status error">
@@ -214,8 +214,8 @@ watch(
       <div class="page-grid two-col analytics-detail-row">
         <PanelCard
           eyebrow="Overview"
-          title="Interaction summary"
-          description="High-level counters from the analytics summary endpoint."
+          title="What happened"
+          description="A quick count of redirects, QR scans, and unique visitor signals."
         >
           <template #actions>
             <RefreshButton :loading="loading" @refresh="load(selectedCode)" />
@@ -243,8 +243,8 @@ watch(
 
         <PanelCard
           eyebrow="Last interaction"
-          title="Latest captured context"
-          description="The most recent analytics event metadata currently available from the backend."
+          title="Latest activity"
+          description="The most recent captured visit context for this link."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div>
@@ -270,8 +270,8 @@ watch(
       <div class="page-grid two-col analytics-detail-row">
         <PanelCard
           eyebrow="Traffic mix"
-          title="Redirects vs QR scans"
-          description="Shows how people reached the target URL: direct redirect route or QR scan route."
+          title="Traffic channels"
+          description="Shows whether people opened the short URL directly or scanned the QR code."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="source in sourceBreakdown" :key="source.label">
@@ -353,7 +353,7 @@ watch(
         <PanelCard
           eyebrow="Timeline"
           title="Timeline by day/hour"
-          description="Daily totals plus the latest hourly buckets returned from backend click events."
+          description="Daily totals with the latest hourly activity for this link."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="bucket in timelineByDay" :key="`day-${bucket.bucket}`">
@@ -380,7 +380,7 @@ watch(
         <PanelCard
           eyebrow="Trend"
           title="QR vs redirect trend"
-          description="Daily split between regular redirects and QR scan redirects."
+          description="Daily split between direct opens and QR scans."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="bucket in sourceTrendByDay" :key="bucket.bucket">
@@ -400,7 +400,7 @@ watch(
         <PanelCard
           eyebrow="Visitors"
           title="Unique vs returning visitors"
-          description="Daily unique visitor estimate based on distinct IP addresses."
+          description="Daily estimate of first-time and repeat activity."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="bucket in visitorTrendByDay" :key="bucket.bucket">
@@ -418,7 +418,7 @@ watch(
         <PanelCard
           eyebrow="Browsers"
           title="Browser breakdown"
-          description="Browser family parsed from captured User-Agent headers."
+          description="Which browser families appear most often in captured visits."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="item in browserBreakdown" :key="item.label">
@@ -440,7 +440,7 @@ watch(
         <PanelCard
           eyebrow="Devices"
           title="Device breakdown"
-          description="Device type parsed from the same User-Agent metadata."
+          description="How activity is split across desktop, mobile, and other devices."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="item in deviceBreakdown" :key="item.label">
@@ -460,7 +460,7 @@ watch(
         <PanelCard
           eyebrow="Referrers"
           title="Referrer breakdown"
-          description="Where traffic came from, grouped by referrer host when available."
+          description="Where visitors came from when a referrer is available."
         >
           <dl class="detail-list detail-list--analytics analytics-detail-list">
             <div v-for="item in referrerBreakdown" :key="item.label">
@@ -482,7 +482,7 @@ watch(
         v-if="details"
         eyebrow="Recent events"
         title="Recent interactions"
-        description="The latest captured redirect and QR scan events for this short code."
+        description="The latest redirect and QR scan events captured for this link."
       >
         <dl
           v-if="recentEvents.length"

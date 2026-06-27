@@ -176,13 +176,13 @@ onMounted(async () => {
     <PageIntro
       eyebrow="Analytics"
       title="Link analytics"
-      description="Compare traffic, QR scans, and visitor signals across links you can access."
+      description="Compare engagement across the links you can access, then open detailed insights for any link."
     />
 
     <PanelCard
-      eyebrow="Links"
-      title="Analytics by link"
-      :description="`Showing ${scopeLabel()} with analytics summaries loaded from the backend.`"
+      eyebrow="Overview"
+      title="Performance by link"
+      :description="`Showing ${scopeLabel()} with totals, QR scans, visitors, and the latest activity.`"
     >
       <template #actions>
         <RefreshButton :loading="loading" @refresh="loadAnalyticsOverview" />
@@ -204,7 +204,7 @@ onMounted(async () => {
 
       <div v-if="loading && !rows.length" class="empty-state">
         <p class="eyebrow">Loading</p>
-        <h4 class="card-title">Loading link analytics from the backend...</h4>
+        <h4 class="card-title">Loading analytics summaries...</h4>
       </div>
 
       <div v-else-if="visibleRows.length" class="analytics-table" role="table">

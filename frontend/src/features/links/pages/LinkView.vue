@@ -100,12 +100,16 @@ function formatDate(value: string | null, fallback = 'Never') {
     <PageIntro
       eyebrow="Link details"
       :title="`Details of &quot;${code}&quot;`"
-      description="Review where this short link points, who owns it, how long it lives, and the latest interaction signals."
+      description="Review the destination, ownership, lifetime, QR code, and sharing actions for this link."
     />
 
     <div class="page-grid link-detail-top-grid">
-      <PanelCard eyebrow="Link details" title="Main details" description="Short link details.">
-        <p v-if="loading" class="help-text">Loading the link from the backend...</p>
+      <PanelCard
+        eyebrow="Link"
+        title="Main details"
+        description="Core information for this short URL."
+      >
+        <p v-if="loading" class="help-text">Loading link details...</p>
         <p v-else-if="errorMessage" class="status error">
           <span class="status-dot"></span>
           {{ errorMessage }}
@@ -184,8 +188,8 @@ function formatDate(value: string | null, fallback = 'Never') {
 
       <PanelCard
         eyebrow="QR"
-        title="Scan-ready output"
-        description="Use this QR code in slides, printouts, or mobile sharing."
+        title="QR code"
+        description="Use this code for slides, printouts, or quick phone sharing."
       >
         <div v-if="link" class="qr-panel-body">
           <figure class="compact-figure link-detail-qr-figure">

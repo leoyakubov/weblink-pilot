@@ -22,22 +22,22 @@ const saved = ref(false);
 const backendLinks = computed(() => [
   {
     label: 'Health',
-    description: 'Health endpoint and readiness state.',
+    description: 'Check whether the backend is healthy and ready.',
     href: monitoringLinks.backendHealthUrl,
   },
   {
     label: 'Info',
-    description: 'Build and application info endpoint.',
+    description: 'View build and application metadata.',
     href: monitoringLinks.backendInfoUrl,
   },
   {
     label: 'Metrics',
-    description: 'Raw Spring Boot metrics namespace.',
+    description: 'Inspect raw application metrics.',
     href: monitoringLinks.backendMetricsUrl,
   },
   {
     label: 'Prometheus',
-    description: 'Prometheus scrape endpoint for the backend.',
+    description: 'Open the metrics feed used by Prometheus.',
     href: monitoringLinks.backendPrometheusUrl,
   },
 ]);
@@ -46,12 +46,12 @@ const localStackLinks = computed(() =>
     ? [
         {
           label: 'Prometheus',
-          description: 'Local scrape and query UI for Docker dev.',
+          description: 'Query local metrics from the Docker stack.',
           href: monitoringLinks.prometheusUrl,
         },
         {
           label: 'Grafana',
-          description: 'Local dashboards for the Docker monitoring stack.',
+          description: 'Open local dashboards for the demo stack.',
           href: monitoringLinks.grafanaUrl,
         },
       ]
@@ -94,22 +94,21 @@ onMounted(() => {
     <PageIntro
       eyebrow="Monitoring"
       title="Admin monitoring"
-      description="Review system totals, open operational endpoints, and adjust local browser/backend settings from one place."
+      description="Review demo totals, open operational tools, and adjust local API settings."
     />
 
     <div class="page-grid two-col monitoring-card-row">
       <PanelCard
-        eyebrow="Admin overview"
+        eyebrow="Overview"
         title="System overview"
-        description="User totals and link ownership counts show how the app is being used."
+        description="A quick snapshot of users, links, ownership, and click volume."
       >
         <template #actions>
           <RefreshButton :loading="loading" @refresh="refresh" />
         </template>
 
         <p class="help-text">
-          This page is for admins only. It combines user totals and link ownership counts so you can
-          see how the app is being used.
+          Admin-only view for checking the current demo data and overall usage.
         </p>
 
         <p v-if="errorMessage" class="status error">
@@ -149,15 +148,15 @@ onMounted(() => {
       </PanelCard>
 
       <PanelCard
-        eyebrow="Frontend settings"
+        eyebrow="Settings"
         title="Settings"
-        description="Use these browser-local settings when testing a different backend endpoint."
+        description="Change the API URL used by this browser during local development."
       >
         <div class="section-row about-toolbar">
           <div class="about-toolbar__copy">
             <p class="eyebrow about-toolbar__eyebrow">Browser tools</p>
             <p class="help-text">
-              Clear saved browser state when the demo points at stale settings.
+              Clear saved browser state if the app is pointing at stale local settings.
             </p>
           </div>
 
@@ -222,9 +221,9 @@ onMounted(() => {
 
     <div class="page-grid two-col monitoring-card-row">
       <PanelCard
-        eyebrow="Live backend"
-        title="Actuator endpoints"
-        description="Open backend health, info, metrics, and scrape endpoints for the current environment."
+        eyebrow="Backend"
+        title="Operational links"
+        description="Open health, info, metrics, and Prometheus views for the current API."
       >
         <div class="list">
           <div v-for="link in backendLinks" :key="link.label" class="list-item monitoring-link">
@@ -245,7 +244,7 @@ onMounted(() => {
         v-if="monitoringLinks.showLocalStack"
         eyebrow="Local stack"
         title="Prometheus and Grafana"
-        description="When you start the Docker full stack, Prometheus scrapes the backend and Grafana reads from Prometheus without extra setup."
+        description="When the local Docker stack is running, these tools show metrics and dashboards."
       >
         <div class="list">
           <div v-for="link in localStackLinks" :key="link.label" class="list-item monitoring-link">

@@ -206,18 +206,15 @@ async function submit() {
       const previewLink = response.previewLink;
       openNotice(
         'Demo email ready',
-        'Use the preview link to verify the account and continue the demo flow.',
+        'Open the preview link to verify the account and continue.',
         'Open verification link',
         () => openPreviewLink(previewLink),
       );
       return;
     }
 
-    openNotice(
-      'Account created',
-      'Check your email to verify your account before signing in.',
-      'Go to sign in',
-      () => router.push('/auth/signin'),
+    openNotice('Account created', 'Verify your email before signing in.', 'Go to sign in', () =>
+      router.push('/auth/signin'),
     );
   } catch (error) {
     if (
@@ -226,7 +223,7 @@ async function submit() {
     ) {
       openNotice(
         'Email not verified',
-        'This account still needs email verification. Open the verification email or request a new link.',
+        'This account still needs email verification. Open the email link or request a new one.',
         'Resend verification',
         () => router.push('/auth/verify-email/request'),
       );
@@ -247,6 +244,13 @@ async function submit() {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">{{ title }}</h3>
+          <p class="help-text">
+            {{
+              props.mode === 'login'
+                ? 'Sign in to manage your saved links and analytics.'
+                : 'Create an account to keep ownership of your links.'
+            }}
+          </p>
         </div>
 
         <form class="form-grid" @submit.prevent="submit">

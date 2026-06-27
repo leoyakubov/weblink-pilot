@@ -93,14 +93,14 @@ onMounted(() => {
     <PageIntro
       eyebrow="Account"
       title="Security"
-      description="Update your password and review external identity providers connected to this account."
+      description="Update your password and review sign-in methods connected to this account."
     />
 
     <div class="page-grid two-col account-settings-grid">
       <PanelCard
         eyebrow="Security"
         title="Change password"
-        description="Use a password with at least 6 characters, including one letter and one number."
+        description="Choose at least 6 characters with one letter and one number."
         class="account-form-card"
       >
         <form class="form-grid" @submit.prevent="submitPasswordChange">
@@ -164,7 +164,7 @@ onMounted(() => {
       <PanelCard
         eyebrow="Identity providers"
         title="Connected sign-ins"
-        description="If you use GitHub sign-in, a local password is still useful for recovery."
+        description="External sign-ins connected to this account."
       >
         <div v-if="linkedAccounts.length" class="stack">
           <div

@@ -65,9 +65,10 @@ onMounted(() => {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">GitHub sign-in</h3>
+          <p class="help-text">Finishing the GitHub handoff and returning you to WebLinkPilot.</p>
         </div>
 
-        <p v-if="busy && !errorMessage" class="footnote">Completing your GitHub session...</p>
+        <p v-if="busy && !errorMessage" class="footnote">Completing GitHub sign-in...</p>
         <p v-if="errorMessage" class="status error" role="alert" aria-live="polite">
           <span class="status-dot"></span>
           {{ errorMessage }}

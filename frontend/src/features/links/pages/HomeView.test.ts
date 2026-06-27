@@ -61,9 +61,9 @@ describe('HomeView', () => {
 
     expect(wrapper.text()).toContain('Link management');
     expect(wrapper.text()).toContain('Shorten link');
-    expect(wrapper.text()).toContain('Fast, personal links');
-    expect(wrapper.text()).toContain('Create without friction');
-    expect(wrapper.text()).toContain('Keep ownership and history');
+    expect(wrapper.text()).toContain('Create once, share anywhere');
+    expect(wrapper.text()).toContain('Start instantly');
+    expect(wrapper.text()).toContain('Keep your links');
     expect(wrapper.text()).toContain('Latest links');
     expect(wrapper.text()).toContain('Guest mode (ready for anonymous links)');
   });

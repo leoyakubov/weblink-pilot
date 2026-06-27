@@ -97,6 +97,7 @@ describe('LinkView', () => {
 
     expect(wrapper.text()).toContain('Details of "github-org"');
     expect(wrapper.text()).toContain('Main details');
+    expect(wrapper.text()).toContain('QR code');
     expect(wrapper.text()).toContain('Analytics');
     expect(wrapper.text()).toContain(
       'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
