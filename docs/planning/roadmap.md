@@ -26,9 +26,9 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 16  | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens)                                 | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
 | 17  | &#x1F7E2; Done | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs.                          |
 | 18  | &#x1F7E2; Done | [Frontend redesign](#phase-18-frontend-redesign)                                                   | Redesign the main frontend pages and forms with a custom mobile-first SaaS UI, shared page/panel/link components, and PrimeVue controls where they are useful.                                                            |
-| 19  | Planned        | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Integrate a ready-made analytics service for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first.                                                              |
-| 20  | Planned        | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Address the remaining OWASP-style findings from the security review, especially CSRF strategy, XSS/token storage, observability exposure, CORS strictness, and abuse controls.                                            |
-| 21  | Planned        | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Add a README section with step-by-step test scenarios and flow diagrams, then reshape the main README into a more presentation-ready, product-style format.                                                               |
+| 19  | Planned        | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Integrate Cloudflare Web Analytics for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first.                                                                     |
+| 20  | &#x1F7E2; Done | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Added security headers, stricter CORS validation, deployment-safe metrics/prometheus access, and dedicated throttling for public auth endpoints; deeper BFF-style auth can remain a future product decision.                |
+| 21  | &#x1F7E2; Done | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Added README test scenarios and flow diagrams for auth, email, link creation, redirects, analytics, admin monitoring, and account recovery.                                                                                |
 | 22  | Planned        | [Codebase refactoring and security review](#phase-22-codebase-refactoring-and-security-review)     | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps.    |
 | 23  | Planned        | [RabbitMQ async messaging](#phase-23-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                   |
 | 24  | Planned        | [Expiry reminder emails](#phase-24-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                             |
@@ -37,8 +37,8 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 Status note:
 
-- Phases 0-14 are already shipped and documented here as the implemented baseline.
-- Phases 15-24 are the remaining roadmap items, with phase 15 complete, phase 16 complete, phase 17 complete, and phase 18 complete.
+- Phases 0-18 and 20 are already shipped and documented here as the implemented baseline.
+- Phases 19 and 22-24 are the remaining roadmap items, with phase 19 intentionally left planned until we enable Cloudflare Web Analytics for the live demo.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -511,7 +511,7 @@ Checklist:
 - [x] Extract repeated UI blocks into smaller components
 - [x] Extract page intro, panel, feature card, refresh button, and link list components
 - [x] Move backend/browser settings from About to Monitoring
-- [x] Split Profile and Security into separate account pages
+- [x] Merge Profile and Security into one compact Account settings page
 - [x] Make QR actions use modal behavior consistently from history and home
 - [x] Remove stale Sakai CSS mode and migration documentation
 
@@ -558,11 +558,11 @@ Exit criteria:
 
 Checklist:
 
-- [ ] Review the remaining OWASP-style findings
-- [ ] Tighten CSRF handling for cookie-based auth where needed
-- [ ] Reduce browser-side token exposure risk
-- [ ] Review public observability exposure, CORS, and abuse controls
-- [ ] Close or explicitly accept the remaining findings
+- [x] Review the remaining OWASP-style findings
+- [x] Keep refresh-cookie CSRF risk bounded with `SameSite=Lax` by default and document the remaining cross-site-cookie tradeoff
+- [x] Reduce browser-side token exposure risk with security headers and CSP
+- [x] Restrict metrics/prometheus by default, keep explicit local/dev scraping support, reject wildcard CORS origins with credentials, and add dedicated auth endpoint throttling
+- [x] Close or explicitly accept the remaining findings in the security review
 
 ### Phase 21 - Testing scenarios and README polish
 
@@ -582,10 +582,10 @@ Exit criteria:
 
 Checklist:
 
-- [ ] Add step-by-step test scenarios for major app flows
-- [ ] Add flow diagrams for auth, email, links, and analytics
-- [ ] Rewrite the main README into a more presentation-ready form
-- [ ] Keep the README aligned with the current implementation
+- [x] Add step-by-step test scenarios for major app flows
+- [x] Add flow diagrams for auth, email, links, and analytics
+- [x] Rewrite the main README into a more presentation-ready form
+- [x] Keep the README aligned with the current implementation
 
 ### Phase 22 - Codebase refactoring and security review
 

@@ -31,7 +31,22 @@ Local/dev startup also seeds the shared `admin` and `user` accounts plus a small
 
 Auth and recovery routes are available under `/auth/signin`, `/auth/signup`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/verify-email/request`, `/auth/verify-email`, and `/auth/github/complete`.
 
-## Auth Flow
+## Demo Test Scenarios
+
+Use these scenarios for a quick product walkthrough before a demo or release check.
+For the full manual QA guide, see [Feature Testing Guide](docs/testing/feature-testing.md).
+
+| Scenario | Steps | Expected result |
+| --- | --- | --- |
+| Guest link | Open `/`, keep the default URL or enter a target, click `Shorten link`, then open the generated short URL | A short link is created anonymously, redirects to the target, and appears in latest links |
+| Signed-in links | Sign in as `user / user123`, create a link, open `/links`, then open the link details page | The link is owned by `user`, available in the filtered list, and exposes QR/copy/share actions |
+| Analytics | Open a seeded link such as `/r/redis`, scan/open its QR path, then open `/analytics/redis` | Redirect and QR counts update, recent interactions show event context, and breakdown panels load |
+| Admin operations | Sign in as `admin / admin123`, open `/monitoring`, then open `Users` from the account menu | Admin can inspect health, metrics, configuration, endpoints, and the read-only users directory |
+| Account recovery | Register a new account, verify it through Mailpit locally, then request password reset | Verification and reset emails arrive, one-time links work, and no secret token appears in logs |
+
+## Flow Diagrams
+
+### Auth
 
 ```mermaid
 sequenceDiagram
@@ -57,6 +72,57 @@ sequenceDiagram
     User->>SPA: Sign out
     SPA->>API: POST /api/v1/auth/logout
     API-->>Browser: Clear refresh cookie
+```
+
+### Link Creation And Redirect
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Visitor
+    participant SPA as Web UI
+    participant API as Backend API
+    participant Redirect as Redirect endpoint
+    participant Analytics as Analytics store
+
+    Visitor->>SPA: Create short link
+    SPA->>API: POST /api/v1/urls
+    API-->>SPA: code + short URL + QR endpoint
+    Visitor->>Redirect: GET /r/{code}
+    Redirect->>Analytics: Record redirect click
+    Redirect-->>Visitor: 302 target URL
+```
+
+### Email Recovery
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant SPA as Web UI
+    participant API as Backend API
+    participant Mail as Mailpit or SMTP provider
+
+    User->>SPA: Request reset or verification email
+    SPA->>API: POST account email action
+    API->>Mail: Send one-time action link
+    User->>Mail: Open delivered email
+    User->>SPA: Open action link
+    SPA->>API: Confirm token
+    API-->>SPA: Account updated
+```
+
+### Analytics Review
+
+```mermaid
+flowchart LR
+    A[Redirect or QR event] --> B[Click event stored]
+    B --> C[Summary counters]
+    B --> D[Recent interactions]
+    B --> E[Country, browser, device, referrer breakdowns]
+    C --> F[Analytics overview]
+    D --> G[Per-link analytics]
+    E --> G
 ```
 
 ## Docs

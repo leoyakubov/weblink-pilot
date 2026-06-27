@@ -235,6 +235,16 @@ For a quick sanity check after changes:
 
 That catches the most common regressions without running the full test suite.
 
+## Flow Checklist
+
+These are the same journeys summarized in the README diagrams. Use this compact checklist when validating a build manually:
+
+- Auth: register, verify email, sign in, refresh page, sign out.
+- Email: request password reset, open the delivered email, set a new password, confirm old reset links cannot be reused.
+- Links: create guest link, create signed-in link, open redirect, open QR, confirm ownership in `/links`.
+- Analytics: generate redirect and QR traffic, open `/analytics`, open `/analytics/:code`, compare totals and recent events.
+- Admin: sign in as `admin / admin123`, open `/monitoring`, inspect health/metrics/configuration/endpoints, open `/admin/users`.
+
 ## 9. Automated Checks
 
 These are the closest scripted checks for the same flows:
