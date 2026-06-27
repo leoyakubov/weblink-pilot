@@ -82,9 +82,7 @@ const router = createRouter({
     },
     {
       path: '/account/security',
-      name: 'account-security',
-      component: () => import('@/features/account/pages/SecurityView.vue'),
-      meta: { requiresAuth: true },
+      redirect: '/account',
     },
     {
       path: '/monitoring',

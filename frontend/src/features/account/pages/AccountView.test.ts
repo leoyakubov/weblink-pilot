@@ -1,7 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import AccountView from '@/features/account/pages/AccountView.vue';
-import SecurityView from '@/features/account/pages/SecurityView.vue';
 
 const mocks = vi.hoisted(() => ({
   getAccountProfileMock: vi.fn(),
@@ -32,7 +31,7 @@ function mountView(component = AccountView) {
 }
 
 describe('AccountView', () => {
-  it('renders account details without security-only providers', async () => {
+  it('renders account details, security, and linked providers together', async () => {
     mocks.getAccountProfileMock.mockResolvedValue({
       username: 'alice',
       role: 'USER',
@@ -47,31 +46,13 @@ describe('AccountView', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('alice@example.com');
-    expect(wrapper.text()).not.toContain('GITHUB');
-    expect(wrapper.text()).not.toContain('alice-github');
-    expect(wrapper.text()).not.toContain('Change password');
-  });
-
-  it('renders linked providers on the security page', async () => {
-    mocks.getAccountProfileMock.mockResolvedValue({
-      username: 'alice',
-      role: 'USER',
-      email: 'alice@example.com',
-      emailVerified: true,
-      createdAt: '2026-05-30T10:00:00Z',
-      lastLoginAt: '2026-05-30T12:00:00Z',
-      socialIdentities: [{ provider: 'GITHUB', providerLogin: 'alice-github' }],
-    });
-
-    const wrapper = mountView(SecurityView);
-    await flushPromises();
-
+    expect(wrapper.text()).toContain('Change password');
     expect(wrapper.text()).toContain('Connected sign-ins');
     expect(wrapper.text()).toContain('GITHUB');
     expect(wrapper.text()).toContain('alice-github');
   });
 
-  it('submits a password change request from the security page', async () => {
+  it('submits a password change request from the account page', async () => {
     mocks.getAccountProfileMock.mockResolvedValue({
       username: 'alice',
       role: 'USER',
@@ -83,7 +64,7 @@ describe('AccountView', () => {
     });
     mocks.changePasswordMock.mockResolvedValue(undefined);
 
-    const wrapper = mountView(SecurityView);
+    const wrapper = mountView();
     await flushPromises();
 
     await wrapper.get('input[placeholder="Current password"]').setValue('Oldpass1');

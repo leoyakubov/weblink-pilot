@@ -90,7 +90,6 @@ onBeforeUnmount(() => {
           class="layout-menu-button"
           icon="pi pi-bars"
           severity="secondary"
-          variant="text"
           rounded
           aria-label="Open navigation"
           @click="menuOpen = true"
@@ -149,15 +148,7 @@ onBeforeUnmount(() => {
             <div v-if="accountMenuOpen" class="account-menu__panel">
               <RouterLink to="/account" class="account-menu__item" @click="closeAccountMenu">
                 <i class="pi pi-user" aria-hidden="true"></i>
-                <span>Profile</span>
-              </RouterLink>
-              <RouterLink
-                to="/account/security"
-                class="account-menu__item"
-                @click="closeAccountMenu"
-              >
-                <i class="pi pi-shield" aria-hidden="true"></i>
-                <span>Security</span>
+                <span>Account</span>
               </RouterLink>
               <RouterLink
                 v-if="isAdmin"

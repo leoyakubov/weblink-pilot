@@ -75,8 +75,7 @@ describe('App', () => {
     expect(wrapper.text()).toContain('admin');
 
     await wrapper.get('button[aria-label="Open account menu"]').trigger('click');
-    expect(wrapper.text()).toContain('Profile');
-    expect(wrapper.text()).toContain('Security');
+    expect(wrapper.text()).toContain('Account');
     expect(wrapper.text()).toContain('Monitoring');
     expect(wrapper.text()).toContain('Sign out');
 

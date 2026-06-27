@@ -40,7 +40,6 @@ describe('router', () => {
         'analytics-detail',
         'links',
         'account',
-        'account-security',
         'monitoring',
       ]),
     );
