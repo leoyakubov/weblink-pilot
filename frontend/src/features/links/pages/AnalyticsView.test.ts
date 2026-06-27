@@ -104,7 +104,7 @@ describe('AnalyticsView', () => {
     expect(wrapper.text()).toContain('Total');
     expect(wrapper.text()).toContain('Redirects');
     expect(wrapper.text()).toContain('QR scans');
-    expect(wrapper.text()).toContain('Detailed analytics');
+    expect(wrapper.text()).toContain('Analytics');
     expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '');
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('redis', expect.any(Object));
   });

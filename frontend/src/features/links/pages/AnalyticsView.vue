@@ -245,11 +245,11 @@ onMounted(async () => {
 
           <div class="actions recent-link-actions analytics-table__actions">
             <RouterLink :to="{ name: 'analytics-detail', params: { code: row.link.code } }">
-              <Button label="Detailed analytics" icon="pi pi-chart-line" />
+              <Button label="Analytics" icon="pi pi-chart-line" />
             </RouterLink>
             <RouterLink :to="{ name: 'link', params: { code: row.link.code } }">
               <Button
-                label="Link details"
+                label="Details"
                 icon="pi pi-external-link"
                 severity="secondary"
                 variant="outlined"

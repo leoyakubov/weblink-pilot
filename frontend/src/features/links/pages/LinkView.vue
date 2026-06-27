@@ -167,7 +167,7 @@ function formatDate(value: string | null, fallback = 'Never') {
             />
             <Button
               type="button"
-              :label="isCopied('share-link') ? 'Share URL copied' : 'Share'"
+              :label="isCopied('share-link') ? 'Copied' : 'Share'"
               :icon="isCopied('share-link') ? 'pi pi-check' : 'pi pi-share-alt'"
               severity="secondary"
               variant="outlined"
@@ -176,7 +176,7 @@ function formatDate(value: string | null, fallback = 'Never') {
             <Button
               v-if="canSeePreview"
               type="button"
-              label="Preview JSON"
+              label="JSON"
               icon="pi pi-code"
               severity="secondary"
               variant="outlined"
@@ -212,7 +212,7 @@ function formatDate(value: string | null, fallback = 'Never') {
           />
           <Button
             type="button"
-            label="Open QR"
+            label="QR code"
             icon="pi pi-qrcode"
             severity="secondary"
             variant="outlined"

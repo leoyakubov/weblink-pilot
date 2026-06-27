@@ -109,9 +109,7 @@ async function shareLink(item: LinkResponse) {
         </RouterLink>
         <Button
           type="button"
-          :label="
-            isCopied(`${props.copyKeyPrefix}-${item.code}`) ? 'Short URL copied' : 'Copy short URL'
-          "
+          :label="isCopied(`${props.copyKeyPrefix}-${item.code}`) ? 'Copied' : 'Copy'"
           :icon="isCopied(`${props.copyKeyPrefix}-${item.code}`) ? 'pi pi-check' : 'pi pi-copy'"
           severity="secondary"
           variant="outlined"
@@ -119,7 +117,7 @@ async function shareLink(item: LinkResponse) {
         />
         <Button
           type="button"
-          label="Open QR"
+          label="QR code"
           icon="pi pi-qrcode"
           severity="secondary"
           variant="outlined"
@@ -127,9 +125,7 @@ async function shareLink(item: LinkResponse) {
         />
         <Button
           type="button"
-          :label="
-            isCopied(`share-${props.copyKeyPrefix}-${item.code}`) ? 'Share URL copied' : 'Share'
-          "
+          :label="isCopied(`share-${props.copyKeyPrefix}-${item.code}`) ? 'Copied' : 'Share'"
           :icon="
             isCopied(`share-${props.copyKeyPrefix}-${item.code}`)
               ? 'pi pi-check'

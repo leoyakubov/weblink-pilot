@@ -374,7 +374,7 @@ watch(
                 </RouterLink>
                 <Button
                   type="button"
-                  :label="isCopied('created-short') ? 'Short URL copied' : 'Copy short URL'"
+                  :label="isCopied('created-short') ? 'Copied' : 'Copy'"
                   :icon="isCopied('created-short') ? 'pi pi-check' : 'pi pi-copy'"
                   severity="secondary"
                   variant="outlined"
@@ -391,7 +391,7 @@ watch(
                 <Button
                   v-if="canSeePreview"
                   type="button"
-                  :label="isCopied('created-preview') ? 'Preview URL copied' : 'Copy preview URL'"
+                  :label="isCopied('created-preview') ? 'Copied' : 'Copy preview URL'"
                   :icon="isCopied('created-preview') ? 'pi pi-check' : 'pi pi-copy'"
                   severity="secondary"
                   variant="outlined"

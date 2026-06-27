@@ -81,7 +81,7 @@ describe('HistoryView', () => {
     expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '');
 
     const buttons = wrapper.findAll('button');
-    await buttons.find((button) => button.text().includes('Open QR'))?.trigger('click');
+    await buttons.find((button) => button.text().includes('QR code'))?.trigger('click');
     await flushPromises();
     expect(document.body.textContent).toContain('QR code');
     expect(document.body.textContent).toContain('github-org');
