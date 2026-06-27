@@ -29,21 +29,14 @@ const runtimeItems = [
 const demoUsers = [
   [
     'admin',
-    'Administrator account for monitoring and full demo access.',
+    'Administrator account for monitoring and full demo access. It can view all links, filter by creator, open monitoring, and inspect admin-only data.',
     'Credentials: admin / admin123',
   ],
   [
     'user',
-    'Standard user account for owned links and private history.',
+    'Standard user account for owned links and private history. It can create owned links, revisit saved history, and view analytics for owned links.',
     'Credentials: user / user123',
   ],
-];
-
-const seededLinks = [
-  ['/spring-boot', 'https://spring.io/projects/spring-boot', 'anonymous'],
-  ['/vue-js', 'https://vuejs.org/guide/introduction.html', 'anonymous'],
-  ['/postgres', 'https://www.postgresql.org/about/', 'user'],
-  ['/redis', 'https://redis.io/docs/latest/develop/', 'user'],
 ];
 
 const accountItems = [
@@ -51,13 +44,49 @@ const accountItems = [
   ['Signed-in mode', 'Keep link ownership, private history, and owned analytics.'],
   ['Admin mode', 'Open monitoring, backend endpoints, and creator-filtered dashboard flows.'],
 ];
+
+const projectLinks = [
+  [
+    'GitHub',
+    'Source code, issues, and pull requests.',
+    'https://github.com/leoyakubov/weblink-pilot',
+  ],
+  [
+    'Docs',
+    'Documentation index for setup, design, testing, and operations.',
+    'https://github.com/leoyakubov/weblink-pilot/blob/main/docs/README.md',
+  ],
+  [
+    'Roadmap',
+    'Current product phases and remaining delivery scope.',
+    'https://github.com/leoyakubov/weblink-pilot/blob/main/docs/planning/roadmap.md',
+  ],
+  [
+    'API contract',
+    'REST API shape used by the frontend and backend.',
+    'https://github.com/leoyakubov/weblink-pilot/blob/main/docs/implementation/api-contract-v1.md',
+  ],
+  [
+    'Deployment',
+    'Runtime environment notes for Netlify, Render, Postgres, Redis, and SMTP.',
+    'https://github.com/leoyakubov/weblink-pilot/blob/main/docs/operations/deployment.md',
+  ],
+];
+
+const localUrls = [
+  ['Frontend', 'http://localhost:5173', 'Vite dev server for the Vue app.'],
+  ['Backend API', 'http://localhost:8080/api/v1', 'Base URL used by frontend requests.'],
+  ['OpenAPI JSON', 'http://localhost:8080/v3/api-docs', 'Machine-readable REST contract.'],
+  ['Health check', 'http://localhost:8080/actuator/health', 'Backend readiness endpoint.'],
+  ['Prometheus', 'http://localhost:8080/actuator/prometheus', 'Metrics endpoint for monitoring.'],
+];
 </script>
 
 <template>
   <section class="page-grid">
     <PageIntro
       eyebrow="About"
-      title="WebLinkPilot"
+      title="WeblinkPilot"
       description="A small short-link workspace for personal sharing, saved history, QR codes, and analytics."
     />
 
@@ -65,7 +94,7 @@ const accountItems = [
       <PanelCard
         eyebrow="Product"
         title="What it does"
-        description="WebLinkPilot keeps link creation quick, with optional ownership and insight when you need it."
+        description="WeblinkPilot keeps link creation quick, with optional ownership and insight when you need it."
       >
         <dl class="detail-list detail-list--about-horizontal">
           <div v-for="[label, value] in productItems" :key="label">
@@ -91,6 +120,19 @@ const accountItems = [
 
     <div class="page-grid two-col about-card-row">
       <PanelCard
+        eyebrow="Runtime"
+        title="Profiles and environments"
+        description="Each mode keeps the same app experience while changing local or hosted infrastructure."
+      >
+        <dl class="detail-list">
+          <div v-for="[label, value] in runtimeItems" :key="label">
+            <dt>{{ label }}</dt>
+            <dd>{{ value }}</dd>
+          </div>
+        </dl>
+      </PanelCard>
+
+      <PanelCard
         eyebrow="Seeded data"
         title="Default users"
         description="Demo accounts are available so you can try ownership and admin-only views right away."
@@ -101,22 +143,6 @@ const accountItems = [
             <dd>
               <span>{{ description }}</span>
               <strong class="footnote">{{ credentials }}</strong>
-            </dd>
-          </div>
-        </dl>
-      </PanelCard>
-
-      <PanelCard
-        eyebrow="Seeded data"
-        title="Demo links"
-        description="Starter links make details, QR codes, and analytics visible immediately."
-      >
-        <dl class="detail-list">
-          <div v-for="[path, url, owner] in seededLinks" :key="path">
-            <dt>{{ path }}</dt>
-            <dd>
-              <strong>{{ url }}</strong>
-              <span class="footnote">by {{ owner }}</span>
             </dd>
           </div>
         </dl>
@@ -138,13 +164,35 @@ const accountItems = [
       </PanelCard>
 
       <PanelCard
-        eyebrow="Runtime"
-        title="Profiles and environments"
-        description="Each mode keeps the same app experience while changing local or hosted infrastructure."
+        eyebrow="Local URLs"
+        title="API endpoints"
+        description="Useful development URLs when the frontend and backend run on your machine."
       >
-        <dl class="detail-list">
-          <div v-for="[label, value] in runtimeItems" :key="label">
-            <dt>{{ label }}</dt>
+        <dl class="detail-list detail-list--about-links">
+          <div v-for="[label, href, value] in localUrls" :key="label">
+            <dt>
+              <a :href="href" target="_blank" rel="noreferrer">{{ label }}</a>
+            </dt>
+            <dd>
+              <strong>{{ href }}</strong>
+              <span class="footnote">{{ value }}</span>
+            </dd>
+          </div>
+        </dl>
+      </PanelCard>
+    </div>
+
+    <div class="page-grid two-col about-card-row">
+      <PanelCard
+        eyebrow="Project links"
+        title="Source and docs"
+        description="Useful references for the codebase, API contract, roadmap, and deployment notes."
+      >
+        <dl class="detail-list detail-list--about-links">
+          <div v-for="[label, value, href] in projectLinks" :key="label">
+            <dt>
+              <a :href="href" target="_blank" rel="noreferrer">{{ label }}</a>
+            </dt>
             <dd>{{ value }}</dd>
           </div>
         </dl>
