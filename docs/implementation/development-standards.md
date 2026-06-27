@@ -1,6 +1,6 @@
 # Development Standards
 
-This document is the working checklist for development hygiene in WebLinkPilot.
+This document is the working checklist for development hygiene in WeblinkPilot.
 
 ## Goal
 

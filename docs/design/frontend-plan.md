@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The frontend will be a Vue-based, mobile-first interface for the WebLinkPilot product.
+The frontend will be a Vue-based, mobile-first interface for the WeblinkPilot product.
 
 Its job is to make link creation, QR handling, and analytics easy on both mobile and desktop without making the user think about backend complexity.
 

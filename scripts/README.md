@@ -1,6 +1,6 @@
 # Project Scripts
 
-WebLinkPilot uses one Bash-only automation set on every platform.
+WeblinkPilot uses one Bash-only automation set on every platform.
 
 ## Layout
 

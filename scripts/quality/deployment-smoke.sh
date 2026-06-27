@@ -53,7 +53,7 @@ load_env_file() {
 }
 
 if [[ "$smoke_target" == demo ]]; then
-  load_env_file "$repo_root/infra/.env.local"
+  load_env_file "$repo_root/infra/.env"
 fi
 
 backend_health_url="${RENDER_HEALTH_URL:-}"

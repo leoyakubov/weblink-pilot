@@ -1,8 +1,8 @@
-# WebLinkPilot Product Spec
+# WeblinkPilot Product Spec
 
 ## 1. Product Summary
 
-WebLinkPilot is a modern URL shortening platform with QR code generation, analytics, and a mobile-first web interface.
+WeblinkPilot is a modern URL shortening platform with QR code generation, analytics, and a mobile-first web interface.
 
 The product is designed to look and feel like a real production service rather than a toy demo.
 
@@ -35,8 +35,10 @@ The product is designed to look and feel like a real production service rather t
 
 ### Management
 
-- As a user, I want to view my link history.
+- As a user, I want to view my saved links.
+- As a user, I want to open a link detail page with QR, copy, share, and analytics actions.
 - As a user, I want to edit or disable links if needed later.
+- As an admin, I want to review system health, configuration, runtime metrics, and registered users.
 
 ## 4. Feature Scope
 
@@ -78,12 +80,19 @@ The product is designed to look and feel like a real production service rather t
 
 ### Pages
 
-- landing/create link page
-- short link success page
-- QR preview/download page
-- analytics dashboard
-- link history page
-- settings/auth page
+- `/` - Home and create-link flow
+- `/links` - Links list with filters and quick actions
+- `/link/:code` - Link details, QR code, copy/share/open actions, and JSON preview
+- `/analytics` - Analytics overview across visible links
+- `/analytics/:code` - Per-link analytics detail page
+- `/account` - Account profile, password/security actions, and identity provider information
+- `/about` - Product, access, seeded data, stack, implementation, API endpoints, and project links
+- `/monitoring` - Admin monitoring with health checks, runtime metrics, configuration, and service endpoints
+- `/admin/users` - Admin read-only users directory
+- `/auth/signin` and `/auth/signup` - Authentication forms
+- `/auth/forgot-password`, `/auth/reset-password`, `/auth/verify-email/request`, and `/auth/verify-email` - Account recovery and email verification flows
+- `/auth/github/complete` - GitHub OAuth completion and error handoff
+- `/settings/reset` - Browser settings reset utility
 
 ### Design goals
 

@@ -2,7 +2,7 @@
 
 ## Decision
 
-WebLinkPilot no longer targets a Sakai template migration.
+WeblinkPilot no longer targets a Sakai template migration.
 
 The current frontend direction is a custom, mobile-first product UI built with Vue 3, shared app components, custom CSS tokens, and PrimeVue controls where they are useful for standard form and action behavior.
 

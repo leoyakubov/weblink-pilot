@@ -1,12 +1,12 @@
 # AGENTS.md
 
-Repository instructions for coding agents working on WebLinkPilot.
+Repository instructions for coding agents working on WeblinkPilot.
 
 This file is intentionally agent-focused. Human-facing project docs stay in `README.md` and `docs/`.
 
 ## Project Context
 
-- WebLinkPilot is a monorepo with a Java/Spring Boot modular backend and a Vue frontend.
+- WeblinkPilot is a monorepo with a Java/Spring Boot modular backend and a Vue frontend.
 - The backend is a modular monolith under `backend/`:
   - `shared-contracts` contains DTOs and cross-module contracts.
   - `url` owns short-link lifecycle behavior.
@@ -99,7 +99,7 @@ If a command cannot run because of sandbox, network, Docker, or local tool limit
 ## Security Rules
 
 - Never hardcode secrets, API keys, personal tokens, real SMTP credentials, or private URLs.
-- Keep local secrets in untracked local files such as `.env.local`.
+- Keep local secrets in untracked local files such as `.env`.
 - Do not log password reset links, verification links, refresh tokens, access tokens, or OAuth tickets.
 - Keep refresh tokens and account action tokens hashed at rest.
 - Review `docs/reference/security-review.md` before changing auth, CORS, cookies, rate limiting, or actuator exposure.

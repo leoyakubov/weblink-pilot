@@ -54,7 +54,7 @@ If you do not want to type the Maven command manually, use the helper script fro
 - WSL/Linux/macOS: `bash ./scripts/quality/sonar-analysis.sh`
 - Windows PowerShell: `wsl bash ./scripts/quality/sonar-analysis.sh`
 
-You can also put the token in a local-only `infra/sonar/.env.local` file:
+You can also put the token in a local-only `infra/sonar/.env` file:
 
 ```bash
 SONAR_TOKEN=your-token-here

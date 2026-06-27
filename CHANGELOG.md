@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to WebLinkPilot are documented in this file.
+All notable changes to WeblinkPilot are documented in this file.
 
 The project follows a lightweight Keep a Changelog style:
 - release entries summarize user-visible changes, fixes, and notable infrastructure updates.

@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(scanBasePackages = "io.weblinkpilot")
 @EnableAsync
 @EnableScheduling
-@Modulithic(systemName = "WebLinkPilot", sharedModules = "shared")
+@Modulithic(systemName = "WeblinkPilot", sharedModules = "shared")
 public class Application {
 
   public static void main(String[] args) {

@@ -38,7 +38,7 @@
         <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
 
         <sonar.projectKey>weblink-pilot-backend</sonar.projectKey>
-        <sonar.projectName>WebLinkPilot Backend</sonar.projectName>
+        <sonar.projectName>WeblinkPilot Backend</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/build-support/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 

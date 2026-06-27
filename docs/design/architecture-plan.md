@@ -1,4 +1,4 @@
-# WebLinkPilot Architecture Plan
+# WeblinkPilot Architecture Plan
 
 ## 1. Goal
 

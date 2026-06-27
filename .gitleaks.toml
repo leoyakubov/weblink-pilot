@@ -1,4 +1,4 @@
-title = "WebLinkPilot Gitleaks configuration"
+title = "WeblinkPilot Gitleaks configuration"
 
 [extend]
 useDefault = true

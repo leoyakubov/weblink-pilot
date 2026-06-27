@@ -48,19 +48,19 @@ flowchart TD
 
 ## Current state
 
-| Area | Status | Notes |
-|---|---|---|
-| Backend CI | Done | GitHub Actions runs Maven and frontend validation on push and PR. |
-| Backend deploy workflow | Done | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`. |
-| Backend readiness gate | Done | The backend deploy workflow waits for the new Render deploy to become live before it dispatches backend smoke. |
-| Frontend deploy workflow | Done | GitHub Actions builds the Vue app and deploys it to Netlify. |
-| Deployment smoke tests | Done | GitHub Actions checks the live backend health endpoint and the freshly deployed frontend URL after deploys with separate backend and frontend smoke workflows. Backend smoke is dispatched only after a real backend deploy finishes, and frontend smoke uses the Netlify deploy URL returned by the deploy step. |
-| Render runtime | Done | The backend runs on Render with Postgres and the demo profile. |
-| Redis cache | Next | Add a Render Key Value instance and point the demo profile at its internal Redis URL. |
-| Frontend host config | Done | Netlify site secrets and the backend API URL are configured. |
-| Backend public URL | Done | The backend is reachable over HTTPS from the browser. |
-| CORS origin | Done | The exact Netlify origin is allowed by the backend CORS config. |
-| Monitoring | Done | The admin page now links to backend health/info/metrics/prometheus, and Prometheus/Grafana are available in a separate optional monitoring stack. |
+| Area                     | Status | Notes                                                                                                                                                                                                                                                                                                             |
+| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend CI               | Done   | GitHub Actions runs Maven and frontend validation on push and PR.                                                                                                                                                                                                                                                 |
+| Backend deploy workflow  | Done   | GitHub Actions triggers the Render deploy hook after CI succeeds on `main`.                                                                                                                                                                                                                                       |
+| Backend readiness gate   | Done   | The backend deploy workflow waits for the new Render deploy to become live before it dispatches backend smoke.                                                                                                                                                                                                    |
+| Frontend deploy workflow | Done   | GitHub Actions builds the Vue app and deploys it to Netlify.                                                                                                                                                                                                                                                      |
+| Deployment smoke tests   | Done   | GitHub Actions checks the live backend health endpoint and the freshly deployed frontend URL after deploys with separate backend and frontend smoke workflows. Backend smoke is dispatched only after a real backend deploy finishes, and frontend smoke uses the Netlify deploy URL returned by the deploy step. |
+| Render runtime           | Done   | The backend runs on Render with Postgres and the demo profile.                                                                                                                                                                                                                                                    |
+| Redis cache              | Next   | Add a Render Key Value instance and point the demo profile at its internal Redis URL.                                                                                                                                                                                                                             |
+| Frontend host config     | Done   | Netlify site secrets and the backend API URL are configured.                                                                                                                                                                                                                                                      |
+| Backend public URL       | Done   | The backend is reachable over HTTPS from the browser.                                                                                                                                                                                                                                                             |
+| CORS origin              | Done   | The exact Netlify origin is allowed by the backend CORS config.                                                                                                                                                                                                                                                   |
+| Monitoring               | Done   | The admin page now links to backend health/info/metrics/prometheus, and Prometheus/Grafana are available in a separate optional monitoring stack.                                                                                                                                                                 |
 
 ## GitHub Actions workflows
 
@@ -136,14 +136,14 @@ Set backend env vars in Render:
 - `SPRING_MAIL_SMTP_AUTH=true`
 - `SPRING_MAIL_SMTP_STARTTLS=true`
 - `SPRING_MAIL_FROM_ADDRESS=<brevo-verified-sender>`
-- `SPRING_MAIL_FROM_NAME=WebLinkPilot`
+- `SPRING_MAIL_FROM_NAME=WeblinkPilot`
 - `APP_AUTH_MAIL_DELIVERY_MODE=SMTP`
 
 Where to get the missing values:
 
 - `SPRING_MAIL_USERNAME` and `SPRING_MAIL_PASSWORD` come from Brevo's SMTP settings page for your sender or SMTP key.
 - `SPRING_MAIL_FROM_ADDRESS` must be a sender address or domain that Brevo accepts for that account.
-- `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WebLinkPilot.
+- `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` come from GitHub `Settings -> Developer settings -> OAuth Apps` after you create the OAuth app for WeblinkPilot.
 
 Optional:
 
@@ -164,7 +164,7 @@ If you use Render free and want to reduce cold starts, add GitHub repository var
 Then let the scheduled GitHub workflow ping those URLs every 5 minutes.
 
 If you store either URL in the `demo` environment instead, the deployment smoke and ping workflows will pick them up from that environment too.
-For local manual smoke runs, the helper script also reads those values from `infra/.env.local` automatically.
+For local manual smoke runs, the helper script also reads those values from `infra/.env` automatically.
 The smoke output prints the backend HTTP status plus `status=UP`, and the frontend HTTP status plus the app shell marker (`id="app"`). By default, the helper script checks the local Docker stack; set `SMOKE_TARGET=demo` together with `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` to smoke the live demo instead. The PowerShell and Bash scripts also add spacing, color, and start/end banners so the backend and frontend checks are easy to scan separately.
 
 ## Important note

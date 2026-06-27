@@ -49,7 +49,6 @@ coverage-final.json
 .env
 .env.*
 !.env.example
-!backend/.env.smtp.local.example
 
 # Docker / local runtime
 .docker/

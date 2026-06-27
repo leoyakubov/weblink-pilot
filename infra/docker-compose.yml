@@ -40,7 +40,7 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     env_file:
-      - ../backend/.env.local
+      - ../backend/.env
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/weblinkpilot

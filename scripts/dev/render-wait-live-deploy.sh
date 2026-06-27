@@ -2,7 +2,7 @@
 set -eu
 
 repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
-env_file="$repo_root/infra/.env.local"
+env_file="$repo_root/infra/.env"
 
 if [ -f "$env_file" ]; then
   load_local_env() {

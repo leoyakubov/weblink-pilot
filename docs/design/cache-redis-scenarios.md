@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document groups the Redis and cache-related flows in WebLinkPilot in one place.
+This document groups the Redis and cache-related flows in WeblinkPilot in one place.
 
 The goal is to make it obvious which data is cached, which data remains durable in PostgreSQL, and where the app uses synchronous cache access versus asynchronous invalidation or background work.
 

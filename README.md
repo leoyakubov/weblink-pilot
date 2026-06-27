@@ -1,4 +1,4 @@
-# WebLinkPilot
+# WeblinkPilot
 
 [![CI](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml)
 [![Smoke Backend](https://github.com/leoyakubov/weblink-pilot/actions/workflows/smoke-backend.yml/badge.svg?branch=main)](https://github.com/leoyakubov/weblink-pilot/actions/workflows/smoke-backend.yml)
@@ -11,8 +11,25 @@ Modern URL shortening platform with QR codes, separate redirect vs QR analytics,
 Live demo: Netlify frontend and Render backend with Render Postgres and Render Key Value Redis.
 
 The app supports both anonymous demo links and signed-in user-owned links. Guests can shorten URLs immediately, while authenticated users get owned links, private history, and admin-only monitoring if they have the admin role.
-The cleaner SaaS-style landing page keeps the main create flow front and center, while the About page now holds the tech stack and developer settings.
+The cleaner SaaS-style landing page keeps the main create flow front and center, while the About page holds product, stack, seeded data, API, and project links.
 Local/dev startup also seeds the shared `admin` and `user` accounts plus a small set of starter links so the dashboards are never empty on first run.
+
+## App Pages
+
+| Route              | Purpose                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `/`                | Home page and create-link flow                                                             |
+| `/links`           | Links list with filters and quick actions                                                  |
+| `/link/:code`      | Link details, QR code, copy/share/open actions, and JSON preview                           |
+| `/analytics`       | Analytics overview across visible links                                                    |
+| `/analytics/:code` | Per-link analytics detail page                                                             |
+| `/account`         | Account profile, password/security actions, and identity provider information              |
+| `/about`           | Product, access, seeded data, stack, implementation, API endpoints, and project links      |
+| `/monitoring`      | Admin monitoring with health checks, runtime metrics, configuration, and service endpoints |
+| `/admin/users`     | Admin read-only users directory                                                            |
+| `/settings/reset`  | Browser settings reset utility                                                             |
+
+Auth and recovery routes are available under `/auth/signin`, `/auth/signup`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/verify-email/request`, `/auth/verify-email`, and `/auth/github/complete`.
 
 ## Auth Flow
 
@@ -117,6 +134,8 @@ Useful API endpoints after startup:
 - `http://localhost:8080/api/v1/urls/{code}/qr`
 - `http://localhost:8080/api/v1/analytics/{code}`
 - `http://localhost:8080/api/v1/analytics/{code}/count`
+- `http://localhost:8080/api/v1/admin/monitoring`
+- `http://localhost:8080/api/v1/admin/users`
 
 ## Backend Quality
 
@@ -163,7 +182,7 @@ bash ./scripts/git/scan-secrets.sh
 ```
 
 The scan uses the official Gitleaks Docker image and the repo-level [`gitleaks`](.gitleaks.toml) configuration.
-It scans Git-tracked content, so your local `.env.local` files stay private to your machine and do not block the repo gate.
+It scans Git-tracked content, so your local `.env` files stay private to your machine and do not block the repo gate.
 
 ## SonarQube / Code Quality
 
@@ -198,17 +217,17 @@ If you prefer not to type the Maven command manually, use the helper scripts:
 
 - [`scripts/quality/sonar-analysis.sh`](scripts/quality/sonar-analysis.sh)
 
-For a local backend convenience file, copy `backend/.env.local.example` to `backend/.env.local` and fill in the values:
+For a local backend convenience file, copy `backend/.env.example` to `backend/.env` and fill in the values:
 
 ```bash
-cp backend/.env.local.local.example backend/.env.local.local
+cp backend/.env.example backend/.env
 APP_AUTH_JWT_SECRET=your-local-jwt-secret
 ```
 
 The backend reads `APP_AUTH_JWT_SECRET` first, then `JWT_SECRET`. The local and dev profiles also fall back to a built-in non-blank placeholder if neither variable is set, so local startup does not fail on an empty secret. Demo and production-style runs still require a real secret from the environment.
 
-Deployment, smoke, and Netlify/Render helper values live under `infra/.env.local`. Use `infra/.env.local.example` as the starter file.
-SonarQube helper values live under `infra/sonar/.env.local`. Use `infra/sonar/.env.local.example` as the starter file.
+Deployment, smoke, and Netlify/Render helper values live under `infra/.env`. Use `infra/.env.example` as the starter file.
+SonarQube helper values live under `infra/sonar/.env`. Use `infra/sonar/.env.example` as the starter file.
 
 ## Run Scripts
 
@@ -328,7 +347,7 @@ Monitoring services:
 - Grafana: `http://localhost:3001`
 
 The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `dev` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped local stack, while direct local development still uses the `local` profile with in-memory H2.
-It also exposes the backend actuator endpoints through the frontend proxy so the admin monitoring page can open health, info, metrics, and Prometheus links from the same origin.
+The admin monitoring page reads `/api/v1/admin/monitoring` for health checks, runtime metrics, configuration, and service endpoints. When the optional local monitoring stack is running, the same page links to Prometheus and Grafana.
 
 ### Backend Profiles
 
@@ -364,7 +383,7 @@ For a local smoke check, the script defaults to the Docker stack URLs:
 - backend: `http://localhost:8080/actuator/health`
 - frontend: `http://localhost:8081`
 
-To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` in your shell or in `infra/.env.local`.
+To smoke the live demo instead, set `SMOKE_TARGET=demo` and provide `RENDER_HEALTH_URL` and `FRONTEND_SMOKE_URL` in your shell or in `infra/.env`.
 
 Then run:
 

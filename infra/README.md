@@ -65,9 +65,9 @@ If you changed the frontend API base URL manually, make sure it still points to 
 
 ### Environment files
 
-- `backend/.env.local`: local backend secret values such as `JWT_SECRET`
-- `infra/.env.local`: deployment, smoke, and Netlify/Render helper values
-- `infra/sonar/.env.local`: Sonar token and local Sonar host URL
+- `backend/.env`: local backend secret values such as `JWT_SECRET`
+- `infra/.env`: deployment, smoke, and Netlify/Render helper values
+- `infra/sonar/.env`: Sonar token and local Sonar host URL
 
 ## Notes
 

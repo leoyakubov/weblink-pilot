@@ -14,8 +14,8 @@ load_env_file() {
   fi
 }
 
-load_env_file "$repo_root/backend/.env.local"
-load_env_file "$repo_root/infra/sonar/.env.local"
+load_env_file "$repo_root/backend/.env"
+load_env_file "$repo_root/infra/sonar/.env"
 
 if [[ -z "${SONAR_TOKEN:-}" ]]; then
   read -r -s -p "Enter Sonar token: " SONAR_TOKEN

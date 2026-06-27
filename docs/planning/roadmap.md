@@ -15,12 +15,12 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 5   | &#x1F7E2; Done | [QR code support](#phase-5-qr-code-support)                                                        | QR generation and the QR endpoint are in place for the core link journey.                                                                                                                                                 |
 | 6   | &#x1F7E2; Done | [Analytics](#phase-6-analytics)                                                                    | Click events are tracked by source (redirect and QR), with summaries and enrichment.                                                                                                                                      |
 | 7   | &#x1F7E2; Done | [Frontend foundation](#phase-7-frontend-foundation)                                                | Vue app shell and backend integration are in place.                                                                                                                                                                       |
-| 8   | &#x1F7E2; Done | [Frontend feature set](#phase-8-frontend-feature-set)                                              | Create flow, dashboard, history, details, QR UI, and sign in/sign up screens are in place.                                                                                                                                |
-| 9   | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control)                    | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, and admin-only monitoring access are in place.                        |
+| 8   | &#x1F7E2; Done | [Frontend feature set](#phase-8-frontend-feature-set)                                              | Home/create, Links, Link details, Analytics overview/detail, QR UI, and sign in/sign up screens are in place.                                                                                                             |
+| 9   | &#x1F7E2; Done | [Authentication and access control](#phase-9-authentication-and-access-control)                    | JWT login/register/me flows, refresh cookies, password reset, email verification, user and admin roles, bootstrap seed data, role-aware navigation, admin monitoring, and admin users are in place.                       |
 | 10  | &#x1F7E2; Done | [Production hardening](#phase-10-production-hardening)                                             | Logging, metrics, documentation polish, release checks, and deploy safety are in place.                                                                                                                                   |
 | 11  | &#x1F7E2; Done | [Environment profiles and scripts](#phase-11-environment-profiles-and-scripts)                     | Local, dev, and demo Spring profiles plus the helper scripts for direct runs and Docker workflows are in place.                                                                                                           |
 | 12  | &#x1F7E2; Done | [Redis cache](#phase-12-redis-caching)                                                             | Redis-backed hot short-code lookup caching and analytics cache invalidation are in place, and the broader cache map lives in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md).                              |
-| 13  | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring)                                               | The admin monitoring page links to backend health/info/metrics/prometheus, and the local Docker stack includes Prometheus and Grafana.                                                                                    |
+| 13  | &#x1F7E2; Done | [Monitoring stack integration](#phase-13-monitoring)                                               | The admin monitoring page shows health checks, runtime metrics, configuration, service endpoints, and links to Prometheus/Grafana when the local stack is available.                                                      |
 | 14  | &#x1F7E2; Done | [Auth expansion](#phase-14-auth-expansion)                                                         | GitHub social login, richer account management, and remember-me session controls are in place on top of the current JWT, refresh-cookie, password-reset, and email-verification flow.                                     |
 | 15  | &#x1F7E2; Done | [Spring Modulith migration](#phase-15-spring-modulith-migration)                                   | The backend module map is frozen, the public APIs are documented, and the Modulith-style verification tests are in place.                                                                                                 |
 | 16  | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens)                                 | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
@@ -228,20 +228,23 @@ Goals:
 
 - create link flow UI
 - success page with short link and QR
-- analytics dashboard
-- link details/history views
+- analytics overview and per-link analytics detail views
+- links list and link details views
+- account, admin monitoring, and admin users routes
 
 Exit criteria:
 
 - core user journeys work on mobile and desktop
+- main navigation matches the shipped route map
 - UI is stable enough for demo and review
 
 Checklist:
 
 - [x] Built the create link flow UI
 - [x] Added the success page with short link and QR
-- [x] Added the analytics dashboard
-- [x] Added link details/history views
+- [x] Added the analytics overview and per-link analytics detail views
+- [x] Added Links and Link details views
+- [x] Added Account, Admin monitoring, and Admin users pages
 
 ### Phase 9 - Authentication and access control
 
@@ -254,11 +257,13 @@ Goals:
 - make navigation and routes role-aware
 - keep guest link creation available for demo users
 - protect admin-only monitoring access
+- protect the admin users directory
 
 Exit criteria:
 
 - users can sign up and sign in
 - admins see admin-only navigation and routes
+- admins can open monitoring and users from the account dropdown
 - anonymous and owned links both work
 - the auth model supports the current product flow
 
@@ -271,6 +276,7 @@ Checklist:
 - [x] Made navigation and routes role-aware
 - [x] Kept guest link creation available for demo users
 - [x] Protected admin-only monitoring access
+- [x] Protected the admin users directory
 
 ### Phase 10 - Production hardening
 
@@ -344,8 +350,8 @@ Checklist:
 
 Goals:
 
-- wire Prometheus/Grafana links and local monitoring stack into the admin monitoring page
-- surface health and metrics in the UI
+- show backend health checks, runtime metrics, configuration, and service endpoints in the admin monitoring page
+- wire Prometheus/Grafana links and local monitoring stack into the service endpoints panel
 - decide whether any monitoring endpoints need additional JWT protection
 
 Exit criteria:
@@ -353,12 +359,12 @@ Exit criteria:
 - monitoring is visible from the app
 - the deploy path stays simple
 - the monitoring stack can be enabled after the app is live
-- the admin monitoring page and local stack are consistent with the docs
+- the admin monitoring page, health checks, configuration info, and local stack are consistent with the docs
 
 Checklist:
 
 - [x] Wired Prometheus/Grafana links into the admin monitoring page
-- [x] Surfaced health and metrics in the UI
+- [x] Surfaced health checks, runtime metrics, configuration, and service endpoints in the UI
 - [x] Evaluated JWT protection for monitoring endpoints
 
 ### Phase 14 - Auth expansion

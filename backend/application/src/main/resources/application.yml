@@ -16,7 +16,7 @@ spring:
     default: local
   mail:
     from-address: ${SPRING_MAIL_FROM_ADDRESS:no-reply@weblinkpilot.local}
-    from-name: ${SPRING_MAIL_FROM_NAME:WebLinkPilot}
+    from-name: ${SPRING_MAIL_FROM_NAME:WeblinkPilot}
 
 management:
   endpoints:
