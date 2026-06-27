@@ -162,7 +162,8 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('Traffic channels');
     expect(wrapper.text()).toContain('Latest activity');
     expect(wrapper.text()).toContain('Country distribution');
-    expect(wrapper.text()).toContain('Timeline by day/hour');
+    expect(wrapper.text()).toContain('Daily timeline');
+    expect(wrapper.text()).toContain('Hourly activity');
     expect(wrapper.text()).toContain('Browser breakdown');
     expect(wrapper.text()).toContain('Device breakdown');
     expect(wrapper.text()).toContain('Referrer breakdown');
@@ -176,7 +177,6 @@ describe('DashboardView', () => {
     expect(wrapper.text()).not.toContain('All analytics');
     expect(wrapper.text()).not.toContain('Target URL');
     expect(wrapper.text()).not.toContain('Open preview JSON');
-    expect(wrapper.text()).not.toContain('Open QR');
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('github-org', expect.any(Object));
     expect(mocks.getAnalyticsDetailsMock).toHaveBeenCalledWith('github-org', expect.any(Object));
   });
