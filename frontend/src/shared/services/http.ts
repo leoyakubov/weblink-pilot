@@ -1,6 +1,8 @@
 import type {
   AccountProfileResponse,
+  AdminMonitoringResponse,
   AdminOverviewResponse,
+  AdminUserResponse,
   AnalyticsDetailsResponse,
   AnalyticsSummaryResponse,
   ApiSettings,
@@ -416,20 +418,45 @@ export function getAdminOverviewRequest(settings: ApiSettings = loadSettings()) 
   );
 }
 
+export function getAdminMonitoringRequest(settings: ApiSettings = loadSettings()) {
+  return requestJson<AdminMonitoringResponse>(
+    '/admin/monitoring',
+    {
+      method: 'GET',
+    },
+    settings,
+  );
+}
+
+export function listAdminUsersRequest(settings: ApiSettings = loadSettings()) {
+  return requestJson<AdminUserResponse[]>(
+    '/admin/users',
+    {
+      method: 'GET',
+    },
+    settings,
+  );
+}
+
 export function listLinksRequest(
   limit: number = 10,
   settings: ApiSettings = loadSettings(),
   creator?: string | null,
   ownerRole?: string | null,
+  expiration?: string | null,
 ) {
   const params = new URLSearchParams({ limit: String(limit) });
   const creatorQuery = creator?.trim();
   const ownerRoleQuery = ownerRole?.trim();
+  const expirationQuery = expiration?.trim();
   if (creatorQuery) {
     params.set('creator', creatorQuery);
   }
   if (ownerRoleQuery) {
     params.set('ownerRole', ownerRoleQuery);
+  }
+  if (expirationQuery) {
+    params.set('expiration', expirationQuery);
   }
   return requestJson<LinkResponse[]>(`/urls?${params.toString()}`, { method: 'GET' }, settings);
 }
@@ -488,6 +515,8 @@ export const completeGithubLogin = completeGithubLoginRequest;
 export const getAccountProfile = getAccountProfileRequest;
 export const changePassword = changePasswordRequest;
 export const getAdminOverview = getAdminOverviewRequest;
+export const getAdminMonitoring = getAdminMonitoringRequest;
+export const listAdminUsers = listAdminUsersRequest;
 export const getLinkCreatorOptions = getLinkCreatorOptionsRequest;
 export const listLinks = listLinksRequest;
 export const getLink = getLinkRequest;

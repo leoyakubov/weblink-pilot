@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.weblinkpilot.auth.service.AdminOverviewService;
 import io.weblinkpilot.shared.contracts.AdminOverviewResponse;
+import io.weblinkpilot.shared.contracts.AdminUserResponse;
 import io.weblinkpilot.shared.contracts.LinkCreatorOptionResponse;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +33,12 @@ public class AdminController {
   @SecurityRequirement(name = "bearerAuth")
   public List<LinkCreatorOptionResponse> linkCreators() {
     return adminOverviewService.linkCreators();
+  }
+
+  @GetMapping("/users")
+  @Operation(summary = "Admin users")
+  @SecurityRequirement(name = "bearerAuth")
+  public List<AdminUserResponse> users() {
+    return adminOverviewService.users();
   }
 }

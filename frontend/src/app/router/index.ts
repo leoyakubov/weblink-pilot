@@ -90,6 +90,12 @@ const router = createRouter({
       component: () => import('@/features/monitoring/pages/MonitoringView.vue'),
       meta: { requiresAdmin: true },
     },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('@/features/admin/pages/UsersView.vue'),
+      meta: { requiresAdmin: true },
+    },
   ],
   scrollBehavior() {
     return { top: 0 };

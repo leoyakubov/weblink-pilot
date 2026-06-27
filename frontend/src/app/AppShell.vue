@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
             <img src="/icons/weblinkpilot-icon.png" alt="" />
           </span>
           <span class="brand-copy">
-            <strong>WebLinkPilot</strong>
+            <strong>WeblinkPilot</strong>
             <small>Personal short link workspace</small>
           </span>
         </RouterLink>
@@ -113,7 +113,8 @@ onBeforeUnmount(() => {
           class="nav-link"
           :class="{ active: route.path === item.to }"
         >
-          {{ item.label }}
+          <i :class="item.icon" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
         </RouterLink>
       </nav>
 
@@ -149,6 +150,15 @@ onBeforeUnmount(() => {
               <RouterLink to="/account" class="account-menu__item" @click="closeAccountMenu">
                 <i class="pi pi-user" aria-hidden="true"></i>
                 <span>Account</span>
+              </RouterLink>
+              <RouterLink
+                v-if="isAdmin"
+                to="/admin/users"
+                class="account-menu__item"
+                @click="closeAccountMenu"
+              >
+                <i class="pi pi-users" aria-hidden="true"></i>
+                <span>Users</span>
               </RouterLink>
               <RouterLink
                 v-if="isAdmin"
@@ -198,7 +208,7 @@ onBeforeUnmount(() => {
               <img src="/icons/weblinkpilot-icon.png" alt="" />
             </span>
             <span class="brand-copy">
-              <strong>WebLinkPilot</strong>
+              <strong>WeblinkPilot</strong>
               <small>Personal short link workspace</small>
             </span>
           </RouterLink>
@@ -292,13 +302,13 @@ onBeforeUnmount(() => {
             <img src="/icons/weblinkpilot-icon.png" alt="" />
           </span>
           <span class="brand-copy">
-            <strong>WebLinkPilot</strong>
+            <strong>WeblinkPilot</strong>
             <small>Personal short link workspace</small>
           </span>
         </RouterLink>
         <p>Clean short links, QR codes, and click history for everyday sharing.</p>
         <p class="page-footer__copyright">
-          © 2026 WebLinkPilot. Built for fast personal link sharing.
+          © 2026 WeblinkPilot. Built for fast personal link sharing.
         </p>
       </div>
 

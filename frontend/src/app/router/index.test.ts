@@ -41,6 +41,7 @@ describe('router', () => {
         'links',
         'account',
         'monitoring',
+        'admin-users',
       ]),
     );
   });
@@ -54,11 +55,27 @@ describe('router', () => {
     expect(mocks.bootstrapAuthMock).not.toHaveBeenCalled();
   });
 
+  it('redirects non-admin users away from admin users', async () => {
+    mocks.authState.currentUser = { username: 'user', role: 'USER' };
+
+    await router.push('/admin/users');
+
+    expect(router.currentRoute.value.name).toBe('home');
+  });
+
   it('allows admins to open monitoring', async () => {
     mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
 
     await router.push('/monitoring');
 
     expect(router.currentRoute.value.name).toBe('monitoring');
+  });
+
+  it('allows admins to open users', async () => {
+    mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
+
+    await router.push('/admin/users');
+
+    expect(router.currentRoute.value.name).toBe('admin-users');
   });
 });

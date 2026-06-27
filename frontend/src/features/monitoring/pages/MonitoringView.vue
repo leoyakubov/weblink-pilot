@@ -3,70 +3,98 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import { getAdminOverview } from '@/features/monitoring/repositories/monitoring.repository';
+import { getAdminMonitoring } from '@/features/monitoring/repositories/monitoring.repository';
 import { buildMonitoringLinks } from '@/features/monitoring/services/monitoring.service';
 import PageIntro from '@/shared/components/common/PageIntro.vue';
 import PanelCard from '@/shared/components/common/PanelCard.vue';
 import RefreshButton from '@/shared/components/common/RefreshButton.vue';
 import { loadSettings, saveSettings } from '@/shared/services/settings';
-import type { AdminOverviewResponse, ApiSettings } from '@/shared/types/api';
+import type {
+  AdminMonitoringResponse,
+  AdminRuntimeMetricResponse,
+  ApiSettings,
+} from '@/shared/types/api';
 
 const settings = reactive<ApiSettings>(loadSettings());
 const canEditBackendUrl = !import.meta.env.PROD;
 const router = useRouter();
-const monitoringLinks = buildMonitoringLinks(settings);
-const overview = ref<AdminOverviewResponse | null>(null);
+const monitoringLinks = computed(() => buildMonitoringLinks(settings));
+const frontendUrl = window.location.origin;
+const monitoring = ref<AdminMonitoringResponse | null>(null);
 const loading = ref(false);
 const errorMessage = ref('');
 const saved = ref(false);
-const backendLinks = computed(() => [
-  {
-    label: 'Health',
-    description: 'Check whether the backend is healthy and ready.',
-    href: monitoringLinks.backendHealthUrl,
-  },
-  {
-    label: 'Info',
-    description: 'View build and application metadata.',
-    href: monitoringLinks.backendInfoUrl,
-  },
-  {
-    label: 'Metrics',
-    description: 'Inspect raw application metrics.',
-    href: monitoringLinks.backendMetricsUrl,
-  },
-  {
-    label: 'Prometheus',
-    description: 'Open the metrics feed used by Prometheus.',
-    href: monitoringLinks.backendPrometheusUrl,
-  },
+const runtimeLabel = computed(() => {
+  const apiBaseUrl = settings.apiBaseUrl.trim();
+  if (apiBaseUrl.startsWith('/')) {
+    return 'same-origin proxy';
+  }
+  if (/localhost|127\.0\.0\.1/i.test(apiBaseUrl)) {
+    return 'local development';
+  }
+  return 'remote demo';
+});
+const authStateLabel = computed(() => (settings.authToken ? 'token saved' : 'no token saved'));
+const runtimeMetrics = computed(() => monitoring.value?.metrics ?? []);
+const healthChecks = computed(() => monitoring.value?.health ?? []);
+const configurationItems = computed(() => monitoring.value?.configuration ?? []);
+const groupedRuntimeMetrics = computed(() => {
+  return runtimeMetrics.value.reduce<Record<string, AdminRuntimeMetricResponse[]>>(
+    (groups, metric) => {
+      groups[metric.group] = [...(groups[metric.group] ?? []), metric];
+      return groups;
+    },
+    {},
+  );
+});
+const runtimeSummary = computed(() => [
+  ['Runtime mode', runtimeLabel.value],
+  ['API base URL', monitoringLinks.value.backendApiUrl],
+  ['Auth state', authStateLabel.value],
+  ['Local stack', monitoringLinks.value.showLocalStack ? 'available' : 'remote API only'],
 ]);
-const localStackLinks = computed(() =>
-  monitoringLinks.showLocalStack
+const endpointLinks = computed(() => [
+  {
+    label: 'Frontend',
+    description: 'Current Vue app origin.',
+    href: frontendUrl,
+  },
+  {
+    label: 'Backend API',
+    description: 'Base URL used by frontend requests.',
+    href: monitoringLinks.value.backendApiUrl,
+  },
+  {
+    label: 'Swagger UI',
+    description: 'Interactive OpenAPI documentation in the browser.',
+    href: monitoringLinks.value.backendSwaggerUiUrl,
+  },
+  ...(monitoringLinks.value.showLocalStack
     ? [
         {
           label: 'Prometheus',
           description: 'Query local metrics from the Docker stack.',
-          href: monitoringLinks.prometheusUrl,
+          href: monitoringLinks.value.prometheusUrl,
         },
         {
           label: 'Grafana',
           description: 'Open local dashboards for the demo stack.',
-          href: monitoringLinks.grafanaUrl,
+          href: monitoringLinks.value.grafanaUrl,
         },
       ]
-    : [],
-);
+    : []),
+]);
 
 async function refresh() {
   loading.value = true;
   errorMessage.value = '';
 
   try {
-    overview.value = await getAdminOverview(settings);
+    const monitoringResponse = await getAdminMonitoring(settings);
+    monitoring.value = monitoringResponse;
   } catch (error) {
-    overview.value = null;
-    errorMessage.value = error instanceof Error ? error.message : 'Could not load admin overview';
+    monitoring.value = null;
+    errorMessage.value = error instanceof Error ? error.message : 'Could not load monitoring data';
   } finally {
     loading.value = false;
   }
@@ -84,6 +112,25 @@ function resetBrowserSettings() {
   router.push({ name: 'settings-reset' });
 }
 
+function lowerFirstLetter(value: string) {
+  return value ? value.charAt(0).toLowerCase() + value.slice(1) : value;
+}
+
+function formatMetricDescription(value: string) {
+  return lowerFirstLetter(value).replace(/\.$/, '');
+}
+
+function healthStatusClass(status: string) {
+  const normalized = status.toUpperCase();
+  if (['UP', 'OK', 'INFO', 'CONFIGURED'].includes(normalized)) {
+    return 'success';
+  }
+  if (['DOWN', 'ERROR', 'FAILED'].includes(normalized)) {
+    return 'error';
+  }
+  return 'warning';
+}
+
 onMounted(() => {
   refresh();
 });
@@ -94,84 +141,85 @@ onMounted(() => {
     <PageIntro
       eyebrow="Monitoring"
       title="Admin monitoring"
-      description="Review demo totals, open operational tools, and adjust local API settings."
-    />
+      description="Operational status for the WeblinkPilot backend, runtime settings, service dependencies, and local tooling."
+    >
+      <template #actions>
+        <RefreshButton :loading="loading" @refresh="refresh" />
+      </template>
+    </PageIntro>
 
     <div class="page-grid two-col monitoring-card-row">
       <PanelCard
-        eyebrow="Overview"
-        title="System overview"
-        description="A quick snapshot of users, links, ownership, and click volume."
+        eyebrow="Health"
+        title="Health checks"
+        description="Live readiness checks for storage, cache, auth, email, analytics, and seeded demo data."
       >
-        <template #actions>
-          <RefreshButton :loading="loading" @refresh="refresh" />
-        </template>
-
-        <p class="help-text">
-          Admin-only view for checking the current demo data and overall usage.
-        </p>
-
         <p v-if="errorMessage" class="status error">
           <span class="status-dot"></span>
           {{ errorMessage }}
         </p>
 
-        <dl
-          v-if="overview"
-          class="detail-list detail-list--link-detail detail-list--analytics monitoring-overview-list"
-        >
-          <div>
-            <dt>Total users</dt>
-            <dd>{{ overview.totalUsers }}</dd>
+        <div class="list monitoring-health-list">
+          <div v-for="check in healthChecks" :key="check.name" class="list-item monitoring-link">
+            <div class="monitoring-health-row">
+              <div class="monitoring-health-copy">
+                <strong>{{ check.name }}</strong>
+              </div>
+              <span class="status" :class="healthStatusClass(check.status)">
+                <span class="status-dot"></span>
+                {{ check.status }}
+              </span>
+              <p>{{ check.detail }}</p>
+            </div>
           </div>
-          <div>
-            <dt>Admin users</dt>
-            <dd>{{ overview.adminUsers }}</dd>
-          </div>
-          <div>
-            <dt>Total links</dt>
-            <dd>{{ overview.totalLinks }}</dd>
-          </div>
-          <div>
-            <dt>Total clicks</dt>
-            <dd>{{ overview.totalClicks }}</dd>
-          </div>
-          <div>
-            <dt>Owned links</dt>
-            <dd>{{ overview.ownedLinks }}</dd>
-          </div>
-          <div>
-            <dt>anonymous links</dt>
-            <dd>{{ overview.anonymousLinks }}</dd>
-          </div>
-        </dl>
+        </div>
       </PanelCard>
 
       <PanelCard
-        eyebrow="Settings"
-        title="Settings"
-        description="Change the API URL used by this browser during local development."
+        eyebrow="Runtime metrics"
+        title="JVM and service metrics"
+        description="Current JVM, HTTP, cache, datasource, and WeblinkPilot service counters."
       >
-        <div class="section-row about-toolbar">
-          <div class="about-toolbar__copy">
-            <p class="eyebrow about-toolbar__eyebrow">Browser tools</p>
-            <p class="help-text">
-              Clear saved browser state if the app is pointing at stale local settings.
-            </p>
-          </div>
-
-          <div class="actions">
-            <Button
-              type="button"
-              label="Reset saved settings"
-              severity="warning"
-              icon="pi pi-refresh"
-              data-testid="reset-browser-settings"
-              @click="resetBrowserSettings"
-            />
-          </div>
+        <div v-if="runtimeMetrics.length" class="monitoring-metric-groups">
+          <section
+            v-for="(metrics, group) in groupedRuntimeMetrics"
+            :key="group"
+            class="monitoring-metric-group"
+          >
+            <h3>{{ group }}</h3>
+            <dl
+              class="detail-list detail-list--link-detail detail-list--analytics monitoring-table"
+            >
+              <div
+                v-for="metric in metrics"
+                :key="`${group}-${metric.name}`"
+                class="monitoring-data-row"
+              >
+                <dt>
+                  {{ metric.name }}
+                  <span class="footnote">({{ formatMetricDescription(metric.description) }})</span>
+                </dt>
+                <dd>
+                  <strong>{{ metric.value }}</strong>
+                </dd>
+              </div>
+            </dl>
+          </section>
         </div>
 
+        <div v-else-if="!loading" class="empty-state">
+          <p class="eyebrow">No metrics</p>
+          <h4 class="card-title">Runtime metrics were not returned by the backend.</h4>
+        </div>
+      </PanelCard>
+    </div>
+
+    <div class="page-grid two-col monitoring-card-row">
+      <PanelCard
+        eyebrow="Config"
+        title="Configuration"
+        description="Backend and browser settings that affect this admin session."
+      >
         <template v-if="canEditBackendUrl">
           <label class="form-field">
             <span class="field-label">API base URL</span>
@@ -183,13 +231,21 @@ onMounted(() => {
             />
           </label>
 
-          <div class="actions">
+          <div class="actions monitoring-config-actions">
             <Button
               type="button"
               label="Save settings"
               icon="pi pi-save"
               data-testid="save-settings"
               @click="saveBaseUrl"
+            />
+            <Button
+              type="button"
+              label="Reset settings"
+              severity="secondary"
+              icon="pi pi-undo"
+              data-testid="reset-browser-settings"
+              @click="resetBrowserSettings"
             />
           </div>
         </template>
@@ -206,48 +262,38 @@ onMounted(() => {
           Saved for this browser
         </p>
 
-        <dl class="detail-list detail-list--settings">
-          <div>
-            <dt>Current backend</dt>
-            <dd>{{ settings.apiBaseUrl }}</dd>
+        <dl class="detail-list detail-list--settings monitoring-runtime-list">
+          <div v-for="[label, value] in runtimeSummary" :key="label">
+            <dt>{{ label }}</dt>
+            <dd>{{ value }}</dd>
           </div>
-          <div>
-            <dt>Demo accounts</dt>
-            <dd>admin / admin123, user / user123</dd>
+          <div v-for="item in configurationItems" :key="item.name">
+            <dt>{{ item.name }}</dt>
+            <dd>
+              <strong>{{ item.value }}</strong>
+            </dd>
           </div>
         </dl>
-      </PanelCard>
-    </div>
 
-    <div class="page-grid two-col monitoring-card-row">
-      <PanelCard
-        eyebrow="Backend"
-        title="Operational links"
-        description="Open health, info, metrics, and Prometheus views for the current API."
-      >
-        <div class="list">
-          <div v-for="link in backendLinks" :key="link.label" class="list-item monitoring-link">
-            <div class="section-row">
-              <div>
-                <strong>{{ link.label }}</strong>
-                <p>{{ link.description }}</p>
-              </div>
-              <a :href="link.href" target="_blank" rel="noreferrer">
-                <Button label="Open" icon="pi pi-external-link" severity="secondary" />
-              </a>
-            </div>
-          </div>
+        <div v-if="!canEditBackendUrl" class="actions monitoring-config-actions">
+          <Button
+            type="button"
+            label="Reset settings"
+            severity="secondary"
+            icon="pi pi-undo"
+            data-testid="reset-browser-settings"
+            @click="resetBrowserSettings"
+          />
         </div>
       </PanelCard>
 
       <PanelCard
-        v-if="monitoringLinks.showLocalStack"
-        eyebrow="Local stack"
-        title="Prometheus and Grafana"
-        description="When the local Docker stack is running, these tools show metrics and dashboards."
+        eyebrow="Endpoints"
+        title="Service endpoints"
+        description="Quick access to the running app, API documentation, and local observability tools."
       >
-        <div class="list">
-          <div v-for="link in localStackLinks" :key="link.label" class="list-item monitoring-link">
+        <div class="list monitoring-endpoint-grid">
+          <div v-for="link in endpointLinks" :key="link.label" class="list-item monitoring-link">
             <div class="section-row">
               <div>
                 <strong>{{ link.label }}</strong>

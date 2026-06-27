@@ -1,9 +1,11 @@
 package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.config.RoleNames;
+import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.links.service.UrlStatisticsService;
 import io.weblinkpilot.shared.contracts.AdminOverviewResponse;
+import io.weblinkpilot.shared.contracts.AdminUserResponse;
 import io.weblinkpilot.shared.contracts.LinkCreatorOptionResponse;
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +45,22 @@ public class AdminOverviewService {
     return java.util.stream.Stream.concat(
             java.util.stream.Stream.of(new LinkCreatorOptionResponse("anonymous", "ANONYMOUS")),
             users.stream())
+        .toList();
+  }
+
+  public List<AdminUserResponse> users() {
+    return userAccountRepository.findAll().stream()
+        .sorted(Comparator.comparing(UserAccount::getUsername))
+        .map(
+            account ->
+                new AdminUserResponse(
+                    account.getUsername(),
+                    account.getEmail(),
+                    account.getRoleName(),
+                    account.isEnabled(),
+                    account.isEmailVerified(),
+                    account.getCreatedAt(),
+                    account.getLastLoginAt()))
         .toList();
   }
 }

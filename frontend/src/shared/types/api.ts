@@ -102,6 +102,42 @@ export interface AdminOverviewResponse {
   totalClicks: number;
 }
 
+export interface AdminUserResponse {
+  username: string;
+  email: string | null;
+  role: string;
+  enabled: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
+export interface AdminRuntimeMetricResponse {
+  group: string;
+  name: string;
+  value: string;
+  unit: string;
+  description: string;
+}
+
+export interface AdminHealthComponentResponse {
+  name: string;
+  status: string;
+  detail: string;
+}
+
+export interface AdminConfigurationItemResponse {
+  name: string;
+  value: string;
+  description: string;
+}
+
+export interface AdminMonitoringResponse {
+  metrics: AdminRuntimeMetricResponse[];
+  health: AdminHealthComponentResponse[];
+  configuration: AdminConfigurationItemResponse[];
+}
+
 export interface RedirectPreviewResponse {
   code: string;
   shortUrl: string;

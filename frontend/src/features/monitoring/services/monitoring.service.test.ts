@@ -10,10 +10,14 @@ describe('buildMonitoringLinks', () => {
     });
 
     expect(links).toEqual({
+      backendRootUrl: '/',
+      backendApiUrl: '/api/v1',
       backendHealthUrl: '/actuator/health',
       backendInfoUrl: '/actuator/info',
       backendMetricsUrl: '/actuator/metrics',
       backendPrometheusUrl: '/actuator/prometheus',
+      backendOpenApiUrl: '/v3/api-docs',
+      backendSwaggerUiUrl: '/swagger-ui/index.html',
       prometheusUrl: 'http://localhost:9090',
       grafanaUrl: 'http://localhost:3001',
       showLocalStack: true,
@@ -31,6 +35,9 @@ describe('buildMonitoringLinks', () => {
     expect(links.backendInfoUrl).toBe('http://localhost:8080/actuator/info');
     expect(links.backendMetricsUrl).toBe('http://localhost:8080/actuator/metrics');
     expect(links.backendPrometheusUrl).toBe('http://localhost:8080/actuator/prometheus');
+    expect(links.backendOpenApiUrl).toBe('http://localhost:8080/v3/api-docs');
+    expect(links.backendSwaggerUiUrl).toBe('http://localhost:8080/swagger-ui/index.html');
+    expect(links.backendApiUrl).toBe('http://localhost:8080/api/v1');
     expect(links.showLocalStack).toBe(true);
     expect(links.prometheusUrl).toBe('http://localhost:9090');
     expect(links.grafanaUrl).toBe('http://localhost:3001');
@@ -49,6 +56,11 @@ describe('buildMonitoringLinks', () => {
     expect(links.backendPrometheusUrl).toBe(
       'https://weblink-pilot.onrender.com/actuator/prometheus',
     );
+    expect(links.backendOpenApiUrl).toBe('https://weblink-pilot.onrender.com/v3/api-docs');
+    expect(links.backendSwaggerUiUrl).toBe(
+      'https://weblink-pilot.onrender.com/swagger-ui/index.html',
+    );
+    expect(links.backendApiUrl).toBe('https://weblink-pilot.onrender.com/api/v1');
     expect(links.showLocalStack).toBe(false);
     expect(links.prometheusUrl).toBe('');
     expect(links.grafanaUrl).toBe('');

@@ -6,10 +6,12 @@ import {
   confirmEmailVerification,
   confirmPasswordReset,
   getAccountProfile,
+  getAdminMonitoring,
   getAdminOverview,
   getAnalyticsSummary,
   getCurrentUser,
   getRedirectPreview,
+  listAdminUsers,
   listLinks,
   login,
   logoutSession,
@@ -211,7 +213,9 @@ describe('api helpers', () => {
 
   it('passes the creator filter when requesting recent links', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      expect(String(input)).toBe('http://localhost:8080/api/v1/urls?limit=8&creator=alice');
+      expect(String(input)).toBe(
+        'http://localhost:8080/api/v1/urls?limit=8&creator=alice&expiration=EXPIRED',
+      );
       return new Response(JSON.stringify([]), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -220,7 +224,7 @@ describe('api helpers', () => {
 
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(listLinks(8, settings, 'alice')).resolves.toEqual([]);
+    await expect(listLinks(8, settings, 'alice', null, 'EXPIRED')).resolves.toEqual([]);
   });
 
   it('serializes login payload and reads auth response', async () => {
@@ -628,5 +632,99 @@ describe('api helpers', () => {
       ownedLinks: 5,
       totalClicks: 99,
     });
+  });
+
+  it('loads admin monitoring from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/monitoring');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token');
+      return new Response(
+        JSON.stringify({
+          metrics: [
+            {
+              group: 'JVM memory',
+              name: 'Heap used',
+              value: '128.0 MB',
+              unit: 'bytes',
+              description: 'Current heap memory used.',
+            },
+          ],
+          health: [{ name: 'Database', status: 'UP', detail: 'PostgreSQL' }],
+          configuration: [
+            {
+              name: 'Active profiles',
+              value: 'local',
+              description: 'Spring profiles active for this runtime.',
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(getAdminMonitoring(settings)).resolves.toEqual({
+      metrics: [
+        {
+          group: 'JVM memory',
+          name: 'Heap used',
+          value: '128.0 MB',
+          unit: 'bytes',
+          description: 'Current heap memory used.',
+        },
+      ],
+      health: [{ name: 'Database', status: 'UP', detail: 'PostgreSQL' }],
+      configuration: [
+        {
+          name: 'Active profiles',
+          value: 'local',
+          description: 'Spring profiles active for this runtime.',
+        },
+      ],
+    });
+  });
+
+  it('loads admin users from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/users');
+      const headers = new Headers(init?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer jwt-token');
+      return new Response(
+        JSON.stringify([
+          {
+            username: 'admin',
+            email: 'admin@example.com',
+            role: 'ADMIN',
+            enabled: true,
+            emailVerified: true,
+            createdAt: '2026-06-20T10:00:00Z',
+            lastLoginAt: '2026-06-21T10:00:00Z',
+          },
+        ]),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(listAdminUsers(settings)).resolves.toEqual([
+      {
+        username: 'admin',
+        email: 'admin@example.com',
+        role: 'ADMIN',
+        enabled: true,
+        emailVerified: true,
+        createdAt: '2026-06-20T10:00:00Z',
+        lastLoginAt: '2026-06-21T10:00:00Z',
+      },
+    ]);
   });
 });
