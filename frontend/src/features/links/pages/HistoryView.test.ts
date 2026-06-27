@@ -78,7 +78,7 @@ describe('HistoryView', () => {
     expect(wrapper.text()).toContain('Owner group');
     expect(wrapper.text()).toContain('github-org');
     expect(wrapper.text()).toContain('3 clicks');
-    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '');
+    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '', '');
 
     const buttons = wrapper.findAll('button');
     await buttons.find((button) => button.text().includes('QR code'))?.trigger('click');
@@ -93,14 +93,73 @@ describe('HistoryView', () => {
     const wrapper = mount(HistoryView);
     await flushPromises();
 
-    await wrapper.get('select').setValue('users');
-    await wrapper.findAll('select')[1].setValue('user');
+    await wrapper.findAll('select')[1].setValue('users');
+    await wrapper.findAll('select')[2].setValue('user');
     await wrapper
       .findAll('button')
       .find((button) => button.text().includes('Apply filters'))
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '', '');
+  });
+
+  it('passes selected expiration filters to the links request', async () => {
+    mocks.listLinksMock.mockResolvedValue([]);
+
+    const wrapper = mount(HistoryView);
+    await flushPromises();
+
+    await wrapper.findAll('select')[0].setValue('expired');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Apply filters'))
+      ?.trigger('click');
+    await flushPromises();
+
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), '', '', 'EXPIRED');
+  });
+
+  it('limits creator options to the selected owner group', async () => {
+    mocks.listLinksMock.mockResolvedValue([]);
+
+    const wrapper = mount(HistoryView);
+    await flushPromises();
+
+    const selects = wrapper.findAll('select');
+    await selects[1].setValue('users');
+    await selects[2].setValue('user');
+    expect((selects[2].element as HTMLSelectElement).value).toBe('user');
+
+    await selects[1].setValue('admins');
+    await flushPromises();
+
+    const creatorSelect = wrapper.findAll('select')[2].element as HTMLSelectElement;
+    const optionValues = Array.from(creatorSelect.options).map((option) => option.value);
+    expect(creatorSelect.value).toBe('');
+    expect(optionValues).toContain('admin');
+    expect(optionValues).not.toContain('user');
+    expect(optionValues).not.toContain('anonymous');
+  });
+
+  it('keeps expiration filters available for non-admin users', async () => {
+    mocks.authState.currentUser = { username: 'user', role: 'USER' };
+    mocks.listLinksMock.mockResolvedValue([]);
+
+    const wrapper = mount(HistoryView);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('Expiration');
+    expect(wrapper.text()).not.toContain('Owner group');
+    expect(wrapper.text()).not.toContain('Creator');
+
+    await wrapper.findAll('select')[0].setValue('never');
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Apply filters'))
+      ?.trigger('click');
+    await flushPromises();
+
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), '', '', 'NEVER');
   });
 });

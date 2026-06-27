@@ -49,7 +49,7 @@ async function shareLink(item: LinkResponse) {
 
     if (shareApi.share) {
       await shareApi.share({
-        title: `WebLinkPilot link: ${item.code}`,
+        title: `WeblinkPilot link: ${item.code}`,
         text: `Open this short link: ${item.shortUrl}`,
         url: item.shortUrl,
       });

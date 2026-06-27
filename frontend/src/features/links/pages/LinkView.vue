@@ -171,7 +171,7 @@ function formatDate(value: string | null, fallback = 'Never') {
               :icon="isCopied('share-link') ? 'pi pi-check' : 'pi pi-share-alt'"
               severity="secondary"
               variant="outlined"
-              @click="shareUrl(link.shortUrl, 'share-link', `WebLinkPilot link: ${link.code}`)"
+              @click="shareUrl(link.shortUrl, 'share-link', `WeblinkPilot link: ${link.code}`)"
             />
             <Button
               v-if="canSeePreview"
@@ -224,7 +224,7 @@ function formatDate(value: string | null, fallback = 'Never') {
             :icon="isCopied('share-qr') ? 'pi pi-check' : 'pi pi-share-alt'"
             severity="secondary"
             variant="outlined"
-            @click="shareUrl(link.qrCodeUrl, 'share-qr', `WebLinkPilot QR: ${link.code}`)"
+            @click="shareUrl(link.qrCodeUrl, 'share-qr', `WeblinkPilot QR: ${link.code}`)"
           />
         </div>
       </PanelCard>

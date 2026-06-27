@@ -190,4 +190,50 @@ class UrlLookupServiceTest {
     assertThat(response).extracting(LinkResponse::code).containsExactly("one");
     verify(repository).findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class));
   }
+
+  @Test
+  void filtersRecentLinksByExpirationStatus() {
+    final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    final ShortLink active =
+        new ShortLink(
+            "active",
+            "https://github.com/weblinkpilot/weblink-pilot/active",
+            null,
+            null,
+            now.minusMinutes(1),
+            now.plusDays(1));
+    final ShortLink expired =
+        new ShortLink(
+            "expired",
+            "https://github.com/weblinkpilot/weblink-pilot/expired",
+            null,
+            null,
+            now.minusMinutes(2),
+            now.minusMinutes(1));
+    final ShortLink never =
+        new ShortLink(
+            "never",
+            "https://github.com/weblinkpilot/weblink-pilot/never",
+            null,
+            null,
+            now.minusMinutes(3),
+            null);
+
+    when(repository.findAllByDeletedAtIsNull(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(active, expired, never)));
+    when(publicUrlBuilder.buildShortUrl("active")).thenReturn("http://localhost:8080/r/active");
+    when(publicUrlBuilder.buildQrCodeUrl("active"))
+        .thenReturn("http://localhost:8080/api/v1/urls/active/qr");
+    when(publicUrlBuilder.buildShortUrl("never")).thenReturn("http://localhost:8080/r/never");
+    when(publicUrlBuilder.buildQrCodeUrl("never"))
+        .thenReturn("http://localhost:8080/api/v1/urls/never/qr");
+
+    final List<LinkResponse> response =
+        service.listRecentLinks("admin", true, null, null, "ACTIVE", 10);
+
+    assertThat(response).extracting(LinkResponse::code).containsExactly("active", "never");
+    final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+    verify(repository).findAllByDeletedAtIsNull(pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(50);
+  }
 }

@@ -32,7 +32,8 @@ public class AnalyticsQueryService {
 
   private static final Logger log = LoggerFactory.getLogger(AnalyticsQueryService.class);
   private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
-  private static final DateTimeFormatter HOUR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
+  private static final DateTimeFormatter HOUR_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00");
 
   private final ClickEventRepository repository;
 
@@ -141,8 +142,7 @@ public class AnalyticsQueryService {
     Map<String, Long> counts =
         events.stream()
             .collect(
-                Collectors.groupingBy(
-                    extractor::label, LinkedHashMap::new, Collectors.counting()));
+                Collectors.groupingBy(extractor::label, LinkedHashMap::new, Collectors.counting()));
 
     return counts.entrySet().stream()
         .sorted(
@@ -155,7 +155,10 @@ public class AnalyticsQueryService {
 
   private List<AnalyticsEventResponse> recentEvents(List<ClickEvent> events, int limit) {
     List<ClickEvent> newestFirst = new ArrayList<>(events);
-    newestFirst.sort(Comparator.comparing(ClickEvent::getClickedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+    newestFirst.sort(
+        Comparator.comparing(
+                ClickEvent::getClickedAt, Comparator.nullsLast(Comparator.naturalOrder()))
+            .reversed());
     return newestFirst.stream()
         .limit(limit)
         .map(

@@ -32,6 +32,7 @@ const settings = loadSettings();
 
 const filters = reactive({
   ownerScope: String(route.query.scope ?? 'all'),
+  expirationScope: String(route.query.expiration ?? 'all'),
   creator: String(route.query.creator ?? ''),
 });
 
@@ -69,6 +70,15 @@ function backendOwnerRoleFilter() {
   return roles[filters.ownerScope] ?? '';
 }
 
+function backendExpirationFilter() {
+  const expirations: Record<string, string> = {
+    active: 'ACTIVE',
+    expired: 'EXPIRED',
+    never: 'NEVER',
+  };
+  return expirations[filters.expirationScope] ?? '';
+}
+
 async function loadAnalyticsOverview() {
   loading.value = true;
   errorMessage.value = '';
@@ -76,7 +86,8 @@ async function loadAnalyticsOverview() {
   try {
     const creator = backendCreatorFilter();
     const ownerRole = backendOwnerRoleFilter();
-    const links = await listLinks(20, settings, creator, ownerRole);
+    const expiration = backendExpirationFilter();
+    const links = await listLinks(20, settings, creator, ownerRole, expiration);
     const analyticsRows = await Promise.all(
       links.map(async (link) => {
         try {
@@ -109,6 +120,7 @@ async function loadAnalyticsOverview() {
         ...(canFilterByCreator.value && filters.creator.trim()
           ? { creator: filters.creator.trim() }
           : {}),
+        ...(filters.expirationScope !== 'all' ? { expiration: filters.expirationScope } : {}),
       },
     });
   } catch (error) {
@@ -189,10 +201,11 @@ onMounted(async () => {
       </template>
 
       <LinkFilters
-        v-if="canFilterByCreator"
         v-model:owner-scope="filters.ownerScope"
+        v-model:expiration-scope="filters.expirationScope"
         v-model:creator="filters.creator"
         :creator-options="creatorOptions"
+        :show-admin-filters="canFilterByCreator"
         :loading="loading"
         @apply="loadAnalyticsOverview"
       />

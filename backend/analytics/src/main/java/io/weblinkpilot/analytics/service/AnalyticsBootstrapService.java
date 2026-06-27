@@ -39,7 +39,14 @@ public class AnalyticsBootstrapService {
             now,
             List.of(
                 event(
-                    5, 4, REDIRECT, "203.0.113.10", "US", "Chrome", "Desktop", "https://github.com"),
+                    5,
+                    4,
+                    REDIRECT,
+                    "203.0.113.10",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"),
                 event(
                     5,
                     2,
@@ -60,12 +67,26 @@ public class AnalyticsBootstrapService {
                     "Desktop",
                     "https://spring.io"),
                 event(
-                    3, 8, REDIRECT, "203.0.113.10", "US", "Chrome", "Desktop", "https://github.com"),
+                    3,
+                    8,
+                    REDIRECT,
+                    "203.0.113.10",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"),
                 event(3, 1, QR_SCAN, "203.0.113.14", "PL", "Safari", "Tablet", null),
                 event(
                     2, 6, REDIRECT, "203.0.113.15", "FR", "Edge", "Desktop", "https://google.com"),
                 event(
-                    2, 2, REDIRECT, "203.0.113.16", "US", "Chrome", "Desktop", "https://github.com"),
+                    2,
+                    2,
+                    REDIRECT,
+                    "203.0.113.16",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"),
                 event(1, 9, QR_SCAN, "203.0.113.17", "CA", "Chrome", "Mobile", null),
                 event(
                     1,
@@ -77,7 +98,14 @@ public class AnalyticsBootstrapService {
                     "Desktop",
                     "https://spring.io"),
                 event(
-                    0, 6, REDIRECT, "203.0.113.19", "US", "Chrome", "Desktop", "https://google.com"),
+                    0,
+                    6,
+                    REDIRECT,
+                    "203.0.113.19",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://google.com"),
                 event(0, 1, QR_SCAN, "203.0.113.20", "ES", "Safari", "Mobile", null))));
 
     counts.put(
@@ -87,7 +115,14 @@ public class AnalyticsBootstrapService {
             now,
             List.of(
                 event(
-                    6, 3, REDIRECT, "198.51.100.10", "US", "Chrome", "Desktop", "https://github.com"),
+                    6,
+                    3,
+                    REDIRECT,
+                    "198.51.100.10",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"),
                 event(5, 7, QR_SCAN, "198.51.100.11", "NL", "Safari", "Mobile", null),
                 event(
                     4,
@@ -99,10 +134,24 @@ public class AnalyticsBootstrapService {
                     "Desktop",
                     "https://vuejs.org"),
                 event(
-                    3, 2, REDIRECT, "198.51.100.13", "ES", "Chrome", "Mobile", "https://google.com"),
+                    3,
+                    2,
+                    REDIRECT,
+                    "198.51.100.13",
+                    "ES",
+                    "Chrome",
+                    "Mobile",
+                    "https://google.com"),
                 event(2, 5, QR_SCAN, "198.51.100.14", "US", "Chrome", "Mobile", null),
                 event(
-                    1, 8, REDIRECT, "198.51.100.10", "US", "Chrome", "Desktop", "https://github.com"),
+                    1,
+                    8,
+                    REDIRECT,
+                    "198.51.100.10",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"),
                 event(
                     0, 4, REDIRECT, "198.51.100.15", "DE", "Edge", "Desktop", "https://google.com"),
                 event(0, 1, QR_SCAN, "198.51.100.16", "FR", "Safari", "Tablet", null))));
@@ -113,7 +162,8 @@ public class AnalyticsBootstrapService {
             "postgres",
             now,
             List.of(
-                event(7, 3, REDIRECT, "192.0.2.10", "US", "Chrome", "Desktop", "https://github.com"),
+                event(
+                    7, 3, REDIRECT, "192.0.2.10", "US", "Chrome", "Desktop", "https://github.com"),
                 event(
                     6,
                     6,
@@ -138,7 +188,14 @@ public class AnalyticsBootstrapService {
                     "Tablet",
                     "https://postgresql.org"),
                 event(
-                    0, 2, REDIRECT, "192.0.2.10", "US", "Chrome", "Desktop", "https://github.com"))));
+                    0,
+                    2,
+                    REDIRECT,
+                    "192.0.2.10",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"))));
 
     counts.put(
         "redis",
@@ -147,29 +204,29 @@ public class AnalyticsBootstrapService {
             now,
             List.of(
                 event(
-                    4, 4, REDIRECT, "203.0.113.40", "US", "Chrome", "Desktop", "https://github.com"),
-                event(3, 6, QR_SCAN, "203.0.113.41", "ES", "Safari", "Mobile", null),
-                event(
-                    2,
-                    5,
+                    4,
+                    4,
                     REDIRECT,
-                    "203.0.113.42",
-                    "DE",
-                    "Firefox",
-                    "Desktop",
-                    "https://redis.io"),
-                event(
-                    1,
-                    8,
-                    REDIRECT,
-                    "203.0.113.43",
+                    "203.0.113.40",
                     "US",
                     "Chrome",
-                    "Mobile",
-                    "https://google.com"),
+                    "Desktop",
+                    "https://github.com"),
+                event(3, 6, QR_SCAN, "203.0.113.41", "ES", "Safari", "Mobile", null),
+                event(
+                    2, 5, REDIRECT, "203.0.113.42", "DE", "Firefox", "Desktop", "https://redis.io"),
+                event(
+                    1, 8, REDIRECT, "203.0.113.43", "US", "Chrome", "Mobile", "https://google.com"),
                 event(0, 6, QR_SCAN, "203.0.113.44", "NL", "Chrome", "Mobile", null),
                 event(
-                    0, 2, REDIRECT, "203.0.113.40", "US", "Chrome", "Desktop", "https://github.com"))));
+                    0,
+                    2,
+                    REDIRECT,
+                    "203.0.113.40",
+                    "US",
+                    "Chrome",
+                    "Desktop",
+                    "https://github.com"))));
     return counts;
   }
 

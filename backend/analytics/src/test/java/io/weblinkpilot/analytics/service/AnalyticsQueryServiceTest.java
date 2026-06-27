@@ -146,8 +146,11 @@ class AnalyticsQueryServiceTest {
     assertThat(details.timelineByHour()).hasSize(2);
     assertThat(details.browserBreakdown()).extracting("label").contains("CHROME", "SAFARI");
     assertThat(details.deviceBreakdown()).extracting("label").contains("DESKTOP", "MOBILE");
-    assertThat(details.referrerBreakdown()).extracting("label").contains("github.com", "DIRECT / NONE");
+    assertThat(details.referrerBreakdown())
+        .extracting("label")
+        .contains("github.com", "DIRECT / NONE");
     assertThat(details.recentEvents()).hasSize(2);
-    assertThat(details.recentEvents().getFirst().eventSource()).isEqualTo(LinkTrackingSource.QR_SCAN);
+    assertThat(details.recentEvents().getFirst().eventSource())
+        .isEqualTo(LinkTrackingSource.QR_SCAN);
   }
 }

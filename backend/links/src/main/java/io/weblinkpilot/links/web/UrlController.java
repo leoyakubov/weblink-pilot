@@ -118,14 +118,21 @@ public class UrlController {
       Authentication authentication,
       @RequestParam(name = "limit", defaultValue = "10") int limit,
       @RequestParam(name = "creator", required = false) String creator,
-      @RequestParam(name = "ownerRole", required = false) String ownerRole) {
+      @RequestParam(name = "ownerRole", required = false) String ownerRole,
+      @RequestParam(name = "expiration", required = false) String expiration) {
     browseCounter.increment();
     if (isAuthenticated(authentication)) {
       return ResponseEntity.ok(
           urlLookupService.listRecentLinks(
-              currentUsername(authentication), isAdmin(authentication), creator, ownerRole, limit));
+              currentUsername(authentication),
+              isAdmin(authentication),
+              creator,
+              ownerRole,
+              expiration,
+              limit));
     }
-    return ResponseEntity.ok(urlLookupService.listRecentLinks(limit));
+    return ResponseEntity.ok(
+        urlLookupService.listRecentLinks(null, false, null, null, expiration, limit));
   }
 
   @GetMapping("/{code}")

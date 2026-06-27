@@ -5,6 +5,8 @@ import io.weblinkpilot.links.exception.UrlExpiredException;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import io.weblinkpilot.shared.contracts.LinkResponse;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import org.slf4j.Logger;
@@ -84,33 +86,54 @@ public class UrlLookupService {
   @Transactional(readOnly = true)
   public List<LinkResponse> listRecentLinks(
       String ownerUsername, boolean admin, String creatorFilter, String ownerRole, int limit) {
+    return listRecentLinks(ownerUsername, admin, creatorFilter, ownerRole, null, limit);
+  }
+
+  @Transactional(readOnly = true)
+  public List<LinkResponse> listRecentLinks(
+      String ownerUsername,
+      boolean admin,
+      String creatorFilter,
+      String ownerRole,
+      String expirationFilter,
+      int limit) {
     int size = Math.max(1, Math.min(limit, 50));
+    String normalizedExpirationFilter = normalizeExpirationFilter(expirationFilter);
+    int querySize = normalizedExpirationFilter == null ? size : 50;
     Sort newestFirst =
         Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id"));
     List<ShortLink> content;
     String normalizedCreatorFilter = normalizeCreatorFilter(creatorFilter);
     String normalizedOwnerRole = normalizeRoleFilter(ownerRole);
     if (admin && normalizedCreatorFilter != null) {
-      content = loadFilteredByCreator(normalizedCreatorFilter, size, newestFirst);
+      content = loadFilteredByCreator(normalizedCreatorFilter, querySize, newestFirst);
     } else if (admin && normalizedOwnerRole != null) {
-      content = loadFilteredByRole(normalizedOwnerRole, size, newestFirst);
+      content = loadFilteredByRole(normalizedOwnerRole, querySize, newestFirst);
     } else if (admin) {
       content =
-          repository.findAllByDeletedAtIsNull(PageRequest.of(0, size, newestFirst)).getContent();
+          repository
+              .findAllByDeletedAtIsNull(PageRequest.of(0, querySize, newestFirst))
+              .getContent();
     } else if (ownerUsername == null || ownerUsername.isBlank()) {
       content =
           repository
-              .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(PageRequest.of(0, size, newestFirst))
+              .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(
+                  PageRequest.of(0, querySize, newestFirst))
               .getContent();
     } else {
       content =
           repository
               .findAllByOwnerUsernameAndDeletedAtIsNull(
                   ownerUsername.trim().toLowerCase(Locale.ROOT),
-                  PageRequest.of(0, size, newestFirst))
+                  PageRequest.of(0, querySize, newestFirst))
               .getContent();
     }
-    List<LinkResponse> links = content.stream().map(this::toResponse).toList();
+    List<LinkResponse> links =
+        content.stream()
+            .filter(link -> matchesExpirationFilter(link, normalizedExpirationFilter))
+            .limit(size)
+            .map(this::toResponse)
+            .toList();
     log.info("url.link.list.success limit={} returned={}", size, links.size());
     return links;
   }
@@ -215,5 +238,31 @@ public class UrlLookupService {
     return normalized.isEmpty() || "ALL".equalsIgnoreCase(normalized)
         ? null
         : normalized.toUpperCase(Locale.ROOT);
+  }
+
+  private String normalizeExpirationFilter(String expirationFilter) {
+    if (expirationFilter == null) {
+      return null;
+    }
+
+    String normalized = expirationFilter.trim();
+    return normalized.isEmpty() || "ALL".equalsIgnoreCase(normalized)
+        ? null
+        : normalized.toUpperCase(Locale.ROOT);
+  }
+
+  private boolean matchesExpirationFilter(ShortLink link, String expirationFilter) {
+    if (expirationFilter == null) {
+      return true;
+    }
+
+    OffsetDateTime expiresAt = link.getExpiresAt();
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    return switch (expirationFilter) {
+      case "ACTIVE" -> expiresAt == null || expiresAt.isAfter(now);
+      case "EXPIRED" -> expiresAt != null && !expiresAt.isAfter(now);
+      case "NEVER" -> expiresAt == null;
+      default -> true;
+    };
   }
 }

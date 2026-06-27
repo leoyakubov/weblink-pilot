@@ -105,7 +105,7 @@ describe('AnalyticsView', () => {
     expect(wrapper.text()).toContain('Redirects');
     expect(wrapper.text()).toContain('QR scans');
     expect(wrapper.text()).toContain('Analytics');
-    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '');
+    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '', '');
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('redis', expect.any(Object));
   });
 
@@ -113,14 +113,14 @@ describe('AnalyticsView', () => {
     const wrapper = mount(AnalyticsView);
     await flushPromises();
 
-    await wrapper.get('select').setValue('users');
-    await wrapper.findAll('select')[1].setValue('user');
+    await wrapper.findAll('select')[1].setValue('users');
+    await wrapper.findAll('select')[2].setValue('user');
     await wrapper
       .findAll('button')
       .find((button) => button.text().includes('Apply filters'))
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '', '');
   });
 });

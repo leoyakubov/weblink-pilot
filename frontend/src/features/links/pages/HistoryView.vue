@@ -16,6 +16,7 @@ import type { LinkCreatorOptionResponse, LinkResponse } from '@/shared/types/api
 const settings = loadSettings();
 const filters = reactive({
   ownerScope: 'all',
+  expirationScope: 'all',
   creator: '',
 });
 const links = ref<LinkResponse[]>([]);
@@ -54,6 +55,15 @@ function backendOwnerRoleFilter() {
   return roles[filters.ownerScope] ?? '';
 }
 
+function backendExpirationFilter() {
+  const expirations: Record<string, string> = {
+    active: 'ACTIVE',
+    expired: 'EXPIRED',
+    never: 'NEVER',
+  };
+  return expirations[filters.expirationScope] ?? '';
+}
+
 function scopeLabel() {
   if (!canFilterByCreator.value) {
     return 'links available to your session';
@@ -77,7 +87,13 @@ async function refresh() {
   errorMessage.value = '';
 
   try {
-    links.value = await listLinks(20, settings, backendCreatorFilter(), backendOwnerRoleFilter());
+    links.value = await listLinks(
+      20,
+      settings,
+      backendCreatorFilter(),
+      backendOwnerRoleFilter(),
+      backendExpirationFilter(),
+    );
   } catch (error) {
     links.value = [];
     errorMessage.value = error instanceof Error ? error.message : 'Could not load recent links';
@@ -129,10 +145,11 @@ function closeQrModal() {
       </template>
 
       <LinkFilters
-        v-if="canFilterByCreator"
         v-model:owner-scope="filters.ownerScope"
+        v-model:expiration-scope="filters.expirationScope"
         v-model:creator="filters.creator"
         :creator-options="creatorOptions"
+        :show-admin-filters="canFilterByCreator"
         :loading="loading"
         @apply="refresh"
       />

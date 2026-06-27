@@ -27,8 +27,9 @@ export function listLinks(
   settings: ApiSettings = loadSettings(),
   creator?: string | null,
   ownerRole?: string | null,
+  expiration?: string | null,
 ) {
-  return listLinksRequest(limit, settings, creator, ownerRole);
+  return listLinksRequest(limit, settings, creator, ownerRole, expiration);
 }
 
 export function getLink(code: string, settings: ApiSettings = loadSettings()) {

@@ -176,7 +176,7 @@ watch(
       <PanelCard
         eyebrow="How it works"
         title="Create once, share anywhere"
-        description="Paste a URL, choose an optional alias, and WebLinkPilot prepares a short redirect with QR access and tracking."
+        description="Paste a URL, choose an optional alias, and WeblinkPilot prepares a short redirect with QR access and tracking."
       >
         <div class="feature-grid feature-grid--compact">
           <FeatureCard
@@ -231,7 +231,7 @@ watch(
                 <HelpTooltip button-label="Toggle custom alias help">
                   Choose a short, memorable word for the end of your link, like
                   <strong>portfolio</strong> or <strong>launch-notes</strong>. Leave it empty when
-                  you want WebLinkPilot to create one automatically.
+                  you want WeblinkPilot to create one automatically.
                 </HelpTooltip>
               </div>
             </div>

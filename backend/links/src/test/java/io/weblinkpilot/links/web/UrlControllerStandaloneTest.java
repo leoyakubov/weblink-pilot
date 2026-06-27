@@ -115,7 +115,8 @@ class UrlControllerStandaloneTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks(10)).thenReturn(List.of(first, second));
+    when(urlLookupService.listRecentLinks(null, false, null, null, null, 10))
+        .thenReturn(List.of(first, second));
 
     mockMvc
         .perform(get("/api/v1/urls"))
@@ -146,7 +147,7 @@ class UrlControllerStandaloneTest {
             null,
             0,
             "alice");
-    when(urlLookupService.listRecentLinks("admin", true, "alice", null, 10))
+    when(urlLookupService.listRecentLinks("admin", true, "alice", null, null, 10))
         .thenReturn(List.of(first, second));
 
     mockMvc
