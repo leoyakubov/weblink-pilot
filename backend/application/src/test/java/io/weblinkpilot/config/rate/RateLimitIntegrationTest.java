@@ -24,7 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
     properties = {
       "app.rate-limit.enabled=true",
       "app.rate-limit.api-per-minute=1",
-      "app.rate-limit.redirect-per-minute=1"
+      "app.rate-limit.redirect-per-minute=1",
+      "app.rate-limit.auth-per-minute=1"
     })
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -114,6 +115,31 @@ class RateLimitIntegrationTest {
         .andExpect(status().isTooManyRequests())
         .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
         .andExpect(jsonPath("$.status").value(429))
+        .andExpect(header().exists("Retry-After"));
+  }
+
+  @Test
+  void limitsAuthEndpointsPerIp() throws Exception {
+    String payload =
+        """
+                {
+                  "username": "admin",
+                  "password": "wrong-password"
+                }
+                """;
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(payload))
+        .andExpect(status().isUnauthorized())
+        .andExpect(header().string("X-RateLimit-Limit", "1"))
+        .andExpect(header().string("X-RateLimit-Remaining", "0"));
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON).content(payload))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(jsonPath("$.code").value("RATE_LIMIT_EXCEEDED"))
         .andExpect(header().exists("Retry-After"));
   }
 }

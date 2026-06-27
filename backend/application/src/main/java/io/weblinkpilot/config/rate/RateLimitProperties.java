@@ -18,6 +18,9 @@ public class RateLimitProperties {
   @Min(1)
   private int redirectPerMinute;
 
+  @Min(1)
+  private int authPerMinute;
+
   public boolean isEnabled() {
     return enabled;
   }
@@ -40,5 +43,13 @@ public class RateLimitProperties {
 
   public void setRedirectPerMinute(int redirectPerMinute) {
     this.redirectPerMinute = redirectPerMinute;
+  }
+
+  public int getAuthPerMinute() {
+    return authPerMinute;
+  }
+
+  public void setAuthPerMinute(int authPerMinute) {
+    this.authPerMinute = authPerMinute;
   }
 }

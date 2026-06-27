@@ -14,12 +14,14 @@ public class RateLimitService {
   private final boolean enabled;
   private final int apiPerMinute;
   private final int redirectPerMinute;
+  private final int authPerMinute;
   private final ConcurrentMap<String, Bucket> buckets = new ConcurrentHashMap<>();
 
   public RateLimitService(RateLimitProperties properties) {
     this.enabled = properties.isEnabled();
     this.apiPerMinute = properties.getApiPerMinute();
     this.redirectPerMinute = properties.getRedirectPerMinute();
+    this.authPerMinute = properties.getAuthPerMinute();
   }
 
   public RateLimitDecision tryConsume(String path, String clientIp) {
@@ -54,7 +56,11 @@ public class RateLimitService {
   }
 
   private int limitFor(String policy) {
-    return "redirect".equals(policy) ? redirectPerMinute : apiPerMinute;
+    return switch (policy) {
+      case "auth" -> authPerMinute;
+      case "redirect" -> redirectPerMinute;
+      default -> apiPerMinute;
+    };
   }
 
   private String policyFor(String path) {
@@ -67,9 +73,24 @@ public class RateLimitService {
     if (path.startsWith("/q/")) {
       return "redirect";
     }
+    if (isPublicAuthPath(path)) {
+      return "auth";
+    }
     if (path.startsWith("/api/v1/")) {
       return "api";
     }
     return null;
+  }
+
+  private boolean isPublicAuthPath(String path) {
+    return path.equals("/api/v1/auth/register")
+        || path.equals("/api/v1/auth/login")
+        || path.equals("/api/v1/auth/refresh")
+        || path.equals("/api/v1/auth/logout")
+        || path.equals("/api/v1/auth/password-reset/request")
+        || path.equals("/api/v1/auth/password-reset/confirm")
+        || path.equals("/api/v1/auth/email-verification/request")
+        || path.equals("/api/v1/auth/email-verification/confirm")
+        || path.startsWith("/api/v1/auth/oauth2/github/");
   }
 }

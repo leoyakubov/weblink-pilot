@@ -39,9 +39,9 @@ The latest frontend redesign pass changed the app from page-by-page custom panel
 - Link feature cards are compact, colorful, and easier to scan.
 - Latest/history links use a shared `LinkList` with alternating card backgrounds, visible frames, full short URLs, aliases, full URLs, share actions, and aligned expiry/click metadata.
 - QR actions open an in-app modal consistently instead of opening a separate tab from history.
-- Dashboard, Link Details, Monitoring, Profile, Security, About, History, and Home now follow the same page-intro-then-panels structure.
-- Profile and Security are separated into dedicated routes.
-- Profile details use compact label/value rows and human-readable dates.
+- Dashboard, Link Details, Monitoring, Account, About, History, and Home now follow the same page-intro-then-panels structure.
+- Account settings merge profile details, password/security actions, and identity providers into one compact page.
+- Account details use compact label/value rows and human-readable dates.
 - Monitoring owns operational settings such as backend base URL and browser reset.
 - About is now read-only product and implementation context.
 - The top navigation, footer, refresh buttons, sign-out button, monitoring buttons, tooltips, and link-card actions were made more visible on the dark background.

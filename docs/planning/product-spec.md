@@ -9,7 +9,7 @@ The product is designed to look and feel like a real production service rather t
 ## 2. Target Users
 
 - developers and engineers who want a portfolio-grade service
-- small teams that need branded short links
+- individual users who want clean personal short links, saved history, and QR sharing
 - users sharing links through mobile and QR
 - hiring managers evaluating backend and product thinking
 
@@ -61,6 +61,7 @@ The product is designed to look and feel like a real production service rather t
 - [x] QR download in PNG/SVG
 - [x] rate limiting
 - [x] cache-backed redirects
+- [x] security headers, strict CORS validation, deployment-safe operational metrics, and dedicated auth throttling
 
 ### Future
 

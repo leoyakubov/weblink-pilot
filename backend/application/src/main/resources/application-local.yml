@@ -26,6 +26,8 @@ management:
       enabled: true
 
 app:
+  security:
+    public-observability: ${APP_SECURITY_PUBLIC_OBSERVABILITY:true}
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   auth:
     jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:local-dev-jwt-secret-change-me-please-0001}}

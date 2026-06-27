@@ -223,6 +223,14 @@ public class AdminMonitoringService {
             property("app.rate-limit.enabled", "true"),
             "Whether backend rate limiting is enabled."),
         new AdminConfigurationItemResponse(
+            "Auth rate limit",
+            property("app.rate-limit.auth-per-minute", "20") + "/min",
+            "Throttle for login, refresh, reset, verification, and OAuth completion."),
+        new AdminConfigurationItemResponse(
+            "Public observability",
+            property("app.security.public-observability", "false"),
+            "Whether metrics and Prometheus are public for local scraping."),
+        new AdminConfigurationItemResponse(
             "Mail delivery mode",
             authProperties.getMailDeliveryMode(),
             "How account emails are delivered."),

@@ -25,6 +25,8 @@ management:
       enabled: true
 
 app:
+  security:
+    public-observability: ${APP_SECURITY_PUBLIC_OBSERVABILITY:true}
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   cache:
     provider: redis

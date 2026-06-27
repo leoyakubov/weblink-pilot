@@ -1,6 +1,7 @@
 package io.weblinkpilot.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -37,5 +38,15 @@ class SecurityConfigurationTest {
         .containsExactly("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With");
     assertThat(corsConfiguration.getExposedHeaders()).containsExactly("Location");
     assertThat(corsConfiguration.getAllowCredentials()).isTrue();
+  }
+
+  @Test
+  void corsConfigurationRejectsWildcardOriginsWithCredentials() {
+    CorsProperties corsProperties = new CorsProperties();
+    corsProperties.setAllowedOriginPatterns(List.of("*"));
+
+    assertThatThrownBy(() -> configuration.corsConfigurationSource(corsProperties))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("wildcard");
   }
 }

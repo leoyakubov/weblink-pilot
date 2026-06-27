@@ -25,6 +25,8 @@ management:
         include: health,info,metrics,prometheus
 
 app:
+  security:
+    public-observability: ${APP_SECURITY_PUBLIC_OBSERVABILITY:false}
   auth:
     issuer: ${APP_AUTH_ISSUER:weblink-pilot}
     jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:}}
@@ -61,6 +63,7 @@ app:
     enabled: ${APP_RATE_LIMIT_ENABLED:true}
     api-per-minute: ${APP_RATE_LIMIT_API_PER_MINUTE:120}
     redirect-per-minute: ${APP_RATE_LIMIT_REDIRECT_PER_MINUTE:300}
+    auth-per-minute: ${APP_RATE_LIMIT_AUTH_PER_MINUTE:20}
   cors:
     allowed-origin-patterns:
       - ${APP_CORS_ALLOWED_ORIGIN_1:http://localhost:5173}

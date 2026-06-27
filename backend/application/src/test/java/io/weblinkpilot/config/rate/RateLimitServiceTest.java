@@ -38,6 +38,7 @@ class RateLimitServiceTest {
     properties.setEnabled(true);
     properties.setApiPerMinute(1);
     properties.setRedirectPerMinute(1);
+    properties.setAuthPerMinute(1);
     RateLimitService service = new RateLimitService(properties);
 
     RateLimitDecision first = service.tryConsume("/api/v1/urls/demo", "127.0.0.1");
@@ -57,6 +58,7 @@ class RateLimitServiceTest {
     properties.setEnabled(true);
     properties.setApiPerMinute(10);
     properties.setRedirectPerMinute(1);
+    properties.setAuthPerMinute(10);
     RateLimitService service = new RateLimitService(properties);
 
     RateLimitDecision first = service.tryConsume("/r/demo", "127.0.0.2");
@@ -73,6 +75,7 @@ class RateLimitServiceTest {
     properties.setEnabled(true);
     properties.setApiPerMinute(10);
     properties.setRedirectPerMinute(1);
+    properties.setAuthPerMinute(10);
     RateLimitService service = new RateLimitService(properties);
 
     RateLimitDecision first = service.tryConsume("/q/demo", "127.0.0.3");
@@ -81,5 +84,24 @@ class RateLimitServiceTest {
     assertThat(first.allowed()).isTrue();
     assertThat(first.limit()).isEqualTo(1L);
     assertThat(second.allowed()).isFalse();
+  }
+
+  @Test
+  void authPolicyUsesDedicatedAuthLimit() {
+    RateLimitProperties properties = new RateLimitProperties();
+    properties.setEnabled(true);
+    properties.setApiPerMinute(10);
+    properties.setRedirectPerMinute(10);
+    properties.setAuthPerMinute(1);
+    RateLimitService service = new RateLimitService(properties);
+
+    RateLimitDecision first = service.tryConsume("/api/v1/auth/login", "127.0.0.4");
+    RateLimitDecision second =
+        service.tryConsume("/api/v1/auth/password-reset/request", "127.0.0.4");
+
+    assertThat(first.allowed()).isTrue();
+    assertThat(first.limit()).isEqualTo(1L);
+    assertThat(second.allowed()).isFalse();
+    assertThat(second.limit()).isEqualTo(1L);
   }
 }
