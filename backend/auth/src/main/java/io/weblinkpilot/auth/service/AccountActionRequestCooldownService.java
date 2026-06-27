@@ -7,6 +7,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ public class AccountActionRequestCooldownService {
 
   private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
   private static final String REQUEST_COOLDOWN_KEY_PREFIX = "auth:action-request:";
+  private static final Logger log =
+      LoggerFactory.getLogger(AccountActionRequestCooldownService.class);
 
   private final StringRedisTemplate redisTemplate;
   private final Duration cooldown;
@@ -37,6 +41,10 @@ public class AccountActionRequestCooldownService {
               .opsForValue()
               .setIfAbsent(cooldownKey(action, normalizedEmail), "1", cooldown);
       if (Boolean.FALSE.equals(acquired)) {
+        log.warn(
+            "auth.action-request.cooldown.rejected action={} retryAfterSeconds={}",
+            normalizeAction(action),
+            cooldown.getSeconds());
         throw new AccountActionRequestCooldownException(action, cooldown.getSeconds());
       }
     } catch (AccountActionRequestCooldownException exception) {

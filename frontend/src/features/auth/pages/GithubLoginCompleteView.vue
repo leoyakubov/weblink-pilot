@@ -18,6 +18,20 @@ function readTicket() {
   );
 }
 
+function readErrorCode() {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
+  const hashParams = new URLSearchParams(hash);
+  return hashParams.get('error') ?? new URLSearchParams(window.location.search).get('error') ?? '';
+}
+
+function formatGithubError(errorCode: string) {
+  if (errorCode === 'github_not_configured') {
+    return 'GitHub sign-in is not configured for this environment. Use username and password, or add GitHub OAuth credentials.';
+  }
+
+  return 'GitHub sign-in could not be completed.';
+}
+
 function postLoginMessage(response: AuthResponse) {
   if (window.opener && !window.opener.closed) {
     window.opener.postMessage(
@@ -36,6 +50,11 @@ function postLoginMessage(response: AuthResponse) {
 
 async function finishLogin() {
   try {
+    const oauthError = readErrorCode();
+    if (oauthError) {
+      throw new Error(formatGithubError(oauthError));
+    }
+
     const ticket = readTicket();
     if (!ticket) {
       throw new Error('Missing GitHub login ticket.');
@@ -65,7 +84,7 @@ onMounted(() => {
         <div class="auth-heading">
           <p class="eyebrow">Account</p>
           <h3 class="panel-title">GitHub sign-in</h3>
-          <p class="help-text">Finishing the GitHub handoff and returning you to WebLinkPilot.</p>
+          <p class="help-text">Finishing the GitHub handoff and returning you to WeblinkPilot.</p>
         </div>
 
         <p v-if="busy && !errorMessage" class="footnote">Completing GitHub sign-in...</p>

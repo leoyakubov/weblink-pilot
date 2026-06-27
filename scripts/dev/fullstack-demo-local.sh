@@ -62,17 +62,10 @@ if ! command -v java >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ -f "$repo_root/backend/.env.local" ]]; then
+if [[ -f "$repo_root/backend/.env" ]]; then
   set -a
   # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.local"
-  set +a
-fi
-
-if [[ -f "$repo_root/backend/.env.smtp.local" ]]; then
-  set -a
-  # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.smtp.local"
+  source "$repo_root/backend/.env"
   set +a
 fi
 
@@ -106,7 +99,7 @@ export SPRING_MAIL_SMTP_STARTTLS="true"
 
 if [[ -z "${SPRING_MAIL_USERNAME:-}" || -z "${SPRING_MAIL_PASSWORD:-}" ]]; then
   echo "Brevo SMTP username/password are required for demo mode." >&2
-  echo "Copy backend/.env.smtp.local.example to backend/.env.smtp.local and fill in the credentials." >&2
+  echo "Copy backend/.env.example to backend/.env and fill in the SMTP credentials." >&2
   exit 1
 fi
 
@@ -162,7 +155,7 @@ echo
 echo "Open the app at http://localhost:8081"
 echo "Backend is available at http://localhost:8080"
 echo "Mail flow uses Brevo SMTP in the demo profile."
-echo "Put your Brevo SMTP username/password in backend/.env.smtp.local before starting."
+echo "Put your Brevo SMTP username/password in backend/.env before starting."
 echo
 echo "Backend PID: $(cat "$log_dir/backend.pid")"
 echo "Frontend PID: $(cat "$log_dir/frontend.pid")"

@@ -62,7 +62,7 @@ public class GitHubApiClient {
             .header("Accept", "application/vnd.github+json")
             .header("X-GitHub-Api-Version", "2022-11-28")
             .header("Authorization", "Bearer " + accessToken)
-            .header("User-Agent", "WebLinkPilot")
+            .header("User-Agent", "WeblinkPilot")
             .GET()
             .build();
     return sendJson(request, GitHubProfile.class);
@@ -75,7 +75,7 @@ public class GitHubApiClient {
             .header("Accept", "application/vnd.github+json")
             .header("X-GitHub-Api-Version", "2022-11-28")
             .header("Authorization", "Bearer " + accessToken)
-            .header("User-Agent", "WebLinkPilot")
+            .header("User-Agent", "WeblinkPilot")
             .GET()
             .build();
     GitHubEmail[] emails = sendJson(request, GitHubEmail[].class);

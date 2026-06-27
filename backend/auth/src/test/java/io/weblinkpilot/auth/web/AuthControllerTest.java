@@ -251,6 +251,7 @@ class AuthControllerTest {
 
   @Test
   void startGithubLoginRedirectsToGithubAndSetsStateCookie() throws Exception {
+    when(gitHubOAuthService.isConfigured()).thenReturn(true);
     when(gitHubOAuthService.createStateToken()).thenReturn("state-token");
     when(gitHubOAuthService.buildAuthorizationUrl(
             "http://localhost/api/v1/auth/oauth2/github/callback", "state-token"))
@@ -263,6 +264,20 @@ class AuthControllerTest {
             header()
                 .string("Location", "https://github.com/login/oauth/authorize?state=state-token"))
         .andExpect(cookie().value("weblinkpilot_github_oauth_state", "state-token"));
+  }
+
+  @Test
+  void startGithubLoginRedirectsToFrontendErrorWhenGithubIsNotConfigured() throws Exception {
+    when(gitHubOAuthService.isConfigured()).thenReturn(false);
+
+    mockMvc
+        .perform(get("/api/v1/auth/oauth2/github/start"))
+        .andExpect(status().isFound())
+        .andExpect(
+            header()
+                .string(
+                    "Location",
+                    "http://localhost:8081/auth/github/complete?error=github_not_configured"));
   }
 
   @Test

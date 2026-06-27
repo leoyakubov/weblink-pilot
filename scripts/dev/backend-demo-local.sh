@@ -6,17 +6,10 @@ backend_dir="$repo_root/backend"
 compose_file="$repo_root/infra/docker-compose.yml"
 mvnw="$backend_dir/mvnw"
 
-if [[ -f "$repo_root/backend/.env.local" ]]; then
+if [[ -f "$repo_root/backend/.env" ]]; then
   set -a
   # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.local"
-  set +a
-fi
-
-if [[ -f "$repo_root/backend/.env.smtp.local" ]]; then
-  set -a
-  # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.smtp.local"
+  source "$repo_root/backend/.env"
   set +a
 fi
 
@@ -56,7 +49,7 @@ export SPRING_MAIL_SMTP_STARTTLS="true"
 
 if [[ -z "${SPRING_MAIL_USERNAME:-}" || -z "${SPRING_MAIL_PASSWORD:-}" ]]; then
   echo "Brevo SMTP username/password are required for demo mode." >&2
-  echo "Copy backend/.env.smtp.local.example to backend/.env.smtp.local and fill in the credentials." >&2
+  echo "Copy backend/.env.example to backend/.env and fill in the SMTP credentials." >&2
   exit 1
 fi
 

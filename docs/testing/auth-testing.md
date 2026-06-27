@@ -48,16 +48,16 @@ The refresh token itself is stored in an `HttpOnly` cookie named:
 The app uses SMTP for password reset and email verification.
 The backend also enforces a short resend cooldown for these links so duplicate clicks do not send multiple emails; repeated requests return `429 Too Many Requests` with a `Retry-After` header.
 
-| Profile | Mail mode | SMTP host | SMTP auth | From address | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `local` | `SMTP` | `localhost:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in the local Docker stack. |
-| `dev` | `SMTP` | `mailpit:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker Compose. |
-| `local demo` | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for local demo rehearsals. |
-| `demo` (Render) | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for the live demo. |
+| Profile         | Mail mode | SMTP host                  | SMTP auth | From address               | Notes                                              |
+| --------------- | --------- | -------------------------- | --------- | -------------------------- | -------------------------------------------------- |
+| `local`         | `SMTP`    | `localhost:1025`           | `false`   | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in the local Docker stack.                 |
+| `dev`           | `SMTP`    | `mailpit:1025`             | `false`   | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker Compose.                         |
+| `local demo`    | `SMTP`    | `smtp-relay.brevo.com:587` | `true`    | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for local demo rehearsals. |
+| `demo` (Render) | `SMTP`    | `smtp-relay.brevo.com:587` | `true`    | `SPRING_MAIL_FROM_ADDRESS` | Real SMTP through Brevo for the live demo.         |
 
 ### Local
 
-Use Mailpit in the local Docker stack. The `backend-local` launcher now starts the `mailpit` service automatically before the backend comes up:
+Use Mailpit in the local Docker stack. The `backend-local` and `backend-dev` launchers force Mailpit settings after loading `backend/.env`, so Brevo credentials cannot leak into local/dev email tests:
 
 - host: `localhost`
 - port: `1025`
@@ -70,21 +70,17 @@ The Docker stack already wires these values through the backend container.
 
 The local and dev backend profiles also perform a startup mail connection check. If Mailpit is not running, the backend should fail fast or log `mail.server.health status=DOWN` before you try to send any email.
 
-If you want to run the backend on your machine instead of inside Docker, start only Mailpit and point the backend to it:
+If you want to run the backend on your machine instead of inside Docker, start only Mailpit and then use the local/dev launcher:
 
 ```powershell
 docker compose -f infra/docker-compose.yml up -d mailpit
-$env:SPRING_MAIL_HOST = "localhost"
-$env:SPRING_MAIL_PORT = "1025"
 ```
 
 ```bash
 docker compose -f infra/docker-compose.yml up -d mailpit
-export SPRING_MAIL_HOST=localhost
-export SPRING_MAIL_PORT=1025
 ```
 
-Then start the backend with either the `local` profile or the `dev` profile. Both can work against Mailpit on `localhost:1025` when you override the SMTP host and port.
+Then start the backend with either the `local` launcher or the `dev` launcher. Both use Mailpit on `localhost:1025`.
 
 ### Demo
 
@@ -99,7 +95,7 @@ If you want to rehearse the demo flow locally before deploying, use:
 - Windows PowerShell: `wsl bash ./scripts/dev/fullstack-demo-local.sh`
 - WSL/Linux/macOS: `bash ./scripts/dev/fullstack-demo-local.sh`
 
-Make sure `backend/.env.smtp.local` contains your Brevo SMTP credentials before you start the demo-local launcher.
+Make sure `backend/.env` contains your Brevo SMTP credentials before you start the demo-local launcher.
 
 ## 1. Sign In
 

@@ -295,7 +295,7 @@ async function submit() {
             />
             <Button
               type="button"
-              label="Continue with GitHub"
+              label="GitHub"
               icon="pi pi-github"
               severity="secondary"
               @click="openGithubLogin"
@@ -310,30 +310,18 @@ async function submit() {
             <span class="footnote">
               {{ props.mode === 'login' ? 'Need an account?' : 'Already have an account?' }}
             </span>
-            <RouterLink :to="switchPath">
-              <Button
-                :label="props.mode === 'login' ? 'Sign up' : 'Sign in'"
-                severity="secondary"
-                variant="outlined"
-                size="small"
-              />
+            <RouterLink :to="switchPath" class="auth-inline-link">
+              {{ props.mode === 'login' ? 'Sign up' : 'Sign in' }}
             </RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
             <span class="footnote">Forgot your password?</span>
-            <RouterLink to="/auth/forgot-password">
-              <Button label="Reset password" severity="secondary" variant="outlined" size="small" />
-            </RouterLink>
+            <RouterLink to="/auth/forgot-password" class="auth-inline-link">Reset</RouterLink>
           </div>
           <div v-if="props.mode === 'login'" class="auth-switch">
-            <span class="footnote">Need a verification email?</span>
-            <RouterLink to="/auth/verify-email/request">
-              <Button
-                label="Resend verification"
-                severity="secondary"
-                variant="outlined"
-                size="small"
-              />
+            <span class="footnote">Need verification?</span>
+            <RouterLink to="/auth/verify-email/request" class="auth-inline-link">
+              Resend
             </RouterLink>
           </div>
         </form>

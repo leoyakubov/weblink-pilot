@@ -48,8 +48,11 @@ describe('AccountView', () => {
     expect(wrapper.text()).toContain('alice@example.com');
     expect(wrapper.text()).toContain('Change password');
     expect(wrapper.text()).toContain('Connected sign-ins');
-    expect(wrapper.text()).toContain('GITHUB');
+    expect(wrapper.text()).toContain('GitHub');
     expect(wrapper.text()).toContain('alice-github');
+    expect(wrapper.text()).toContain(
+      'Password login becomes available after you set a password via reset password.',
+    );
   });
 
   it('submits a password change request from the account page', async () => {

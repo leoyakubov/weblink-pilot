@@ -6,19 +6,22 @@ backend_dir="$repo_root/backend"
 mvnw="$backend_dir/mvnw"
 compose_file="$repo_root/infra/docker-compose.yml"
 
-if [[ -f "$repo_root/backend/.env.local" ]]; then
+if [[ -f "$repo_root/backend/.env" ]]; then
   set -a
   # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.local"
+  source "$repo_root/backend/.env"
   set +a
 fi
 
-if [[ -f "$repo_root/backend/.env.smtp.local" ]]; then
-  set -a
-  # shellcheck disable=SC1090
-  source "$repo_root/backend/.env.smtp.local"
-  set +a
-fi
+# Local development must always use Mailpit, even if backend/.env contains Brevo
+# credentials for demo-local runs.
+export APP_AUTH_MAIL_DELIVERY_MODE="SMTP"
+export SPRING_MAIL_HOST="localhost"
+export SPRING_MAIL_PORT="1025"
+export SPRING_MAIL_USERNAME=""
+export SPRING_MAIL_PASSWORD=""
+export SPRING_MAIL_SMTP_AUTH="false"
+export SPRING_MAIL_SMTP_STARTTLS="false"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker is not available on PATH. Install Docker Desktop and make sure the daemon is running." >&2

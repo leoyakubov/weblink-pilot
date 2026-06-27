@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
@@ -13,6 +13,9 @@ const { account, busy, errorMessage, linkedAccounts, loadAccount } = useAccountP
 const saving = ref(false);
 const passwordErrorMessage = ref('');
 const successMessage = ref('');
+const hasGithubIdentity = computed(() =>
+  linkedAccounts.value.some((identity) => identity.provider.toUpperCase() === 'GITHUB'),
+);
 const form = reactive({
   currentPassword: '',
   newPassword: '',
@@ -30,6 +33,16 @@ function formatDateTime(value: string | null | undefined) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(value));
+}
+
+function formatProvider(provider: string) {
+  if (provider.toUpperCase() === 'GITHUB') {
+    return 'GitHub';
+  }
+
+  return provider
+    .toLowerCase()
+    .replace(/(^|[-_\s])\w/g, (match) => match.toUpperCase());
 }
 
 function resetPasswordMessages() {
@@ -154,6 +167,11 @@ onMounted(() => {
         description="Choose at least 6 characters with one letter and one number."
         class="account-form-card"
       >
+        <p v-if="hasGithubIdentity" class="status">
+          <span class="status-dot"></span>
+          Password login becomes available after you set a password via reset password.
+        </p>
+
         <form class="form-grid" @submit.prevent="submitPasswordChange">
           <label class="form-field">
             <span class="field-label">Current password</span>
@@ -219,16 +237,15 @@ onMounted(() => {
         title="Connected sign-ins"
         description="External sign-ins connected to this account."
       >
-        <div v-if="linkedAccounts.length" class="stack">
+        <dl v-if="linkedAccounts.length" class="detail-list detail-list--compact">
           <div
             v-for="identity in linkedAccounts"
             :key="`${identity.provider}-${identity.providerLogin}`"
-            class="linked-account"
           >
-            <strong>{{ identity.provider }}</strong>
-            <span class="footnote">{{ identity.providerLogin }}</span>
+            <dt>{{ formatProvider(identity.provider) }}</dt>
+            <dd>{{ identity.providerLogin }}</dd>
           </div>
-        </div>
+        </dl>
         <p v-else class="footnote">No social accounts linked yet.</p>
       </PanelCard>
     </div>

@@ -123,7 +123,7 @@ async function submit() {
 
           <div class="actions">
             <button class="button button-primary" type="submit" :disabled="busy">
-              {{ busy ? 'Working...' : 'Send verification email' }}
+              {{ busy ? 'Working...' : 'Send email' }}
             </button>
           </div>
 
@@ -138,12 +138,7 @@ async function submit() {
 
           <div class="auth-switch">
             <span class="footnote">Already verified?</span>
-            <RouterLink
-              class="button button-secondary button-small auth-link-button"
-              to="/auth/signin"
-            >
-              Sign in
-            </RouterLink>
+            <RouterLink class="auth-inline-link" to="/auth/signin"> Sign in </RouterLink>
           </div>
         </form>
       </div>

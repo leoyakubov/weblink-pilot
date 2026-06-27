@@ -151,7 +151,7 @@ describe('AuthView', () => {
     } as unknown as Window);
 
     const wrapper = mountAuth('login');
-    await wrapper.get('button[aria-label="Continue with GitHub"]').trigger('click');
+    await wrapper.get('button[aria-label="GitHub"]').trigger('click');
 
     expect(openMock).toHaveBeenCalledWith(
       expect.stringContaining('/auth/oauth2/github/start'),

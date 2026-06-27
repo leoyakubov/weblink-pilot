@@ -60,7 +60,7 @@ public class EmailVerificationService {
     }
 
     if (account.isEmailVerified()) {
-      log.debug(
+      log.info(
           "auth.email-verification.skipped reason=already_verified username={} email={}",
           account.getUsername(),
           account.getEmail());
@@ -93,7 +93,7 @@ public class EmailVerificationService {
             + VERIFY_PATH
             + "?token="
             + URLEncoder.encode(token, StandardCharsets.UTF_8);
-    log.debug(
+    log.info(
         "auth.email-verification.queued username={} email={}",
         account.getUsername(),
         account.getEmail());

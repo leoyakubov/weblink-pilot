@@ -1,6 +1,6 @@
 # Development Environment
 
-This document describes the local workflow for building, testing, and maintaining WebLinkPilot.
+This document describes the local workflow for building, testing, and maintaining WeblinkPilot.
 
 ## Baseline Tools
 
@@ -60,12 +60,12 @@ bash ./scripts/dev/fullstack-dev.sh
 
 The full stack includes:
 
-| Service | Purpose | Default Port |
-| --- | --- | --- |
-| Postgres | relational database | `5432` |
-| Redis | cache and refresh-session mirror | `6379` |
-| Backend | Spring Boot API | `8080` |
-| Frontend | Vue SPA | `8081` |
+| Service  | Purpose                          | Default Port |
+| -------- | -------------------------------- | ------------ |
+| Postgres | relational database              | `5432`       |
+| Redis    | cache and refresh-session mirror | `6379`       |
+| Backend  | Spring Boot API                  | `8080`       |
+| Frontend | Vue SPA                          | `8081`       |
 
 If you want monitoring locally, start it separately:
 
@@ -83,21 +83,21 @@ bash ./scripts/dev/monitoring-stack.sh
 
 The monitoring stack includes:
 
-| Service | Purpose | Default Port |
-| --- | --- | --- |
-| Prometheus | metrics scraping | `9090` |
-| Grafana | dashboards | `3001` |
+| Service    | Purpose          | Default Port |
+| ---------- | ---------------- | ------------ |
+| Prometheus | metrics scraping | `9090`       |
+| Grafana    | dashboards       | `3001`       |
 
 ### Mail testing locally
 
-The backend-local scripts load `backend/.env.local` first and then `backend/.env.smtp.local` if it exists. They also start the `mailpit` Docker service before launching the backend so the local mail catcher is available automatically.
+The backend-local and backend-dev scripts load `backend/.env`, then force Mailpit SMTP settings after the file is loaded. This keeps local/dev email safe even when `backend/.env` also contains Brevo credentials for demo-local runs.
 
-| Profile | Mail mode | SMTP host | SMTP auth | From address | Notes |
-| --- | --- | --- | --- | --- | --- |
-| `local` | `SMTP` | `localhost:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker or a manual local Mailpit instance. |
-| `dev` | `SMTP` | `mailpit:1025` | `false` | `SPRING_MAIL_FROM_ADDRESS` | Docker Compose Mailpit service. |
-| `local demo` | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Use Brevo credentials from `backend/.env.smtp.local`. |
-| `demo` (Render) | `SMTP` | `smtp-relay.brevo.com:587` | `true` | `SPRING_MAIL_FROM_ADDRESS` | Render demo with Brevo SMTP and a verified sender. |
+| Profile         | Mail mode | SMTP host                  | SMTP auth | From address               | Notes                                                 |
+| --------------- | --------- | -------------------------- | --------- | -------------------------- | ----------------------------------------------------- |
+| `local`         | `SMTP`    | `localhost:1025`           | `false`   | `SPRING_MAIL_FROM_ADDRESS` | Mailpit in Docker or a manual local Mailpit instance. |
+| `dev`           | `SMTP`    | `mailpit:1025`             | `false`   | `SPRING_MAIL_FROM_ADDRESS` | Docker Compose Mailpit service.                       |
+| `local demo`    | `SMTP`    | `smtp-relay.brevo.com:587` | `true`    | `SPRING_MAIL_FROM_ADDRESS` | Use Brevo credentials from `backend/.env`.            |
+| `demo` (Render) | `SMTP`    | `smtp-relay.brevo.com:587` | `true`    | `SPRING_MAIL_FROM_ADDRESS` | Render demo with Brevo SMTP and a verified sender.    |
 
 The backend performs a startup mail connection check in `local` and `dev`, so if Mailpit is not running you should see a clear startup failure or a `mail.server.health status=DOWN` log entry instead of discovering the problem only after the first email request.
 
@@ -105,7 +105,7 @@ If you ever need the old preview-mailbox behavior again for a one-off test, set 
 
 ### Demo-like local run
 
-If you want to test the app locally the same way demo behaves on Render, use the demo-local launcher with Brevo SMTP credentials instead of the Mailpit flow:
+If you want to test the app locally the same way demo behaves on Render, use the demo-local launcher with Brevo SMTP credentials instead of the Mailpit flow. Do not put Brevo host/port overrides into local/dev scripts; those profiles are intentionally pinned to Mailpit.
 
 Windows PowerShell:
 
@@ -136,49 +136,49 @@ In this mode:
 
 ## Environment Files
 
-- Keep backend-only values in `backend/.env.local`. Start from `backend/.env.local.example`.
-- Keep backend SMTP override values in `backend/.env.smtp.local`. Start from `backend/.env.smtp.local.example`.
-- Keep frontend-only values in `frontend/.env.local`. Start from `frontend/.env.local.example`.
-- Keep deployment helper values in `infra/.env.local`. Start from `infra/.env.local.example`.
-- Keep Sonar helper values in `infra/sonar/.env.local`. Start from `infra/sonar/.env.local.example`.
+- Keep backend-only values in `backend/.env`. Start from `backend/.env.example`.
+- Keep backend Brevo credentials in `backend/.env` for demo/demo-local only. Local/dev scripts force Mailpit after loading this file.
+- Keep frontend-only values in `frontend/.env`. Start from `frontend/.env.example`.
+- Keep deployment helper values in `infra/.env`. Start from `infra/.env.example`.
+- Keep Sonar helper values in `infra/sonar/.env`. Start from `infra/sonar/.env.example`.
 - Keep real secrets out of tracked files and git history.
 - Document new required variables in `docs/operations/deployment.md` or the relevant feature doc.
 - Use placeholder values only in tracked examples.
 
-There is no shared repo-root `.env.local` now; use the area-specific files above instead.
+There is no shared repo-root `.env` now; use the area-specific files above instead.
 
 ### Config Source Map
 
-| Runtime / workflow | Main config sources | Local override file | Dev / demo override source |
-| --- | --- | --- | --- |
-| Backend local | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-local.yml` | `backend/.env.local` | N/A |
-| Backend dev | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-dev.yml` | `backend/.env.local` when running backend scripts manually or through the Docker stack | Docker Compose environment and `infra/.env.local` |
-| Backend demo | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-demo.yml` | none | Render environment variables and GitHub deployment secrets/vars |
-| Frontend local | `frontend/.env.local`, `frontend/vite.config.js` | `frontend/.env.local` | N/A |
-| Frontend dev | `frontend/.env.local`, `frontend/vite.config.js` | `frontend/.env.local` | Docker Compose env or shell overrides |
-| Frontend demo | GitHub Actions / Netlify build env | none | `VITE_API_BASE_URL` passed during Netlify deploy |
-| Deploy smoke | `infra/.env.local` | `infra/.env.local` | GitHub Actions environment and repository secrets |
-| Sonar local | `infra/sonar/.env.local` | `infra/sonar/.env.local` | GitHub Actions disabled for Sonar at the moment |
+| Runtime / workflow | Main config sources                                                                                                      | Local override file                                                              | Dev / demo override source                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Backend local      | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-local.yml` | `backend/.env`                                                                   | N/A                                                             |
+| Backend dev        | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-dev.yml`   | `backend/.env` when running backend scripts manually or through the Docker stack | Docker Compose environment and `infra/.env`                     |
+| Backend demo       | `backend/application/src/main/resources/application.yml`, `backend/application/src/main/resources/application-demo.yml`  | none                                                                             | Render environment variables and GitHub deployment secrets/vars |
+| Frontend local     | `frontend/.env`, `frontend/vite.config.js`                                                                               | `frontend/.env`                                                                  | N/A                                                             |
+| Frontend dev       | `frontend/.env`, `frontend/vite.config.js`                                                                               | `frontend/.env`                                                                  | Docker Compose env or shell overrides                           |
+| Frontend demo      | GitHub Actions / Netlify build env                                                                                       | none                                                                             | `VITE_API_BASE_URL` passed during Netlify deploy                |
+| Deploy smoke       | `infra/.env`                                                                                                             | `infra/.env`                                                                     | GitHub Actions environment and repository secrets               |
+| Sonar local        | `infra/sonar/.env`                                                                                                       | `infra/sonar/.env`                                                               | GitHub Actions disabled for Sonar at the moment                 |
 
 ### Key Variables
 
-| Variable or family | Read by | Source of truth |
-| --- | --- | --- |
-| `JWT_SECRET` / `APP_AUTH_JWT_SECRET` | Backend JWT signing | `backend/application/src/main/resources/application.yml` reads `APP_AUTH_JWT_SECRET` first, then `JWT_SECRET`; `application-local.yml` and `application-dev.yml` add a non-blank local fallback; `backend/.env.local` is the convenient place to set either value |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | Backend GitHub OAuth | shell env, `backend/.env.local`, or Render secrets |
-| `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS` | Backend mail sender | `application-local.yml`, `application-dev.yml`, `application-demo.yml` plus env overrides |
-| `SPRING_MAIL_FROM_ADDRESS`, `SPRING_MAIL_FROM_NAME` | Backend mail sender identity | `application.yml` plus env overrides |
-| `APP_AUTH_*` | Backend auth settings | `application.yml` plus env overrides |
-| `BOOTSTRAP_*` | Backend demo seed accounts | `application.yml` and `application-demo.yml` plus demo env overrides |
-| `APP_PUBLIC_BASE_URL` | Backend generated links | `application.yml` and profile overrides |
-| `APP_SHORT_LINK_*` | Backend cleanup and expiry | `application.yml` and env overrides |
-| `APP_CACHE_PROVIDER` | Backend cache mode | `application.yml` and profile overrides |
-| `APP_RATE_LIMIT_*` | Backend rate limiting | `application.yml` and env overrides |
-| `APP_CORS_ALLOWED_ORIGIN_*` / `APP_CORS_ALLOWED_ORIGIN_PATTERNS` | Backend CORS allowlist | `application.yml` and `application-demo.yml` |
-| `VITE_API_BASE_URL` | Frontend API client | `frontend/.env.local` for local runs, Netlify build env for demo |
-| `VITE_DEV_SERVER_PORT` | Frontend Vite dev server | `frontend/.env.local` or the default from `frontend/vite.config.js` |
-| `RENDER_DEPLOY_HOOK_URL`, `RENDER_API_KEY`, `RENDER_BACKEND_SERVICE_ID`, `RENDER_HEALTH_URL`, `FRONTEND_SMOKE_URL`, `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` | Deploy / smoke helpers | `infra/.env.local` |
-| `SONAR_TOKEN`, `SONAR_HOST_URL` | Local Sonar helper | `infra/sonar/.env.local` |
+| Variable or family                                                                                                                                          | Read by                      | Source of truth                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET` / `APP_AUTH_JWT_SECRET`                                                                                                                        | Backend JWT signing          | `backend/application/src/main/resources/application.yml` reads `APP_AUTH_JWT_SECRET` first, then `JWT_SECRET`; `application-local.yml` and `application-dev.yml` add a non-blank local fallback; `backend/.env` is the convenient place to set either value |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                                                                                                                  | Backend GitHub OAuth         | shell env, `backend/.env`, or Render secrets                                                                                                                                                                                                                |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `SPRING_MAIL_SMTP_AUTH`, `SPRING_MAIL_SMTP_STARTTLS`                | Backend mail sender          | Local/dev launchers and Docker Compose force Mailpit; demo/demo-local use Brevo credentials from environment values                                                                                                                                         |
+| `SPRING_MAIL_FROM_ADDRESS`, `SPRING_MAIL_FROM_NAME`                                                                                                         | Backend mail sender identity | `application.yml` plus env overrides                                                                                                                                                                                                                        |
+| `APP_AUTH_*`                                                                                                                                                | Backend auth settings        | `application.yml` plus env overrides                                                                                                                                                                                                                        |
+| `BOOTSTRAP_*`                                                                                                                                               | Backend demo seed accounts   | `application.yml` and `application-demo.yml` plus demo env overrides                                                                                                                                                                                        |
+| `APP_PUBLIC_BASE_URL`                                                                                                                                       | Backend generated links      | `application.yml` and profile overrides                                                                                                                                                                                                                     |
+| `APP_SHORT_LINK_*`                                                                                                                                          | Backend cleanup and expiry   | `application.yml` and env overrides                                                                                                                                                                                                                         |
+| `APP_CACHE_PROVIDER`                                                                                                                                        | Backend cache mode           | `application.yml` and profile overrides                                                                                                                                                                                                                     |
+| `APP_RATE_LIMIT_*`                                                                                                                                          | Backend rate limiting        | `application.yml` and env overrides                                                                                                                                                                                                                         |
+| `APP_CORS_ALLOWED_ORIGIN_*` / `APP_CORS_ALLOWED_ORIGIN_PATTERNS`                                                                                            | Backend CORS allowlist       | `application.yml` and `application-demo.yml`                                                                                                                                                                                                                |
+| `VITE_API_BASE_URL`                                                                                                                                         | Frontend API client          | `frontend/.env` for local runs, Netlify build env for demo                                                                                                                                                                                                  |
+| `VITE_DEV_SERVER_PORT`                                                                                                                                      | Frontend Vite dev server     | `frontend/.env` or the default from `frontend/vite.config.js`                                                                                                                                                                                               |
+| `RENDER_DEPLOY_HOOK_URL`, `RENDER_API_KEY`, `RENDER_BACKEND_SERVICE_ID`, `RENDER_HEALTH_URL`, `FRONTEND_SMOKE_URL`, `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` | Deploy / smoke helpers       | `infra/.env`                                                                                                                                                                                                                                                |
+| `SONAR_TOKEN`, `SONAR_HOST_URL`                                                                                                                             | Local Sonar helper           | `infra/sonar/.env`                                                                                                                                                                                                                                          |
 
 Common environment values include:
 
@@ -198,13 +198,13 @@ Common environment values include:
 
 The backend resolves the JWT secret in this order:
 
-1. `APP_AUTH_JWT_SECRET` from the environment or `backend/.env.local`
-2. `JWT_SECRET` from the environment or `backend/.env.local`
+1. `APP_AUTH_JWT_SECRET` from the environment or `backend/.env`
+2. `JWT_SECRET` from the environment or `backend/.env`
 3. A built-in non-blank placeholder only in the `local` and `dev` profiles
 
 That means:
 
-- `local` and `dev` can start even if neither variable is set, although you should still put a real secret in `backend/.env.local` for normal use.
+- `local` and `dev` can start even if neither variable is set, although you should still put a real secret in `backend/.env` for normal use.
 - `demo` and production-style runs still require a real secret and will fail fast if it is missing or blank.
 
 ## Development Commands

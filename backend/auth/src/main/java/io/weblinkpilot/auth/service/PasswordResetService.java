@@ -87,7 +87,7 @@ public class PasswordResetService {
     String token = tokenService.issueToken(account, AccountActionTokenType.PASSWORD_RESET);
     String link =
         frontendBaseUrl + RESET_PATH + "?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
-    log.debug(
+    log.info(
         "auth.password-reset.queued username={} email={}",
         account.getUsername(),
         account.getEmail());

@@ -14,6 +14,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -22,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class GitHubOAuthService {
 
   private static final String AUTHORIZATION_BASE_URL = "https://github.com/login/oauth/authorize";
+  private static final Logger log = LoggerFactory.getLogger(GitHubOAuthService.class);
 
   private final GitHubApiClient gitHubApiClient;
   private final SocialIdentityRepository socialIdentityRepository;
@@ -71,7 +74,7 @@ public class GitHubOAuthService {
         .queryParam("redirect_uri", redirectUri)
         .queryParam("scope", scope)
         .queryParam("state", state)
-        .queryParam("allow_signup", "true")
+        .queryParam("allow_signup", "false")
         .build()
         .encode()
         .toUriString();
@@ -140,6 +143,11 @@ public class GitHubOAuthService {
       }
       identity.markLoggedIn(now);
       socialIdentityRepository.save(identity);
+      log.info(
+          "auth.github.login.reused username={} githubLogin={} githubUserId={}",
+          account.getUsername(),
+          identity.getProviderLogin(),
+          providerUserId);
       return account;
     }
 
@@ -157,8 +165,21 @@ public class GitHubOAuthService {
         account.markEmailVerified(now);
         userAccountRepository.save(account);
       }
+      log.info(
+          "auth.github.account.linked username={} githubLogin={} githubUserId={} email={}",
+          account.getUsername(),
+          profile.login(),
+          providerUserId,
+          email);
     } else {
-      account = userAccountService.createSocialUser(createUsername(profile.id()), email);
+      String username = createUsername(profile);
+      account = userAccountService.createSocialUser(username, email);
+      log.info(
+          "auth.github.account.created username={} githubLogin={} githubUserId={} emailVerifiedByGithub={}",
+          account.getUsername(),
+          profile.login(),
+          providerUserId,
+          email != null && !email.isBlank());
     }
 
     socialIdentityRepository.save(
@@ -167,8 +188,11 @@ public class GitHubOAuthService {
     return account;
   }
 
-  private String createUsername(long providerUserId) {
-    String base = "gh" + providerUserId;
+  private String createUsername(GitHubApiClient.GitHubProfile profile) {
+    String base = normalizeGithubLogin(profile.login());
+    if (base.isBlank()) {
+      base = "gh" + profile.id();
+    }
     String username = base;
     int suffix = 1;
     while (userAccountRepository.existsByUsername(username)) {
@@ -176,5 +200,17 @@ public class GitHubOAuthService {
       suffix++;
     }
     return username;
+  }
+
+  private String normalizeGithubLogin(String login) {
+    if (login == null) {
+      return "";
+    }
+    return login
+        .trim()
+        .toLowerCase(Locale.ROOT)
+        .replaceAll("[^a-z0-9-]", "-")
+        .replaceAll("-+", "-")
+        .replaceAll("^-|-$", "");
   }
 }

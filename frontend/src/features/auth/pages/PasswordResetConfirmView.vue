@@ -104,7 +104,7 @@ async function submit() {
 
           <div class="actions">
             <button class="button button-primary" type="submit" :disabled="busy">
-              {{ busy ? 'Working...' : 'Update password' }}
+              {{ busy ? 'Working...' : 'Update' }}
             </button>
           </div>
 
@@ -119,10 +119,7 @@ async function submit() {
 
           <div class="auth-switch">
             <span class="footnote">Need a fresh reset link?</span>
-            <RouterLink
-              class="button button-secondary button-small auth-link-button"
-              to="/auth/forgot-password"
-            >
+            <RouterLink class="auth-inline-link" to="/auth/forgot-password">
               Request again
             </RouterLink>
           </div>

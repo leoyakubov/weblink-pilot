@@ -21,4 +21,11 @@ public class AuthFrontendRedirectService {
             + "/auth/github/complete#ticket="
             + URLEncoder.encode(ticket, StandardCharsets.UTF_8));
   }
+
+  public URI buildGithubErrorUri(String errorCode) {
+    return URI.create(
+        frontendBaseUrl
+            + "/auth/github/complete?error="
+            + URLEncoder.encode(errorCode, StandardCharsets.UTF_8));
+  }
 }

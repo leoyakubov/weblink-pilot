@@ -27,11 +27,11 @@ public class MailAccountNotificationService implements AccountNotificationServic
   public void sendPasswordResetLink(String email, String link) {
     send(
         email,
-        "Reset your WebLinkPilot password",
+        "Reset your WeblinkPilot password",
         """
             Hi,
 
-            We received a request to reset the password for your WebLinkPilot account.
+            We received a request to reset the password for your WeblinkPilot account.
 
             Reset your password here:
             %s
@@ -39,7 +39,7 @@ public class MailAccountNotificationService implements AccountNotificationServic
             If you did not ask for this, you can safely ignore this message.
 
             Thanks,
-            The WebLinkPilot team
+            The WeblinkPilot team
             """
             .formatted(link));
   }
@@ -48,11 +48,11 @@ public class MailAccountNotificationService implements AccountNotificationServic
   public void sendEmailVerificationLink(String email, String link) {
     send(
         email,
-        "Verify your WebLinkPilot email",
+        "Verify your WeblinkPilot email",
         """
             Hi,
 
-            Welcome to WebLinkPilot. To finish creating your account, please verify your email address.
+            Welcome to WeblinkPilot. To finish creating your account, please verify your email address.
 
             Verify your email here:
             %s
@@ -60,7 +60,7 @@ public class MailAccountNotificationService implements AccountNotificationServic
             If you did not create this account, you can ignore this email.
 
             Thanks,
-            The WebLinkPilot team
+            The WeblinkPilot team
             """
             .formatted(link));
   }

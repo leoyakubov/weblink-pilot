@@ -189,6 +189,12 @@ public class AuthController {
   @GetMapping("/oauth2/github/start")
   @Operation(summary = "Start GitHub login")
   public ResponseEntity<Void> startGithubLogin(HttpServletRequest request) {
+    if (!gitHubOAuthService.isConfigured()) {
+      return ResponseEntity.status(HttpStatus.FOUND)
+          .location(authFrontendRedirectService.buildGithubErrorUri("github_not_configured"))
+          .build();
+    }
+
     String state = gitHubOAuthService.createStateToken();
     String redirectUri = buildGithubCallbackUri(request);
     String authorizationUrl = gitHubOAuthService.buildAuthorizationUrl(redirectUri, state);

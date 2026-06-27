@@ -53,6 +53,13 @@ class GitHubOAuthServiceTest {
   }
 
   @Test
+  void buildAuthorizationUrlDisablesGithubAccountSignup() {
+    String authorizationUrl = service.buildAuthorizationUrl("http://localhost/callback", "state-1");
+
+    assertThat(authorizationUrl).contains("allow_signup=false");
+  }
+
+  @Test
   void completeLoginUsesVerifiedEmailAndIssuesTicket() {
     when(gitHubApiClient.exchangeCodeForAccessToken(
             "github-client-id", "github-client-secret", "code-1", "http://localhost/callback"))
@@ -65,14 +72,15 @@ class GitHubOAuthServiceTest {
                 new GitHubApiClient.GitHubEmail("alice@example.com", true, true),
                 new GitHubApiClient.GitHubEmail("public@example.com", false, false)));
 
-    UserAccount account = new UserAccount("gh1234", "hash", new Role("USER"), true, now());
-    when(userAccountService.createSocialUser("gh1234", "alice@example.com")).thenReturn(account);
+    UserAccount account = new UserAccount("alice-github", "hash", new Role("USER"), true, now());
+    when(userAccountService.createSocialUser("alice-github", "alice@example.com"))
+        .thenReturn(account);
     when(oauthLoginService.issueLoginTicket(account)).thenReturn("login-ticket");
 
     String ticket = service.completeLogin("code-1", "http://localhost/callback");
 
     assertThat(ticket).isEqualTo("login-ticket");
-    verify(userAccountService).createSocialUser("gh1234", "alice@example.com");
+    verify(userAccountService).createSocialUser("alice-github", "alice@example.com");
     ArgumentCaptor<SocialIdentity> identityCaptor = ArgumentCaptor.forClass(SocialIdentity.class);
     verify(socialIdentityRepository).save(identityCaptor.capture());
     assertThat(identityCaptor.getValue().getProvider()).isEqualTo(SocialLoginProvider.GITHUB);
@@ -90,14 +98,14 @@ class GitHubOAuthServiceTest {
         .thenReturn(new GitHubApiClient.GitHubProfile(5678L, "bob-github", "public@example.com"));
     when(gitHubApiClient.fetchEmails("access-token")).thenReturn(List.of());
 
-    UserAccount account = new UserAccount("gh5678", "hash", new Role("USER"), true, now());
-    when(userAccountService.createSocialUser("gh5678", null)).thenReturn(account);
+    UserAccount account = new UserAccount("bob-github", "hash", new Role("USER"), true, now());
+    when(userAccountService.createSocialUser("bob-github", null)).thenReturn(account);
     when(oauthLoginService.issueLoginTicket(account)).thenReturn("login-ticket");
 
     String ticket = service.completeLogin("code-2", "http://localhost/callback");
 
     assertThat(ticket).isEqualTo("login-ticket");
-    verify(userAccountService).createSocialUser("gh5678", null);
+    verify(userAccountService).createSocialUser("bob-github", null);
     ArgumentCaptor<SocialIdentity> identityCaptor = ArgumentCaptor.forClass(SocialIdentity.class);
     verify(socialIdentityRepository).save(identityCaptor.capture());
     assertThat(identityCaptor.getValue().getProviderLogin()).isEqualTo("bob-github");
@@ -132,6 +140,31 @@ class GitHubOAuthServiceTest {
     verify(socialIdentityRepository).save(identity);
     assertThat(account.getEmail()).isEqualTo("carol@example.com");
     assertThat(account.isEmailVerified()).isTrue();
+  }
+
+  @Test
+  void completeLoginAddsSuffixWhenGithubLoginIsAlreadyTaken() {
+    when(gitHubApiClient.exchangeCodeForAccessToken(
+            "github-client-id", "github-client-secret", "code-4", "http://localhost/callback"))
+        .thenReturn("access-token");
+    when(gitHubApiClient.fetchProfile("access-token"))
+        .thenReturn(new GitHubApiClient.GitHubProfile(3456L, "taken-user", null));
+    when(gitHubApiClient.fetchEmails("access-token")).thenReturn(List.of());
+    when(userAccountRepository.existsByUsername("taken-user")).thenReturn(true);
+    when(userAccountRepository.existsByUsername("taken-user1")).thenReturn(false);
+
+    UserAccount account = new UserAccount("taken-user1", "hash", new Role("USER"), true, now());
+    when(userAccountService.createSocialUser("taken-user1", null)).thenReturn(account);
+    when(oauthLoginService.issueLoginTicket(account)).thenReturn("login-ticket");
+
+    String ticket = service.completeLogin("code-4", "http://localhost/callback");
+
+    assertThat(ticket).isEqualTo("login-ticket");
+    verify(userAccountService).createSocialUser("taken-user1", null);
+    ArgumentCaptor<SocialIdentity> identityCaptor = ArgumentCaptor.forClass(SocialIdentity.class);
+    verify(socialIdentityRepository).save(identityCaptor.capture());
+    assertThat(identityCaptor.getValue().getProviderLogin()).isEqualTo("taken-user");
+    assertThat(identityCaptor.getValue().getUser()).isSameAs(account);
   }
 
   private static OffsetDateTime now() {
