@@ -41,6 +41,10 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
   @Query("update ShortLink s set s.clickCount = s.clickCount + 1 where s.code = :code")
   int incrementClickCountByCode(@Param("code") String code);
 
+  @Modifying
+  @Query("update ShortLink s set s.clickCount = :clickCount where s.code = :code")
+  int updateClickCountByCode(@Param("code") String code, @Param("clickCount") long clickCount);
+
   @Query(
       "select s from ShortLink s where s.expiresAt is not null and s.expiresAt <= :cutoff and s.deletedAt is null")
   List<ShortLink> findExpiredLinksBefore(@Param("cutoff") java.time.OffsetDateTime cutoff);

@@ -1,9 +1,11 @@
 package io.weblinkpilot.bootstrap;
 
+import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.service.UserAccountService;
-import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
 import io.weblinkpilot.links.service.UrlBootstrapService;
+import io.weblinkpilot.links.service.UrlStatisticsService;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -22,14 +24,17 @@ public class BootstrapLinkRunner implements ApplicationRunner {
   private final UserAccountService userAccountService;
   private final UrlBootstrapService urlBootstrapService;
   private final AnalyticsBootstrapService analyticsBootstrapService;
+  private final UrlStatisticsService urlStatisticsService;
 
   public BootstrapLinkRunner(
       UserAccountService userAccountService,
       UrlBootstrapService urlBootstrapService,
-      AnalyticsBootstrapService analyticsBootstrapService) {
+      AnalyticsBootstrapService analyticsBootstrapService,
+      UrlStatisticsService urlStatisticsService) {
     this.userAccountService = userAccountService;
     this.urlBootstrapService = urlBootstrapService;
     this.analyticsBootstrapService = analyticsBootstrapService;
+    this.urlStatisticsService = urlStatisticsService;
   }
 
   @Override
@@ -37,7 +42,8 @@ public class BootstrapLinkRunner implements ApplicationRunner {
     UserAccount admin = userAccountService.ensureBootstrapAdmin();
     UserAccount user = userAccountService.ensureBootstrapUser();
     urlBootstrapService.seedDefaultLinks(user == null ? null : user.getUsername());
-    analyticsBootstrapService.seedDefaultAnalytics();
+    Map<String, Long> seededAnalyticsCounts = analyticsBootstrapService.seedDefaultAnalytics();
+    urlStatisticsService.syncClickCounts(seededAnalyticsCounts);
 
     log.info(
         "bootstrap.links.seeded user={} admin={}",

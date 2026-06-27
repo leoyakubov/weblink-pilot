@@ -6,6 +6,7 @@ import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.shared.contracts.LinkTrackingSource;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -33,8 +34,13 @@ class AnalyticsBootstrapServiceTest {
 
   @Test
   void seedsAnalyticsForDefaultLinks() {
-    service.seedDefaultAnalytics();
+    Map<String, Long> counts = service.seedDefaultAnalytics();
 
+    assertThat(counts)
+        .containsEntry("spring-boot", 12L)
+        .containsEntry("vue-js", 8L)
+        .containsEntry("postgres", 8L)
+        .containsEntry("redis", 6L);
     assertThat(repository.countByShortCode("spring-boot")).isEqualTo(12L);
     assertThat(repository.countByShortCode("vue-js")).isEqualTo(8L);
     assertThat(repository.countByShortCode("postgres")).isEqualTo(8L);
@@ -53,8 +59,9 @@ class AnalyticsBootstrapServiceTest {
   @Test
   void doesNotDuplicateExistingSeededAnalytics() {
     service.seedDefaultAnalytics();
-    service.seedDefaultAnalytics();
+    Map<String, Long> counts = service.seedDefaultAnalytics();
 
+    assertThat(counts).containsEntry("spring-boot", 12L).containsEntry("redis", 6L);
     assertThat(repository.countByShortCode("spring-boot")).isEqualTo(12L);
     assertThat(repository.countByShortCode("redis")).isEqualTo(6L);
   }

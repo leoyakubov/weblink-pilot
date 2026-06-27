@@ -8,6 +8,8 @@ import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.service.UserAccountService;
 import io.weblinkpilot.links.service.UrlBootstrapService;
+import io.weblinkpilot.links.service.UrlStatisticsService;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +25,18 @@ class BootstrapLinkRunnerTest {
 
   @Mock private AnalyticsBootstrapService analyticsBootstrapService;
 
+  @Mock private UrlStatisticsService urlStatisticsService;
+
   private BootstrapLinkRunner runner;
 
   @BeforeEach
   void setUp() {
     runner =
-        new BootstrapLinkRunner(userAccountService, urlBootstrapService, analyticsBootstrapService);
+        new BootstrapLinkRunner(
+            userAccountService,
+            urlBootstrapService,
+            analyticsBootstrapService,
+            urlStatisticsService);
   }
 
   @Test
@@ -39,6 +47,8 @@ class BootstrapLinkRunnerTest {
         new UserAccount("user", "hash", "user@example.com", new Role("USER"), true, null, null);
     when(userAccountService.ensureBootstrapAdmin()).thenReturn(admin);
     when(userAccountService.ensureBootstrapUser()).thenReturn(user);
+    Map<String, Long> seededCounts = Map.of("redis", 6L);
+    when(analyticsBootstrapService.seedDefaultAnalytics()).thenReturn(seededCounts);
 
     runner.run(null);
 
@@ -46,5 +56,6 @@ class BootstrapLinkRunnerTest {
     verify(userAccountService).ensureBootstrapUser();
     verify(urlBootstrapService).seedDefaultLinks("user");
     verify(analyticsBootstrapService).seedDefaultAnalytics();
+    verify(urlStatisticsService).syncClickCounts(seededCounts);
   }
 }

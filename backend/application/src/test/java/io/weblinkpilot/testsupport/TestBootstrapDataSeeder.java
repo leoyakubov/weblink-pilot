@@ -8,8 +8,10 @@ import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.auth.service.RoleCatalogService;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
+import io.weblinkpilot.links.service.UrlStatisticsService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -28,18 +30,21 @@ public class TestBootstrapDataSeeder implements ApplicationRunner {
   private final PasswordEncoder passwordEncoder;
   private final RoleCatalogService roleCatalogService;
   private final AnalyticsBootstrapService analyticsBootstrapService;
+  private final UrlStatisticsService urlStatisticsService;
 
   public TestBootstrapDataSeeder(
       UserAccountRepository userAccountRepository,
       ShortLinkRepository shortLinkRepository,
       PasswordEncoder passwordEncoder,
       RoleCatalogService roleCatalogService,
-      AnalyticsBootstrapService analyticsBootstrapService) {
+      AnalyticsBootstrapService analyticsBootstrapService,
+      UrlStatisticsService urlStatisticsService) {
     this.userAccountRepository = userAccountRepository;
     this.shortLinkRepository = shortLinkRepository;
     this.passwordEncoder = passwordEncoder;
     this.roleCatalogService = roleCatalogService;
     this.analyticsBootstrapService = analyticsBootstrapService;
+    this.urlStatisticsService = urlStatisticsService;
   }
 
   @Override
@@ -64,7 +69,8 @@ public class TestBootstrapDataSeeder implements ApplicationRunner {
         BootstrapDefaults.USER_USERNAME,
         now);
 
-    analyticsBootstrapService.seedDefaultAnalytics();
+    Map<String, Long> seededAnalyticsCounts = analyticsBootstrapService.seedDefaultAnalytics();
+    urlStatisticsService.syncClickCounts(seededAnalyticsCounts);
   }
 
   private void ensureUser(String username, String password, String roleName) {
