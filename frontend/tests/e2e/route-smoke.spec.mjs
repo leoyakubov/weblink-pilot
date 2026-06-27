@@ -123,13 +123,13 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.goto(`${baseUrl}/auth/forgot-password`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /reset password/i }).waitFor();
     await page.getByLabel('Email').fill('alice@example.com');
-    await page.getByRole('button', { name: 'Send reset link' }).click();
+    await page.getByRole('button', { name: 'Send link' }).click();
     await page.getByText('reset link was sent').waitFor();
 
     await page.goto(`${baseUrl}/auth/verify-email/request`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /verify email/i }).waitFor();
     await page.getByLabel('Email').fill('alice@example.com');
-    await page.getByRole('button', { name: 'Send verification email' }).click();
+    await page.getByRole('button', { name: 'Send email' }).click();
     await page.getByText('Verification email sent').waitFor();
 
     await page.goto(`${baseUrl}/auth/reset-password?token=reset-token`, {
@@ -138,7 +138,7 @@ test('auth recovery routes and the GitHub callback work', async () => {
     await page.getByRole('heading', { name: /set new password/i }).waitFor();
     await page.getByLabel('Reset token').fill('reset-token');
     await page.getByLabel('New password').fill('Password1');
-    await page.getByRole('button', { name: 'Update password' }).click();
+    await page.getByRole('button', { name: 'Update' }).click();
     await page.getByRole('heading', { name: /sign in/i }).waitFor();
     assert.match(page.url(), /\/auth\/signin$/);
 
@@ -245,16 +245,17 @@ test('signed-in user can open analytics, links, and account routes', async () =>
     await page.locator('.recent-link-code', { hasText: 'openai-docs' }).waitFor();
 
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /^profile$/i }).waitFor();
+    await page.getByRole('heading', { name: /account details/i }).waitFor();
     await page.getByText('alice@example.com').waitFor();
 
     await page.goto(`${baseUrl}/account/security`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /^security$/i }).waitFor();
-    const linkedAccount = page.locator('.linked-account').first();
-    await linkedAccount.waitFor();
-    const linkedAccountText = await linkedAccount.textContent();
-    assert.ok(linkedAccountText);
-    assert.match(linkedAccountText, /GITHUB/i);
+    await page.getByRole('heading', { name: /change password/i }).waitFor();
+    const connectedSignIns = page.locator('section', {
+      has: page.getByRole('heading', { name: /connected sign-ins/i }),
+    });
+    await connectedSignIns.getByRole('heading', { name: /connected sign-ins/i }).waitFor();
+    await connectedSignIns.getByText('GitHub', { exact: true }).waitFor();
+    await connectedSignIns.getByText('alice-github', { exact: true }).waitFor();
   } finally {
     await browser.close();
   }
@@ -280,6 +281,32 @@ test('admin can open monitoring and filter analytics links by creator', async ()
           anonymousLinks: 7,
           ownedLinks: 5,
           totalClicks: 99,
+        }),
+      'GET /api/v1/admin/monitoring': async () =>
+        jsonResponse({
+          metrics: [
+            {
+              group: 'JVM memory',
+              name: 'Heap used',
+              value: '128.0 MB',
+              unit: 'bytes',
+              description: 'Current heap memory used.',
+            },
+            {
+              group: 'Service counters',
+              name: 'Links created',
+              value: '4',
+              unit: 'events',
+              description: 'Short-link creation events.',
+            },
+          ],
+          health: [
+            { name: 'Database', status: 'UP', detail: 'PostgreSQL' },
+            { name: 'Redis', status: 'UP', detail: 'Connected' },
+          ],
+          configuration: [
+            { name: 'Active profiles', value: 'local', description: 'Spring profiles.' },
+          ],
         }),
       'GET /api/v1/admin/link-creators': async () =>
         jsonResponse([
@@ -379,7 +406,8 @@ test('admin can open monitoring and filter analytics links by creator', async ()
 
     await page.goto(`${baseUrl}/monitoring`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: /admin monitoring/i }).waitFor();
-    await page.getByText('Total users').waitFor();
+    await page.getByText('Health checks').waitFor();
+    await page.getByText('JVM and service metrics').waitFor();
     await page.getByText('Local stack').waitFor();
   } finally {
     await browser.close();

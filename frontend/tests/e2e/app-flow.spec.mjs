@@ -172,9 +172,9 @@ test('signed-in user can log in and open the account page', async () => {
     await page.locator('input[type="password"]').fill('Password1');
     await page.getByRole('button', { name: 'Sign in' }).click();
 
-    await page.getByText('Signed in as alice', { exact: true }).waitFor();
+    await page.locator('.account-name', { hasText: 'alice' }).waitFor();
     await page.goto(`${baseUrl}/account`, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /^profile$/i }).waitFor();
+    await page.getByRole('heading', { name: /account details/i }).waitFor();
 
     assert.match(page.url(), /\/account$/);
     await page.getByText('alice@example.com').waitFor();
