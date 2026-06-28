@@ -88,6 +88,35 @@ The monitoring stack includes:
 | Prometheus | metrics scraping | `9090`       |
 | Grafana    | dashboards       | `3001`       |
 
+### Local observability security
+
+The backend protects operational endpoints differently depending on the active profile.
+This keeps demo and production-style runs safer while still allowing the local Docker monitoring stack to scrape metrics.
+
+| Profile | `APP_SECURITY_PUBLIC_OBSERVABILITY` default | `/actuator/health` and `/actuator/info` | `/actuator/metrics` and `/actuator/prometheus` |
+| ------- | ------------------------------------------- | --------------------------------------- | ---------------------------------------------- |
+| `local` | `true`                                      | Public                                  | Public, so local Prometheus can scrape         |
+| `dev`   | `true`                                      | Public                                  | Public, so Docker Prometheus can scrape        |
+| `demo`  | `false`                                     | Public                                  | Requires admin access                          |
+| `test`  | `false`                                     | Public                                  | Requires admin access                          |
+| default | `false`                                     | Public                                  | Requires admin access                          |
+
+`APP_SECURITY_PUBLIC_OBSERVABILITY` controls only the operational actuator metrics endpoints.
+It does not make application admin APIs public.
+Leave it as `false` for demo and production-style deployments unless metrics are protected by a separate network boundary.
+
+The local monitoring stack scrapes:
+
+```yaml
+metrics_path: /actuator/prometheus
+```
+
+If Prometheus shows no backend metrics locally, check:
+
+- the backend is running with the `local` or `dev` profile
+- `APP_SECURITY_PUBLIC_OBSERVABILITY` was not overridden to `false`
+- the backend is reachable from the Prometheus container as `backend:8080`
+
 ### Mail testing locally
 
 The backend-local and backend-dev scripts load `backend/.env`, then force Mailpit SMTP settings after the file is loaded. This keeps local/dev email safe even when `backend/.env` also contains Brevo credentials for demo-local runs.
@@ -174,6 +203,7 @@ There is no shared repo-root `.env` now; use the area-specific files above inste
 | `APP_SHORT_LINK_*`                                                                                                                                          | Backend cleanup and expiry   | `application.yml` and env overrides                                                                                                                                                                                                                         |
 | `APP_CACHE_PROVIDER`                                                                                                                                        | Backend cache mode           | `application.yml` and profile overrides                                                                                                                                                                                                                     |
 | `APP_RATE_LIMIT_*`                                                                                                                                          | Backend rate limiting        | `application.yml` and env overrides                                                                                                                                                                                                                         |
+| `APP_SECURITY_PUBLIC_OBSERVABILITY`                                                                                                                         | Backend actuator protection  | `application.yml` defaults to `false`; `application-local.yml` and `application-dev.yml` default to `true` so local Prometheus can scrape metrics                                                                                                           |
 | `APP_CORS_ALLOWED_ORIGIN_*` / `APP_CORS_ALLOWED_ORIGIN_PATTERNS`                                                                                            | Backend CORS allowlist       | `application.yml` and `application-demo.yml`                                                                                                                                                                                                                |
 | `VITE_API_BASE_URL`                                                                                                                                         | Frontend API client          | `frontend/.env` for local runs, Netlify build env for demo                                                                                                                                                                                                  |
 | `VITE_DEV_SERVER_PORT`                                                                                                                                      | Frontend Vite dev server     | `frontend/.env` or the default from `frontend/vite.config.js`                                                                                                                                                                                               |

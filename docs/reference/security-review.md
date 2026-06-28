@@ -27,3 +27,31 @@ Status meanings:
 - Refresh cookies default to `SameSite=Lax`. Do not switch demo/prod to cross-site cookies without adding an explicit CSRF token/header flow.
 - SQL injection risk is currently low because the repository layer is mostly parameterized.
 - Phase 20 hardening added security headers, stricter CORS validation, deployment-safe operational metrics, and endpoint-specific auth throttling.
+
+## Phase 20 Security Defaults
+
+### Browser security headers
+
+The backend currently sends these headers through Spring Security:
+
+| Header | Current value | Purpose |
+| ------ | ------------- | ------- |
+| `Content-Security-Policy` | `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:* http://127.0.0.1:* https:` | Limits script, image, font, style, frame, object, and API connection surfaces. |
+| `Referrer-Policy` | `same-origin` | Keeps full referrer data only for same-origin navigation. |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables browser capabilities the app does not use. |
+| `X-Frame-Options` | `SAMEORIGIN` | Legacy clickjacking protection in addition to CSP `frame-ancestors`. |
+
+### Observability access
+
+`APP_SECURITY_PUBLIC_OBSERVABILITY` decides whether actuator metrics endpoints are public.
+It exists because local Prometheus needs unauthenticated scrape access, while demo/prod should not expose runtime metrics to the public internet.
+
+| Profile / runtime | Default | Behavior |
+| ----------------- | ------- | -------- |
+| `local` | `true` | `/actuator/metrics` and `/actuator/prometheus` are public for local inspection and local Prometheus. |
+| `dev` | `true` | `/actuator/metrics` and `/actuator/prometheus` are public so the Docker monitoring stack can scrape the backend. |
+| `demo` | `false` | Only `/actuator/health` and `/actuator/info` are public; metrics and Prometheus require admin access. |
+| `test` | `false` | Tests verify that metrics and Prometheus are protected by default. |
+| default | `false` | Safe baseline for any runtime that does not explicitly opt in. |
+
+This setting does not affect `/api/v1/admin/**`; admin APIs still require the admin role.

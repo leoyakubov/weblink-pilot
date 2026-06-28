@@ -176,6 +176,29 @@ The demo profile keeps the mail health indicator disabled so the `/actuator/heal
 
 If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted because the backend falls back to `RENDER_EXTERNAL_URL`.
 
+## Security and observability defaults
+
+The backend sends these browser-facing security headers from the Spring Security configuration:
+
+| Header | Current value | Why it exists |
+| ------ | ------------- | ------------- |
+| `Content-Security-Policy` | `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:* http://127.0.0.1:* https:` | Reduces XSS impact, blocks plugin/object content, blocks framing, and limits where scripts, images, fonts, and API calls can load from. |
+| `Referrer-Policy` | `same-origin` | Avoids leaking full cross-site referrer paths while keeping same-origin navigation context. |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables browser features the app does not need. |
+| `X-Frame-Options` | `SAMEORIGIN` | Adds legacy clickjacking protection alongside `frame-ancestors`. |
+
+Operational endpoints use this deployment model:
+
+| Environment | Recommended value | Result |
+| ----------- | ----------------- | ------ |
+| Local direct development | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `local` profile default | Prometheus-style metrics can be opened locally without an admin token. |
+| Docker dev stack | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `dev` profile default | The local Prometheus container can scrape `/actuator/prometheus`. |
+| Demo / Render | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset | `/actuator/health` and `/actuator/info` stay public; `/actuator/metrics` and `/actuator/prometheus` require admin access. |
+| Production-style deployments | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset | Metrics are not public unless you deliberately place them behind a private network or separate observability gateway. |
+
+Do not set `APP_SECURITY_PUBLIC_OBSERVABILITY=true` in the public demo unless you have another protection layer in front of actuator metrics.
+The admin monitoring UI still uses `/api/v1/admin/monitoring`, which is protected by the admin role.
+
 ## Runbook
 
 1. push to `main` or run the CI workflow
