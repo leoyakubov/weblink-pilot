@@ -35,6 +35,7 @@ copy .env.example .env
 ```
 
 The frontend uses `VITE_API_BASE_URL` for the backend API and `VITE_DEV_SERVER_PORT` for the local Vite port.
+`VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` is optional and should stay blank locally; when set for the demo build, Vite injects the Cloudflare Web Analytics beacon into `index.html`.
 
 If you run the backend with the helper scripts, also put the shared backend secret in `backend/.env`:
 

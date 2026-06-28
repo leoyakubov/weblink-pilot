@@ -86,6 +86,7 @@ Recommended GitHub values:
 - repository secret `NETLIFY_AUTH_TOKEN`
 - repository secret `NETLIFY_SITE_ID`
 - repository secret `VITE_API_BASE_URL`
+- optional repository/environment variable `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN`
 - repository environment variable `RENDER_HEALTH_URL`
 - repository environment variable `FRONTEND_SMOKE_URL`
 
@@ -103,9 +104,42 @@ Set:
 - site token: store as `NETLIFY_AUTH_TOKEN` in GitHub
 - site ID: store as `NETLIFY_SITE_ID` in GitHub
 - public backend URL: store as `VITE_API_BASE_URL` in GitHub, for example `https://weblink-pilot.onrender.com/api/v1`
+- optional Cloudflare Web Analytics token: store as `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` in the `demo` environment if you want live demo traffic analytics
 
 The frontend workflow uses the Netlify CLI to deploy the built `dist` folder and reads the fresh deploy URL from the deploy output.
 That URL is then passed to frontend smoke so the smoke job checks the exact fresh deploy.
+
+### 2.1 Cloudflare Web Analytics for the demo frontend
+
+The frontend build can inject the Cloudflare Web Analytics beacon into `index.html`.
+This is disabled by default and only turns on when `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` is present at build time.
+
+Setup:
+
+1. In Cloudflare, open **Web Analytics** and add the Netlify demo hostname.
+2. Copy the site token from the Cloudflare JavaScript snippet.
+3. Add that token as `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` in the GitHub `demo` environment or repository secrets.
+4. Redeploy the frontend.
+5. Confirm the built page includes `https://static.cloudflareinsights.com/beacon.min.js`.
+6. Wait a few minutes for visits to appear in the Cloudflare Web Analytics dashboard.
+
+Local/dev behavior:
+
+- `frontend/.env.example` leaves `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` blank.
+- When the token is blank, Vite does not inject the Cloudflare script.
+- Local and Docker dev remain lightweight and do not call Cloudflare.
+
+What it measures:
+
+- page views and visitors for the public frontend
+- referrers and basic page usage
+- SPA route changes through Cloudflare's History API support
+
+Privacy note:
+
+- Cloudflare describes Web Analytics as privacy-first and says it does not collect or use visitors' personal data.
+- The demo uses this only for public site traffic analytics; product link analytics still come from the WeblinkPilot backend.
+- Reference docs: [Cloudflare Web Analytics setup](https://developers.cloudflare.com/web-analytics/get-started/) and [Cloudflare SPA support](https://developers.cloudflare.com/web-analytics/get-started/web-analytics-spa/).
 
 ### 3. Render setup
 

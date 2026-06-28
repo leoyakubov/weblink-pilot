@@ -26,7 +26,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 16  | &#x1F7E2; Done | [Redis-first refresh tokens](#phase-16-redis-first-refresh-tokens)                                 | Make refresh-token lookup and rotation Redis-first while keeping PostgreSQL as the durable source of truth. The refresh-token cache flow is documented in [cache-redis-scenarios.md](../design/cache-redis-scenarios.md). |
 | 17  | &#x1F7E2; Done | [Async and non-blocking operations strategy](#phase-17-async-and-non-blocking-operations-strategy) | Document which flows should stay synchronous and which ones should move to async or deferred processing, starting with auth email delivery, analytics fan-out, cache updates, and reminder jobs.                          |
 | 18  | &#x1F7E2; Done | [Frontend redesign](#phase-18-frontend-redesign)                                                   | Redesign the main frontend pages and forms with a custom mobile-first SaaS UI, shared page/panel/link components, and PrimeVue controls where they are useful.                                                            |
-| 19  | Planned        | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Integrate Cloudflare Web Analytics for demo traffic so we can track visits, referrers, and basic usage without building our own analytics stack first.                                                                     |
+| 19  | &#x1F7E2; Done | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Added optional Cloudflare Web Analytics injection for the demo frontend, controlled by a build-time token so local/dev stay lightweight.                                                                                    |
 | 20  | &#x1F7E2; Done | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Added security headers, stricter CORS validation, deployment-safe metrics/prometheus access, and dedicated throttling for public auth endpoints; deeper BFF-style auth can remain a future product decision.                |
 | 21  | &#x1F7E2; Done | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Added README test scenarios and flow diagrams for auth, email, link creation, redirects, analytics, admin monitoring, and account recovery.                                                                                |
 | 22  | Planned        | [Codebase refactoring and security review](#phase-22-codebase-refactoring-and-security-review)     | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps.    |
@@ -37,8 +37,8 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 Status note:
 
-- Phases 0-18 and 20 are already shipped and documented here as the implemented baseline.
-- Phases 19 and 22-24 are the remaining roadmap items, with phase 19 intentionally left planned until we enable Cloudflare Web Analytics for the live demo.
+- Phases 0-21 are already shipped and documented here as the implemented baseline.
+- Phases 22-24 are the remaining roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -534,10 +534,10 @@ Exit criteria:
 Checklist:
 
 - [x] Choose Cloudflare Web Analytics as the demo analytics provider
-- [ ] Add the Cloudflare beacon snippet or integration
-- [ ] Track visits, referrers, and basic page usage
-- [ ] Keep local/dev optional and lightweight
-- [ ] Document the privacy and deployment implications
+- [x] Add the Cloudflare beacon snippet or integration
+- [x] Track visits, referrers, and basic page usage
+- [x] Keep local/dev optional and lightweight
+- [x] Document the privacy and deployment implications
 
 ### Phase 20 - Security hardening follow-up
 
