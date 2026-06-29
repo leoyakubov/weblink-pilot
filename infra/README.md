@@ -39,6 +39,7 @@ docker compose -p weblink-pilot -f infra/docker-compose.yml down
 - Frontend: `http://localhost:8081`
 - Backend API: `http://localhost:8080/api/v1`
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Ollama: `http://localhost:11434`
 - Monitoring stack: `docker compose -p weblink-pilot-monitoring -f infra/monitoring/docker-compose.monitoring.yml up --build`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`

@@ -204,6 +204,7 @@ There is no shared repo-root `.env` now; use the area-specific files above inste
 | `APP_CACHE_PROVIDER`                                                                                                                                        | Backend cache mode           | `application.yml` and profile overrides                                                                                                                                                                                                                     |
 | `APP_RATE_LIMIT_*`                                                                                                                                          | Backend rate limiting        | `application.yml` and env overrides                                                                                                                                                                                                                         |
 | `APP_SECURITY_PUBLIC_OBSERVABILITY`                                                                                                                         | Backend actuator protection  | `application.yml` defaults to `false`; `application-local.yml` and `application-dev.yml` default to `true` so local Prometheus can scrape metrics                                                                                                           |
+| `APP_AI_ENABLED`, `APP_AI_PROVIDER`, `APP_AI_PROMPT_VERSION`, `APP_AI_OLLAMA_*`                                                                             | Backend AI enrichment        | `application.yml` defaults to enabled stub enrichment; `local` and `dev` profiles default to Ollama; local/dev launchers start the Ollama container and pull the configured model; demo/demo-local should stay on `stub`                                    |
 | `APP_CORS_ALLOWED_ORIGIN_*` / `APP_CORS_ALLOWED_ORIGIN_PATTERNS`                                                                                            | Backend CORS allowlist       | `application.yml` and `application-demo.yml`                                                                                                                                                                                                                |
 | `VITE_API_BASE_URL`                                                                                                                                         | Frontend API client          | `frontend/.env` for local runs, Netlify build env for demo                                                                                                                                                                                                  |
 | `VITE_DEV_SERVER_PORT`                                                                                                                                      | Frontend Vite dev server     | `frontend/.env` or the default from `frontend/vite.config.js`                                                                                                                                                                                               |
@@ -224,6 +225,45 @@ Common environment values include:
 - `SPRING_MAIL_HOST`
 - `SPRING_MAIL_USERNAME`
 - `SPRING_MAIL_PASSWORD`
+
+### AI Enrichment Defaults
+
+AI link enrichment is intentionally safe by default, but local developer workflows use Ollama automatically:
+
+- `APP_AI_ENABLED=true`
+- `APP_AI_PROVIDER=stub` in the base and demo profiles
+- `APP_AI_PROVIDER=ollama` in `local` and `dev`
+- `APP_AI_PROMPT_VERSION=link-metadata-v1`
+- `APP_AI_OLLAMA_BASE_URL=http://localhost:11434`
+- `APP_AI_OLLAMA_MODEL=llama3.2:1b`
+- `APP_AI_OLLAMA_TIMEOUT=60s`
+
+With the stub provider, the backend does not call OpenAI or any external LLM.
+It derives deterministic demo metadata from the URL after `LinkCreatedEvent` is published.
+With the Ollama provider, the backend calls the local Ollama HTTP API and asks for JSON metadata.
+The metadata is stored in `ai_link_metadata` and can be read from:
+
+- `GET /api/v1/ai/links/{code}/metadata`
+
+Use `APP_AI_ENABLED=false` if you want to keep the lifecycle visible but mark metadata as `DISABLED`.
+Real providers must not receive account secrets, JWTs, passwords, or private user profile data.
+Only the target URL and link code should be sent for enrichment.
+
+The local backend launcher starts Mailpit and Ollama, pulls the configured model, warms it with a tiny prompt, and runs the backend with `APP_AI_PROVIDER=ollama`:
+
+```bash
+bash ./scripts/dev/backend-local.sh
+```
+
+The Docker dev stack starts Postgres, Redis, Mailpit, Ollama, a one-shot model pull/warm-up service, backend, and frontend:
+
+```bash
+bash ./scripts/dev/fullstack-dev.sh
+```
+
+`demo-local` and live `demo` should keep `APP_AI_PROVIDER=stub` by default.
+`demo-local` uses the `demo` profile to rehearse Render-like behavior, and live Render instances should not be expected to run a local LLM.
+If you explicitly point demo-local at a reachable Ollama instance, enrichment can work, but it is not the recommended default.
 
 ### JWT Secret Resolution
 
@@ -287,11 +327,13 @@ Backend checks:
 ```powershell
 wsl bash ./scripts/quality/backend-style.sh
 wsl bash ./scripts/quality/backend-tests.sh
+wsl bash ./scripts/quality/backend-coverage.sh
 ```
 
 ```bash
 bash ./scripts/quality/backend-style.sh
 bash ./scripts/quality/backend-tests.sh
+bash ./scripts/quality/backend-coverage.sh
 ```
 
 Frontend checks:
@@ -299,26 +341,36 @@ Frontend checks:
 ```powershell
 wsl bash ./scripts/quality/frontend-style.sh
 wsl bash ./scripts/quality/frontend-tests.sh
+wsl bash ./scripts/quality/frontend-coverage.sh
 wsl bash ./scripts/dev/frontend-build.sh
 ```
 
 ```bash
 bash ./scripts/quality/frontend-style.sh
 bash ./scripts/quality/frontend-tests.sh
+bash ./scripts/quality/frontend-coverage.sh
 bash ./scripts/dev/frontend-build.sh
 ```
 
-Manual coverage and security checks:
+The full pre-push gate already runs backend coverage and frontend coverage. You can still run them manually when you want a focused coverage report:
 
 ```powershell
 wsl bash ./scripts/quality/backend-coverage.sh
 wsl bash ./scripts/quality/frontend-coverage.sh
+```
+
+Manual security checks:
+
+```powershell
 wsl bash ./scripts/security/check-dependencies.sh
 ```
 
 ```bash
 bash ./scripts/quality/backend-coverage.sh
 bash ./scripts/quality/frontend-coverage.sh
+```
+
+```bash
 bash ./scripts/security/check-dependencies.sh
 ```
 

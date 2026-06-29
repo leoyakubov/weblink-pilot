@@ -43,7 +43,7 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
 4. Run secret scans.
 5. Run static analysis.
 6. Push only if the pre-push gate passes.
-7. Run coverage checks in CI or manually when needed.
+7. Run the full pre-push gate before pushing; it includes backend and frontend coverage.
 
 ## Verification Rule
 
@@ -59,12 +59,12 @@ Keep the codebase predictable, reviewable, and hard to accidentally break.
   - lint/static analysis
   - dependency vulnerability checks
   - architecture checks
-  - coverage in CI/manual runs
+  - coverage in pre-push, CI, and manual runs
 - Frontend:
   - formatter
   - lint/static analysis
   - TypeScript compile check
-  - coverage in CI/manual runs
+  - coverage in pre-push, CI, and manual runs
 - Repo:
   - pre-push wrapper
   - CI job parity

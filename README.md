@@ -313,7 +313,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 - Frontend style check: [`scripts/quality/frontend-style.sh`](scripts/quality/frontend-style.sh)
 - Frontend tests: [`scripts/quality/frontend-tests.sh`](scripts/quality/frontend-tests.sh)
 - Frontend vulnerability check: [`scripts/security/frontend-vulnerabilities.sh`](scripts/security/frontend-vulnerabilities.sh)
-- Frontend coverage: `npm run test:coverage` from `frontend/`
+- Frontend coverage: [`scripts/quality/frontend-coverage.sh`](scripts/quality/frontend-coverage.sh)
 - Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
 - Frontend smoke test: [`scripts/dev/smoke-frontend.sh`](scripts/dev/smoke-frontend.sh)
 - Deployment smoke: [`scripts/quality/deployment-smoke.sh`](scripts/quality/deployment-smoke.sh)
@@ -331,7 +331,7 @@ From the repo root, the preferred quick-run entrypoints are grouped by area:
 
 ## Local, Demo, and Dev Modes
 
-- `local`: use the full Docker stack or the backend-local launcher. Mailpit is the inbox catcher.
+- `local`: use the full Docker stack or the backend-local launcher. Mailpit is the inbox catcher, and Ollama provides local AI link enrichment.
 - `demo`: use the demo-local launcher to mimic Render more closely. The backend runs in `demo` profile and the frontend opens preview links in the simulated mailbox modal.
 - `dev`: use the backend-only or frontend-local scripts when you want to run pieces independently during development.
 
@@ -345,7 +345,7 @@ Quick commands:
 - Backend local with Mailpit: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
 - Frontend local: [`scripts/dev/frontend-local.sh`](scripts/dev/frontend-local.sh)
 - Git hook setup: [`scripts/git/setup-hooks.sh`](scripts/git/setup-hooks.sh)
-- Before-push check: [`scripts/run-before-push.sh`](scripts/run-before-push.sh)
+- Before-push check with backend/frontend coverage gates: [`scripts/run-before-push.sh`](scripts/run-before-push.sh)
 
 The project has one Bash-only script set. On Windows, run it through WSL, for example:
 
@@ -374,7 +374,7 @@ If you want the exact test/build shortcuts the project uses day to day:
 - Frontend tests: [`scripts/quality/frontend-tests.sh`](scripts/quality/frontend-tests.sh)
 - Backend coverage: [`scripts/quality/backend-coverage.sh`](scripts/quality/backend-coverage.sh)
 - Frontend build: [`scripts/dev/frontend-build.sh`](scripts/dev/frontend-build.sh)
-- Frontend coverage: `npm run test:coverage` from `frontend/`
+- Frontend coverage: [`scripts/quality/frontend-coverage.sh`](scripts/quality/frontend-coverage.sh)
 - Frontend smoke test: [`scripts/dev/smoke-frontend.sh`](scripts/dev/smoke-frontend.sh)
 
 ## Docker Stack
@@ -386,6 +386,7 @@ The repo also includes a containerized local stack:
 - frontend image built from [`frontend/Dockerfile`](frontend/Dockerfile)
 - Postgres 17 for persistence
 - Redis 7 for hot-cache lookups and analytics cache invalidation
+- Ollama for local AI link metadata enrichment
 - Prometheus and Grafana are available in a separate monitoring stack
 
 Start it from the repo root:
@@ -400,6 +401,7 @@ Services:
 - backend API: `http://localhost:8080/api/v1`
 - backend direct: `http://localhost:8080`
 - Mailpit: `http://localhost:8025`
+- Ollama: `http://localhost:11434`
 
 Start monitoring separately when you need it:
 
@@ -412,13 +414,13 @@ Monitoring services:
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001`
 
-The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `dev` Spring profile with PostgreSQL and Redis so it behaves like a production-shaped local stack, while direct local development still uses the `local` profile with in-memory H2.
+The frontend container serves the Vue app through nginx and proxies API and redirect requests to the backend. The Docker stack uses the `dev` Spring profile with PostgreSQL, Redis, Mailpit, and Ollama so it behaves like a production-shaped local stack with local AI enrichment, while direct local development still uses the `local` profile with in-memory H2.
 The admin monitoring page reads `/api/v1/admin/monitoring` for health checks, runtime metrics, configuration, and service endpoints. When the optional local monitoring stack is running, the same page links to Prometheus and Grafana.
 
 ### Backend Profiles
 
-- `local`: default for developer workflows, uses H2 and localhost origins
-- `dev`: Docker stack profile, uses PostgreSQL, Redis, and localhost deployment wiring
+- `local`: default for developer workflows, uses H2, localhost origins, Mailpit, and Ollama
+- `dev`: Docker stack profile, uses PostgreSQL, Redis, Mailpit, Ollama, and localhost deployment wiring
 - `demo`: use for deployed demo instances, uses PostgreSQL, Redis, and runtime secrets
 - `ci`: verification profile for automated builds, tests, coverage, and static analysis
 
@@ -435,7 +437,7 @@ You can also select the Maven convenience profiles when running the backend dire
 Quick guide:
 
 - `local`: [`scripts/dev/backend-local.sh`](scripts/dev/backend-local.sh)
-- `dev`: [`scripts/dev/fullstack-dev.sh`](scripts/dev/fullstack-dev.sh) for the main stack, [`scripts/dev/monitoring-stack.sh`](scripts/dev/monitoring-stack.sh) for dashboards, or [`scripts/dev/backend-dev.sh`](scripts/dev/backend-dev.sh) after Postgres and Redis are up locally
+- `dev`: [`scripts/dev/fullstack-dev.sh`](scripts/dev/fullstack-dev.sh) for the main stack, [`scripts/dev/monitoring-stack.sh`](scripts/dev/monitoring-stack.sh) for dashboards, or [`scripts/dev/backend-dev.sh`](scripts/dev/backend-dev.sh) for a host-run backend with Docker-managed Postgres, Redis, Mailpit, and Ollama
 - `demo`: Render backend + Netlify frontend
 
 For a lightweight browser smoke check against the Docker stack, use:

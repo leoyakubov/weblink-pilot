@@ -63,6 +63,7 @@ The product is designed to look and feel like a real production service rather t
 - [x] cache-backed redirects
 - [x] security headers, strict CORS validation, deployment-safe operational metrics, and dedicated auth throttling
 - [x] optional Cloudflare Web Analytics for public demo traffic
+- [x] AI-style link metadata enrichment with a free deterministic stub provider
 
 ### Future
 

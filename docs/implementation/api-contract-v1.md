@@ -187,6 +187,45 @@ Response:
 }
 ```
 
+### 8. Get AI link metadata
+
+`GET /api/v1/ai/links/{code}/metadata`
+
+Response:
+
+```json
+{
+  "code": "spring-boot",
+  "status": "READY",
+  "provider": "stub",
+  "promptVersion": "link-metadata-v1",
+  "title": "Spring Boot",
+  "summary": "A clean short-link preview for spring.io that helps people understand the destination before opening it.",
+  "category": "Programming",
+  "tags": ["spring", "java", "backend"],
+  "icon": "code",
+  "suggestedAlias": "spring-boot",
+  "errorMessage": null,
+  "updatedAt": "2026-06-28T17:30:00Z",
+  "completedAt": "2026-06-28T17:30:00Z"
+}
+```
+
+Suggested behavior:
+
+- link creation stays synchronous and fast
+- AI enrichment runs asynchronously from `LinkCreatedEvent`
+- `status` can be `PENDING`, `READY`, `FAILED`, or `DISABLED`
+- the default `stub` provider does not call external AI services
+- the UI does not display `suggestedAlias` yet; it is kept in the API for future create-flow assistance
+
+### 9. Regenerate AI link metadata
+
+`POST /api/v1/ai/links/{code}/metadata/regenerate`
+
+Regenerates metadata for a link that already has an AI metadata row.
+The response body is the updated `AiLinkMetadataResponse`.
+
 ## Error contract
 
 Use a stable error payload:

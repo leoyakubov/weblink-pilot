@@ -116,12 +116,23 @@ This is disabled by default and only turns on when `VITE_CLOUDFLARE_WEB_ANALYTIC
 
 Setup:
 
-1. In Cloudflare, open **Web Analytics** and add the Netlify demo hostname.
-2. Copy the site token from the Cloudflare JavaScript snippet.
-3. Add that token as `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN` in the GitHub `demo` environment or repository secrets.
-4. Redeploy the frontend.
-5. Confirm the built page includes `https://static.cloudflareinsights.com/beacon.min.js`.
-6. Wait a few minutes for visits to appear in the Cloudflare Web Analytics dashboard.
+1. In Cloudflare, open **Web Analytics**.
+2. Select **Add a site**.
+3. Add the live frontend hostname, for example `weblink-pilot.netlify.app` or the custom frontend domain.
+4. Open **Manage site** and copy the token from the JavaScript snippet.
+5. In GitHub, open `Settings -> Environments -> demo`.
+6. Add `VITE_CLOUDFLARE_WEB_ANALYTICS_TOKEN=<cloudflare-token>` as an environment variable or secret.
+7. Run `Actions -> Deploy frontend -> Run workflow`, or push a frontend-relevant change to `main`.
+8. Open the deployed Netlify site.
+9. In browser DevTools, confirm the page includes `https://static.cloudflareinsights.com/beacon.min.js` or that the Network tab loads `beacon.min.js`.
+10. Wait a few minutes for visits to appear in the Cloudflare Web Analytics dashboard.
+
+The token is safe to expose in the built frontend because Cloudflare's snippet token is designed to be public.
+Using a GitHub environment variable is usually enough; using a secret also works because the deploy workflow reads both.
+
+Render does not need any Cloudflare Web Analytics configuration.
+The analytics beacon is a frontend-only script that tracks public Netlify traffic.
+The Render backend continues to serve API, redirect, QR, auth, and product analytics endpoints normally.
 
 Local/dev behavior:
 
