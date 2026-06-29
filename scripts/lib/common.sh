@@ -32,18 +32,28 @@ init_terminal_colors() {
 print_box() {
   local title="$1"
   local width="${2:-$(terminal_width)}"
-  if [ "$width" -gt 120 ]; then
-    width=120
+  local color="${3:-$cyan}"
+  if [ "$width" -gt 160 ]; then
+    width=160
   fi
-  local inner_width=$((width - 4))
+  local border_width=$((width - 4))
+  local content_width=$((width - 6))
   local border
   local -a lines=()
   local current=""
   local word
   for word in $title; do
+    while [ "${#word}" -gt "$content_width" ]; do
+      if [ -n "$current" ]; then
+        lines+=("$current")
+        current=""
+      fi
+      lines+=("${word:0:content_width}")
+      word="${word:content_width}"
+    done
     if [ -z "$current" ]; then
       current="$word"
-    elif [ $(( ${#current} + 1 + ${#word} )) -le "$inner_width" ]; then
+    elif [ $(( ${#current} + 1 + ${#word} )) -le "$content_width" ]; then
       current="$current $word"
     else
       lines+=("$current")
@@ -56,19 +66,22 @@ print_box() {
   if [ ${#lines[@]} -eq 0 ]; then
     lines+=("")
   fi
-  border="||$(printf '%*s' $((width - 4)) '' | tr ' ' '=')||"
-  printf '\n%b%s%b\n' "$cyan" "$border" "$reset"
+  border="||$(printf '%*s' "$border_width" '' | tr ' ' '=')||"
+  printf '\n%b%s%b\n' "$color" "$border" "$reset"
   for line in "${lines[@]}"; do
-    printf '|| %-*s ||\n' "$inner_width" "$line"
+    printf '%b||%b %-*s %b||%b\n' "$color" "$reset" "$content_width" "$line" "$color" "$reset"
   done
-  printf '%b%s%b\n\n' "$cyan" "$border" "$reset"
+  printf '%b%s%b\n\n' "$color" "$border" "$reset"
 }
 
 print_summary_border() {
   local color="${1:-$cyan}"
   local width="${2:-$(terminal_width)}"
-  if [ "$width" -gt 120 ]; then
-    width=120
+  if [ "$width" -lt 160 ]; then
+    width=160
+  fi
+  if [ "$width" -gt 160 ]; then
+    width=160
   fi
   printf '%b||%s||%b\n' "$color" "$(printf '%*s' $((width - 4)) '' | tr ' ' '=')" "$reset"
 }
@@ -76,8 +89,11 @@ print_summary_border() {
 print_summary_divider() {
   local color="${1:-$cyan}"
   local width="${2:-$(terminal_width)}"
-  if [ "$width" -gt 120 ]; then
-    width=120
+  if [ "$width" -lt 160 ]; then
+    width=160
+  fi
+  if [ "$width" -gt 160 ]; then
+    width=160
   fi
   printf '%b||%s||%b\n' "$color" "$(printf '%*s' $((width - 4)) '' | tr ' ' '-')" "$reset"
 }
@@ -114,14 +130,19 @@ print_summary_row() {
   local label="$1"
   local status="$2"
   local details="$3"
-  local color badge text
+  local color badge detail_line label_cell status_cell
   local width="${4:-$(terminal_width)}"
   local inner_width=$((width - 4))
-  local label_width=24
-  local badge_width=10
+  local label_width=20
+  local badge_width=8
   local details_width=$((inner_width - label_width - badge_width - 8))
-  if [ "$width" -gt 120 ]; then
-    width=120
+  if [ "$width" -lt 160 ]; then
+    width=160
+    inner_width=$((width - 4))
+    details_width=$((inner_width - label_width - badge_width - 8))
+  fi
+  if [ "$width" -gt 160 ]; then
+    width=160
     inner_width=$((width - 4))
     details_width=$((inner_width - label_width - badge_width - 8))
   fi
@@ -131,9 +152,18 @@ print_summary_row() {
     details_width=20
   fi
   label="$(truncate_text "$label" 28)"
-  details="$(truncate_text "$details" "$details_width")"
-  text="$(printf '|| %-24s | %-10s | %-*s ||' "$label" "$badge" "$details_width" "$details")"
-  printf '%b%s%b\n' "$color" "$text" "$reset"
+  label_cell="$label"
+  status_cell="$badge"
+
+  while [ "${#details}" -gt "$details_width" ]; do
+    detail_line="${details:0:details_width}"
+    printf '%b|| %-*s | %-*s | %-*s ||%b\n' "$color" "$label_width" "$label_cell" "$badge_width" "$status_cell" "$details_width" "$detail_line" "$reset"
+    details="${details:details_width}"
+    label_cell=""
+    status_cell=""
+  done
+
+  printf '%b|| %-*s | %-*s | %-*s ||%b\n' "$color" "$label_width" "$label_cell" "$badge_width" "$status_cell" "$details_width" "$details" "$reset"
 }
 
 remove_stale_docker_containers() {

@@ -7,7 +7,7 @@ source "$repo_root/scripts/lib/common.sh"
 backend_status='SKIPPED'
 frontend_status='SKIPPED'
 
-print_box "Running backend dependency checks..."
+print_box "Running backend dependency checks"
 if bash "$repo_root/scripts/security/backend-vulnerabilities.sh"; then
   backend_status='PASS'
 else
@@ -15,7 +15,7 @@ else
 fi
 
 if [ "$backend_status" = 'PASS' ]; then
-  print_box "Running frontend dependency checks..."
+  print_box "Running frontend dependency checks"
   if bash "$repo_root/scripts/security/frontend-vulnerabilities.sh"; then
     frontend_status='PASS'
   else
