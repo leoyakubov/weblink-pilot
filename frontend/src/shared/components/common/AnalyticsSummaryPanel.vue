@@ -2,7 +2,13 @@
 import type { AnalyticsSummaryResponse } from '@/shared/types/api';
 import { countryCodeLabel, countryFlagUrl } from '@/shared/utils/countries';
 
-const props = defineProps<{
+const {
+  summary,
+  showMetrics = true,
+  showTopCountries = true,
+  eyebrow = 'Top countries',
+  title = 'Where clicks are coming from',
+} = defineProps<{
   summary: AnalyticsSummaryResponse | null;
   showMetrics?: boolean;
   showTopCountries?: boolean;
@@ -23,51 +29,51 @@ function formatDate(value: string | null) {
 </script>
 
 <template>
-  <div v-if="props.summary" class="stack">
-    <template v-if="props.showMetrics !== false">
+  <div v-if="summary" class="stack">
+    <template v-if="showMetrics">
       <div class="grid-2">
         <div class="metric">
-          <span class="value">{{ props.summary.totalClicks }}</span>
+          <span class="value">{{ summary.totalClicks }}</span>
           <span class="label">Total interactions</span>
         </div>
         <div class="metric">
-          <span class="value">{{ props.summary.redirectClicks }}</span>
+          <span class="value">{{ summary.redirectClicks }}</span>
           <span class="label">Redirect clicks</span>
         </div>
         <div class="metric">
-          <span class="value">{{ props.summary.qrScans }}</span>
+          <span class="value">{{ summary.qrScans }}</span>
           <span class="label">QR scans</span>
         </div>
         <div class="metric">
-          <span class="value">{{ props.summary.uniqueVisitors }}</span>
+          <span class="value">{{ summary.uniqueVisitors }}</span>
           <span class="label">Unique visitors</span>
         </div>
       </div>
 
       <div class="list-item">
         <strong>Last click</strong>
-        <p>{{ formatDate(props.summary.lastClickedAt) }}</p>
+        <p>{{ formatDate(summary.lastClickedAt) }}</p>
       </div>
       <div class="list-item">
         <strong>Last referrer</strong>
-        <p>{{ props.summary.lastReferrer ?? 'No referrer captured yet' }}</p>
+        <p>{{ summary.lastReferrer ?? 'No referrer captured yet' }}</p>
       </div>
       <div class="list-item">
         <strong>Browser / device</strong>
         <p>
-          {{ props.summary.lastBrowserFamily ?? 'Unknown browser' }} -
-          {{ props.summary.lastDeviceType ?? 'Unknown device' }}
+          {{ summary.lastBrowserFamily ?? 'Unknown browser' }} -
+          {{ summary.lastDeviceType ?? 'Unknown device' }}
         </p>
       </div>
     </template>
 
-    <div v-if="props.showTopCountries !== false && props.summary.topCountries.length" class="stack">
+    <div v-if="showTopCountries && summary.topCountries.length" class="stack">
       <div>
-        <p class="eyebrow">{{ props.eyebrow ?? 'Top countries' }}</p>
-        <h4 class="card-title">{{ props.title ?? 'Where clicks are coming from' }}</h4>
+        <p class="eyebrow">{{ eyebrow }}</p>
+        <h4 class="card-title">{{ title }}</h4>
       </div>
       <div class="list">
-        <div v-for="country in props.summary.topCountries" :key="country.country" class="list-item">
+        <div v-for="country in summary.topCountries" :key="country.country" class="list-item">
           <strong class="country-label">
             <img
               v-if="countryFlagUrl(country.country)"

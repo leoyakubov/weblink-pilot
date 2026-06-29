@@ -22,8 +22,10 @@ const testConfig = {
 
 if (coverageEnabled) {
   testConfig.coverage = {
+    enabled: true,
     provider: 'v8',
     reporter: ['text', 'html', 'lcov', 'json-summary'],
+    reportsDirectory: path.resolve(frontendRoot, 'coverage'),
     all: true,
     include: ['src/**/*.{ts,vue}'],
     exclude: [

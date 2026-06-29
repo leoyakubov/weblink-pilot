@@ -14,28 +14,29 @@ async function main() {
   const { browser, executablePath } = await launchHeadlessBrowser()
 
   const page = await browser.newPage()
+  const alias = `smoke-${Date.now().toString(36)}`
 
   try {
     await page.goto(baseUrl, { waitUntil: 'networkidle' })
-    await page.getByRole('heading', { name: /short links that feel like a product/i }).waitFor()
+    await page.getByRole('heading', { name: /web link shortener/i }).waitFor()
 
     await page.getByLabel('Original URL').fill('https://github.com/openai')
-    await page.getByLabel('Custom alias').fill('github-openai')
-    await page.getByRole('button', { name: 'Create link' }).click()
+    await page.getByRole('textbox', { name: 'Custom alias' }).fill(alias)
+    await page.getByRole('button', { name: 'Shorten link' }).click()
 
-    await page.getByText('Created github-openai successfully').waitFor()
-    await page.getByRole('link', { name: 'View details page' }).waitFor()
-    await page.getByRole('button', { name: 'Copy short URL' }).waitFor()
+    await page.getByText('Created link', { exact: true }).waitFor()
+    await page.getByRole('link', { name: 'View details' }).waitFor()
+    await page.getByRole('button', { name: 'Copy', exact: true }).waitFor()
 
-    const shortUrlText = await page.getByText('http://localhost:8080/r/github-openai').textContent()
-    assert(shortUrlText?.includes('http://localhost:8080/r/github-openai'), 'Short URL was not rendered as expected')
+    const shortUrlText = await page.getByText(`http://localhost:8080/r/${alias}`).textContent()
+    assert(shortUrlText?.includes(`http://localhost:8080/r/${alias}`), 'Short URL was not rendered as expected')
 
-    await page.getByRole('link', { name: 'View details page' }).click()
-    await page.getByRole('heading', { name: /code: github-openai/i }).waitFor()
-    await page.getByText('Copy QR URL').waitFor()
+    await page.getByRole('link', { name: 'View details' }).click()
+    await page.getByRole('heading', { name: new RegExp(`details of "${alias}"`, 'i') }).waitFor()
+    await page.getByRole('button', { name: 'QR code' }).waitFor()
 
     const detailsUrl = page.url()
-    assert(detailsUrl.includes('/link/github-openai'), `Unexpected details URL: ${detailsUrl}`)
+    assert(detailsUrl.includes(`/link/${alias}`), `Unexpected details URL: ${detailsUrl}`)
 
     console.log(`Smoke test passed against ${baseUrl} using ${path.basename(executablePath)}`)
   } finally {

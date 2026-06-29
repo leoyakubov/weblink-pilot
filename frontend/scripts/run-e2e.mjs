@@ -47,10 +47,14 @@ function startStaticServer(rootDir) {
   const server = http.createServer((req, res) => {
     const requestUrl = new URL(req.url ?? '/', baseUrl);
     const requestPath = decodeURIComponent(requestUrl.pathname);
-    const candidatePath = path.join(rootDir, requestPath === '/' ? 'index.html' : requestPath.slice(1));
-    const filePath = fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()
-      ? candidatePath
-      : path.join(rootDir, 'index.html');
+    const candidatePath = path.join(
+      rootDir,
+      requestPath === '/' ? 'index.html' : requestPath.slice(1),
+    );
+    const filePath =
+      fs.existsSync(candidatePath) && fs.statSync(candidatePath).isFile()
+        ? candidatePath
+        : path.join(rootDir, 'index.html');
 
     fs.readFile(filePath, (error, data) => {
       if (error) {
@@ -98,7 +102,16 @@ async function main() {
   const tempOutDir = buildTempOutputDir();
   const build = spawnSync(
     process.execPath,
-    [viteBin, 'build', '--configLoader', 'runner', '--outDir', tempOutDir, '--emptyOutDir', 'false'],
+    [
+      viteBin,
+      'build',
+      '--configLoader',
+      'runner',
+      '--outDir',
+      tempOutDir,
+      '--emptyOutDir',
+      'false',
+    ],
     {
       cwd: frontendRoot,
       stdio: 'inherit',
@@ -135,6 +148,9 @@ async function main() {
     await waitForBaseUrl(actualBaseUrl);
 
     const testFiles = ['tests/e2e/app-flow.spec.mjs', 'tests/e2e/route-smoke.spec.mjs'];
+    if (process.env.E2E_REAL_BACKEND === '1') {
+      testFiles.push('tests/e2e/fullstack-real.spec.mjs');
+    }
     process.env.E2E_BASE_URL = actualBaseUrl;
 
     const result = spawn(process.execPath, ['--test', ...testFiles], {
