@@ -22,6 +22,10 @@ export SPRING_MAIL_USERNAME=""
 export SPRING_MAIL_PASSWORD=""
 export SPRING_MAIL_SMTP_AUTH="false"
 export SPRING_MAIL_SMTP_STARTTLS="false"
+export APP_AI_PROVIDER="ollama"
+export APP_AI_OLLAMA_BASE_URL="${APP_AI_OLLAMA_BASE_URL:-http://localhost:11434}"
+export APP_AI_OLLAMA_MODEL="${APP_AI_OLLAMA_MODEL:-llama3.2:1b}"
+export APP_AI_OLLAMA_TIMEOUT="${APP_AI_OLLAMA_TIMEOUT:-60s}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker is not available on PATH. Install Docker Desktop and make sure the daemon is running." >&2
@@ -35,13 +39,16 @@ fi
 
 printf '\n'
 printf '||============================================================================================================||\n'
-printf '|| Starting Mailpit for local backend:                                                                         ||\n'
+printf '|| Starting local backend services:                                                                            ||\n'
 printf '||============================================================================================================||\n\n'
 printf '  - %-12s %s\n' "mailpit" "SMTP catcher on port 1025, inbox UI on port 8025"
+printf '  - %-12s %s\n' "ollama" "Local AI provider on port 11434, model $APP_AI_OLLAMA_MODEL"
 printf '\n'
 
 cd "$repo_root"
-docker compose -p weblink-pilot -f "$compose_file" up -d mailpit
+docker compose -p weblink-pilot -f "$compose_file" up -d mailpit ollama
+docker exec weblink-pilot-ollama ollama pull "$APP_AI_OLLAMA_MODEL"
+docker exec weblink-pilot-ollama ollama run "$APP_AI_OLLAMA_MODEL" "Return only: OK" >/dev/null
 
 if ! command -v java >/dev/null 2>&1; then
   echo "java is not available on PATH. Install Java 21 or newer before running this script." >&2

@@ -34,6 +34,25 @@ services:
       - "1025:1025"
       - "8025:8025"
 
+  ollama:
+    image: ollama/ollama:0.12.10
+    container_name: weblink-pilot-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  ollama-pull:
+    image: ollama/ollama:0.12.10
+    container_name: weblink-pilot-ollama-pull
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command: "ollama pull ${APP_AI_OLLAMA_MODEL:-llama3.2:1b} && ollama run ${APP_AI_OLLAMA_MODEL:-llama3.2:1b} 'Return only: OK' >/dev/null"
+    depends_on:
+      ollama:
+        condition: service_started
+
   backend:
     container_name: weblink-pilot-backend
     build:
@@ -51,6 +70,10 @@ services:
       SPRING_MAIL_PORT: 1025
       SPRING_MAIL_SMTP_AUTH: false
       SPRING_MAIL_SMTP_STARTTLS: false
+      APP_AI_PROVIDER: ollama
+      APP_AI_OLLAMA_BASE_URL: ${APP_AI_OLLAMA_BASE_URL:-http://ollama:11434}
+      APP_AI_OLLAMA_MODEL: ${APP_AI_OLLAMA_MODEL:-llama3.2:1b}
+      APP_AI_OLLAMA_TIMEOUT: ${APP_AI_OLLAMA_TIMEOUT:-60s}
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,6 +81,8 @@ services:
         condition: service_healthy
       mailpit:
         condition: service_started
+      ollama-pull:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
 
@@ -72,3 +97,6 @@ services:
       - backend
     ports:
       - "8081:80"
+
+volumes:
+  ollama-data:

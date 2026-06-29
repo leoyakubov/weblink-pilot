@@ -34,6 +34,8 @@ remove_stale_docker_containers \
   weblink-pilot-postgres \
   weblink-pilot-redis \
   weblink-pilot-mailpit \
+  weblink-pilot-ollama \
+  weblink-pilot-ollama-pull \
   weblink-pilot-backend \
   weblink-pilot-frontend
 
@@ -41,6 +43,7 @@ print_box "Starting docker full stack:"
 print_service "$red" "postgres" "PostgreSQL database on port 5432"
 print_service "$magenta" "redis" "Redis cache/session store on port 6379"
 print_service "$yellow" "mailpit" "SMTP catcher on port 1025, inbox UI on port 8025"
+print_service "$blue" "ollama" "Local AI provider on port 11434"
 print_service "$green" "backend" "Spring Boot API on port 8080"
 print_service "$cyan" "frontend" "Vue SPA on port 8081"
 printf '\n'
