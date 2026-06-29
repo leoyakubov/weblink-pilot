@@ -19,7 +19,11 @@ public class AiProperties {
 
   @NotBlank private String promptVersion = "link-metadata-v1";
 
+  private int maxAttempts = 2;
+
   private Ollama ollama = new Ollama();
+
+  private OpenAi openai = new OpenAi();
 
   public boolean isEnabled() {
     return enabled;
@@ -45,12 +49,28 @@ public class AiProperties {
     this.promptVersion = promptVersion;
   }
 
+  public int getMaxAttempts() {
+    return maxAttempts;
+  }
+
+  public void setMaxAttempts(int maxAttempts) {
+    this.maxAttempts = maxAttempts;
+  }
+
   public Ollama getOllama() {
     return ollama;
   }
 
   public void setOllama(Ollama ollama) {
     this.ollama = ollama;
+  }
+
+  public OpenAi getOpenai() {
+    return openai;
+  }
+
+  public void setOpenai(OpenAi openai) {
+    this.openai = openai;
   }
 
   public static class Ollama {
@@ -67,6 +87,49 @@ public class AiProperties {
 
     public void setBaseUrl(String baseUrl) {
       this.baseUrl = baseUrl;
+    }
+
+    public String getModel() {
+      return model;
+    }
+
+    public void setModel(String model) {
+      this.model = model;
+    }
+
+    public Duration getTimeout() {
+      return timeout;
+    }
+
+    public void setTimeout(Duration timeout) {
+      this.timeout = timeout;
+    }
+  }
+
+  public static class OpenAi {
+
+    private String baseUrl = "https://api.openai.com/v1";
+
+    private String apiKey = "";
+
+    private String model = "gpt-4o-mini";
+
+    private Duration timeout = Duration.ofSeconds(30);
+
+    public String getBaseUrl() {
+      return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+      this.baseUrl = baseUrl;
+    }
+
+    public String getApiKey() {
+      return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+      this.apiKey = apiKey;
     }
 
     public String getModel() {

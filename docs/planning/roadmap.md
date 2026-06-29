@@ -29,7 +29,7 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 19  | &#x1F7E2; Done | [Demo visit analytics](#phase-19-demo-visit-analytics)                                             | Added optional Cloudflare Web Analytics injection for the demo frontend, controlled by a build-time token so local/dev stay lightweight.                                                                                    |
 | 20  | &#x1F7E2; Done | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Added security headers, stricter CORS validation, deployment-safe metrics/prometheus access, and dedicated throttling for public auth endpoints; deeper BFF-style auth can remain a future product decision.                |
 | 21  | &#x1F7E2; Done | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Added README test scenarios and flow diagrams for auth, email, link creation, redirects, analytics, admin monitoring, and account recovery.                                                                                |
-| 22  | Planned        | [AI link enrichment](#phase-22-ai-link-enrichment)                                                 | Add practical AI enrichment for created links: generated metadata, summary, category, tags, icon, suggested alias, provider abstraction, async processing, and graceful fallback.                                          |
+| 22  | &#x1F7E2; Done | [AI link enrichment](#phase-22-ai-link-enrichment)                                                 | Added practical AI enrichment for created links with generated metadata, summary, category, tags, icon, suggested alias, provider abstraction, async processing, retry, and graceful fallback.                              |
 | 23  | Planned        | [Codebase refactoring and security review](#phase-23-codebase-refactoring-and-security-review)     | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps.    |
 | 24  | Planned        | [RabbitMQ async messaging](#phase-24-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                   |
 | 25  | Planned        | [Expiry reminder emails](#phase-25-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                             |
@@ -38,8 +38,8 @@ The old implementation checklist has been merged here so we only maintain one pl
 
 Status note:
 
-- Phases 0-21 are already shipped and documented here as the implemented baseline.
-- Phases 22-25 are the remaining roadmap items.
+- Phases 0-22 are already shipped and documented here as the implemented baseline.
+- Phases 23-25 are the remaining roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -603,7 +603,7 @@ Exit criteria:
 - creating a link publishes an enrichment job or event without blocking the create-link response
 - metadata can move through clear states such as `PENDING`, `READY`, `FAILED`, or `DISABLED`
 - AI metadata is stored separately from core short-link lifecycle data
-- link list and link details can display enrichment data when it is ready and a graceful pending/disabled state when it is not
+- link list APIs and link details can expose enrichment data when it is ready and a graceful pending/disabled state when it is not
 - provider configuration, privacy implications, retry/error behavior, and local/demo setup are documented
 
 Checklist:
@@ -611,16 +611,16 @@ Checklist:
 - [x] Add a backend `ai` module with provider, prompt, service, repository, and event/listener boundaries
 - [x] Define `AiProvider` plus `StubAiProvider` for local/tests
 - [x] Add a real local provider implementation through Ollama for optional local/dev use
-- [ ] Add a hosted provider implementation for optional live demo use
+- [x] Add a hosted provider implementation for optional live demo use
 - [x] Add persistence for AI link metadata with status, provider, prompt version, generated fields, and error details
 - [x] Publish or handle link-created enrichment asynchronously after successful link creation
 - [x] Generate title, summary, category, tags, icon, and suggested alias for created links
 - [x] Expose metadata through a dedicated metadata endpoint
 - [x] Display AI metadata on link details with pending, failed, and disabled states
-- [ ] Add aggregated metadata to link lists without N+1 frontend requests
+- [x] Add aggregated metadata to link lists without N+1 frontend requests
 - [x] Add manual metadata regeneration from the link details page
 - [x] Document privacy rules: original URLs may be sent to the configured AI provider, but user secrets and account data must not be sent
-- [ ] Add tests for real provider parsing, retries, and API authorization boundaries
+- [x] Add tests for real provider parsing, retries, and API authorization boundaries
 
 ### Phase 23 - Codebase refactoring and security review
 

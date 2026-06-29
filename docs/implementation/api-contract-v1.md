@@ -69,9 +69,13 @@ Response:
   "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
   "expiresAt": "2026-12-31T23:59:59Z",
   "createdAt": "2026-05-22T11:00:00Z",
-  "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr"
+  "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr",
+  "aiMetadata": null
 }
 ```
+
+`aiMetadata` is `null` immediately after creation unless metadata already exists.
+For list/read responses, it may contain the same object returned by `GET /api/v1/ai/links/{code}/metadata`.
 
 ### 2. Redirect
 

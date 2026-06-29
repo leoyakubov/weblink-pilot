@@ -57,10 +57,16 @@ app:
     enabled: ${APP_AI_ENABLED:true}
     provider: ${APP_AI_PROVIDER:stub}
     prompt-version: ${APP_AI_PROMPT_VERSION:link-metadata-v1}
+    max-attempts: ${APP_AI_MAX_ATTEMPTS:2}
     ollama:
       base-url: ${APP_AI_OLLAMA_BASE_URL:http://localhost:11434}
       model: ${APP_AI_OLLAMA_MODEL:llama3.2:1b}
       timeout: ${APP_AI_OLLAMA_TIMEOUT:60s}
+    openai:
+      base-url: ${APP_AI_OPENAI_BASE_URL:https://api.openai.com/v1}
+      api-key: ${APP_AI_OPENAI_API_KEY:}
+      model: ${APP_AI_OPENAI_MODEL:gpt-4o-mini}
+      timeout: ${APP_AI_OPENAI_TIMEOUT:30s}
   short-link:
     max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}
     cleanup-retention: ${APP_SHORT_LINK_CLEANUP_RETENTION:30d}

@@ -4,11 +4,13 @@ import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.exception.UrlExpiredException;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
+import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,24 +28,32 @@ public class UrlLookupService {
   private final UrlCacheService cacheService;
   private final PublicUrlBuilder publicUrlBuilder;
   private final LinkOwnerMetadataService linkOwnerMetadataService;
+  private final LinkAiMetadataService linkAiMetadataService;
 
   @Autowired
   public UrlLookupService(
       ShortLinkRepository repository,
       UrlCacheService cacheService,
       PublicUrlBuilder publicUrlBuilder,
-      LinkOwnerMetadataService linkOwnerMetadataService) {
+      LinkOwnerMetadataService linkOwnerMetadataService,
+      LinkAiMetadataService linkAiMetadataService) {
     this.repository = repository;
     this.cacheService = cacheService;
     this.publicUrlBuilder = publicUrlBuilder;
     this.linkOwnerMetadataService = linkOwnerMetadataService;
+    this.linkAiMetadataService = linkAiMetadataService;
   }
 
   public UrlLookupService(
       ShortLinkRepository repository,
       UrlCacheService cacheService,
       PublicUrlBuilder publicUrlBuilder) {
-    this(repository, cacheService, publicUrlBuilder, new LinkOwnerMetadataService() {});
+    this(
+        repository,
+        cacheService,
+        publicUrlBuilder,
+        new LinkOwnerMetadataService() {},
+        new LinkAiMetadataService() {});
   }
 
   @Transactional(readOnly = true)
@@ -64,7 +74,7 @@ public class UrlLookupService {
         snapshot.clickCount(),
         hostOf(snapshot.originalUrl()),
         snapshot.expiresAt());
-    return toResponse(snapshot);
+    return toResponse(snapshot, metadataByCodes(List.of(snapshot.code())));
   }
 
   @Transactional(readOnly = true)
@@ -129,13 +139,24 @@ public class UrlLookupService {
               .getContent();
     }
     List<LinkResponse> links =
-        content.stream()
-            .filter(link -> matchesExpirationFilter(link, normalizedExpirationFilter))
-            .limit(size)
-            .map(this::toResponse)
-            .toList();
+        withAiMetadata(
+            content.stream()
+                .filter(link -> matchesExpirationFilter(link, normalizedExpirationFilter))
+                .limit(size)
+                .toList());
     log.info("url.link.list.success limit={} returned={}", size, links.size());
     return links;
+  }
+
+  private List<LinkResponse> withAiMetadata(List<ShortLink> links) {
+    List<String> codes = links.stream().map(ShortLink::getCode).toList();
+    Map<String, AiLinkMetadataResponse> metadata = metadataByCodes(codes);
+    return links.stream().map(link -> toResponse(link, metadata)).toList();
+  }
+
+  private Map<String, AiLinkMetadataResponse> metadataByCodes(List<String> codes) {
+    Map<String, AiLinkMetadataResponse> metadata = linkAiMetadataService.metadataByCodes(codes);
+    return metadata == null ? Map.of() : metadata;
   }
 
   private List<ShortLink> loadFilteredByCreator(String creatorFilter, int size, Sort newestFirst) {
@@ -172,24 +193,27 @@ public class UrlLookupService {
         .getContent();
   }
 
-  private LinkResponse toResponse(ShortLinkSnapshot snapshot) {
+  private LinkResponse toResponse(
+      ShortLinkSnapshot snapshot, Map<String, AiLinkMetadataResponse> metadata) {
     return toResponse(
         snapshot.code(),
         snapshot.originalUrl(),
         snapshot.ownerUsername(),
         snapshot.createdAt(),
         snapshot.expiresAt(),
-        snapshot.clickCount());
+        snapshot.clickCount(),
+        metadata.get(snapshot.code()));
   }
 
-  private LinkResponse toResponse(ShortLink link) {
+  private LinkResponse toResponse(ShortLink link, Map<String, AiLinkMetadataResponse> metadata) {
     return toResponse(
         link.getCode(),
         link.getOriginalUrl(),
         link.getOwnerUsername(),
         link.getCreatedAt(),
         link.getExpiresAt(),
-        link.getClickCount());
+        link.getClickCount(),
+        metadata.get(link.getCode()));
   }
 
   private LinkResponse toResponse(
@@ -198,7 +222,8 @@ public class UrlLookupService {
       String ownerUsername,
       java.time.OffsetDateTime createdAt,
       java.time.OffsetDateTime expiresAt,
-      long clickCount) {
+      long clickCount,
+      AiLinkMetadataResponse aiMetadata) {
     return new LinkResponse(
         code,
         publicUrlBuilder.buildShortUrl(code),
@@ -208,7 +233,8 @@ public class UrlLookupService {
         expiresAt,
         clickCount,
         ownerUsername,
-        ownerUsername == null ? "ANONYMOUS" : linkOwnerMetadataService.roleForOwner(ownerUsername));
+        ownerUsername == null ? "ANONYMOUS" : linkOwnerMetadataService.roleForOwner(ownerUsername),
+        aiMetadata);
   }
 
   private String hostOf(String url) {

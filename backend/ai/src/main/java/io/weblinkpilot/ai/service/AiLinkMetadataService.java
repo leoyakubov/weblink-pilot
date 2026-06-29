@@ -8,12 +8,17 @@ import io.weblinkpilot.ai.domain.AiLinkMetadataStatus;
 import io.weblinkpilot.ai.provider.AiLinkMetadataPrompt;
 import io.weblinkpilot.ai.provider.AiProvider;
 import io.weblinkpilot.ai.repository.AiLinkMetadataRepository;
+import io.weblinkpilot.links.service.LinkAiMetadataService;
 import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
 import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SuppressFBWarnings(
     value = "EI_EXPOSE_REP2",
     justification = "Spring-managed configuration is intentionally retained by this service.")
-public class AiLinkMetadataService {
+public class AiLinkMetadataService implements LinkAiMetadataService {
 
   private static final Logger log = LoggerFactory.getLogger(AiLinkMetadataService.class);
   private static final String SEED_PROVIDER = "seed";
@@ -140,6 +145,22 @@ public class AiLinkMetadataService {
                     null));
   }
 
+  @Override
+  @Transactional(readOnly = true)
+  public Map<String, AiLinkMetadataResponse> metadataByCodes(Collection<String> codes) {
+    List<String> normalizedCodes =
+        codes == null
+            ? List.of()
+            : codes.stream().filter(code -> code != null && !code.isBlank()).distinct().toList();
+    if (normalizedCodes.isEmpty()) {
+      return Map.of();
+    }
+
+    return repository.findAllByShortCodeIn(normalizedCodes).stream()
+        .map(mapper::toResponse)
+        .collect(Collectors.toUnmodifiableMap(AiLinkMetadataResponse::code, Function.identity()));
+  }
+
   @Transactional
   public void seedDefaultMetadata() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
@@ -186,23 +207,43 @@ public class AiLinkMetadataService {
   }
 
   private void generate(AiLinkMetadata metadata, String customAlias) {
-    try {
-      AiProvider provider = provider();
-      metadata.markReady(
-          provider.generateLinkMetadata(
-              new AiLinkMetadataPrompt(
-                  metadata.getShortCode(), metadata.getOriginalUrl(), customAlias)),
-          OffsetDateTime.now(ZoneOffset.UTC));
-      log.info(
-          "ai.metadata.ready code={} provider={} category={}",
-          metadata.getShortCode(),
-          provider.name(),
-          metadata.getCategory());
-    } catch (RuntimeException exception) {
-      metadata.markFailed(safeMessage(exception), OffsetDateTime.now(ZoneOffset.UTC));
-      log.warn(
-          "ai.metadata.failed code={} reason={}", metadata.getShortCode(), exception.getMessage());
+    RuntimeException lastFailure = null;
+    int attempts = Math.max(1, properties.getMaxAttempts());
+    for (int attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        generateOnce(metadata, customAlias);
+        return;
+      } catch (RuntimeException exception) {
+        lastFailure = exception;
+        log.warn(
+            "ai.metadata.attempt_failed code={} attempt={} maxAttempts={} reason={}",
+            metadata.getShortCode(),
+            attempt,
+            attempts,
+            exception.getMessage());
+      }
     }
+
+    RuntimeException failure =
+        lastFailure == null
+            ? new IllegalStateException("AI metadata generation failed")
+            : lastFailure;
+    metadata.markFailed(safeMessage(failure), OffsetDateTime.now(ZoneOffset.UTC));
+    log.warn("ai.metadata.failed code={} reason={}", metadata.getShortCode(), failure.getMessage());
+  }
+
+  private void generateOnce(AiLinkMetadata metadata, String customAlias) {
+    AiProvider provider = provider();
+    metadata.markReady(
+        provider.generateLinkMetadata(
+            new AiLinkMetadataPrompt(
+                metadata.getShortCode(), metadata.getOriginalUrl(), customAlias)),
+        OffsetDateTime.now(ZoneOffset.UTC));
+    log.info(
+        "ai.metadata.ready code={} provider={} category={}",
+        metadata.getShortCode(),
+        provider.name(),
+        metadata.getCategory());
   }
 
   private AiProvider provider() {

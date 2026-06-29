@@ -20,6 +20,7 @@ export interface LinkResponse {
   clickCount: number;
   ownerUsername: string | null;
   ownerRole?: string | null;
+  aiMetadata?: AiLinkMetadataResponse | null;
 }
 
 export interface AiLinkMetadataResponse {

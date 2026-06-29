@@ -11,10 +11,12 @@ import static org.mockito.Mockito.when;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
+import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
 import io.weblinkpilot.shared.contracts.LinkResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,6 +37,8 @@ class UrlLookupServiceTest {
   @Mock private PublicUrlBuilder publicUrlBuilder;
 
   @Mock private LinkOwnerMetadataService linkOwnerMetadataService;
+
+  @Mock private LinkAiMetadataService linkAiMetadataService;
 
   @InjectMocks private UrlLookupService service;
 
@@ -129,6 +133,59 @@ class UrlLookupServiceTest {
     assertThat(pageable.getSort())
         .isEqualTo(
             Sort.by(Sort.Direction.DESC, "createdAt").and(Sort.by(Sort.Direction.DESC, "id")));
+  }
+
+  @Test
+  void listsRecentLinksWithBatchAiMetadata() {
+    final ShortLink first =
+        new ShortLink(
+            "one",
+            "https://github.com/weblinkpilot/weblink-pilot/one",
+            null,
+            null,
+            OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
+            null);
+    final ShortLink second =
+        new ShortLink(
+            "two",
+            "https://github.com/weblinkpilot/weblink-pilot/two",
+            null,
+            null,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            null);
+
+    AiLinkMetadataResponse metadata =
+        new AiLinkMetadataResponse(
+            "two",
+            "READY",
+            "stub",
+            "link-metadata-v1",
+            "Second link",
+            "Generated summary",
+            "Documentation",
+            List.of("docs"),
+            "docs",
+            "second-link",
+            null,
+            OffsetDateTime.now(ZoneOffset.UTC),
+            OffsetDateTime.now(ZoneOffset.UTC));
+
+    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(second, first)));
+    when(linkAiMetadataService.metadataByCodes(List.of("two", "one")))
+        .thenReturn(Map.of("two", metadata));
+    when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
+    when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
+    when(publicUrlBuilder.buildQrCodeUrl("two"))
+        .thenReturn("http://localhost:8080/api/v1/urls/two/qr");
+    when(publicUrlBuilder.buildQrCodeUrl("one"))
+        .thenReturn("http://localhost:8080/api/v1/urls/one/qr");
+
+    final List<LinkResponse> response = service.listRecentLinks(10);
+
+    assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
+    assertThat(response.getFirst().aiMetadata()).isEqualTo(metadata);
+    assertThat(response.get(1).aiMetadata()).isNull();
   }
 
   @Test

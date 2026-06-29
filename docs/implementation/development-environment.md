@@ -234,16 +234,24 @@ AI link enrichment is intentionally safe by default, but local developer workflo
 - `APP_AI_PROVIDER=stub` in the base and demo profiles
 - `APP_AI_PROVIDER=ollama` in `local` and `dev`
 - `APP_AI_PROMPT_VERSION=link-metadata-v1`
+- `APP_AI_MAX_ATTEMPTS=2`
 - `APP_AI_OLLAMA_BASE_URL=http://localhost:11434`
 - `APP_AI_OLLAMA_MODEL=llama3.2:1b`
 - `APP_AI_OLLAMA_TIMEOUT=60s`
+- `APP_AI_OPENAI_BASE_URL=https://api.openai.com/v1`
+- `APP_AI_OPENAI_API_KEY=` blank unless `APP_AI_PROVIDER=openai`
+- `APP_AI_OPENAI_MODEL=gpt-4o-mini`
+- `APP_AI_OPENAI_TIMEOUT=30s`
 
 With the stub provider, the backend does not call OpenAI or any external LLM.
 It derives deterministic demo metadata from the URL after `LinkCreatedEvent` is published.
 With the Ollama provider, the backend calls the local Ollama HTTP API and asks for JSON metadata.
+With the OpenAI-compatible provider, set `APP_AI_PROVIDER=openai` and provide `APP_AI_OPENAI_API_KEY`.
+The OpenAI-compatible provider uses a chat-completions style HTTP endpoint and can also point at compatible gateways by changing `APP_AI_OPENAI_BASE_URL`.
 The metadata is stored in `ai_link_metadata` and can be read from:
 
 - `GET /api/v1/ai/links/{code}/metadata`
+- `GET /api/v1/urls`, where each link may include `aiMetadata` when enrichment is available
 
 Use `APP_AI_ENABLED=false` if you want to keep the lifecycle visible but mark metadata as `DISABLED`.
 Real providers must not receive account secrets, JWTs, passwords, or private user profile data.
