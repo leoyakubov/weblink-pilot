@@ -1,5 +1,6 @@
 package io.weblinkpilot.bootstrap;
 
+import io.weblinkpilot.ai.service.AiLinkMetadataService;
 import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.service.UserAccountService;
@@ -25,16 +26,19 @@ public class BootstrapLinkRunner implements ApplicationRunner {
   private final UrlBootstrapService urlBootstrapService;
   private final AnalyticsBootstrapService analyticsBootstrapService;
   private final UrlStatisticsService urlStatisticsService;
+  private final AiLinkMetadataService aiLinkMetadataService;
 
   public BootstrapLinkRunner(
       UserAccountService userAccountService,
       UrlBootstrapService urlBootstrapService,
       AnalyticsBootstrapService analyticsBootstrapService,
-      UrlStatisticsService urlStatisticsService) {
+      UrlStatisticsService urlStatisticsService,
+      AiLinkMetadataService aiLinkMetadataService) {
     this.userAccountService = userAccountService;
     this.urlBootstrapService = urlBootstrapService;
     this.analyticsBootstrapService = analyticsBootstrapService;
     this.urlStatisticsService = urlStatisticsService;
+    this.aiLinkMetadataService = aiLinkMetadataService;
   }
 
   @Override
@@ -42,6 +46,7 @@ public class BootstrapLinkRunner implements ApplicationRunner {
     UserAccount admin = userAccountService.ensureBootstrapAdmin();
     UserAccount user = userAccountService.ensureBootstrapUser();
     urlBootstrapService.seedDefaultLinks(user == null ? null : user.getUsername());
+    aiLinkMetadataService.seedDefaultMetadata();
     Map<String, Long> seededAnalyticsCounts = analyticsBootstrapService.seedDefaultAnalytics();
     urlStatisticsService.syncClickCounts(seededAnalyticsCounts);
 

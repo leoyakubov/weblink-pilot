@@ -14,6 +14,7 @@
         <module>auth</module>
         <module>links</module>
         <module>analytics</module>
+        <module>ai</module>
         <module>application</module>
         <module>build-support</module>
     </modules>
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>io.weblinkpilot</groupId>
                 <artifactId>analytics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.weblinkpilot</groupId>
+                <artifactId>ai</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

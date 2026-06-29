@@ -53,6 +53,14 @@ app:
     bootstrap-user-role: ${BOOTSTRAP_USER_ROLE:USER}
     bootstrap-user-email: ${BOOTSTRAP_USER_EMAIL:user@weblinkpilot.local}
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+  ai:
+    enabled: ${APP_AI_ENABLED:true}
+    provider: ${APP_AI_PROVIDER:stub}
+    prompt-version: ${APP_AI_PROMPT_VERSION:link-metadata-v1}
+    ollama:
+      base-url: ${APP_AI_OLLAMA_BASE_URL:http://localhost:11434}
+      model: ${APP_AI_OLLAMA_MODEL:llama3.2:1b}
+      timeout: ${APP_AI_OLLAMA_TIMEOUT:60s}
   short-link:
     max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}
     cleanup-retention: ${APP_SHORT_LINK_CLEANUP_RETENTION:30d}
