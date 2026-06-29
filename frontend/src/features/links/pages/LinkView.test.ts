@@ -4,6 +4,8 @@ import LinkView from '@/features/links/pages/LinkView.vue';
 
 const mocks = vi.hoisted(() => ({
   getLinkMock: vi.fn(),
+  getAiLinkMetadataMock: vi.fn(),
+  regenerateAiLinkMetadataMock: vi.fn(),
   getRedirectPreviewMock: vi.fn(),
   getAnalyticsSummaryMock: vi.fn(),
   ApiRequestError: class ApiRequestError extends Error {
@@ -40,8 +42,10 @@ vi.mock('@/shared/services/http', () => ({
 
 vi.mock('@/features/links/repositories/link.repository', () => ({
   getAnalyticsSummary: mocks.getAnalyticsSummaryMock,
+  getAiLinkMetadata: mocks.getAiLinkMetadataMock,
   getLink: mocks.getLinkMock,
   getRedirectPreview: mocks.getRedirectPreviewMock,
+  regenerateAiLinkMetadata: mocks.regenerateAiLinkMetadataMock,
 }));
 
 vi.mock('@/shared/composables/useCopyAction', () => ({
@@ -75,6 +79,21 @@ describe('LinkView', () => {
       clickCount: 3,
       ownerUsername: null,
     });
+    mocks.getAiLinkMetadataMock.mockResolvedValue({
+      code: 'github-org',
+      status: 'READY',
+      provider: 'stub',
+      promptVersion: 'link-metadata-v1',
+      title: 'Main Docs',
+      summary: 'Helpful project documentation.',
+      category: 'Documentation',
+      tags: ['docs', 'project'],
+      icon: 'docs',
+      suggestedAlias: 'main-docs',
+      errorMessage: null,
+      updatedAt: '2026-05-23T11:01:00Z',
+      completedAt: '2026-05-23T11:01:00Z',
+    });
 
     mocks.getRedirectPreviewMock.mockResolvedValue({
       code: 'github-org',
@@ -94,11 +113,18 @@ describe('LinkView', () => {
       refreshToken: '',
     });
     expect(mocks.getAnalyticsSummaryMock).not.toHaveBeenCalled();
+    expect(mocks.getAiLinkMetadataMock).toHaveBeenCalledWith('github-org', {
+      apiBaseUrl: 'http://localhost:8080/api/v1',
+      authToken: '',
+      refreshToken: '',
+    });
 
     expect(wrapper.text()).toContain('Details of "github-org"');
     expect(wrapper.text()).toContain('Main details');
     expect(wrapper.text()).toContain('QR code');
     expect(wrapper.text()).toContain('Analytics');
+    expect(wrapper.text()).toContain('AI enrichment');
+    expect(wrapper.text()).toContain('Main Docs');
     expect(wrapper.text()).toContain(
       'https://github.com/weblinkpilot/weblink-pilot/tree/main/docs',
     );
@@ -116,6 +142,21 @@ describe('LinkView', () => {
       expiresAt: null,
       clickCount: 3,
       ownerUsername: null,
+    });
+    mocks.getAiLinkMetadataMock.mockResolvedValue({
+      code: 'github-org',
+      status: 'PENDING',
+      provider: 'stub',
+      promptVersion: 'link-metadata-v1',
+      title: null,
+      summary: null,
+      category: null,
+      tags: [],
+      icon: null,
+      suggestedAlias: null,
+      errorMessage: null,
+      updatedAt: null,
+      completedAt: null,
     });
 
     mocks.getRedirectPreviewMock.mockResolvedValue({

@@ -6,8 +6,12 @@ import { buildApiBaseUrl } from '@/shared/services/http';
 import { useCopyAction } from '@/shared/composables/useCopyAction';
 import { isAdminUser } from '@/features/auth/services/auth.service';
 import { loadSettings } from '@/shared/services/settings';
-import { getLink } from '@/features/links/repositories/link.repository';
-import type { LinkResponse } from '@/shared/types/api';
+import {
+  getAiLinkMetadata,
+  getLink,
+  regenerateAiLinkMetadata,
+} from '@/features/links/repositories/link.repository';
+import type { AiLinkMetadataResponse, LinkResponse } from '@/shared/types/api';
 import PageIntro from '@/shared/components/common/PageIntro.vue';
 import PanelCard from '@/shared/components/common/PanelCard.vue';
 import QrCodeModal from '@/shared/components/common/QrCodeModal.vue';
@@ -16,7 +20,9 @@ const route = useRoute();
 const settings = loadSettings();
 
 const link = ref<LinkResponse | null>(null);
+const aiMetadata = ref<AiLinkMetadataResponse | null>(null);
 const loading = ref(false);
+const regeneratingAi = ref(false);
 const errorMessage = ref('');
 const qrModalUrl = ref('');
 const qrModalTitle = ref('');
@@ -35,13 +41,30 @@ async function load(codeValue: string) {
 
   try {
     link.value = await getLink(codeValue, settings);
+    try {
+      aiMetadata.value = await getAiLinkMetadata(codeValue, settings);
+    } catch {
+      aiMetadata.value = null;
+    }
   } catch (error) {
     link.value = null;
+    aiMetadata.value = null;
     errorMessage.value = error instanceof Error ? error.message : 'Could not load link details';
   } finally {
     loading.value = false;
   }
 }
+
+const aiMetadataStatus = computed(() => aiMetadata.value?.status ?? 'PENDING');
+
+const aiMetadataTags = computed(() => aiMetadata.value?.tags ?? []);
+
+const regenerateAiLabel = computed(() => {
+  if (regeneratingAi.value) {
+    return 'Regenerating';
+  }
+  return aiMetadataStatus.value === 'FAILED' ? 'Retry' : 'Regenerate';
+});
 
 onMounted(() => load(code.value));
 watch(code, (value) => load(value));
@@ -53,6 +76,19 @@ function openExternal(url: string) {
 function openQrModal(url: string, title: string) {
   qrModalUrl.value = url;
   qrModalTitle.value = title;
+}
+
+async function regenerateAiMetadata() {
+  if (!link.value || regeneratingAi.value) {
+    return;
+  }
+
+  regeneratingAi.value = true;
+  try {
+    aiMetadata.value = await regenerateAiLinkMetadata(link.value.code, settings);
+  } finally {
+    regeneratingAi.value = false;
+  }
 }
 
 async function shareUrl(url: string, label: string, title: string) {
@@ -139,6 +175,26 @@ function formatDate(value: string | null, fallback = 'Never') {
             </div>
           </dl>
 
+          <div class="ai-metadata-card">
+            <div class="ai-metadata-card__heading">
+              <div>
+                <p class="recent-link-label">AI enrichment</p>
+                <strong>{{ aiMetadata?.title ?? 'Metadata is being prepared' }}</strong>
+              </div>
+              <span class="ai-metadata-status">{{ aiMetadataStatus.toLowerCase() }}</span>
+            </div>
+            <p class="ai-metadata-summary">
+              {{
+                aiMetadata?.summary ??
+                'WeblinkPilot enriches new links asynchronously with a readable title, category, tags, and a suggested alias.'
+              }}
+            </p>
+            <div class="ai-metadata-tags">
+              <span v-if="aiMetadata?.category">{{ aiMetadata.category }}</span>
+              <span v-for="tag in aiMetadataTags" :key="tag">#{{ tag }}</span>
+            </div>
+          </div>
+
           <div class="actions recent-link-actions link-detail-actions">
             <RouterLink :to="{ name: 'analytics-detail', params: { code: link.code } }">
               <Button
@@ -181,6 +237,15 @@ function formatDate(value: string | null, fallback = 'Never') {
               severity="secondary"
               variant="outlined"
               @click="openExternal(buildApiBaseUrl(`/urls/${link.code}/preview`, settings))"
+            />
+            <Button
+              type="button"
+              :label="regenerateAiLabel"
+              :icon="regeneratingAi ? 'pi pi-spin pi-spinner' : 'pi pi-refresh'"
+              severity="secondary"
+              variant="outlined"
+              :disabled="regeneratingAi"
+              @click="regenerateAiMetadata"
             />
           </div>
         </template>

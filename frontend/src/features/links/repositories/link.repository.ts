@@ -1,4 +1,5 @@
 import type {
+  AiLinkMetadataResponse,
   ApiSettings,
   AnalyticsDetailsResponse,
   AnalyticsSummaryResponse,
@@ -10,12 +11,14 @@ import type {
 import { loadSettings } from '@/shared/services/settings';
 import {
   createLinkRequest,
+  getAiLinkMetadataRequest,
   getAnalyticsDetailsRequest,
   getAnalyticsSummaryRequest,
   getLinkRequest,
   getLinkCreatorOptionsRequest,
   getRedirectPreviewRequest,
   listLinksRequest,
+  regenerateAiLinkMetadataRequest,
 } from '@/shared/services/http';
 
 export function createLink(request: CreateLinkRequest, settings: ApiSettings = loadSettings()) {
@@ -34,6 +37,14 @@ export function listLinks(
 
 export function getLink(code: string, settings: ApiSettings = loadSettings()) {
   return getLinkRequest(code, settings);
+}
+
+export function getAiLinkMetadata(code: string, settings: ApiSettings = loadSettings()) {
+  return getAiLinkMetadataRequest(code, settings);
+}
+
+export function regenerateAiLinkMetadata(code: string, settings: ApiSettings = loadSettings()) {
+  return regenerateAiLinkMetadataRequest(code, settings);
 }
 
 export function getRedirectPreview(code: string, settings: ApiSettings = loadSettings()) {
@@ -55,6 +66,7 @@ export function getLinkCreatorOptions(settings: ApiSettings = loadSettings()) {
 export type {
   AnalyticsSummaryResponse,
   AnalyticsDetailsResponse,
+  AiLinkMetadataResponse,
   LinkCreatorOptionResponse,
   LinkResponse,
   RedirectPreviewResponse,

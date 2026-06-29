@@ -22,6 +22,22 @@ export interface LinkResponse {
   ownerRole?: string | null;
 }
 
+export interface AiLinkMetadataResponse {
+  code: string;
+  status: string;
+  provider: string;
+  promptVersion: string;
+  title: string | null;
+  summary: string | null;
+  category: string | null;
+  tags: string[];
+  icon: string | null;
+  suggestedAlias: string | null;
+  errorMessage: string | null;
+  updatedAt: string | null;
+  completedAt: string | null;
+}
+
 export interface LinkCreatorOptionResponse {
   username: string;
   role: string;

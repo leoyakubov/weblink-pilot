@@ -3,6 +3,7 @@ import type {
   AdminMonitoringResponse,
   AdminOverviewResponse,
   AdminUserResponse,
+  AiLinkMetadataResponse,
   AnalyticsDetailsResponse,
   AnalyticsSummaryResponse,
   ApiSettings,
@@ -473,6 +474,25 @@ export function getLinkRequest(code: string, settings: ApiSettings = loadSetting
   return requestJson<LinkResponse>(
     `/urls/${encodeURIComponent(code)}`,
     { method: 'GET' },
+    settings,
+  );
+}
+
+export function getAiLinkMetadataRequest(code: string, settings: ApiSettings = loadSettings()) {
+  return requestJson<AiLinkMetadataResponse>(
+    `/ai/links/${encodeURIComponent(code)}/metadata`,
+    { method: 'GET' },
+    settings,
+  );
+}
+
+export function regenerateAiLinkMetadataRequest(
+  code: string,
+  settings: ApiSettings = loadSettings(),
+) {
+  return requestJson<AiLinkMetadataResponse>(
+    `/ai/links/${encodeURIComponent(code)}/metadata/regenerate`,
+    { method: 'POST' },
     settings,
   );
 }

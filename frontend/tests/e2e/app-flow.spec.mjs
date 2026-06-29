@@ -77,6 +77,25 @@ test('guest can create a link and open the details page', async () => {
           ownerUsername: null,
         }),
       }),
+      'GET /api/v1/ai/links/openai-docs/metadata': async () => ({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'openai-docs',
+          status: 'READY',
+          provider: 'stub',
+          promptVersion: 'link-metadata-v1',
+          title: 'Openai Docs',
+          summary: 'A readable AI-style metadata preview for this link.',
+          category: 'Documentation',
+          tags: ['docs', 'ai'],
+          icon: 'docs',
+          suggestedAlias: 'openai-docs',
+          errorMessage: null,
+          updatedAt: '2026-06-12T10:01:00Z',
+          completedAt: '2026-06-12T10:01:00Z',
+        }),
+      }),
       'GET /api/v1/analytics/openai-docs': async () => ({
         status: 200,
         contentType: 'application/json',
@@ -117,7 +136,7 @@ test('guest can create a link and open the details page', async () => {
     await page.getByRole('textbox', { name: 'Custom alias' }).fill('openai-docs');
     await page.getByRole('button', { name: 'Shorten link' }).click();
 
-    await page.getByText('Created link').waitFor();
+    await page.getByText('Created link', { exact: true }).waitFor();
     await page.getByRole('link', { name: 'View details' }).click();
     await page.getByRole('heading', { name: /details of "openai-docs"/i }).waitFor();
 
