@@ -3,6 +3,7 @@ package io.weblinkpilot.auth.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "ObjectMapper is a shared Spring bean and is safe to retain.")
 public class GitHubApiClient {
 
   private static final URI TOKEN_URI = URI.create("https://github.com/login/oauth/access_token");

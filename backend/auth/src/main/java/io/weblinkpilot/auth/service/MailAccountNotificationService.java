@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.MailProperties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -11,6 +12,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class MailAccountNotificationService implements AccountNotificationService {
 
   private static final Logger log = LoggerFactory.getLogger(MailAccountNotificationService.class);
@@ -28,20 +32,19 @@ public class MailAccountNotificationService implements AccountNotificationServic
     send(
         email,
         "Reset your WeblinkPilot password",
-        """
-            Hi,
-
-            We received a request to reset the password for your WeblinkPilot account.
-
-            Reset your password here:
-            %s
-
-            If you did not ask for this, you can safely ignore this message.
-
-            Thanks,
-            The WeblinkPilot team
-            """
-            .formatted(link));
+        String.join(
+            System.lineSeparator(),
+            "Hi,",
+            "",
+            "We received a request to reset the password for your WeblinkPilot account.",
+            "",
+            "Reset your password here:",
+            link,
+            "",
+            "If you did not ask for this, you can safely ignore this message.",
+            "",
+            "Thanks,",
+            "The WeblinkPilot team"));
   }
 
   @Override
@@ -49,20 +52,19 @@ public class MailAccountNotificationService implements AccountNotificationServic
     send(
         email,
         "Verify your WeblinkPilot email",
-        """
-            Hi,
-
-            Welcome to WeblinkPilot. To finish creating your account, please verify your email address.
-
-            Verify your email here:
-            %s
-
-            If you did not create this account, you can ignore this email.
-
-            Thanks,
-            The WeblinkPilot team
-            """
-            .formatted(link));
+        String.join(
+            System.lineSeparator(),
+            "Hi,",
+            "",
+            "Welcome to WeblinkPilot. To finish creating your account, please verify your email address.",
+            "",
+            "Verify your email here:",
+            link,
+            "",
+            "If you did not create this account, you can ignore this email.",
+            "",
+            "Thanks,",
+            "The WeblinkPilot team"));
   }
 
   private void send(String email, String subject, String body) {

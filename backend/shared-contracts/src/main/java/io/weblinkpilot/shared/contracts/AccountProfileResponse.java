@@ -9,4 +9,9 @@ public record AccountProfileResponse(
     boolean emailVerified,
     String createdAt,
     String lastLoginAt,
-    List<AccountIdentityResponse> socialIdentities) {}
+    List<AccountIdentityResponse> socialIdentities) {
+
+  public AccountProfileResponse {
+    socialIdentities = socialIdentities == null ? List.of() : List.copyOf(socialIdentities);
+  }
+}

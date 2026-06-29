@@ -1,5 +1,6 @@
 package io.weblinkpilot.bootstrap;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.service.ShortLinkCleanupService;
 import org.springframework.context.annotation.Profile;
@@ -8,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Profile("!test")
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Spring-managed dependencies are intentionally retained by this job.")
 public class ShortLinkCleanupJob {
 
   private final ShortLinkCleanupService cleanupService;

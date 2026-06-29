@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.domain.SocialIdentity;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class AccountManagementService {
 
   private final UserAccountRepository userAccountRepository;

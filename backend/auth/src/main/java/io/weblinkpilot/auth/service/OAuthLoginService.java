@@ -1,5 +1,6 @@
 package io.weblinkpilot.auth.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.AccountActionTokenType;
 import io.weblinkpilot.auth.domain.UserAccount;
@@ -13,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class OAuthLoginService {
 
   public record AuthSession(String token, String refreshToken, String username, String role) {}

@@ -1,5 +1,6 @@
 package io.weblinkpilot.config;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.weblinkpilot.shared.contracts.AdminMonitoringResponse;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin")
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP2",
+    justification = "Spring-managed dependencies are intentionally retained by this controller.")
 public class AdminMonitoringController {
 
   private final AdminMonitoringService adminMonitoringService;

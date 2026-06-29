@@ -3,6 +3,7 @@ package io.weblinkpilot.auth.service;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.links.service.LinkOwnerMetadataService;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +21,7 @@ public class LinkOwnerMetadataAdapter implements LinkOwnerMetadataService {
       return null;
     }
 
-    return userAccountRepository.findByUsername(username.trim().toLowerCase()).stream()
+    return userAccountRepository.findByUsername(username.trim().toLowerCase(Locale.ROOT)).stream()
         .map(account -> account.getRoleName())
         .findFirst()
         .orElse(null);
