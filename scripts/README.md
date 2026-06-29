@@ -44,9 +44,9 @@ bash ./scripts/run-before-push.sh be
 bash ./scripts/run-before-push.sh fe
 ```
 
-- `all` (default) - backend style, backend coverage, secret scan, frontend style, frontend coverage, E2E, and frontend build
-- `be` / `backend` - backend style and coverage checks only
-- `fe` / `frontend` - frontend style, coverage, E2E, and build checks only
+- `all` (default) - backend style, backend unit/integration tests, backend coverage, backend static analysis, secret scan, frontend style, frontend unit/component tests, frontend coverage, frontend E2E, and frontend build
+- `be` / `backend` - backend style, unit/integration tests, coverage, and static analysis only
+- `fe` / `frontend` - frontend style, unit/component tests, coverage, E2E, and build checks only
 
 ## Requirements
 

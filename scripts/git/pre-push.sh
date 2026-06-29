@@ -53,9 +53,16 @@ frontend_tests_status="SKIPPED"
 frontend_e2e_status="SKIPPED"
 frontend_build_status="SKIPPED"
 
-backend_tests_summary=""
-frontend_tests_summary=""
-frontend_e2e_summary=""
+backend_style_summary="Spotless formatting + Checkstyle API rules"
+backend_tests_summary="unit and integration test suites"
+backend_coverage_summary="JaCoCo module gates + aggregate report"
+backend_static_analysis_summary="SpotBugs static analysis"
+secret_scan_summary="Gitleaks repository scan"
+frontend_style_summary="ESLint + Prettier format check"
+frontend_tests_summary="Vitest unit/component test suites"
+frontend_coverage_summary="Vitest coverage thresholds"
+frontend_e2e_summary="Playwright browser flows via node:test"
+frontend_build_summary="Vue typecheck + Vite production bundle"
 
 if [ "$run_backend" -eq 1 ]; then
   print_box "Running backend style: formatting (Spotless), API checks (Checkstyle)"
@@ -66,7 +73,7 @@ if [ "$run_backend" -eq 1 ]; then
   fi
 
   if [ "$backend_style_status" = "PASS" ]; then
-    print_box "Running backend coverage: tests, JaCoCo gates, aggregate report, SpotBugs"
+    print_box "Running backend tests and coverage: unit tests, integration tests, JaCoCo gates, aggregate report, SpotBugs"
     if bash "$repo_root/scripts/quality/backend-coverage.sh" 2>&1 | tee "$backend_tests_log"; then
       backend_tests_status="PASS"
     else
@@ -94,7 +101,7 @@ if [ "$run_frontend" -eq 1 ] && { [ "$run_secret_scan" -eq 0 ] || [ "$secret_sca
 fi
 
 if [ "$frontend_style_status" = "PASS" ]; then
-  print_box "Running frontend coverage: component tests with Vitest coverage thresholds"
+  print_box "Running frontend unit tests and coverage: Vitest component tests with coverage thresholds"
   if bash "$repo_root/scripts/quality/frontend-coverage.sh" 2>&1 | tee "$frontend_tests_log"; then
     frontend_tests_status="PASS"
   else
@@ -125,13 +132,11 @@ fi
 if [ -s "$backend_tests_log" ]; then
   backend_tests_summary="$(grep -Eo 'Tests run: [0-9]+, Failures: [0-9]+, Errors: [0-9]+, Skipped: [0-9]+' "$backend_tests_log" | tail -n 1 || true)"
   if [ "$backend_tests_status" = "PASS" ]; then
-    backend_tests_summary="JaCoCo gates, aggregate report, SpotBugs"
+    backend_tests_summary="$(node -e 'const fs=require("fs"); const text=fs.readFileSync(process.argv[1],"utf8"); const classResults=[...text.matchAll(/Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+).*? -- in ([^\s]+)/g)]; const totals=classResults.reduce((acc,m)=>{acc.tests+=Number(m[1]); return acc;},{tests:0}); const integration=classResults.filter((m)=>/(IntegrationTest|IT)$/.test(m[5])).length; const unit=Math.max(0, classResults.length - integration); const parts=[]; if (totals.tests) parts.push(`${totals.tests} tests`); parts.push(`${unit} unit suites`); if (integration) parts.push(`${integration} integration suites`); console.log(parts.join("; "));' "$backend_tests_log" 2>/dev/null || true)"
+    backend_static_analysis_summary="SpotBugs static analysis"
     backend_coverage_report="$repo_root/backend/build-support/target/site/jacoco-aggregate/jacoco.csv"
     if [ -f "$backend_coverage_report" ]; then
       backend_coverage_summary="$(node -e 'const fs=require("fs"); const csv=fs.readFileSync(process.argv[1],"utf8").trim().split(/\r?\n/).slice(1); let lineMissed=0,lineCovered=0,branchMissed=0,branchCovered=0; for (const row of csv) { const cols=row.split(","); lineMissed+=Number(cols[7]||0); lineCovered+=Number(cols[8]||0); branchMissed+=Number(cols[5]||0); branchCovered+=Number(cols[6]||0); } const pct=(covered, missed)=> covered + missed === 0 ? "100.0" : ((covered/(covered+missed))*100).toFixed(1); console.log(`lines ${pct(lineCovered,lineMissed)}%, branches ${pct(branchCovered,branchMissed)}%`);' "$backend_coverage_report" 2>/dev/null || true)"
-      if [ -n "$backend_coverage_summary" ]; then
-        backend_tests_summary="$backend_coverage_summary"
-      fi
     fi
   fi
 fi
@@ -140,13 +145,6 @@ if [ -s "$frontend_tests_log" ]; then
   frontend_coverage_report="$repo_root/frontend/coverage/coverage-summary.json"
   if [ -f "$frontend_coverage_report" ]; then
     frontend_coverage_summary="$(node -e 'const fs=require("fs"); const total=JSON.parse(fs.readFileSync(process.argv[1],"utf8")).total; console.log(`lines ${total.lines.pct.toFixed(1)}%, branches ${total.branches.pct.toFixed(1)}%`);' "$frontend_coverage_report" 2>/dev/null || true)"
-    if [ -n "$frontend_coverage_summary" ]; then
-      if [ -n "$frontend_tests_summary" ]; then
-        frontend_tests_summary="$frontend_coverage_summary; $frontend_tests_summary"
-      else
-        frontend_tests_summary="$frontend_coverage_summary"
-      fi
-    fi
   fi
 fi
 if [ -s "$frontend_e2e_log" ]; then
@@ -177,7 +175,7 @@ if [ "$summary_width" -gt 160 ]; then
 fi
 print_box "Summary" "$summary_width" "$summary_color"
 print_summary_border "$summary_color" "$summary_width"
-summary_label_width=20
+summary_label_width=24
 summary_status_width=8
 summary_details_width=$((summary_width - 4 - summary_label_width - summary_status_width - 8))
 if [ "$summary_details_width" -lt 20 ]; then
@@ -187,19 +185,22 @@ printf '%b|| %-*s | %-*s | %-*s ||%b\n' "$summary_color" "$summary_label_width" 
 print_summary_divider "$summary_color" "$summary_width"
 
 if [ "$run_backend" -eq 1 ]; then
-  print_summary_row "backend style" "$backend_style_status" ""
-  print_summary_row "backend coverage" "$backend_tests_status" "$backend_tests_summary"
+  print_summary_row "backend style" "$backend_style_status" "$backend_style_summary"
+  print_summary_row "backend tests" "$backend_tests_status" "$backend_tests_summary"
+  print_summary_row "backend coverage" "$backend_tests_status" "$backend_coverage_summary"
+  print_summary_row "backend static analysis" "$backend_tests_status" "$backend_static_analysis_summary"
 fi
 
 if [ "$run_secret_scan" -eq 1 ]; then
-  print_summary_row "secret scan" "$secret_scan_status" ""
+  print_summary_row "secret scan" "$secret_scan_status" "$secret_scan_summary"
 fi
 
 if [ "$run_frontend" -eq 1 ]; then
-  print_summary_row "frontend style" "$frontend_style_status" ""
-  print_summary_row "frontend coverage" "$frontend_tests_status" "$frontend_tests_summary"
+  print_summary_row "frontend style" "$frontend_style_status" "$frontend_style_summary"
+  print_summary_row "frontend unit tests" "$frontend_tests_status" "$frontend_tests_summary"
+  print_summary_row "frontend coverage" "$frontend_tests_status" "$frontend_coverage_summary"
   print_summary_row "frontend e2e" "$frontend_e2e_status" "$frontend_e2e_summary"
-  print_summary_row "frontend build" "$frontend_build_status" ""
+  print_summary_row "frontend build" "$frontend_build_status" "$frontend_build_summary"
 fi
 
 print_summary_border "$summary_color" "$summary_width"

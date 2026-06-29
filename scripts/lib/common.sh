@@ -133,7 +133,7 @@ print_summary_row() {
   local color badge detail_line label_cell status_cell
   local width="${4:-$(terminal_width)}"
   local inner_width=$((width - 4))
-  local label_width=20
+  local label_width=24
   local badge_width=8
   local details_width=$((inner_width - label_width - badge_width - 8))
   if [ "$width" -lt 160 ]; then
@@ -151,7 +151,7 @@ print_summary_row() {
   if [ "$details_width" -lt 20 ]; then
     details_width=20
   fi
-  label="$(truncate_text "$label" 28)"
+  label="$(truncate_text "$label" "$label_width")"
   label_cell="$label"
   status_cell="$badge"
 
