@@ -1,11 +1,12 @@
 package io.weblinkpilot.links.service;
 
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.api.links.CreateLinkRequest;
+import io.weblinkpilot.shared.api.links.LinkResponse;
+import io.weblinkpilot.shared.ports.LinkOwnershipLookupService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UrlService {
+public class UrlService implements LinkOwnershipLookupService {
 
   private final UrlCreationService creationService;
   private final UrlLookupService lookupService;
@@ -25,6 +26,11 @@ public class UrlService {
 
   public LinkResponse getByCode(String code) {
     return lookupService.getByCode(code);
+  }
+
+  @Override
+  public String ownerUsernameForCode(String code) {
+    return getByCode(code).ownerUsername();
   }
 
   public java.util.List<LinkResponse> listRecentLinks(int limit) {

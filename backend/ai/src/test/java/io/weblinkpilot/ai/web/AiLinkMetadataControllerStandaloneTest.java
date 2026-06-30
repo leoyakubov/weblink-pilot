@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.weblinkpilot.ai.service.AiLinkMetadataService;
-import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
+import io.weblinkpilot.shared.api.ai.AiLinkMetadataResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;

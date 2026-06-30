@@ -3,13 +3,15 @@ package io.weblinkpilot.ai.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import io.weblinkpilot.ai.bootstrap.AiLinkMetadataBootstrapService;
 import io.weblinkpilot.ai.config.AiProperties;
 import io.weblinkpilot.ai.domain.AiLinkMetadataResult;
+import io.weblinkpilot.ai.mapper.AiLinkMetadataMapper;
 import io.weblinkpilot.ai.provider.AiLinkMetadataPrompt;
 import io.weblinkpilot.ai.provider.AiProvider;
 import io.weblinkpilot.ai.provider.StubAiProvider;
 import io.weblinkpilot.ai.repository.AiLinkMetadataRepository;
-import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
+import io.weblinkpilot.shared.events.LinkCreatedEvent;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +35,12 @@ class AiLinkMetadataServiceTest {
   @EnableAutoConfiguration
   @EntityScan("io.weblinkpilot.ai.domain")
   @EnableJpaRepositories("io.weblinkpilot.ai.repository")
-  @Import({AiLinkMetadataService.class, AiLinkMetadataMapper.class, StubAiProvider.class})
+  @Import({
+    AiLinkMetadataService.class,
+    AiLinkMetadataMapper.class,
+    AiLinkMetadataBootstrapService.class,
+    StubAiProvider.class
+  })
   static class TestConfig {
 
     @Bean
@@ -43,6 +50,8 @@ class AiLinkMetadataServiceTest {
   }
 
   @Autowired private AiLinkMetadataService service;
+
+  @Autowired private AiLinkMetadataBootstrapService bootstrapService;
 
   @Autowired private AiLinkMetadataRepository repository;
 
@@ -92,7 +101,7 @@ class AiLinkMetadataServiceTest {
     when(properties.getProvider()).thenReturn("stub");
     when(properties.getPromptVersion()).thenReturn("link-metadata-v1");
 
-    service.seedDefaultMetadata();
+    bootstrapService.seedDefaultMetadata();
 
     var response = service.getByCode("vue-js");
 
@@ -132,7 +141,7 @@ class AiLinkMetadataServiceTest {
     when(properties.getProvider()).thenReturn("stub");
     when(properties.getPromptVersion()).thenReturn("link-metadata-v1");
 
-    service.seedDefaultMetadata();
+    bootstrapService.seedDefaultMetadata();
 
     var metadata = service.metadataByCodes(List.of("redis", "postgres", "missing", "redis"));
 

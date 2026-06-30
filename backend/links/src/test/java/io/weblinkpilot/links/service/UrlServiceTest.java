@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.api.links.LinkResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +37,7 @@ class UrlServiceTest {
 
     LinkResponse result =
         service.create(
-            new io.weblinkpilot.shared.contracts.CreateLinkRequest(
+            new io.weblinkpilot.shared.api.links.CreateLinkRequest(
                 "https://github.com/weblinkpilot/weblink-pilot", "my-link", null));
 
     assertThat(result).isEqualTo(response);

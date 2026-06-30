@@ -14,7 +14,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,11 +25,19 @@ public class OpenAiCompatibleProvider implements AiProvider {
 
   private final AiProperties properties;
   private final ObjectMapper objectMapper;
+  private final AiMetadataPromptRenderer promptRenderer;
+  private final AiMetadataJsonParser jsonParser;
   private final HttpClient httpClient;
 
-  public OpenAiCompatibleProvider(AiProperties properties, ObjectMapper objectMapper) {
+  public OpenAiCompatibleProvider(
+      AiProperties properties,
+      ObjectMapper objectMapper,
+      AiMetadataPromptRenderer promptRenderer,
+      AiMetadataJsonParser jsonParser) {
     this.properties = properties;
     this.objectMapper = objectMapper;
+    this.promptRenderer = promptRenderer;
+    this.jsonParser = jsonParser;
     this.httpClient = HttpClient.newHttpClient();
   }
 
@@ -86,27 +93,10 @@ public class OpenAiCompatibleProvider implements AiProvider {
         new ChatCompletionRequest(
             properties.getOpenai().getModel(),
             List.of(
-                new Message("system", systemPrompt()),
-                new Message(
-                    "user",
-                    "Link code: "
-                        + prompt.code()
-                        + "\nCurrent custom alias: "
-                        + (prompt.customAlias() == null ? "" : prompt.customAlias())
-                        + "\nTarget URL: "
-                        + prompt.originalUrl())),
+                new Message("system", promptRenderer.systemPrompt()),
+                new Message("user", promptRenderer.userPrompt(prompt))),
             new ResponseFormat("json_object"),
             0.2));
-  }
-
-  private String systemPrompt() {
-    return String.join(
-        System.lineSeparator(),
-        "You enrich short links for WeblinkPilot.",
-        "Return only valid JSON with these fields:",
-        "title, summary, category, tags, icon, suggestedAlias.",
-        "Keep values concise and product-friendly.",
-        "Do not include markdown or any fields not requested.");
   }
 
   private AiLinkMetadataResult parseResponse(String body) throws JsonProcessingException {
@@ -116,31 +106,7 @@ public class OpenAiCompatibleProvider implements AiProvider {
       throw new IllegalStateException("OpenAI-compatible response did not include metadata");
     }
 
-    JsonNode metadata = objectMapper.readTree(content.asText());
-    return new AiLinkMetadataResult(
-        text(metadata, "title"),
-        text(metadata, "summary"),
-        text(metadata, "category"),
-        tags(metadata.get("tags")),
-        text(metadata, "icon"),
-        text(metadata, "suggestedAlias"));
-  }
-
-  private String text(JsonNode node, String fieldName) {
-    JsonNode value = node.get(fieldName);
-    return value == null || value.asText().isBlank() ? null : value.asText().trim();
-  }
-
-  private List<String> tags(JsonNode tagsNode) {
-    if (tagsNode == null || !tagsNode.isArray()) {
-      return List.of();
-    }
-    return StreamSupport.stream(tagsNode.spliterator(), false)
-        .map(JsonNode::asText)
-        .map(String::trim)
-        .filter(tag -> !tag.isBlank())
-        .limit(5)
-        .toList();
+    return jsonParser.parse(content.asText());
   }
 
   private record ChatCompletionRequest(

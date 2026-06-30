@@ -1,5 +1,6 @@
 package io.weblinkpilot.analytics.service;
 
+import io.weblinkpilot.shared.cache.CacheNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,9 +14,9 @@ public class AnalyticsCacheService {
 
   @Caching(
       evict = {
-        @CacheEvict(cacheNames = "analyticsCounts", key = "#code"),
-        @CacheEvict(cacheNames = "analyticsSummaries", key = "#code"),
-        @CacheEvict(cacheNames = "analyticsDetails", key = "#code")
+        @CacheEvict(cacheNames = CacheNames.ANALYTICS_COUNTS, key = "#code"),
+        @CacheEvict(cacheNames = CacheNames.ANALYTICS_SUMMARIES, key = "#code"),
+        @CacheEvict(cacheNames = CacheNames.ANALYTICS_DETAILS, key = "#code")
       })
   public void evict(String code) {
     log.debug("analytics.cache.evict code={}", code);

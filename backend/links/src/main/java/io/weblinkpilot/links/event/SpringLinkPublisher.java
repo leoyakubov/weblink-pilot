@@ -1,7 +1,7 @@
 package io.weblinkpilot.links.event;
 
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
+import io.weblinkpilot.shared.events.LinkClickedEvent;
+import io.weblinkpilot.shared.events.LinkCreatedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

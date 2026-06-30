@@ -56,8 +56,13 @@ class OpenAiCompatibleProviderTest {
     properties.getOpenai().setBaseUrl("http://localhost:" + server.getAddress().getPort());
     properties.getOpenai().setApiKey("test-key");
     properties.getOpenai().setModel("demo-model");
+    ObjectMapper objectMapper = new ObjectMapper();
     OpenAiCompatibleProvider provider =
-        new OpenAiCompatibleProvider(properties, new ObjectMapper());
+        new OpenAiCompatibleProvider(
+            properties,
+            objectMapper,
+            new AiMetadataPromptRenderer(),
+            new AiMetadataJsonParser(objectMapper));
 
     var result =
         provider.generateLinkMetadata(

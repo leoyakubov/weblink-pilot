@@ -1,6 +1,6 @@
 package io.weblinkpilot.analytics.service;
 
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
+import io.weblinkpilot.shared.events.LinkClickedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;

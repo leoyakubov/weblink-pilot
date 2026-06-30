@@ -10,10 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
-import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsCountryStatResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.ports.LinkOwnershipLookupService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
@@ -33,7 +32,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Mock private AnalyticsQueryService analyticsQueryService;
 
-  @Mock private UrlService urlService;
+  @Mock private LinkOwnershipLookupService linkOwnershipLookupService;
 
   private AnalyticsController controller;
   private MockMvc mockMvc;
@@ -41,23 +40,14 @@ class AnalyticsControllerStandaloneTest {
   @BeforeEach
   void setUp() {
     controller =
-        new AnalyticsController(analyticsQueryService, urlService, new SimpleMeterRegistry());
+        new AnalyticsController(
+            analyticsQueryService, linkOwnershipLookupService, new SimpleMeterRegistry());
     mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
   }
 
   @Test
   void returnsClickCount() throws Exception {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                null));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn(null);
     when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
 
     mockMvc
@@ -68,17 +58,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void returnsSummary() throws Exception {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                null));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn(null);
     AnalyticsSummaryResponse summary =
         new AnalyticsSummaryResponse(
             "demo",
@@ -88,8 +68,8 @@ class AnalyticsControllerStandaloneTest {
             5L,
             OffsetDateTime.now(ZoneOffset.UTC),
             "https://github.com",
-            "Chrome",
-            "Desktop",
+            "CHROME",
+            "DESKTOP",
             List.of(new AnalyticsCountryStatResponse("US", 3L)));
     when(analyticsQueryService.summarize("demo")).thenReturn(summary);
 
@@ -105,17 +85,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void allowsAnonymousAccessForPublicLinks() {
-    when(urlService.getByCode("public"))
-        .thenReturn(
-            new LinkResponse(
-                "public",
-                "http://localhost:8080/r/public",
-                "http://localhost:8080/api/v1/urls/public/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                null));
+    when(linkOwnershipLookupService.ownerUsernameForCode("public")).thenReturn(null);
     when(analyticsQueryService.countClicks("public")).thenReturn(1L);
 
     long count = controller.count(null, "public");
@@ -125,17 +95,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void rejectsAnonymousAccessForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
 
     assertThatThrownBy(() -> controller.summary(null, "demo"))
         .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
@@ -144,17 +104,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void rejectsDifferentUsersForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
     Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
     when(authentication.isAuthenticated()).thenReturn(true);
     when(authentication.getName()).thenReturn("someone-else");
@@ -169,17 +119,7 @@ class AnalyticsControllerStandaloneTest {
 
   @Test
   void allowsAdminAccessForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
     when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
     Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
     when(authentication.isAuthenticated()).thenReturn(true);

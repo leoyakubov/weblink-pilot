@@ -3,9 +3,9 @@ package io.weblinkpilot.analytics.web;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
-import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.AnalyticsDetailsResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsDetailsResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.ports.LinkOwnershipLookupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,16 +24,16 @@ public class AnalyticsController {
   private static final Logger log = LoggerFactory.getLogger(AnalyticsController.class);
 
   private final AnalyticsQueryService analyticsQueryService;
-  private final UrlService urlService;
+  private final LinkOwnershipLookupService linkOwnershipLookupService;
   private final Counter countCounter;
   private final Counter summaryCounter;
 
   public AnalyticsController(
       AnalyticsQueryService analyticsQueryService,
-      UrlService urlService,
+      LinkOwnershipLookupService linkOwnershipLookupService,
       MeterRegistry meterRegistry) {
     this.analyticsQueryService = analyticsQueryService;
-    this.urlService = urlService;
+    this.linkOwnershipLookupService = linkOwnershipLookupService;
     this.countCounter =
         Counter.builder("weblinkpilot.analytics.count.requests")
             .description("Number of analytics count requests")
@@ -80,7 +80,7 @@ public class AnalyticsController {
   }
 
   private void assertCanReadAnalytics(Authentication authentication, String code) {
-    String ownerUsername = urlService.getByCode(code).ownerUsername();
+    String ownerUsername = linkOwnershipLookupService.ownerUsernameForCode(code);
     if (ownerUsername == null || ownerUsername.isBlank()) {
       return;
     }

@@ -1,12 +1,13 @@
 package io.weblinkpilot.links.service;
 
 import io.weblinkpilot.links.repository.ShortLinkRepository;
+import io.weblinkpilot.shared.ports.LinkStatisticsService;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UrlStatisticsService {
+public class UrlStatisticsService implements LinkStatisticsService {
 
   private final ShortLinkRepository repository;
 
@@ -14,18 +15,22 @@ public class UrlStatisticsService {
     this.repository = repository;
   }
 
+  @Override
   public long countActiveLinks() {
     return repository.countByDeletedAtIsNull();
   }
 
+  @Override
   public long countAnonymousLinks() {
     return repository.countByOwnerUsernameIsNullAndDeletedAtIsNull();
   }
 
+  @Override
   public long countOwnedLinks() {
     return repository.countByOwnerUsernameIsNotNullAndDeletedAtIsNull();
   }
 
+  @Override
   public long sumClickCount() {
     return repository.sumClickCount();
   }

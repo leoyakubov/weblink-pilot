@@ -7,13 +7,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.weblinkpilot.links.service.PublicUrlBuilder;
-import io.weblinkpilot.links.service.QrCodeService;
+import io.weblinkpilot.links.criteria.LinkSearchCriteria;
+import io.weblinkpilot.links.qr.QrCodeService;
 import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
+import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.shared.api.links.CreateLinkRequest;
+import io.weblinkpilot.shared.api.links.LinkResponse;
+import io.weblinkpilot.shared.api.links.RedirectPreviewResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.slf4j.Logger;
@@ -35,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UrlController {
 
   private static final Logger log = LoggerFactory.getLogger(UrlController.class);
+  private static final String DEFAULT_LIMIT_SENTINEL = "0";
+  private static final String ADMIN_AUTHORITY = "ROLE_ADMIN";
 
   private final UrlService urlService;
   private final UrlLookupService urlLookupService;
@@ -116,7 +119,7 @@ public class UrlController {
   @GetMapping
   public ResponseEntity<List<LinkResponse>> list(
       Authentication authentication,
-      @RequestParam(name = "limit", defaultValue = "10") int limit,
+      @RequestParam(name = "limit", defaultValue = DEFAULT_LIMIT_SENTINEL) int limit,
       @RequestParam(name = "creator", required = false) String creator,
       @RequestParam(name = "ownerRole", required = false) String ownerRole,
       @RequestParam(name = "expiration", required = false) String expiration) {
@@ -124,15 +127,16 @@ public class UrlController {
     if (isAuthenticated(authentication)) {
       return ResponseEntity.ok(
           urlLookupService.listRecentLinks(
-              currentUsername(authentication),
-              isAdmin(authentication),
-              creator,
-              ownerRole,
-              expiration,
-              limit));
+              LinkSearchCriteria.user(
+                  currentUsername(authentication),
+                  isAdmin(authentication),
+                  creator,
+                  ownerRole,
+                  expiration,
+                  limit)));
     }
     return ResponseEntity.ok(
-        urlLookupService.listRecentLinks(null, false, null, null, expiration, limit));
+        urlLookupService.listRecentLinks(LinkSearchCriteria.guest(expiration, limit)));
   }
 
   @GetMapping("/{code}")
@@ -189,7 +193,7 @@ public class UrlController {
   private boolean isAdmin(Authentication authentication) {
     return isAuthenticated(authentication)
         && authentication.getAuthorities().stream()
-            .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+            .anyMatch(authority -> ADMIN_AUTHORITY.equals(authority.getAuthority()));
   }
 
   private boolean isAuthenticated(Authentication authentication) {

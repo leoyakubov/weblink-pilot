@@ -84,6 +84,54 @@ public class AiLinkMetadata {
     this.updatedAt = now;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private String shortCode;
+    private String originalUrl;
+    private AiLinkMetadataStatus status;
+    private String provider;
+    private String promptVersion;
+    private OffsetDateTime now;
+
+    public Builder shortCode(String shortCode) {
+      this.shortCode = shortCode;
+      return this;
+    }
+
+    public Builder originalUrl(String originalUrl) {
+      this.originalUrl = originalUrl;
+      return this;
+    }
+
+    public Builder status(AiLinkMetadataStatus status) {
+      this.status = status;
+      return this;
+    }
+
+    public Builder provider(String provider) {
+      this.provider = provider;
+      return this;
+    }
+
+    public Builder promptVersion(String promptVersion) {
+      this.promptVersion = promptVersion;
+      return this;
+    }
+
+    public Builder now(OffsetDateTime now) {
+      this.now = now;
+      return this;
+    }
+
+    public AiLinkMetadata build() {
+      return new AiLinkMetadata(shortCode, originalUrl, status, provider, promptVersion, now);
+    }
+  }
+
   public void markReady(AiLinkMetadataResult result, OffsetDateTime now) {
     this.status = AiLinkMetadataStatus.READY;
     this.title = result.title();

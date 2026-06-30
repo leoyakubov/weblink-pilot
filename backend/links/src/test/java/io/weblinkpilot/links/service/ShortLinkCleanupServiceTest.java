@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import io.weblinkpilot.links.cache.UrlCacheService;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import java.time.Duration;

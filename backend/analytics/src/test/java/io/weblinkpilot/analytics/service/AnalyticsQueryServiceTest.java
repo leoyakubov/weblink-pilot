@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
-import io.weblinkpilot.shared.contracts.AnalyticsDetailsResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.api.analytics.AnalyticsDetailsResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -49,8 +49,8 @@ class AnalyticsQueryServiceTest {
             "Mozilla/5.0",
             "https://github.com",
             "US",
-            "Chrome",
-            "Desktop");
+            "CHROME",
+            "DESKTOP");
     CountryClicksView country =
         new CountryClicksView() {
           @Override
@@ -83,8 +83,8 @@ class AnalyticsQueryServiceTest {
     assertThat(summary.uniqueVisitors()).isEqualTo(4L);
     assertThat(summary.lastClickedAt()).isEqualTo(clickedAt);
     assertThat(summary.lastReferrer()).isEqualTo("https://github.com");
-    assertThat(summary.lastBrowserFamily()).isEqualTo("Chrome");
-    assertThat(summary.lastDeviceType()).isEqualTo("Desktop");
+    assertThat(summary.lastBrowserFamily()).isEqualTo("CHROME");
+    assertThat(summary.lastDeviceType()).isEqualTo("DESKTOP");
     assertThat(summary.topCountries()).hasSize(1);
     assertThat(summary.topCountries().getFirst().country()).isEqualTo("US");
   }

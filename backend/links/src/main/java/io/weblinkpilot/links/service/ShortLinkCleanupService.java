@@ -1,5 +1,6 @@
 package io.weblinkpilot.links.service;
 
+import io.weblinkpilot.links.cache.UrlCacheService;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import java.time.Duration;

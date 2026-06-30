@@ -5,9 +5,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
+import io.weblinkpilot.analytics.event.AnalyticsCacheInvalidationRequestedEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.analytics.useragent.BrowserFamily;
+import io.weblinkpilot.analytics.useragent.DeviceType;
+import io.weblinkpilot.analytics.useragent.UserAgentMetadata;
+import io.weblinkpilot.analytics.useragent.UserAgentParser;
+import io.weblinkpilot.shared.events.LinkClickedEvent;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -32,7 +37,7 @@ class ClickEventRecorderTest {
   @Test
   void recordsEnrichedClickEvent() {
     when(userAgentParser.parse("Mozilla/5.0"))
-        .thenReturn(new UserAgentMetadata("Chrome", "Desktop"));
+        .thenReturn(new UserAgentMetadata(BrowserFamily.CHROME, DeviceType.DESKTOP));
 
     LinkClickedEvent event =
         new LinkClickedEvent(
@@ -53,7 +58,7 @@ class ClickEventRecorderTest {
     assertThat(saved.getShortCode()).isEqualTo("demo");
     assertThat(saved.getEventSource()).isEqualTo(LinkTrackingSource.REDIRECT);
     assertThat(saved.getCountry()).isEqualTo("US");
-    assertThat(saved.getBrowserFamily()).isEqualTo("Chrome");
-    assertThat(saved.getDeviceType()).isEqualTo("Desktop");
+    assertThat(saved.getBrowserFamily()).isEqualTo("CHROME");
+    assertThat(saved.getDeviceType()).isEqualTo("DESKTOP");
   }
 }

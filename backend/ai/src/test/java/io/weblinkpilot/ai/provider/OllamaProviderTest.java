@@ -46,7 +46,13 @@ class OllamaProviderTest {
     properties.setProvider("ollama");
     properties.getOllama().setBaseUrl("http://localhost:" + server.getAddress().getPort());
     properties.getOllama().setModel("llama3.2:1b");
-    OllamaProvider provider = new OllamaProvider(properties, new ObjectMapper());
+    ObjectMapper objectMapper = new ObjectMapper();
+    OllamaProvider provider =
+        new OllamaProvider(
+            properties,
+            objectMapper,
+            new AiMetadataPromptRenderer(),
+            new AiMetadataJsonParser(objectMapper));
 
     var result =
         provider.generateLinkMetadata(

@@ -1,6 +1,6 @@
 package io.weblinkpilot.analytics.domain;
 
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

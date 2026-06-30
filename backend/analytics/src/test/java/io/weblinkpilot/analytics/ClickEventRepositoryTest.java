@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.analytics.repository.CountryClicksView;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -41,8 +41,8 @@ class ClickEventRepositoryTest {
                 "Mozilla/5.0",
                 "https://github.com",
                 "US",
-                "Chrome",
-                "Desktop"),
+                "CHROME",
+                "DESKTOP"),
             new ClickEvent(
                 "demo",
                 second,
@@ -51,8 +51,8 @@ class ClickEventRepositoryTest {
                 "Mozilla/5.0",
                 null,
                 "DE",
-                "Safari",
-                "Mobile"),
+                "SAFARI",
+                "MOBILE"),
             new ClickEvent(
                 "demo",
                 second.plusMinutes(1),
@@ -61,8 +61,8 @@ class ClickEventRepositoryTest {
                 "Mozilla/5.0",
                 null,
                 "US",
-                "Firefox",
-                "Mobile")));
+                "FIREFOX",
+                "MOBILE")));
 
     assertThat(repository.countByShortCode("demo")).isEqualTo(3L);
     assertThat(repository.countByShortCodeAndEventSource("demo", LinkTrackingSource.REDIRECT))

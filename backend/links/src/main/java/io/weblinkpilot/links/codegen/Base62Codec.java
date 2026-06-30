@@ -5,20 +5,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class Base62Codec {
 
-  private static final char[] ALPHABET =
-      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
-
   public String encode(long value) {
     if (value == 0L) {
-      return "0";
+      return String.valueOf(Base62Alphabet.ZERO);
     }
 
     StringBuilder builder = new StringBuilder();
     long current = value;
     while (current > 0) {
-      int index = (int) (current % ALPHABET.length);
-      builder.append(ALPHABET[index]);
-      current /= ALPHABET.length;
+      int index = (int) (current % Base62Alphabet.BASE);
+      builder.append(Base62Alphabet.VALUE.charAt(index));
+      current /= Base62Alphabet.BASE;
     }
     return builder.reverse().toString();
   }

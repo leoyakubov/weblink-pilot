@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.weblinkpilot.links.service.RedirectService;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.links.support.RedirectRequestContext;
+import io.weblinkpilot.links.web.support.RequestContextExtractor;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

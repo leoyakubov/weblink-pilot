@@ -59,6 +59,54 @@ public class ShortLink {
     this.deletedAt = null;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private String code;
+    private String originalUrl;
+    private String customAlias;
+    private String ownerUsername;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime expiresAt;
+
+    public Builder code(String code) {
+      this.code = code;
+      return this;
+    }
+
+    public Builder originalUrl(String originalUrl) {
+      this.originalUrl = originalUrl;
+      return this;
+    }
+
+    public Builder customAlias(String customAlias) {
+      this.customAlias = customAlias;
+      return this;
+    }
+
+    public Builder ownerUsername(String ownerUsername) {
+      this.ownerUsername = ownerUsername;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder expiresAt(OffsetDateTime expiresAt) {
+      this.expiresAt = expiresAt;
+      return this;
+    }
+
+    public ShortLink build() {
+      return new ShortLink(code, originalUrl, customAlias, ownerUsername, createdAt, expiresAt);
+    }
+  }
+
   public Long getId() {
     return id;
   }

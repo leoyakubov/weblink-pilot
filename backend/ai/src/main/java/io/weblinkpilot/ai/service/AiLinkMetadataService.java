@@ -3,14 +3,14 @@ package io.weblinkpilot.ai.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.ai.config.AiProperties;
 import io.weblinkpilot.ai.domain.AiLinkMetadata;
-import io.weblinkpilot.ai.domain.AiLinkMetadataResult;
 import io.weblinkpilot.ai.domain.AiLinkMetadataStatus;
+import io.weblinkpilot.ai.mapper.AiLinkMetadataMapper;
 import io.weblinkpilot.ai.provider.AiLinkMetadataPrompt;
 import io.weblinkpilot.ai.provider.AiProvider;
 import io.weblinkpilot.ai.repository.AiLinkMetadataRepository;
-import io.weblinkpilot.links.service.LinkAiMetadataService;
-import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
-import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
+import io.weblinkpilot.shared.api.ai.AiLinkMetadataResponse;
+import io.weblinkpilot.shared.events.LinkCreatedEvent;
+import io.weblinkpilot.shared.ports.LinkAiMetadataService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
@@ -31,46 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AiLinkMetadataService implements LinkAiMetadataService {
 
   private static final Logger log = LoggerFactory.getLogger(AiLinkMetadataService.class);
-  private static final String SEED_PROVIDER = "seed";
-  private static final String SEED_PROMPT_VERSION = "seeded-link-metadata-v1";
-  private static final List<SeedMetadata> DEFAULT_SEED_METADATA =
-      List.of(
-          new SeedMetadata(
-              "spring-boot",
-              "https://spring.io/projects/spring-boot",
-              "Spring Boot",
-              "Production-ready Java application framework for building APIs, services, and web applications with less setup.",
-              "Programming",
-              List.of("spring", "java", "backend"),
-              "code",
-              "spring-boot"),
-          new SeedMetadata(
-              "vue-js",
-              "https://vuejs.org/guide/introduction.html",
-              "Vue.js Guide",
-              "Official Vue.js introduction for building reactive interfaces and modern frontend applications.",
-              "Frontend",
-              List.of("vue", "javascript", "frontend"),
-              "sparkles",
-              "vue-js"),
-          new SeedMetadata(
-              "postgres",
-              "https://www.postgresql.org/about/",
-              "PostgreSQL",
-              "Overview of the open-source relational database used for reliable data storage and SQL workloads.",
-              "Database",
-              List.of("postgres", "database", "sql"),
-              "database",
-              "postgres"),
-          new SeedMetadata(
-              "redis",
-              "https://redis.io/docs/latest/develop/",
-              "Redis Developer Docs",
-              "Redis documentation for fast data structures, caching, and application performance patterns.",
-              "Database",
-              List.of("redis", "cache", "data"),
-              "database",
-              "redis"));
 
   private final AiProperties properties;
   private final List<AiProvider> providers;
@@ -98,26 +58,28 @@ public class AiLinkMetadataService implements LinkAiMetadataService {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     if (!properties.isEnabled()) {
       repository.save(
-          new AiLinkMetadata(
-              event.code(),
-              event.originalUrl(),
-              AiLinkMetadataStatus.DISABLED,
-              providerName(),
-              properties.getPromptVersion(),
-              now));
+          AiLinkMetadata.builder()
+              .shortCode(event.code())
+              .originalUrl(event.originalUrl())
+              .status(AiLinkMetadataStatus.DISABLED)
+              .provider(providerName())
+              .promptVersion(properties.getPromptVersion())
+              .now(now)
+              .build());
       log.info("ai.metadata.disabled code={}", event.code());
       return;
     }
 
     AiLinkMetadata metadata =
         repository.save(
-            new AiLinkMetadata(
-                event.code(),
-                event.originalUrl(),
-                AiLinkMetadataStatus.PENDING,
-                providerName(),
-                properties.getPromptVersion(),
-                now));
+            AiLinkMetadata.builder()
+                .shortCode(event.code())
+                .originalUrl(event.originalUrl())
+                .status(AiLinkMetadataStatus.PENDING)
+                .provider(providerName())
+                .promptVersion(properties.getPromptVersion())
+                .now(now)
+                .build());
 
     generate(metadata, event.customAlias());
   }
@@ -159,32 +121,6 @@ public class AiLinkMetadataService implements LinkAiMetadataService {
     return repository.findAllByShortCodeIn(normalizedCodes).stream()
         .map(mapper::toResponse)
         .collect(Collectors.toUnmodifiableMap(AiLinkMetadataResponse::code, Function.identity()));
-  }
-
-  @Transactional
-  public void seedDefaultMetadata() {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    for (SeedMetadata seed : DEFAULT_SEED_METADATA) {
-      AiLinkMetadata metadata =
-          repository
-              .findByShortCode(seed.code())
-              .orElseGet(
-                  () ->
-                      new AiLinkMetadata(
-                          seed.code(),
-                          seed.originalUrl(),
-                          AiLinkMetadataStatus.PENDING,
-                          SEED_PROVIDER,
-                          SEED_PROMPT_VERSION,
-                          now));
-      if (metadata.getStatus() == AiLinkMetadataStatus.READY) {
-        continue;
-      }
-      metadata.markPending(SEED_PROVIDER, SEED_PROMPT_VERSION, now);
-      metadata.markReady(seed.toResult(), now);
-      repository.save(metadata);
-      log.info("bootstrap.ai.metadata.seeded code={}", seed.code());
-    }
   }
 
   @Transactional
@@ -264,19 +200,5 @@ public class AiLinkMetadataService implements LinkAiMetadataService {
       return exception.getClass().getSimpleName();
     }
     return message.length() > 1000 ? message.substring(0, 1000) : message;
-  }
-
-  private record SeedMetadata(
-      String code,
-      String originalUrl,
-      String title,
-      String summary,
-      String category,
-      List<String> tags,
-      String icon,
-      String suggestedAlias) {
-    AiLinkMetadataResult toResult() {
-      return new AiLinkMetadataResult(title, summary, category, tags, icon, suggestedAlias);
-    }
   }
 }

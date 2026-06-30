@@ -1,7 +1,7 @@
 package io.weblinkpilot.analytics.repository;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,6 +2,7 @@ package io.weblinkpilot.links.web;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import io.weblinkpilot.links.service.RedirectService;
+import io.weblinkpilot.links.web.support.RequestContextExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import org.springframework.http.HttpHeaders;

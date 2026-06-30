@@ -6,9 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShortCodeGenerator {
 
-  private static final char[] ALPHABET =
-      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
   private static final int DEFAULT_LENGTH = 7;
+  private static final String INVALID_LENGTH_MESSAGE = "length must be positive";
 
   private final SecureRandom random = new SecureRandom();
 
@@ -18,12 +17,12 @@ public class ShortCodeGenerator {
 
   public String generate(int length) {
     if (length <= 0) {
-      throw new IllegalArgumentException("length must be positive");
+      throw new IllegalArgumentException(INVALID_LENGTH_MESSAGE);
     }
 
     StringBuilder builder = new StringBuilder(length);
     for (int i = 0; i < length; i++) {
-      builder.append(ALPHABET[random.nextInt(ALPHABET.length)]);
+      builder.append(Base62Alphabet.VALUE.charAt(random.nextInt(Base62Alphabet.BASE)));
     }
     return builder.toString();
   }

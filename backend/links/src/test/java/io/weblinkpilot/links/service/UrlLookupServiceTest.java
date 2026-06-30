@@ -8,19 +8,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import io.weblinkpilot.links.cache.ShortLinkSnapshot;
+import io.weblinkpilot.links.cache.UrlCacheService;
 import io.weblinkpilot.links.domain.ShortLink;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
+import io.weblinkpilot.links.mapper.LinkResponseMapper;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
-import io.weblinkpilot.shared.contracts.AiLinkMetadataResponse;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.shared.api.ai.AiLinkMetadataResponse;
+import io.weblinkpilot.shared.api.links.LinkResponse;
+import io.weblinkpilot.shared.ports.LinkAiMetadataService;
+import io.weblinkpilot.shared.ports.LinkOwnerMetadataService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -40,7 +46,18 @@ class UrlLookupServiceTest {
 
   @Mock private LinkAiMetadataService linkAiMetadataService;
 
-  @InjectMocks private UrlLookupService service;
+  private UrlLookupService service;
+
+  @BeforeEach
+  void setUp() {
+    service =
+        new UrlLookupService(
+            repository,
+            cacheService,
+            linkOwnerMetadataService,
+            linkAiMetadataService,
+            new LinkResponseMapper(publicUrlBuilder, linkOwnerMetadataService));
+  }
 
   @Test
   void returnsLinkWhenCacheHit() {

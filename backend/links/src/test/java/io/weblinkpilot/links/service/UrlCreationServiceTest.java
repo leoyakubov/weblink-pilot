@@ -7,14 +7,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import io.weblinkpilot.links.cache.UrlCacheService;
 import io.weblinkpilot.links.codegen.ShortCodeGenerator;
 import io.weblinkpilot.links.config.ShortLinkProperties;
 import io.weblinkpilot.links.event.LinkPublisher;
 import io.weblinkpilot.links.exception.DuplicateAliasException;
+import io.weblinkpilot.links.mapper.LinkResponseMapper;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkCreatedEvent;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.links.validation.ShortLinkCreationValidator;
+import io.weblinkpilot.shared.api.links.CreateLinkRequest;
+import io.weblinkpilot.shared.api.links.LinkResponse;
+import io.weblinkpilot.shared.events.LinkCreatedEvent;
+import io.weblinkpilot.shared.ports.LinkOwnerMetadataService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -46,11 +51,11 @@ class UrlCreationServiceTest {
     service =
         new UrlCreationService(
             repository,
-            shortCodeGenerator,
+            new ShortLinkCreationValidator(shortLinkProperties),
+            new ShortCodeAllocationStrategy(repository, shortCodeGenerator, shortLinkProperties),
             cacheService,
             linkPublisher,
-            publicUrlBuilder,
-            shortLinkProperties);
+            new LinkResponseMapper(publicUrlBuilder, new LinkOwnerMetadataService() {}));
   }
 
   @Test
@@ -82,7 +87,7 @@ class UrlCreationServiceTest {
 
   @Test
   void createsGeneratedAliasLink() {
-    when(shortCodeGenerator.generate()).thenReturn("abc1234");
+    when(shortCodeGenerator.generate(7)).thenReturn("abc1234");
     when(repository.existsByCode("abc1234")).thenReturn(false);
     when(repository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
     when(publicUrlBuilder.buildShortUrl("abc1234")).thenReturn("http://localhost:8080/r/abc1234");
@@ -97,7 +102,7 @@ class UrlCreationServiceTest {
     assertThat(response.code()).isEqualTo("abc1234");
     assertThat(response.shortUrl()).isEqualTo("http://localhost:8080/r/abc1234");
     assertThat(response.qrCodeUrl()).isEqualTo("http://localhost:8080/api/v1/urls/abc1234/qr");
-    verify(shortCodeGenerator).generate();
+    verify(shortCodeGenerator).generate(7);
     verify(repository).existsByCode("abc1234");
     verify(cacheService).evict("abc1234");
     verify(linkPublisher).publish(org.mockito.ArgumentMatchers.any(LinkCreatedEvent.class));

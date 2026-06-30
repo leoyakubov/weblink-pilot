@@ -12,8 +12,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.List;
-import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,11 +23,19 @@ public class OllamaProvider implements AiProvider {
 
   private final AiProperties properties;
   private final ObjectMapper objectMapper;
+  private final AiMetadataPromptRenderer promptRenderer;
+  private final AiMetadataJsonParser jsonParser;
   private final HttpClient httpClient;
 
-  public OllamaProvider(AiProperties properties, ObjectMapper objectMapper) {
+  public OllamaProvider(
+      AiProperties properties,
+      ObjectMapper objectMapper,
+      AiMetadataPromptRenderer promptRenderer,
+      AiMetadataJsonParser jsonParser) {
     this.properties = properties;
     this.objectMapper = objectMapper;
+    this.promptRenderer = promptRenderer;
+    this.jsonParser = jsonParser;
     this.httpClient = HttpClient.newHttpClient();
   }
 
@@ -77,30 +83,10 @@ public class OllamaProvider implements AiProvider {
     return objectMapper.writeValueAsString(
         new OllamaGenerateRequest(
             properties.getOllama().getModel(),
-            promptText(prompt),
+            promptRenderer.generationPrompt(prompt),
             false,
             "json",
             new OllamaOptions(0.2)));
-  }
-
-  private String promptText(AiLinkMetadataPrompt prompt) {
-    return String.join(
-        System.lineSeparator(),
-        "You enrich short links for WeblinkPilot.",
-        "Return only valid JSON with these fields:",
-        "title, summary, category, tags, icon, suggestedAlias.",
-        "Rules:",
-        "- title: human readable, max 80 characters",
-        "- summary: one sentence, max 220 characters",
-        "- category: short product-friendly category",
-        "- tags: 2 to 5 lowercase tags",
-        "- icon: one lowercase word such as link, docs, code, repo, video, product",
-        "- suggestedAlias: lowercase URL alias, 3-64 chars, only letters, numbers, dash or underscore",
-        "Do not include markdown.",
-        "",
-        "Link code: " + prompt.code(),
-        "Current custom alias: " + (prompt.customAlias() == null ? "" : prompt.customAlias()),
-        "Target URL: " + prompt.originalUrl());
   }
 
   private AiLinkMetadataResult parseResponse(String body) throws JsonProcessingException {
@@ -110,31 +96,7 @@ public class OllamaProvider implements AiProvider {
       throw new IllegalStateException("Ollama response did not include generated metadata");
     }
 
-    JsonNode metadata = objectMapper.readTree(response.asText());
-    return new AiLinkMetadataResult(
-        text(metadata, "title"),
-        text(metadata, "summary"),
-        text(metadata, "category"),
-        tags(metadata.get("tags")),
-        text(metadata, "icon"),
-        text(metadata, "suggestedAlias"));
-  }
-
-  private String text(JsonNode node, String fieldName) {
-    JsonNode value = node.get(fieldName);
-    return value == null || value.asText().isBlank() ? null : value.asText().trim();
-  }
-
-  private List<String> tags(JsonNode tagsNode) {
-    if (tagsNode == null || !tagsNode.isArray()) {
-      return List.of();
-    }
-    return StreamSupport.stream(tagsNode.spliterator(), false)
-        .map(JsonNode::asText)
-        .map(String::trim)
-        .filter(tag -> !tag.isBlank())
-        .limit(5)
-        .toList();
+    return jsonParser.parse(response.asText());
   }
 
   private record OllamaGenerateRequest(

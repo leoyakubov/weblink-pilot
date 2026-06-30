@@ -2,8 +2,8 @@ package io.weblinkpilot.analytics.service;
 
 import static org.mockito.Mockito.verify;
 
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.events.LinkClickedEvent;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;

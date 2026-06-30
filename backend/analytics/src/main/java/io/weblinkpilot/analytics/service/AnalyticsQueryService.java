@@ -2,13 +2,14 @@ package io.weblinkpilot.analytics.service;
 
 import io.weblinkpilot.analytics.domain.ClickEvent;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
-import io.weblinkpilot.shared.contracts.AnalyticsBreakdownStatResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsBucketStatResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsDetailsResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsEventResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.shared.api.analytics.AnalyticsBreakdownStatResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsBucketStatResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsCountryStatResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsDetailsResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsEventResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.cache.CacheNames;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.net.URI;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class AnalyticsQueryService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(cacheNames = "analyticsCounts", key = "#code")
+  @Cacheable(cacheNames = CacheNames.ANALYTICS_COUNTS, key = "#code")
   public long countClicks(String code) {
     long count = repository.countByShortCode(code);
     log.info("analytics.query.count code={} count={}", code, count);
@@ -50,7 +51,7 @@ public class AnalyticsQueryService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(cacheNames = "analyticsSummaries", key = "#code")
+  @Cacheable(cacheNames = CacheNames.ANALYTICS_SUMMARIES, key = "#code")
   public AnalyticsSummaryResponse summarize(String code) {
     long totalClicks = repository.countByShortCode(code);
     long redirectClicks =
@@ -90,7 +91,7 @@ public class AnalyticsQueryService {
   }
 
   @Transactional(readOnly = true)
-  @Cacheable(cacheNames = "analyticsDetails", key = "#code")
+  @Cacheable(cacheNames = CacheNames.ANALYTICS_DETAILS, key = "#code")
   public AnalyticsDetailsResponse details(String code) {
     List<ClickEvent> events = repository.findByShortCodeOrderByClickedAtAsc(code);
 

@@ -1,12 +1,14 @@
 package io.weblinkpilot.links.service;
 
+import io.weblinkpilot.links.cache.ShortLinkSnapshot;
+import io.weblinkpilot.links.cache.UrlCacheService;
 import io.weblinkpilot.links.event.LinkPublisher;
 import io.weblinkpilot.links.exception.UrlExpiredException;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
-import io.weblinkpilot.links.web.RedirectRequestContext;
-import io.weblinkpilot.shared.contracts.LinkClickedEvent;
-import io.weblinkpilot.shared.contracts.LinkTrackingSource;
+import io.weblinkpilot.links.support.RedirectRequestContext;
+import io.weblinkpilot.shared.events.LinkClickedEvent;
+import io.weblinkpilot.shared.types.LinkTrackingSource;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

@@ -12,13 +12,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.links.config.ShortLinkProperties;
+import io.weblinkpilot.links.criteria.LinkSearchCriteria;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
-import io.weblinkpilot.links.service.PublicUrlBuilder;
-import io.weblinkpilot.links.service.QrCodeService;
+import io.weblinkpilot.links.qr.QrCodeService;
 import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.links.web.error.UrlExceptionHandler;
+import io.weblinkpilot.shared.api.links.CreateLinkRequest;
+import io.weblinkpilot.shared.api.links.LinkResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -47,7 +50,9 @@ class UrlControllerStandaloneTest {
 
   @BeforeEach
   void setUp() {
-    publicUrlBuilder = new PublicUrlBuilder("http://localhost:8080");
+    ShortLinkProperties shortLinkProperties = new ShortLinkProperties();
+    shortLinkProperties.setPublicBaseUrl("http://localhost:8080");
+    publicUrlBuilder = new PublicUrlBuilder(shortLinkProperties);
     final UrlController controller =
         new UrlController(
             urlService,
@@ -115,7 +120,7 @@ class UrlControllerStandaloneTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks(null, false, null, null, null, 10))
+    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
         .thenReturn(List.of(first, second));
 
     mockMvc
@@ -147,7 +152,7 @@ class UrlControllerStandaloneTest {
             null,
             0,
             "alice");
-    when(urlLookupService.listRecentLinks("admin", true, "alice", null, null, 10))
+    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
         .thenReturn(List.of(first, second));
 
     mockMvc
