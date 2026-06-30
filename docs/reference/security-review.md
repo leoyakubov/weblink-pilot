@@ -16,9 +16,10 @@ Status meanings:
 | Broken access control | Public endpoints like metrics/prometheus and any newly added route can widen exposure if not reviewed. | Metrics and Prometheus require admin access by default; only local/dev profiles open them for the Docker Prometheus scrape. Keep deny-by-default security and review every new route. | High | Mitigated |
 | CORS misconfiguration | Loose allowed-origin patterns could let unwanted origins call authenticated APIs. | CORS remains allowlist-driven, credentials are explicit, and wildcard origins are rejected at startup. | High | Mitigated |
 | Brute force and abuse | Login, refresh, password reset, and verification endpoints can be spammed or brute-forced. | Public auth endpoints now use a dedicated, stricter rate-limit bucket in addition to the general API and redirect buckets. | Medium | Mitigated |
-| Sensitive logging | Reset and verification links must never be logged in full because they contain secret tokens. | Log the event, not the secret URL; keep reset and verification tokens hashed at rest. | Medium | Mitigated |
+| Sensitive logging | Reset and verification links must not leak from normal operational logs, and account emails should not be printed in full. | Normal auth logs mask email addresses through `SafeLogValue`; reset and verification tokens stay hashed at rest. Demo mailbox preview links are only emitted when the explicit demo-mailbox mode is enabled. | Medium | Mitigated |
 | Cache serialization | Redis serialization uses broad typing, which is convenient but should stay constrained. | Keep the polymorphic type validator tight or move to explicit serializers for the limited cached types. | Medium | Monitor |
 | Actuator exposure | Health and metrics endpoints are useful, but public metrics can leak deployment details. | `health` and `info` stay public; `metrics` and `prometheus` require admin access by default, with an explicit local/dev exception for Prometheus scraping. | Medium | Mitigated |
+| AI regeneration abuse | Public AI regeneration can consume backend or provider resources if anonymous traffic repeatedly triggers it. | AI metadata reads remain public, but regeneration now requires an authenticated user. If regeneration becomes expensive in demo/prod, add a dedicated AI rate-limit bucket or owner/admin authorization. | Medium | Mitigated |
 
 ## Notes
 
@@ -27,6 +28,8 @@ Status meanings:
 - Refresh cookies default to `SameSite=Lax`. Do not switch demo/prod to cross-site cookies without adding an explicit CSRF token/header flow.
 - SQL injection risk is currently low because the repository layer is mostly parameterized.
 - Phase 20 hardening added security headers, stricter CORS validation, deployment-safe operational metrics, and endpoint-specific auth throttling.
+- Phase 23 started a follow-up pass by centralizing public auth route constants across Spring Security and rate limiting, masking auth email addresses in logs, and protecting AI metadata regeneration behind authentication.
+- Backend maintainability findings are tracked in [backend-code-quality-review.md](backend-code-quality-review.md).
 
 ## Phase 20 Security Defaults
 

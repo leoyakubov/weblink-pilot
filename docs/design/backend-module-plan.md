@@ -12,24 +12,48 @@ The current shape is optimized for:
 
 ## Current Modules
 
-### 1. `shared-contracts`
+### 1. `shared`
 
-Shared DTOs and response contracts used across backend modules.
+Stable public surface shared across backend modules.
 
 Responsibilities:
 
-- request/response records
-- shared response payloads
-- admin overview contract
-- any other cross-module API contract that must stay stable
+- `shared.api.*` request/response records grouped by API area
+- `shared.events` event contracts that cross module boundaries
+- `shared.ports` small interfaces that remove direct feature-module dependencies
+- `shared.types` strict shared enums/value types
+- `shared.seed` reusable demo seed data consumed by links, analytics, and AI
 
 Rules:
 
 - no infrastructure dependencies
 - no business logic
 - minimal surface area
+- no feature-module entities, repositories, controllers, or services
 
-### 2. `url`
+### 2. `auth`
+
+Identity, access, and account lifecycle behavior.
+
+Responsibilities:
+
+- login and registration
+- JWT issuing and refresh sessions
+- password reset and email verification
+- GitHub OAuth
+- user and role management
+- admin user overview
+- account profile and security actions
+
+Core concepts:
+
+- user account
+- role
+- refresh session
+- account action token
+- social identity
+
+### 3. `links`
 
 All short-link lifecycle behavior.
 
@@ -43,6 +67,7 @@ Responsibilities:
 - generate QR payloads
 - maintain redirect-path caching
 - publish click events
+- implement shared link ownership/statistics ports
 
 Core concepts:
 
@@ -52,7 +77,7 @@ Core concepts:
 - QR generation
 - ownership state
 
-### 3. `analytics`
+### 4. `analytics`
 
 Click-event enrichment, persistence, and read models.
 
@@ -71,29 +96,49 @@ Potential enrichments:
 - referrer capture
 - geo enrichment
 
-### 4. `app`
+### 5. `ai`
+
+AI enrichment for short-link metadata.
+
+Responsibilities:
+
+- consume link-created events
+- generate title, summary, category, tags, icon, and suggested alias metadata
+- support stub, Ollama, and OpenAI-compatible providers
+- persist enrichment status and failures
+- expose regeneration/read endpoints
+
+Core concepts:
+
+- AI metadata
+- provider strategy
+- prompt rendering
+- async enrichment worker
+
+### 6. `application`
 
 Application composition and technical wiring.
 
 Responsibilities:
 
 - Spring Boot application bootstrap
-- security configuration
-- JWT auth endpoints
-- user and role management
-- admin monitoring endpoints
-- Flyway wiring
-- cache wiring
-- observability wiring
+- `platform.security` security configuration
+- `platform.web` HTTP/CORS/request infrastructure
+- `platform.admin` admin monitoring endpoints
+- `platform.persistence` Flyway wiring
+- `platform.cache` cache wiring
+- `platform.observability` metrics wiring
 - bootstrap data runners
 - deployment-facing configuration
 
 Rules:
 
-- no domain logic that belongs in `url` or `analytics`
+- no domain logic that belongs in `auth`, `links`, `analytics`, or `ai`
 - use it as the composition root and runtime shell
+- keep technical application infrastructure under `io.weblinkpilot.platform.*`
+- Spring Modulith uses `explicitly-annotated` detection, so only packages marked with `@ApplicationModule` become business modules
 
-### 5. `build-support`
+### 7. `build-support`
 
 Build/reporting module only.
 
@@ -109,10 +154,13 @@ Rules:
 
 ## Module Dependencies
 
-- `url` and `analytics` depend on `shared-contracts`
-- `app` wires the runtime and depends on the feature modules
+- `auth`, `links`, `analytics`, and `ai` depend on `shared`
+- `application` wires the runtime and depends on the feature modules
+- `application` platform packages are infrastructure, not business modules
 - `build-support` only aggregates reports
 - feature modules should not depend on each other's internals
+- cross-feature sync access should go through `shared.ports`
+- cross-feature async communication should go through `shared.events`
 - `build-support` does not participate in the runtime dependency graph
 
 ## Domain Boundaries
@@ -286,11 +334,12 @@ Demo:
 Best future extraction candidates:
 
 - `analytics`
-- `url` if redirect volume or isolation needs grow
+- `links` if redirect volume or isolation needs grow
+- `ai` if provider usage, queues, or cost controls become substantial
 
 Keep extraction cheap by:
 
-- keeping DTO contracts in `shared-contracts`
+- keeping API DTOs, events, ports, and shared value types in `shared`
 - avoiding direct cross-module persistence access
 - using events for click propagation
-- keeping the composition root in `app`
+- keeping the composition root in `application`

@@ -12,18 +12,18 @@ For the Redis-specific scenarios across links, auth, analytics, and rate limitin
 
 | Module | Owns | Notes |
 |---|---|---|
-| `application` | Spring Boot startup, security wiring, observability, rate limiting, bootstrap jobs | Composition root only |
+| `application` | Spring Boot startup plus `platform.*` security, web, cache, persistence, observability, rate limiting, and jobs | Composition root only |
 | `auth` | Authentication, refresh sessions, password reset, email verification, account management, GitHub OAuth | Domain logic for identity and access |
 | `links` | Short-link lifecycle, alias handling, redirects, QR, bootstrap links, cleanup, URL statistics | Domain logic for links |
 | `analytics` | Click-event persistence, enrichment, and summaries | Consumes link events and serves analytics reads |
-| `shared-contracts` | Shared DTOs and event contracts | Stable boundary between modules |
+| `shared` | API DTOs, events, ports, shared types, reusable demo seed data | Stable boundary between modules |
 | `build-support` | JaCoCo aggregation and coverage reporting | Build-only, not part of runtime communication |
 
 ## Communication Rules
 
 - `application` wires modules together but should not hold core business logic.
-- `auth`, `links`, and `analytics` can expose small public services and named interfaces.
-- Cross-module communication should prefer public APIs and shared contracts over repository access.
+- `auth`, `links`, `analytics`, and `ai` can expose small public services through shared ports when another module needs a read-only facade.
+- Cross-module communication should prefer shared ports/events/API DTOs over repository access.
 - Business events are used when the producer should not know about the consumer.
 - Redis is a performance layer, not the source of truth.
 - PostgreSQL is the source of truth for durable business data.
@@ -32,16 +32,16 @@ For the Redis-specific scenarios across links, auth, analytics, and rate limitin
 
 | From | To | Mechanism | Type | Typical Data |
 |---|---|---|---|---|
-| `application` | `auth`, `links`, `analytics` | public services, named interfaces | Sync | bootstrap orchestration, security wiring, health/config access |
-| `auth` | `links` | public statistics facade | Sync | admin link counts, ownership summary |
-| `links` | `analytics` | shared event contracts + Spring application events | Async | `LinkCreatedEvent`, `LinkClickedEvent` |
+| `application` | `auth`, `links`, `analytics`, `ai` | public services, named interfaces | Sync | bootstrap orchestration, security wiring, health/config access |
+| `auth` | `shared.ports.LinkStatisticsService` | shared port implemented by `links` | Sync | admin link counts, ownership summary |
+| `links` | `analytics`, `ai` | shared events + Spring application events | Async | `LinkCreatedEvent`, `LinkClickedEvent` |
 | `links` | Redis | cache-aside | Sync | hot short-code lookups |
 | `links` | PostgreSQL | repository layer | Sync | short links, aliases, ownership, expiration state |
 | `analytics` | PostgreSQL | repository layer | Sync | click events, summary data |
 | `analytics` | Redis | async cache eviction listener | Async | analytics counts and summaries |
 | `auth` | PostgreSQL | repository layer | Sync | users, roles, refresh tokens, password reset tokens, email verification tokens |
 | `auth` | Redis | optional token/session cache | Sync | fast refresh-token lookup and rotation metadata |
-| `analytics` | `links` | read facade | Sync | link read model for summaries and admin views |
+| `analytics` | `shared.ports.LinkOwnershipLookupService` | shared port implemented by `links` | Sync | analytics access checks |
 
 Legend:
 
@@ -55,8 +55,12 @@ flowchart LR
   A["application"] -->|"sync: public services / named interfaces"| B["auth"]
   A -->|"sync: public services / named interfaces"| C["links"]
   A -->|"sync: public services / named interfaces"| D["analytics"]
-  B -->|"sync: statistics facade"| C
+  A -->|"sync: public services / named interfaces"| AI["ai"]
+  B -->|"sync: shared port LinkStatisticsService"| S["shared"]
+  D -->|"sync: shared port LinkOwnershipLookupService"| S
+  C -->|"implements shared ports"| S
   C -->|"async: LinkCreatedEvent / LinkClickedEvent"| D
+  C -->|"async: LinkCreatedEvent"| AI
   C -->|"sync: cache-aside"| R["Redis"]
   D -->|"async: cache invalidation event"| R
   C -->|"sync: repositories"| P["PostgreSQL"]
@@ -207,6 +211,8 @@ Async parts:
 - SMTP delivery through the listener
 - any future retry / failure handling around outbound mail
 
+Technical runtime concerns live under `io.weblinkpilot.platform.*` inside the `application` Maven module. They are not business modules and should not own link, auth, analytics, or AI domain decisions.
+
 Failure policy:
 
 - listener failures are logged centrally
@@ -258,7 +264,7 @@ Redis should never be treated as the only copy of durable auth or link data.
 - `auth` owns identity.
 - `links` owns short-link behavior and redirects.
 - `analytics` owns click processing and reporting.
-- `shared-contracts` keeps the boundary types stable.
+- `shared` keeps the boundary types stable.
 - PostgreSQL is the durable store.
 - Redis is the fast path.
 - events connect modules asynchronously when direct coupling would be worse.

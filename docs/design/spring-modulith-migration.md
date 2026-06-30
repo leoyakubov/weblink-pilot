@@ -18,9 +18,11 @@ This is a migration guide, not an implementation record.
 
 The backend already behaves like a modular monolith:
 
-- business areas are split into Maven modules: `auth`, `links`, `analytics`, and `shared-contracts`
+- business areas are split into Maven modules: `auth`, `links`, `analytics`, `ai`, and `shared`
 - the runtime composition lives in `application`
 - application-level bootstrap delegates demo-link seeding and cleanup work to module services
+- application-level technical infrastructure lives under `io.weblinkpilot.platform.*`
+- Spring Modulith uses `spring.modulith.detection-strategy=explicitly-annotated`
 - configuration packages that are intentionally shared across modules are declared as named interfaces
 - module communication already uses application events in several places
 - ArchUnit and Spring Modulith structure checks are both present
@@ -31,21 +33,25 @@ This is the frozen module map for the current backend:
 
 | Module | Purpose | Public surface |
 |---|---|---|
-| `application` | Spring Boot composition root, bootstrap, config, observability, rate limiting | No business API; wires the app together |
+| `application` | Spring Boot composition root, bootstrap, and `platform.*` technical runtime infrastructure | No business API; wires the app together |
 | `auth` | Login, registration, refresh sessions, password reset, email verification, GitHub OAuth, account management | `AuthService`, `AccountManagementService`, `RefreshTokenService`, `EmailVerificationService`, `PasswordResetService`, `GitHubOAuthService`, `OAuthLoginService`, `UserAccountService`, `RoleCatalogService`, `AdminOverviewService`, auth DTOs, `auth.config` |
 | `links` | Short-link creation, alias handling, redirects, QR, caching, cleanup, seeding | `UrlService`, `UrlLookupService`, `RedirectService`, `PublicUrlBuilder`, `QrCodeService`, `UrlCacheService`, `UrlBootstrapService`, `ShortLinkCleanupService`, `UrlStatisticsService`, link DTOs, `links.config`, `links.service` |
-| `analytics` | Click-event persistence, consumption, enrichment, summaries | `AnalyticsQueryService`, `ClickEventRecorder`, `ClickEventConsumer`, `UserAgentParser`, analytics DTOs |
-| `shared-contracts` | Stable request/response/event contracts shared across modules | `contracts` |
+| `analytics` | Click-event persistence, consumption, enrichment, summaries | `AnalyticsQueryService`, `ClickEventRecorder`, `ClickEventConsumer`, `analytics.useragent`, analytics DTOs |
+| `ai` | AI metadata enrichment for short links | `AiLinkMetadataService`, provider strategies, AI metadata DTOs |
+| `shared` | Stable API DTOs, events, ports, shared types, and reusable demo seed data | `api`, `events`, `ports`, `types`, `seed` |
 | `build-support` | Technical build-only aggregation for coverage reporting | No runtime API; excluded from Modulith boundary thinking |
 
 ### Dependency Policy
 
 - `application` may depend on the public APIs of the feature modules
 - `application` may depend on named interfaces such as `auth.config`, `links.config`, and `links.service`
-- `auth` may depend on `shared-contracts`
-- `auth` may depend on the public `links` statistics facade for admin ownership counts
-- `links` may depend on `shared-contracts`
-- `analytics` may depend on `shared-contracts`
+- `io.weblinkpilot.platform.*` packages are technical infrastructure and are not detected as Spring Modulith business modules
+- `auth` may depend on `shared`
+- `auth` may depend on the shared `LinkStatisticsService` port; `links` implements it
+- `links` may depend on `shared`
+- `analytics` may depend on `shared`
+- `ai` may depend on `shared`
+- feature modules must not directly import other feature modules
 - internal repositories, entities, and helper classes stay internal unless a module explicitly exposes them
 
 ## What Was Still Missing
@@ -104,52 +110,62 @@ Responsible for:
 - persistence
 - analytics summaries and counts
 
-### `shared-contracts`
+### `shared`
 
 Responsible for:
 
-- shared request and response records
-- event contracts that cross module boundaries
+- `shared.api.*` request and response records grouped by API area
+- `shared.events` event contracts that cross module boundaries
+- `shared.ports` small cross-module interfaces
+- `shared.types` strict shared enums/value types
+- `shared.seed` reusable demo seed data consumed by multiple modules
 
 Rules:
 
 - no infrastructure dependencies
 - no business logic
 - minimal and stable surface area
-- expose contracts through the `contracts` named interface
+- expose public surface through named interfaces: `api.*`, `events`, `ports`, `types`, `seed`
 
 ### `application`
 
 Responsible for:
 
 - Spring Boot bootstrap
-- security configuration
-- observability configuration
-- rate limiting
+- `platform.security` security configuration
+- `platform.observability` observability configuration
+- `platform.rate` rate limiting
+- `platform.web` web/CORS/request infrastructure
+- `platform.cache`, `platform.persistence`, `platform.mail`, and `platform.openapi`
 - bootstrap data
 - composition of the application
 
 Rules:
 
-- no core business logic that belongs in `auth`, `links`, or `analytics`
+- no core business logic that belongs in `auth`, `links`, `analytics`, or `ai`
 - treat this as the composition root
+- keep runtime infrastructure grouped under `io.weblinkpilot.platform.*`
 
 ## Allowed Dependencies
 
 ### Recommended direction
 
-- `auth` may depend on `shared-contracts`
-- `auth` may depend on the public URL statistics facade for admin ownership counts
-- `links` may depend on `shared-contracts`
-- `analytics` may depend on `shared-contracts`
+- `auth` may depend on `shared`
+- `links` may depend on `shared`
+- `analytics` may depend on `shared`
+- `ai` may depend on `shared`
+- `auth` may use `shared.ports.LinkStatisticsService`; `links` implements it
+- `analytics` may use `shared.ports.LinkOwnershipLookupService`; `links` implements it
+- `links` may use `shared.ports.LinkAiMetadataService`; `ai` implements it
+- `links` may use `shared.ports.LinkOwnerMetadataService`; `auth` implements it
 - `application` may depend on the public APIs of the feature modules
 - `application` may depend on named interfaces such as `auth.config` and `links.config` when it is acting as the composition root
 
 ### Dependency policy
 
-- `auth` should not depend on `links` internals
-- `links` should not depend on `analytics` internals
-- `analytics` should not depend on hidden implementation classes from `links`
+- feature modules should not directly import other feature modules
+- cross-feature sync reads should go through `shared.ports`
+- cross-feature async notifications should go through `shared.events`
 - internal repositories, entities, and helper classes should stay internal unless a module explicitly exposes them
 
 ## Current Pressure Points
@@ -178,7 +194,7 @@ Migration direction:
 - move seeding behavior behind a module-level API if the data belongs to the module behavior
 - keep bootstrap logic in `application`, but reduce direct repository reach where possible
 
-### `application.config.SecurityConfiguration`
+### `application.platform.security.SecurityConfiguration`
 
 Current issue:
 
@@ -231,14 +247,14 @@ Migration direction:
 Current implementation progress:
 
 - Spring Modulith verification now runs in the backend build
-- `bootstrap` and `config` are intentionally outside the business-module scan because they belong to the composition root
+- `platform.*` and application bootstrap code stay outside business-module detection because Spring Modulith uses explicitly annotated modules
 - `auth` is now a dedicated Maven module instead of living inside `application`
-- `links` and `analytics` use named interfaces for the approved public surfaces
-- `auth` depends on the public `links` statistics facade instead of the repository layer
+- `links`, `analytics`, `auth`, and `ai` use shared ports/events instead of direct feature-module imports
+- `auth` depends on the shared `LinkStatisticsService` port instead of the `links` repository layer
 - demo link seeding now lives behind `links.service.UrlBootstrapService`
 - cleanup job logic now lives behind `links.service.ShortLinkCleanupService`
-- `auth.config`, `links.config`, and `links.service` are explicit named interfaces
-- Maven modules now use production-style names: `application`, `auth`, `links`, `analytics`, `shared-contracts`
+- `shared` exposes public surface through `api.*`, `events`, `ports`, `types`, and `seed`
+- Maven modules now use production-style names: `application`, `auth`, `links`, `analytics`, `ai`, `shared`
 
 ### Step 3 - Define named interfaces
 
@@ -267,7 +283,7 @@ Current implementation progress:
 The migration is ready when:
 
 - the module map is explicitly documented
-- `auth`, `links`, `analytics`, `shared-contracts`, `build-support`, and `application` are represented as separate Maven modules
+- `auth`, `links`, `analytics`, `ai`, `shared`, `build-support`, and `application` are represented as separate Maven modules
 - structural checks enforce the intended boundaries
 - the public API of each module is clear
 - direct cross-module coupling is reduced to the agreed minimum

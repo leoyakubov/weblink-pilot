@@ -33,23 +33,40 @@ Why this fits the project:
 
 ## 3. Current Backend Modules
 
-### `shared-contracts`
+### `shared`
 
-Shared DTOs and response contracts used across backend modules.
+Stable cross-module surface used by backend modules.
 
 Responsibilities:
 
-- request and response records
-- shared response payloads
-- admin overview contract
+- `shared.api.*` request and response records grouped by API area
+- `shared.events` application events that cross module boundaries
+- `shared.ports` small interfaces used to avoid direct business-module dependencies
+- `shared.types` strict shared enums/value types
+- `shared.seed` reusable demo seed catalog for links, analytics, and AI metadata
 
 Rules:
 
 - no infrastructure dependencies
 - no business logic
+- no repositories, controllers, or domain entities from feature modules
 - stable API surface between modules
 
-### `url`
+### `auth`
+
+Identity and account lifecycle behavior.
+
+Responsibilities:
+
+- username/password login and registration
+- JWT and refresh-token session management
+- password reset and email verification
+- GitHub OAuth login
+- user roles and admin users view
+- account/profile/security actions
+- owner metadata port implementation for other modules
+
+### `links`
 
 All short-link lifecycle behavior.
 
@@ -63,6 +80,7 @@ Responsibilities:
 - generate QR payloads
 - publish click events
 - keep the hot lookup path cache-friendly
+- expose link ownership/statistics ports for other modules
 
 ### `analytics`
 
@@ -76,7 +94,18 @@ Responsibilities:
 - expose analytics summary endpoints
 - manage analytics cache invalidation
 
-### `app`
+### `ai`
+
+AI metadata enrichment for created links.
+
+Responsibilities:
+
+- listen to link-created events
+- generate title, summary, category, tags, and icon metadata
+- support stub, Ollama, and OpenAI-compatible providers
+- store enrichment status and retry failures safely
+
+### `application`
 
 Runtime composition and technical wiring.
 
@@ -250,9 +279,10 @@ Current monitoring direction:
 Most likely future extraction candidates:
 
 - `analytics`
-- `url` if redirect load or isolation needs grow
+- `links` if redirect load or isolation needs grow
+- `ai` if provider usage, queueing, or cost controls grow
 
-Auth is expected to stay in the `app` composition root unless it grows into a much larger subsystem.
+Auth is already a feature module and should stay inside the modular monolith unless identity requirements grow into a separate product boundary.
 
 ## 13. Non-Functional Requirements
 

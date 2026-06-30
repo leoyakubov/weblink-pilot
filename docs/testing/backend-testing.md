@@ -39,7 +39,7 @@ Use these when you want a production-like PostgreSQL database instead of H2:
 
 Example in this repo:
 
-- `backend/application/src/test/java/io/weblinkpilot/config/testcontainers/PostgresUrlApiIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/platform/persistence/testcontainers/PostgresUrlApiIntegrationTest.java`
 
 ### Integration tests
 
@@ -57,8 +57,8 @@ Examples in this repo:
 - `backend/application/src/test/java/io/weblinkpilot/ApplicationContextTest.java`
 - `backend/application/src/test/java/io/weblinkpilot/links/web/UrlApiIntegrationTest.java`
 - `backend/application/src/test/java/io/weblinkpilot/analytics/web/AnalyticsApiIntegrationTest.java`
-- `backend/application/src/test/java/io/weblinkpilot/config/rate/RateLimitIntegrationTest.java`
-- `backend/application/src/test/java/io/weblinkpilot/config/observability/ObservabilityIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/platform/rate/RateLimitIntegrationTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/platform/observability/ObservabilityIntegrationTest.java`
 
 ### Contract tests
 

@@ -30,16 +30,18 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 20  | &#x1F7E2; Done | [Security hardening follow-up](#phase-20-security-hardening-follow-up)                             | Added security headers, stricter CORS validation, deployment-safe metrics/prometheus access, and dedicated throttling for public auth endpoints; deeper BFF-style auth can remain a future product decision.                |
 | 21  | &#x1F7E2; Done | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Added README test scenarios and flow diagrams for auth, email, link creation, redirects, analytics, admin monitoring, and account recovery.                                                                                |
 | 22  | &#x1F7E2; Done | [AI link enrichment](#phase-22-ai-link-enrichment)                                                 | Added practical AI enrichment for created links with generated metadata, summary, category, tags, icon, suggested alias, provider abstraction, async processing, retry, and graceful fallback.                              |
-| 23  | Planned        | [Codebase refactoring and security review](#phase-23-codebase-refactoring-and-security-review)     | Review backend, frontend, and supporting files for best practices, coding smells, hardcoded values, magic strings and numbers, oversized classes, logging quality, sensitive data exposure, and overall security gaps.    |
-| 24  | Planned        | [RabbitMQ async messaging](#phase-24-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                   |
-| 25  | Planned        | [Expiry reminder emails](#phase-25-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                             |
+| 23  | &#x1F7E2; Done | [Codebase refactoring and security review](#phase-23-codebase-refactoring-and-security-review)     | Completed backend maintainability/security pass: route policy constants, auth log masking, AI regenerate protection, typed link filters, link response mapper, demo seed catalog, token digest utility, monitoring split, refresh-token support split, AI provider helper split, URL creation split, and monitoring health status enum are in place. |
+| 24  | Planned        | [Pagination for list pages](#phase-24-pagination-for-links-and-analytics-list-pages)                | Add pagination to the links, analytics, and admin users list pages across backend APIs, frontend tables, and supporting docs so large datasets stay usable.                                                              |
+| 25  | Planned        | [Email templating engine](#phase-25-email-templating-engine)                                        | Move auth and reminder emails to a proper templating engine so mail content, layout, and localization can evolve without string-concatenation templates.                                                                  |
+| 26  | Planned        | [RabbitMQ async messaging](#phase-26-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                   |
+| 27  | Planned        | [Expiry reminder emails](#phase-27-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                             |
 
 ## Execution Checklist
 
 Status note:
 
-- Phases 0-22 are already shipped and documented here as the implemented baseline.
-- Phases 23-25 are the remaining roadmap items.
+- Phases 0-23 are already shipped and documented here as the implemented baseline.
+- Phases 24-27 are the remaining planned roadmap items.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -75,7 +77,7 @@ Goals:
 - create backend module structure
 - wire Spring Boot application
 - configure PostgreSQL, Flyway, security, cache, and basic observability
-- define shared contracts and domain modules
+- define shared API/events/ports and domain modules
 
 Exit criteria:
 
@@ -89,7 +91,7 @@ Checklist:
 - [x] Created the backend module structure
 - [x] Wired the Spring Boot application
 - [x] Configured PostgreSQL, Flyway, security, cache, and observability
-- [x] Defined shared contracts and domain modules
+- [x] Defined shared API/events/ports and domain modules
 
 ### Phase 2 - Tests, code quality, Sonar
 
@@ -642,13 +644,82 @@ Exit criteria:
 
 Checklist:
 
-- [ ] Review backend, frontend, and docs/scripts for best practices
-- [ ] Replace hardcoded values and magic strings/numbers where appropriate
-- [ ] Split large classes and services where it improves clarity
-- [ ] Review logging for quality and sensitive-data exposure
-- [ ] Run a full-project security review
+- [x] Review backend, frontend, and docs/scripts for best practices
+- [x] Replace hardcoded values and magic strings/numbers where appropriate
+- [x] Split large classes and services where it improves clarity
+- [x] Review logging for quality and sensitive-data exposure
+- [x] Run a full-project security review
 
-### Phase 24 - RabbitMQ async messaging
+Progress notes:
+
+- Started with backend route-policy duplication: public auth route constants are now shared by Spring Security authorization and rate limiting.
+- Started the sensitive logging pass: auth reset, verification, mail, controller, and GitHub-link logs now mask email addresses through one helper.
+- Protected AI metadata regeneration: metadata reads remain public, but regeneration now requires authentication so anonymous traffic cannot trigger backend/provider work.
+- Replaced raw link-list filter strings with `LinkSearchCriteria` and `ExpirationFilter`, and centralized link DTO creation in `LinkResponseMapper`.
+- Extracted demo link and AI seed identity into `DemoSeedDataCatalog`, so link seeding, AI seed metadata, and monitoring checks share one source of truth.
+- Extracted refresh-token SHA-256/base64-url hashing into `TokenDigest` with a focused unit test.
+- Split admin monitoring into focused runtime metrics, health-check, configuration snapshot, and facade services.
+- Split refresh-token Redis session caching, per-user token indexing, and after-commit execution into focused collaborators.
+- Split AI provider prompt rendering and metadata JSON parsing into shared provider helpers.
+- Split URL creation validation and generated-code allocation into focused collaborators.
+- Replaced internal monitoring health-status strings with `AdminHealthStatus` while keeping API response values unchanged.
+- Added [backend-code-quality-review.md](../reference/backend-code-quality-review.md) to track the Effective Java/code-smell review and remaining refactor candidates.
+- Verified the completed pass with `./scripts/run-before-push.sh`: backend style, tests, coverage, SpotBugs, secret scan, frontend style, unit/component tests, frontend coverage, e2e, and production build all pass.
+- Current accepted risk remains the browser-side access-token storage tradeoff documented in [security-review.md](../reference/security-review.md).
+
+### Phase 24 - Pagination for links and analytics list pages
+
+Goals:
+
+- add page-based pagination to the links list and analytics list endpoints
+- add page-based pagination to the admin users list endpoint
+- expose pagination controls in the frontend tables and summary views
+- keep sorting, filtering, and empty states consistent across all list surfaces
+- update docs so the API contract and UI behavior stay discoverable
+
+Exit criteria:
+
+- large link and analytics lists remain usable without loading everything at once
+- large admin users lists remain usable without loading everything at once
+- backend endpoints return stable pagination metadata
+- frontend pages support moving between pages without losing the current filters
+- API and testing docs describe the pagination behavior
+
+Checklist:
+
+- [ ] Add backend pagination to links list endpoints
+- [ ] Add backend pagination to analytics list endpoints
+- [ ] Add backend pagination to admin users list endpoints
+- [ ] Add frontend pagination controls for links pages
+- [ ] Add frontend pagination controls for analytics pages
+- [ ] Add frontend pagination controls for admin users pages
+- [ ] Update API, testing, and docs references for the new list behavior
+
+### Phase 25 - Email templating engine
+
+Goals:
+
+- move auth and reminder emails away from ad hoc string assembly
+- use a real templating engine for email layout and reusable fragments
+- keep the email content easier to maintain, review, and localize
+- preserve the current delivery flow and tests while changing only the rendering layer
+
+Exit criteria:
+
+- email templates are rendered through a proper templating engine
+- auth and reminder emails share reusable layout/components
+- email rendering has focused tests for the important variants
+- docs explain how to update or add templates
+
+Checklist:
+
+- [ ] Pick and wire the templating engine
+- [ ] Migrate password-reset and verification emails
+- [ ] Migrate expiry reminder emails
+- [ ] Add template-focused tests
+- [ ] Document the email template workflow
+
+### Phase 26 - RabbitMQ async messaging
 
 Goals:
 
@@ -671,7 +742,7 @@ Checklist:
 - [ ] Add integration tests for the queue-backed flow
 - [ ] Keep RabbitMQ optional until the need is proven
 
-### Phase 25 - Expiry reminder emails
+### Phase 27 - Expiry reminder emails
 
 Goals:
 
@@ -721,5 +792,7 @@ Checklist:
 21. testing scenarios and README polish
 22. AI link enrichment
 23. codebase refactoring and security review
-24. RabbitMQ async messaging
-25. expiry reminder emails
+24. pagination for links and analytics list pages
+25. email templating engine
+26. RabbitMQ async messaging
+27. expiry reminder emails

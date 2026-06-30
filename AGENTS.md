@@ -8,10 +8,12 @@ This file is intentionally agent-focused. Human-facing project docs stay in `REA
 
 - WeblinkPilot is a monorepo with a Java/Spring Boot modular backend and a Vue frontend.
 - The backend is a modular monolith under `backend/`:
-  - `shared-contracts` contains DTOs and cross-module contracts.
-  - `url` owns short-link lifecycle behavior.
+  - `shared` contains API DTOs, events, ports, shared types, and reusable demo seed data.
+  - `auth` owns identity, roles, sessions, account actions, and OAuth behavior.
+  - `links` owns short-link lifecycle behavior.
   - `analytics` owns click/event analytics behavior.
-  - `app` wires runtime, security, persistence, bootstrap, and HTTP controllers.
+  - `ai` owns AI metadata enrichment behavior.
+  - `application` is the composition root; its technical runtime code lives under `io.weblinkpilot.platform.*`.
 - The frontend lives under `frontend/` and is a Vue SPA.
 - Automation uses one Bash-only script set under `scripts/`.
 - On Windows, run project scripts inside WSL rather than maintaining PowerShell duplicates.
@@ -39,9 +41,9 @@ Update the relevant doc when a change becomes part of the durable project baseli
 ## Implementation Boundaries
 
 - Keep backend module boundaries intact.
-- Do not put URL lifecycle logic into `app` unless it is HTTP/runtime wiring.
+- Do not put link lifecycle logic into `application` unless it is HTTP/runtime wiring.
 - Do not put analytics domain logic into controllers.
-- Keep shared contracts stable and update frontend types/tests when contracts change.
+- Keep shared API/events/ports stable and update frontend types/tests when contracts change.
 - Follow existing Spring Boot, JPA, Flyway, Vue, and script patterns before introducing new abstractions.
 - Ask before adding new production dependencies or external services.
 

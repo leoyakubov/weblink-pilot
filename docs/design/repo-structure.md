@@ -7,10 +7,13 @@ weblink-pilot/
 |-- AGENTS.md
 |-- backend/
 |   |-- pom.xml
-|   |-- shared-contracts/
-|   |-- url/
+|   |-- shared/
+|   |-- auth/
+|   |-- links/
 |   |-- analytics/
-|   `-- app/
+|   |-- ai/
+|   |-- application/
+|   `-- build-support/
 |-- frontend/
 |   |-- package.json
 |   |-- src/
@@ -61,10 +64,13 @@ weblink-pilot/
 
 Backend should remain a modular monolith:
 
-- `shared-contracts` for DTOs, events, and cross-module contracts
-- `url` for URL lifecycle
+- `shared` for API DTOs, events, shared value types, ports, and reusable demo seed data
+- `auth` for identity, roles, sessions, account actions, and OAuth
+- `links` for short-link lifecycle
 - `analytics` for click event processing
-- `app` for wiring, security, and runtime
+- `ai` for link metadata enrichment providers and workers
+- `application` for the Spring Boot composition root plus `io.weblinkpilot.platform.*` runtime infrastructure
+- `build-support` for coverage aggregation only
 
 ## Frontend structure
 

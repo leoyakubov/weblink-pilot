@@ -49,7 +49,7 @@ Why:
 
 ### Backend modules
 
-- `shared-contracts`
+- `shared`
 - `auth`
 - `links`
 - `analytics`

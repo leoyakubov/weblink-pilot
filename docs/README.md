@@ -40,6 +40,7 @@ This repo keeps one documentation tree with a small set of categories so it is e
 - [Changelog](../CHANGELOG.md) - release notes for shipped user-visible changes.
 - [Interview Notes](reference/interview-notes.md) - short talking points and trade-offs for interviews.
 - [Security Review](reference/security-review.md) - OWASP-style risks, fixes, priorities, and status.
+- [GitHub Presentation Checklist](reference/github-presentation.md) - README, screenshots, topics, releases, and repo-settings polish.
 
 ## Suggested Reading Order
 
