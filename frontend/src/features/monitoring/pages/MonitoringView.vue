@@ -170,6 +170,9 @@ onMounted(() => {
                 {{ check.status }}
               </span>
               <p>{{ check.detail }}</p>
+              <p v-if="check.error" class="monitoring-health-error">
+                {{ check.error.type }}: {{ check.error.message }}
+              </p>
             </div>
           </div>
         </div>

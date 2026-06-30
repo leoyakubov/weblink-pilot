@@ -141,6 +141,10 @@ export interface AdminHealthComponentResponse {
   name: string;
   status: string;
   detail: string;
+  error?: {
+    type: string;
+    message: string;
+  } | null;
 }
 
 export interface AdminConfigurationItemResponse {

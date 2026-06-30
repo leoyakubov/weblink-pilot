@@ -2979,6 +2979,14 @@ button {
   text-align: right;
 }
 
+.monitoring-health-row .monitoring-health-error {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  color: #fecaca;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
 .monitoring-health-list,
 .monitoring-endpoint-grid {
   align-self: start;
