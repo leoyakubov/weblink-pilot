@@ -7,14 +7,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.links.criteria.LinkSearchCriteria;
 import io.weblinkpilot.links.exception.UrlNotFoundException;
-import io.weblinkpilot.links.service.PublicUrlBuilder;
-import io.weblinkpilot.links.service.QrCodeService;
+import io.weblinkpilot.links.qr.QrCodeService;
 import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.CreateLinkRequest;
-import io.weblinkpilot.shared.contracts.LinkResponse;
-import io.weblinkpilot.shared.contracts.RedirectPreviewResponse;
+import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.shared.api.links.CreateLinkRequest;
+import io.weblinkpilot.shared.api.links.LinkResponse;
+import io.weblinkpilot.shared.api.links.RedirectPreviewResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -101,7 +102,7 @@ class UrlApiIntegrationTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks("alice", false, null, null, null, 10))
+    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
         .thenReturn(List.of(first, second));
 
     List<LinkResponse> response =

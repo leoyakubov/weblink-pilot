@@ -25,24 +25,19 @@ management:
       enabled: true
 
 app:
+  # Public dev runtime
   security:
     public-observability: ${APP_SECURITY_PUBLIC_OBSERVABILITY:true}
-  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
   cache:
     provider: redis
+
+  # Dev credentials and frontend callback URL
+  auth:
+    jwt:
+      secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:local-dev-jwt-secret-change-me-please-0001}}
+    frontend:
+      base-url: ${FRONTEND_BASE_URL:http://localhost:8081}
+
+  # Dev AI uses Ollama by default
   ai:
     provider: ${APP_AI_PROVIDER:ollama}
-    ollama:
-      base-url: ${APP_AI_OLLAMA_BASE_URL:http://localhost:11434}
-      model: ${APP_AI_OLLAMA_MODEL:llama3.2:1b}
-  auth:
-    jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:local-dev-jwt-secret-change-me-please-0001}}
-    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:8081}
-  cors:
-    allowed-origin-patterns:
-      - http://localhost:5173
-      - http://127.0.0.1:5173
-      - http://localhost:4173
-      - http://127.0.0.1:4173
-      - http://localhost:8081
-      - http://127.0.0.1:8081

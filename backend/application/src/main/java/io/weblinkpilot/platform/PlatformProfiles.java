@@ -1,0 +1,10 @@
+package io.weblinkpilot.platform;
+
+public final class PlatformProfiles {
+
+  public static final String LOCAL = "local";
+  public static final String DEV = "dev";
+  public static final String NOT_TEST = "!test";
+
+  private PlatformProfiles() {}
+}

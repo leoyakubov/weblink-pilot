@@ -1,13 +1,12 @@
 package io.weblinkpilot.testsupport;
 
-import io.weblinkpilot.analytics.service.AnalyticsBootstrapService;
+import io.weblinkpilot.analytics.bootstrap.AnalyticsBootstrapService;
 import io.weblinkpilot.auth.config.BootstrapDefaults;
 import io.weblinkpilot.auth.config.RoleNames;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.auth.service.RoleCatalogService;
-import io.weblinkpilot.links.domain.ShortLink;
-import io.weblinkpilot.links.repository.ShortLinkRepository;
+import io.weblinkpilot.links.bootstrap.UrlBootstrapService;
 import io.weblinkpilot.links.service.UrlStatisticsService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -26,23 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class TestBootstrapDataSeeder implements ApplicationRunner {
 
   private final UserAccountRepository userAccountRepository;
-  private final ShortLinkRepository shortLinkRepository;
   private final PasswordEncoder passwordEncoder;
   private final RoleCatalogService roleCatalogService;
+  private final UrlBootstrapService urlBootstrapService;
   private final AnalyticsBootstrapService analyticsBootstrapService;
   private final UrlStatisticsService urlStatisticsService;
 
   public TestBootstrapDataSeeder(
       UserAccountRepository userAccountRepository,
-      ShortLinkRepository shortLinkRepository,
       PasswordEncoder passwordEncoder,
       RoleCatalogService roleCatalogService,
+      UrlBootstrapService urlBootstrapService,
       AnalyticsBootstrapService analyticsBootstrapService,
       UrlStatisticsService urlStatisticsService) {
     this.userAccountRepository = userAccountRepository;
-    this.shortLinkRepository = shortLinkRepository;
     this.passwordEncoder = passwordEncoder;
     this.roleCatalogService = roleCatalogService;
+    this.urlBootstrapService = urlBootstrapService;
     this.analyticsBootstrapService = analyticsBootstrapService;
     this.urlStatisticsService = urlStatisticsService;
   }
@@ -50,25 +49,10 @@ public class TestBootstrapDataSeeder implements ApplicationRunner {
   @Override
   @Transactional
   public void run(ApplicationArguments args) {
-    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     ensureUser(BootstrapDefaults.ADMIN_USERNAME, BootstrapDefaults.ADMIN_PASSWORD, RoleNames.ADMIN);
     ensureUser(BootstrapDefaults.USER_USERNAME, BootstrapDefaults.USER_PASSWORD, RoleNames.USER);
 
-    seedLink("spring-boot", "https://spring.io/projects/spring-boot", null, null, now);
-    seedLink("vue-js", "https://vuejs.org/guide/introduction.html", null, null, now);
-    seedLink(
-        "postgres",
-        "https://www.postgresql.org/about/",
-        null,
-        BootstrapDefaults.USER_USERNAME,
-        now);
-    seedLink(
-        "redis",
-        "https://redis.io/docs/latest/develop/",
-        null,
-        BootstrapDefaults.USER_USERNAME,
-        now);
-
+    urlBootstrapService.seedDefaultLinks(BootstrapDefaults.USER_USERNAME);
     Map<String, Long> seededAnalyticsCounts = analyticsBootstrapService.seedDefaultAnalytics();
     urlStatisticsService.syncClickCounts(seededAnalyticsCounts);
   }
@@ -88,22 +72,5 @@ public class TestBootstrapDataSeeder implements ApplicationRunner {
             OffsetDateTime.now(ZoneOffset.UTC),
             null);
     userAccountRepository.save(account);
-  }
-
-  private void seedLink(
-      String code,
-      String originalUrl,
-      String customAlias,
-      String ownerUsername,
-      OffsetDateTime createdAt) {
-    if (shortLinkRepository.existsByCode(code)) {
-      return;
-    }
-    if (customAlias != null && shortLinkRepository.existsByCustomAlias(customAlias)) {
-      return;
-    }
-
-    ShortLink link = new ShortLink(code, originalUrl, customAlias, ownerUsername, createdAt, null);
-    shortLinkRepository.save(link);
   }
 }

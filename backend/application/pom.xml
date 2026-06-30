@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>io.weblinkpilot</groupId>
-            <artifactId>shared-contracts</artifactId>
+            <artifactId>shared</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

@@ -1,0 +1,408 @@
+{
+  "links": [
+    {
+      "code": "spring-boot",
+      "originalUrl": "https://spring.io/projects/spring-boot",
+      "customAlias": null,
+      "ownerKind": "ANONYMOUS",
+      "metadata": {
+        "title": "Spring Boot",
+        "summary": "Production-ready Java application framework for building APIs, services, and web applications with less setup.",
+        "category": "Programming",
+        "tags": ["spring", "java", "backend"],
+        "icon": "code",
+        "suggestedAlias": "spring-boot"
+      },
+      "analytics": [
+        {
+          "daysAgo": 5,
+          "hoursAgo": 4,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 5,
+          "hoursAgo": 2,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.11",
+          "country": "US",
+          "browserFamily": "Safari",
+          "deviceType": "Mobile",
+          "referrer": "https://news.ycombinator.com"
+        },
+        {
+          "daysAgo": 4,
+          "hoursAgo": 7,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.12",
+          "country": "DE",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 4,
+          "hoursAgo": 3,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.13",
+          "country": "ES",
+          "browserFamily": "Firefox",
+          "deviceType": "Desktop",
+          "referrer": "https://spring.io"
+        },
+        {
+          "daysAgo": 3,
+          "hoursAgo": 8,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 3,
+          "hoursAgo": 1,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.14",
+          "country": "PL",
+          "browserFamily": "Safari",
+          "deviceType": "Tablet",
+          "referrer": null
+        },
+        {
+          "daysAgo": 2,
+          "hoursAgo": 6,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.15",
+          "country": "FR",
+          "browserFamily": "Edge",
+          "deviceType": "Desktop",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 2,
+          "hoursAgo": 2,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.16",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 1,
+          "hoursAgo": 9,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.17",
+          "country": "CA",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 1,
+          "hoursAgo": 5,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.18",
+          "country": "DE",
+          "browserFamily": "Firefox",
+          "deviceType": "Desktop",
+          "referrer": "https://spring.io"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 6,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.19",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 1,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.20",
+          "country": "ES",
+          "browserFamily": "Safari",
+          "deviceType": "Mobile",
+          "referrer": null
+        }
+      ]
+    },
+    {
+      "code": "vue-js",
+      "originalUrl": "https://vuejs.org/guide/introduction.html",
+      "customAlias": null,
+      "ownerKind": "ANONYMOUS",
+      "metadata": {
+        "title": "Vue.js Guide",
+        "summary": "Official Vue.js introduction for building reactive interfaces and modern frontend applications.",
+        "category": "Frontend",
+        "tags": ["vue", "javascript", "frontend"],
+        "icon": "sparkles",
+        "suggestedAlias": "vue-js"
+      },
+      "analytics": [
+        {
+          "daysAgo": 6,
+          "hoursAgo": 3,
+          "source": "REDIRECT",
+          "ipAddress": "198.51.100.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 5,
+          "hoursAgo": 7,
+          "source": "QR_SCAN",
+          "ipAddress": "198.51.100.11",
+          "country": "NL",
+          "browserFamily": "Safari",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 4,
+          "hoursAgo": 8,
+          "source": "REDIRECT",
+          "ipAddress": "198.51.100.12",
+          "country": "UA",
+          "browserFamily": "Firefox",
+          "deviceType": "Desktop",
+          "referrer": "https://vuejs.org"
+        },
+        {
+          "daysAgo": 3,
+          "hoursAgo": 2,
+          "source": "REDIRECT",
+          "ipAddress": "198.51.100.13",
+          "country": "ES",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 2,
+          "hoursAgo": 5,
+          "source": "QR_SCAN",
+          "ipAddress": "198.51.100.14",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 1,
+          "hoursAgo": 8,
+          "source": "REDIRECT",
+          "ipAddress": "198.51.100.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 4,
+          "source": "REDIRECT",
+          "ipAddress": "198.51.100.15",
+          "country": "DE",
+          "browserFamily": "Edge",
+          "deviceType": "Desktop",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 1,
+          "source": "QR_SCAN",
+          "ipAddress": "198.51.100.16",
+          "country": "FR",
+          "browserFamily": "Safari",
+          "deviceType": "Tablet",
+          "referrer": null
+        }
+      ]
+    },
+    {
+      "code": "postgres",
+      "originalUrl": "https://www.postgresql.org/about/",
+      "customAlias": null,
+      "ownerKind": "BOOTSTRAP_USER",
+      "metadata": {
+        "title": "PostgreSQL",
+        "summary": "Overview of the open-source relational database used for reliable data storage and SQL workloads.",
+        "category": "Database",
+        "tags": ["postgres", "database", "sql"],
+        "icon": "database",
+        "suggestedAlias": "postgres"
+      },
+      "analytics": [
+        {
+          "daysAgo": 7,
+          "hoursAgo": 3,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 6,
+          "hoursAgo": 6,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.11",
+          "country": "DE",
+          "browserFamily": "Firefox",
+          "deviceType": "Desktop",
+          "referrer": "https://postgresql.org"
+        },
+        {
+          "daysAgo": 5,
+          "hoursAgo": 2,
+          "source": "QR_SCAN",
+          "ipAddress": "192.0.2.12",
+          "country": "GB",
+          "browserFamily": "Safari",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 4,
+          "hoursAgo": 7,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.13",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 3,
+          "hoursAgo": 5,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.14",
+          "country": "PL",
+          "browserFamily": "Edge",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 2,
+          "hoursAgo": 9,
+          "source": "QR_SCAN",
+          "ipAddress": "192.0.2.15",
+          "country": "ES",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 1,
+          "hoursAgo": 3,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.16",
+          "country": "FR",
+          "browserFamily": "Safari",
+          "deviceType": "Tablet",
+          "referrer": "https://postgresql.org"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 2,
+          "source": "REDIRECT",
+          "ipAddress": "192.0.2.10",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        }
+      ]
+    },
+    {
+      "code": "redis",
+      "originalUrl": "https://redis.io/docs/latest/develop/",
+      "customAlias": null,
+      "ownerKind": "BOOTSTRAP_USER",
+      "metadata": {
+        "title": "Redis Developer Docs",
+        "summary": "Redis documentation for fast data structures, caching, and application performance patterns.",
+        "category": "Database",
+        "tags": ["redis", "cache", "data"],
+        "icon": "database",
+        "suggestedAlias": "redis"
+      },
+      "analytics": [
+        {
+          "daysAgo": 4,
+          "hoursAgo": 4,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.40",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        },
+        {
+          "daysAgo": 3,
+          "hoursAgo": 6,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.41",
+          "country": "ES",
+          "browserFamily": "Safari",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 2,
+          "hoursAgo": 5,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.42",
+          "country": "DE",
+          "browserFamily": "Firefox",
+          "deviceType": "Desktop",
+          "referrer": "https://redis.io"
+        },
+        {
+          "daysAgo": 1,
+          "hoursAgo": 8,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.43",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": "https://google.com"
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 6,
+          "source": "QR_SCAN",
+          "ipAddress": "203.0.113.44",
+          "country": "NL",
+          "browserFamily": "Chrome",
+          "deviceType": "Mobile",
+          "referrer": null
+        },
+        {
+          "daysAgo": 0,
+          "hoursAgo": 2,
+          "source": "REDIRECT",
+          "ipAddress": "203.0.113.40",
+          "country": "US",
+          "browserFamily": "Chrome",
+          "deviceType": "Desktop",
+          "referrer": "https://github.com"
+        }
+      ]
+    }
+  ]
+}

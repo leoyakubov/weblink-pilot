@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>shared-contracts</module>
+        <module>shared</module>
         <module>auth</module>
         <module>links</module>
         <module>analytics</module>
@@ -47,7 +47,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.weblinkpilot</groupId>
-                <artifactId>shared-contracts</artifactId>
+                <artifactId>shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

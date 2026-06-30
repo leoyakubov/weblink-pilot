@@ -1,6 +1,8 @@
 spring:
   application:
     name: weblink-pilot
+  modulith:
+    detection-strategy: explicitly-annotated
   jpa:
     hibernate:
       ddl-auto: validate
@@ -25,34 +27,100 @@ management:
         include: health,info,metrics,prometheus
 
 app:
+  # Public URLs and browser access
+  cors:
+    allowed-origin-patterns: ${APP_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8081,http://127.0.0.1:8081}
+
+  # Platform runtime controls
   security:
     public-observability: ${APP_SECURITY_PUBLIC_OBSERVABILITY:false}
+  cache:
+    provider: ${APP_CACHE_PROVIDER:local}
+    ttl:
+      default-ttl: ${APP_CACHE_DEFAULT_TTL:10m}
+      short-links: ${APP_CACHE_SHORT_LINKS_TTL:30m}
+      analytics: ${APP_CACHE_ANALYTICS_TTL:30s}
+  rate-limit:
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
+    api-per-minute: ${APP_RATE_LIMIT_API_PER_MINUTE:120}
+    redirect-per-minute: ${APP_RATE_LIMIT_REDIRECT_PER_MINUTE:300}
+    auth-per-minute: ${APP_RATE_LIMIT_AUTH_PER_MINUTE:20}
+  async:
+    core-pool-size: ${APP_ASYNC_CORE_POOL_SIZE:2}
+    max-pool-size: ${APP_ASYNC_MAX_POOL_SIZE:4}
+    queue-capacity: ${APP_ASYNC_QUEUE_CAPACITY:100}
+    thread-name-prefix: ${APP_ASYNC_THREAD_NAME_PREFIX:weblink-async-}
+
+  # Authentication and default accounts
   auth:
-    issuer: ${APP_AUTH_ISSUER:weblink-pilot}
-    jwt-secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:}}
-    token-ttl-minutes: ${APP_AUTH_TOKEN_TTL_MINUTES:30}
-    refresh-token-ttl-days: ${APP_AUTH_REFRESH_TOKEN_TTL_DAYS:30}
-    account-action-token-ttl-hours: ${APP_AUTH_ACCOUNT_ACTION_TOKEN_TTL_HOURS:24}
-    github-login-ticket-ttl-minutes: ${APP_AUTH_GITHUB_LOGIN_TICKET_TTL_MINUTES:10}
-    refresh-cookie-name: ${APP_AUTH_REFRESH_COOKIE_NAME:weblinkpilot_refresh}
-    refresh-cookie-path: ${APP_AUTH_REFRESH_COOKIE_PATH:/api/v1/auth}
-    refresh-cookie-same-site: ${APP_AUTH_REFRESH_COOKIE_SAME_SITE:Lax}
-    refresh-cookie-secure: ${APP_AUTH_REFRESH_COOKIE_SECURE:false}
-    frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
-    github-client-id: ${GITHUB_CLIENT_ID:}
-    github-client-secret: ${GITHUB_CLIENT_SECRET:}
-    github-scope: ${APP_GITHUB_SCOPE:read:user user:email}
-    github-state-cookie-name: ${APP_GITHUB_STATE_COOKIE_NAME:weblinkpilot_github_oauth_state}
-    github-state-cookie-path: ${APP_GITHUB_STATE_COOKIE_PATH:/api/v1/auth/oauth2/github}
-    bootstrap-admin-username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
-    bootstrap-admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:admin123}
-    bootstrap-admin-role: ${BOOTSTRAP_ADMIN_ROLE:ADMIN}
-    bootstrap-admin-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@weblinkpilot.local}
-    bootstrap-user-username: ${BOOTSTRAP_USER_USERNAME:user}
-    bootstrap-user-password: ${BOOTSTRAP_USER_PASSWORD:user123}
-    bootstrap-user-role: ${BOOTSTRAP_USER_ROLE:USER}
-    bootstrap-user-email: ${BOOTSTRAP_USER_EMAIL:user@weblinkpilot.local}
-  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+    jwt:
+      issuer: ${APP_AUTH_ISSUER:weblink-pilot}
+      secret: ${APP_AUTH_JWT_SECRET:${JWT_SECRET:}}
+      access-token-ttl-minutes: ${APP_AUTH_TOKEN_TTL_MINUTES:30}
+    refresh-token:
+      ttl-days: ${APP_AUTH_REFRESH_TOKEN_TTL_DAYS:30}
+    refresh-cookie:
+      name: ${APP_AUTH_REFRESH_COOKIE_NAME:weblinkpilot_refresh}
+      path: ${APP_AUTH_REFRESH_COOKIE_PATH:/api/v1/auth}
+      same-site: ${APP_AUTH_REFRESH_COOKIE_SAME_SITE:Lax}
+      secure: ${APP_AUTH_REFRESH_COOKIE_SECURE:false}
+    account-actions:
+      token-ttl-hours: ${APP_AUTH_ACCOUNT_ACTION_TOKEN_TTL_HOURS:24}
+      request-cooldown-seconds: ${APP_AUTH_ACCOUNT_ACTION_REQUEST_COOLDOWN_SECONDS:30}
+    frontend:
+      base-url: ${FRONTEND_BASE_URL:http://localhost:5173}
+    github:
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
+      scope: ${APP_GITHUB_SCOPE:read:user user:email}
+      authorization-url: ${APP_GITHUB_AUTHORIZATION_URL:https://github.com/login/oauth/authorize}
+      token-url: ${APP_GITHUB_TOKEN_URL:https://github.com/login/oauth/access_token}
+      api-base-url: ${APP_GITHUB_API_BASE_URL:https://api.github.com}
+      api-version: ${APP_GITHUB_API_VERSION:2022-11-28}
+      user-agent: ${APP_GITHUB_USER_AGENT:WeblinkPilot}
+      timeout: ${APP_GITHUB_TIMEOUT:10s}
+      allow-signup: ${APP_GITHUB_ALLOW_SIGNUP:false}
+      login-ticket-ttl-minutes: ${APP_AUTH_GITHUB_LOGIN_TICKET_TTL_MINUTES:10}
+      state-entropy-bytes: ${APP_GITHUB_STATE_ENTROPY_BYTES:32}
+      state-cookie:
+        name: ${APP_GITHUB_STATE_COOKIE_NAME:weblinkpilot_github_oauth_state}
+        path: ${APP_GITHUB_STATE_COOKIE_PATH:/api/v1/auth/oauth2/github}
+    mail:
+      delivery-mode: ${APP_AUTH_MAIL_DELIVERY_MODE:SMTP}
+    bootstrap:
+      admin:
+        username: ${BOOTSTRAP_ADMIN_USERNAME:admin}
+        password: ${BOOTSTRAP_ADMIN_PASSWORD:admin123}
+        role: ${BOOTSTRAP_ADMIN_ROLE:ADMIN}
+        email: ${BOOTSTRAP_ADMIN_EMAIL:admin@weblinkpilot.local}
+      user:
+        username: ${BOOTSTRAP_USER_USERNAME:user}
+        password: ${BOOTSTRAP_USER_PASSWORD:user123}
+        role: ${BOOTSTRAP_USER_ROLE:USER}
+        email: ${BOOTSTRAP_USER_EMAIL:user@weblinkpilot.local}
+
+  # Link lifecycle
+  short-link:
+    public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+    max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}
+    cleanup-retention: ${APP_SHORT_LINK_CLEANUP_RETENTION:30d}
+    cleanup-cron: ${APP_SHORT_LINK_CLEANUP_CRON:0 15 3 * * *}
+    alias:
+      min-length: ${APP_SHORT_LINK_ALIAS_MIN_LENGTH:3}
+      max-length: ${APP_SHORT_LINK_ALIAS_MAX_LENGTH:64}
+      allowed-pattern: ${APP_SHORT_LINK_ALIAS_ALLOWED_PATTERN:^[A-Za-z0-9_-]+$}
+    browse:
+      default-limit: ${APP_SHORT_LINK_BROWSE_DEFAULT_LIMIT:10}
+      max-limit: ${APP_SHORT_LINK_BROWSE_MAX_LIMIT:50}
+    code:
+      length: ${APP_SHORT_LINK_CODE_LENGTH:7}
+      max-generation-attempts: ${APP_SHORT_LINK_CODE_MAX_GENERATION_ATTEMPTS:10}
+    qr:
+      size: ${APP_SHORT_LINK_QR_SIZE:320}
+      margin: ${APP_SHORT_LINK_QR_MARGIN:2}
+      image-format: ${APP_SHORT_LINK_QR_IMAGE_FORMAT:PNG}
+
+  # AI enrichment
   ai:
     enabled: ${APP_AI_ENABLED:true}
     provider: ${APP_AI_PROVIDER:stub}
@@ -67,25 +135,6 @@ app:
       api-key: ${APP_AI_OPENAI_API_KEY:}
       model: ${APP_AI_OPENAI_MODEL:gpt-4o-mini}
       timeout: ${APP_AI_OPENAI_TIMEOUT:30s}
-  short-link:
-    max-expiration: ${APP_SHORT_LINK_MAX_EXPIRATION:365d}
-    cleanup-retention: ${APP_SHORT_LINK_CLEANUP_RETENTION:30d}
-    cleanup-cron: ${APP_SHORT_LINK_CLEANUP_CRON:0 15 3 * * *}
-  cache:
-    provider: ${APP_CACHE_PROVIDER:local}
-  rate-limit:
-    enabled: ${APP_RATE_LIMIT_ENABLED:true}
-    api-per-minute: ${APP_RATE_LIMIT_API_PER_MINUTE:120}
-    redirect-per-minute: ${APP_RATE_LIMIT_REDIRECT_PER_MINUTE:300}
-    auth-per-minute: ${APP_RATE_LIMIT_AUTH_PER_MINUTE:20}
-  cors:
-    allowed-origin-patterns:
-      - ${APP_CORS_ALLOWED_ORIGIN_1:http://localhost:5173}
-      - ${APP_CORS_ALLOWED_ORIGIN_2:http://127.0.0.1:5173}
-      - ${APP_CORS_ALLOWED_ORIGIN_3:http://localhost:4173}
-      - ${APP_CORS_ALLOWED_ORIGIN_4:http://127.0.0.1:4173}
-      - ${APP_CORS_ALLOWED_ORIGIN_5:http://localhost:8081}
-      - ${APP_CORS_ALLOWED_ORIGIN_6:http://127.0.0.1:8081}
 
 logging:
   level:

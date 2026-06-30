@@ -6,10 +6,9 @@ import static org.mockito.Mockito.when;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import io.weblinkpilot.analytics.service.AnalyticsQueryService;
-import io.weblinkpilot.links.service.UrlService;
-import io.weblinkpilot.shared.contracts.AnalyticsCountryStatResponse;
-import io.weblinkpilot.shared.contracts.AnalyticsSummaryResponse;
-import io.weblinkpilot.shared.contracts.LinkResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsCountryStatResponse;
+import io.weblinkpilot.shared.api.analytics.AnalyticsSummaryResponse;
+import io.weblinkpilot.shared.ports.LinkOwnershipLookupService;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -28,29 +27,20 @@ class AnalyticsApiIntegrationTest {
 
   @Mock private AnalyticsQueryService analyticsQueryService;
 
-  @Mock private UrlService urlService;
+  @Mock private LinkOwnershipLookupService linkOwnershipLookupService;
 
   private AnalyticsController controller;
 
   @BeforeEach
   void setUp() {
     controller =
-        new AnalyticsController(analyticsQueryService, urlService, new SimpleMeterRegistry());
+        new AnalyticsController(
+            analyticsQueryService, linkOwnershipLookupService, new SimpleMeterRegistry());
   }
 
   @Test
   void returnsClickCount() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
     when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
 
     assertEquals(12L, controller.count(auth("owner", "USER"), "demo"));
@@ -58,17 +48,7 @@ class AnalyticsApiIntegrationTest {
 
   @Test
   void returnsSummary() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
     AnalyticsSummaryResponse summary =
         new AnalyticsSummaryResponse(
             "demo",
@@ -78,8 +58,8 @@ class AnalyticsApiIntegrationTest {
             5L,
             OffsetDateTime.now(ZoneOffset.UTC),
             "https://github.com",
-            "Chrome",
-            "Desktop",
+            "CHROME",
+            "DESKTOP",
             List.of(new AnalyticsCountryStatResponse("US", 3L)));
     when(analyticsQueryService.summarize("demo")).thenReturn(summary);
 
@@ -94,17 +74,7 @@ class AnalyticsApiIntegrationTest {
 
   @Test
   void allowsAnonymousAccessForPublicLinks() {
-    when(urlService.getByCode("public"))
-        .thenReturn(
-            new LinkResponse(
-                "public",
-                "http://localhost:8080/r/public",
-                "http://localhost:8080/api/v1/urls/public/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                null));
+    when(linkOwnershipLookupService.ownerUsernameForCode("public")).thenReturn(null);
     when(analyticsQueryService.countClicks("public")).thenReturn(1L);
 
     assertEquals(1L, controller.count(null, "public"));
@@ -112,17 +82,7 @@ class AnalyticsApiIntegrationTest {
 
   @Test
   void rejectsAnonymousAccessForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
 
     ResponseStatusException exception =
         assertThrows(ResponseStatusException.class, () -> controller.summary(null, "demo"));
@@ -132,17 +92,7 @@ class AnalyticsApiIntegrationTest {
 
   @Test
   void rejectsDifferentUsersForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
 
     ResponseStatusException exception =
         assertThrows(
@@ -154,17 +104,7 @@ class AnalyticsApiIntegrationTest {
 
   @Test
   void allowsAdminAccessForOwnedLinks() {
-    when(urlService.getByCode("demo"))
-        .thenReturn(
-            new LinkResponse(
-                "demo",
-                "http://localhost:8080/r/demo",
-                "http://localhost:8080/api/v1/urls/demo/qr",
-                "https://github.com/weblinkpilot/weblink-pilot",
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                0L,
-                "owner"));
+    when(linkOwnershipLookupService.ownerUsernameForCode("demo")).thenReturn("owner");
     when(analyticsQueryService.countClicks("demo")).thenReturn(12L);
 
     assertEquals(12L, controller.count(auth("admin", "ADMIN"), "demo"));
