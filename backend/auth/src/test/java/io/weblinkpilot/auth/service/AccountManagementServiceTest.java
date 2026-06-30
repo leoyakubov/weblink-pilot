@@ -11,9 +11,11 @@ import io.weblinkpilot.auth.domain.SocialIdentity;
 import io.weblinkpilot.auth.domain.SocialLoginProvider;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
+import io.weblinkpilot.auth.mapper.AuthResponseMapper;
 import io.weblinkpilot.auth.repository.SocialIdentityRepository;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
-import io.weblinkpilot.shared.contracts.AccountProfileResponse;
+import io.weblinkpilot.auth.token.RefreshTokenService;
+import io.weblinkpilot.shared.api.auth.AccountProfileResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -43,7 +45,8 @@ class AccountManagementServiceTest {
             socialIdentityRepository,
             passwordEncoder,
             refreshTokenService,
-            userAccountService);
+            userAccountService,
+            new AuthResponseMapper());
   }
 
   @Test

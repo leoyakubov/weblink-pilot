@@ -1,7 +1,7 @@
 package io.weblinkpilot.auth.service;
 
 import io.weblinkpilot.auth.repository.UserAccountRepository;
-import io.weblinkpilot.links.service.LinkOwnerMetadataService;
+import io.weblinkpilot.shared.ports.LinkOwnerMetadataService;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.stereotype.Service;

@@ -205,7 +205,7 @@ class UserAccountServiceTest {
 
     assertThat(service.profile(" Alice "))
         .isEqualTo(
-            new io.weblinkpilot.shared.contracts.UserProfileResponse("alice", RoleNames.USER));
+            new io.weblinkpilot.shared.api.auth.UserProfileResponse("alice", RoleNames.USER));
   }
 
   @Test

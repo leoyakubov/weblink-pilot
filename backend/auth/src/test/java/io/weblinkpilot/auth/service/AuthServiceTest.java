@@ -7,8 +7,11 @@ import static org.mockito.Mockito.when;
 
 import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.UserAccount;
-import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
-import io.weblinkpilot.shared.contracts.UserProfileResponse;
+import io.weblinkpilot.auth.session.AuthSession;
+import io.weblinkpilot.auth.token.JwtService;
+import io.weblinkpilot.auth.token.RefreshTokenService;
+import io.weblinkpilot.shared.api.auth.AuthCredentialsRequest;
+import io.weblinkpilot.shared.api.auth.UserProfileResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -81,8 +84,7 @@ class AuthServiceTest {
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-2");
     when(refreshTokenService.issueRefreshToken(account)).thenReturn("refresh-2");
 
-    AuthService.AuthSession response =
-        service.login(new AuthCredentialsRequest("alice", "Password1"));
+    AuthSession response = service.login(new AuthCredentialsRequest("alice", "Password1"));
 
     assertThat(response.token()).isEqualTo("token-2");
     assertThat(response.username()).isEqualTo("alice");
@@ -112,7 +114,7 @@ class AuthServiceTest {
         .thenReturn(new RefreshTokenService.RotationResult("alice", "USER", "refresh-2"));
     when(jwtService.issueToken("alice", "USER")).thenReturn("token-3");
 
-    AuthService.AuthSession response = service.refresh("refresh-1");
+    AuthSession response = service.refresh("refresh-1");
 
     assertThat(response.token()).isEqualTo("token-3");
     assertThat(response.username()).isEqualTo("alice");

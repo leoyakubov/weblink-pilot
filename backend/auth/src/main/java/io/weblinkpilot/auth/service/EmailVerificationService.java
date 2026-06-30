@@ -3,8 +3,11 @@ package io.weblinkpilot.auth.service;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.AccountActionTokenType;
 import io.weblinkpilot.auth.domain.UserAccount;
+import io.weblinkpilot.auth.event.EmailVerificationLinkRequestedEvent;
 import io.weblinkpilot.auth.exception.InvalidAccountActionTokenException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.auth.support.SafeLogValue;
+import io.weblinkpilot.auth.token.AccountActionTokenService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -50,12 +53,13 @@ public class EmailVerificationService {
       throw new IllegalArgumentException("Email is required.");
     }
 
-    log.debug("auth.email-verification.requested email={}", normalizedEmail);
+    log.debug("auth.email-verification.requested email={}", SafeLogValue.email(normalizedEmail));
 
     UserAccount account = userAccountRepository.findByEmailIgnoreCase(normalizedEmail).orElse(null);
     if (account == null) {
       log.debug(
-          "auth.email-verification.skipped reason=account_not_found email={}", normalizedEmail);
+          "auth.email-verification.skipped reason=account_not_found email={}",
+          SafeLogValue.email(normalizedEmail));
       return null;
     }
 
@@ -63,7 +67,7 @@ public class EmailVerificationService {
       log.info(
           "auth.email-verification.skipped reason=already_verified username={} email={}",
           account.getUsername(),
-          account.getEmail());
+          SafeLogValue.email(account.getEmail()));
       return null;
     }
 
@@ -83,7 +87,7 @@ public class EmailVerificationService {
     log.info(
         "auth.email-verification.confirmed username={} email={}",
         account.getUsername(),
-        account.getEmail());
+        SafeLogValue.email(account.getEmail()));
   }
 
   private String sendVerificationLink(UserAccount account) {
@@ -96,12 +100,12 @@ public class EmailVerificationService {
     log.info(
         "auth.email-verification.queued username={} email={}",
         account.getUsername(),
-        account.getEmail());
+        SafeLogValue.email(account.getEmail()));
     if (demoMailboxEnabled) {
       log.info(
           "auth.email-verification.demo-preview username={} email={} link={}",
           account.getUsername(),
-          account.getEmail(),
+          SafeLogValue.email(account.getEmail()),
           link);
       return link;
     }

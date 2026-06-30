@@ -68,6 +68,61 @@ public class UserAccount {
     this.emailVerifiedAt = emailVerifiedAt;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+
+    private String username;
+    private String passwordHash;
+    private String email;
+    private Role role;
+    private boolean enabled = true;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime emailVerifiedAt;
+
+    public Builder username(String username) {
+      this.username = username;
+      return this;
+    }
+
+    public Builder passwordHash(String passwordHash) {
+      this.passwordHash = passwordHash;
+      return this;
+    }
+
+    public Builder email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder role(Role role) {
+      this.role = role;
+      return this;
+    }
+
+    public Builder enabled(boolean enabled) {
+      this.enabled = enabled;
+      return this;
+    }
+
+    public Builder createdAt(OffsetDateTime createdAt) {
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder emailVerifiedAt(OffsetDateTime emailVerifiedAt) {
+      this.emailVerifiedAt = emailVerifiedAt;
+      return this;
+    }
+
+    public UserAccount build() {
+      return new UserAccount(
+          username, passwordHash, email, role, enabled, createdAt, emailVerifiedAt);
+    }
+  }
+
   public Long getId() {
     return id;
   }

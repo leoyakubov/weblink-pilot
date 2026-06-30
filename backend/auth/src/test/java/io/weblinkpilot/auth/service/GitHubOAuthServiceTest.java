@@ -11,8 +11,10 @@ import io.weblinkpilot.auth.domain.Role;
 import io.weblinkpilot.auth.domain.SocialIdentity;
 import io.weblinkpilot.auth.domain.SocialLoginProvider;
 import io.weblinkpilot.auth.domain.UserAccount;
+import io.weblinkpilot.auth.integration.github.GitHubApiClient;
 import io.weblinkpilot.auth.repository.SocialIdentityRepository;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -42,6 +44,11 @@ class GitHubOAuthServiceTest {
     authProperties.setGithubClientSecret("github-client-secret");
     authProperties.setGithubScope("read:user user:email");
     authProperties.setGithubLoginTicketTtlMinutes(10);
+    authProperties
+        .getGithub()
+        .setAuthorizationUrl(URI.create("https://github.com/login/oauth/authorize"));
+    authProperties.getGithub().setAllowSignup(false);
+    authProperties.getGithub().setStateEntropyBytes(32);
     service =
         new GitHubOAuthService(
             gitHubApiClient,

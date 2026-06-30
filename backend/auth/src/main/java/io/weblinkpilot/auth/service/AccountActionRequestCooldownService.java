@@ -3,11 +3,8 @@ package io.weblinkpilot.auth.service;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.exception.AccountActionRequestCooldownException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import io.weblinkpilot.auth.token.TokenDigest;
 import java.time.Duration;
-import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,7 +16,6 @@ import org.springframework.stereotype.Service;
     justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class AccountActionRequestCooldownService {
 
-  private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
   private static final String REQUEST_COOLDOWN_KEY_PREFIX = "auth:action-request:";
   private static final Logger log =
       LoggerFactory.getLogger(AccountActionRequestCooldownService.class);
@@ -73,12 +69,6 @@ public class AccountActionRequestCooldownService {
   }
 
   private String hash(String value) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashed = digest.digest(value.getBytes(StandardCharsets.UTF_8));
-      return ENCODER.encodeToString(hashed);
-    } catch (NoSuchAlgorithmException exception) {
-      throw new IllegalStateException("Unable to hash resend cooldown key", exception);
-    }
+    return TokenDigest.sha256Base64Url(value);
   }
 }

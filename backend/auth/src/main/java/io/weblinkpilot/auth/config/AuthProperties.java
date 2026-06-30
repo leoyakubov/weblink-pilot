@@ -1,274 +1,667 @@
 package io.weblinkpilot.auth.config;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import java.net.URI;
+import java.time.Duration;
+import java.util.Locale;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "app.auth")
+@SuppressFBWarnings(
+    value = "EI_EXPOSE_REP",
+    justification = "Spring configuration properties expose nested mutable beans for binding.")
 public class AuthProperties {
 
-  @NotBlank private String issuer;
-  @NotBlank private String jwtSecret;
+  @Valid private Jwt jwt = new Jwt();
+  @Valid private RefreshToken refreshToken = new RefreshToken();
+  @Valid private AccountActions accountActions = new AccountActions();
+  @Valid private RefreshCookie refreshCookie = new RefreshCookie();
+  @Valid private Frontend frontend = new Frontend();
+  @Valid private GitHub github = new GitHub();
+  @Valid private Mail mail = new Mail();
+  @Valid private Bootstrap bootstrap = new Bootstrap();
 
-  @Min(15)
-  private long tokenTtlMinutes;
+  public Jwt getJwt() {
+    return jwt;
+  }
 
-  @Min(1)
-  private long refreshTokenTtlDays;
+  public void setJwt(Jwt jwt) {
+    this.jwt = jwt == null ? new Jwt() : jwt;
+  }
 
-  @Min(1)
-  private long accountActionTokenTtlHours;
+  public RefreshToken getRefreshToken() {
+    return refreshToken;
+  }
 
-  @Min(1)
-  private long accountActionRequestCooldownSeconds = 30;
+  public void setRefreshToken(RefreshToken refreshToken) {
+    this.refreshToken = refreshToken == null ? new RefreshToken() : refreshToken;
+  }
 
-  @Min(1)
-  private long githubLoginTicketTtlMinutes;
+  public AccountActions getAccountActions() {
+    return accountActions;
+  }
 
-  @NotBlank private String refreshCookieName;
-  @NotBlank private String refreshCookiePath;
-  @NotBlank private String frontendBaseUrl;
-  private String githubClientId;
-  private String githubClientSecret;
-  @NotBlank private String githubScope;
-  @NotBlank private String githubStateCookieName;
-  @NotBlank private String githubStateCookiePath;
+  public void setAccountActions(AccountActions accountActions) {
+    this.accountActions = accountActions == null ? new AccountActions() : accountActions;
+  }
 
-  @Pattern(regexp = "(?i)STRICT|LAX|NONE")
-  private String refreshCookieSameSite;
+  public RefreshCookie getRefreshCookie() {
+    return refreshCookie;
+  }
 
-  private boolean refreshCookieSecure;
-  private String bootstrapAdminUsername;
-  private String bootstrapAdminPassword;
-  private String bootstrapAdminRole;
-  private String bootstrapAdminEmail;
-  private String bootstrapUserUsername;
-  private String bootstrapUserPassword;
-  private String bootstrapUserRole;
-  private String bootstrapUserEmail;
+  public void setRefreshCookie(RefreshCookie refreshCookie) {
+    this.refreshCookie = refreshCookie == null ? new RefreshCookie() : refreshCookie;
+  }
 
-  @Pattern(regexp = "(?i)SMTP|DEMO_PREVIEW")
-  private String mailDeliveryMode = "SMTP";
+  public Frontend getFrontend() {
+    return frontend;
+  }
+
+  public void setFrontend(Frontend frontend) {
+    this.frontend = frontend == null ? new Frontend() : frontend;
+  }
+
+  public GitHub getGithub() {
+    return github;
+  }
+
+  public void setGithub(GitHub github) {
+    this.github = github == null ? new GitHub() : github;
+  }
+
+  public Mail getMail() {
+    return mail;
+  }
+
+  public void setMail(Mail mail) {
+    this.mail = mail == null ? new Mail() : mail;
+  }
+
+  public Bootstrap getBootstrap() {
+    return bootstrap;
+  }
+
+  public void setBootstrap(Bootstrap bootstrap) {
+    this.bootstrap = bootstrap == null ? new Bootstrap() : bootstrap;
+  }
 
   public String getIssuer() {
-    return issuer;
+    return jwt.getIssuer();
   }
 
   public void setIssuer(String issuer) {
-    this.issuer = issuer;
+    jwt.setIssuer(issuer);
   }
 
   public String getJwtSecret() {
-    return jwtSecret;
+    return jwt.getSecret();
   }
 
   public void setJwtSecret(String jwtSecret) {
-    this.jwtSecret = jwtSecret;
+    jwt.setSecret(jwtSecret);
   }
 
   public long getTokenTtlMinutes() {
-    return tokenTtlMinutes;
+    return jwt.getAccessTokenTtlMinutes();
   }
 
   public void setTokenTtlMinutes(long tokenTtlMinutes) {
-    this.tokenTtlMinutes = tokenTtlMinutes;
+    jwt.setAccessTokenTtlMinutes(tokenTtlMinutes);
   }
 
   public long getRefreshTokenTtlDays() {
-    return refreshTokenTtlDays;
+    return refreshToken.getTtlDays();
   }
 
   public void setRefreshTokenTtlDays(long refreshTokenTtlDays) {
-    this.refreshTokenTtlDays = refreshTokenTtlDays;
+    refreshToken.setTtlDays(refreshTokenTtlDays);
   }
 
   public long getAccountActionTokenTtlHours() {
-    return accountActionTokenTtlHours;
+    return accountActions.getTokenTtlHours();
   }
 
   public void setAccountActionTokenTtlHours(long accountActionTokenTtlHours) {
-    this.accountActionTokenTtlHours = accountActionTokenTtlHours;
+    accountActions.setTokenTtlHours(accountActionTokenTtlHours);
   }
 
   public long getAccountActionRequestCooldownSeconds() {
-    return accountActionRequestCooldownSeconds;
+    return accountActions.getRequestCooldownSeconds();
   }
 
   public void setAccountActionRequestCooldownSeconds(long accountActionRequestCooldownSeconds) {
-    this.accountActionRequestCooldownSeconds = accountActionRequestCooldownSeconds;
+    accountActions.setRequestCooldownSeconds(accountActionRequestCooldownSeconds);
   }
 
   public long getGithubLoginTicketTtlMinutes() {
-    return githubLoginTicketTtlMinutes;
+    return github.getLoginTicketTtlMinutes();
   }
 
   public void setGithubLoginTicketTtlMinutes(long githubLoginTicketTtlMinutes) {
-    this.githubLoginTicketTtlMinutes = githubLoginTicketTtlMinutes;
+    github.setLoginTicketTtlMinutes(githubLoginTicketTtlMinutes);
   }
 
   public String getRefreshCookieName() {
-    return refreshCookieName;
+    return refreshCookie.getName();
   }
 
   public void setRefreshCookieName(String refreshCookieName) {
-    this.refreshCookieName = refreshCookieName;
+    refreshCookie.setName(refreshCookieName);
   }
 
   public String getRefreshCookiePath() {
-    return refreshCookiePath;
+    return refreshCookie.getPath();
   }
 
   public void setRefreshCookiePath(String refreshCookiePath) {
-    this.refreshCookiePath = refreshCookiePath;
+    refreshCookie.setPath(refreshCookiePath);
   }
 
   public String getFrontendBaseUrl() {
-    return frontendBaseUrl;
+    return frontend.getBaseUrl();
   }
 
   public void setFrontendBaseUrl(String frontendBaseUrl) {
-    this.frontendBaseUrl = frontendBaseUrl;
+    frontend.setBaseUrl(frontendBaseUrl);
   }
 
   public String getGithubClientId() {
-    return githubClientId;
+    return github.getClientId();
   }
 
   public void setGithubClientId(String githubClientId) {
-    this.githubClientId = githubClientId;
+    github.setClientId(githubClientId);
   }
 
   public String getGithubClientSecret() {
-    return githubClientSecret;
+    return github.getClientSecret();
   }
 
   public void setGithubClientSecret(String githubClientSecret) {
-    this.githubClientSecret = githubClientSecret;
+    github.setClientSecret(githubClientSecret);
   }
 
   public String getGithubScope() {
-    return githubScope;
+    return github.getScope();
   }
 
   public void setGithubScope(String githubScope) {
-    this.githubScope = githubScope;
+    github.setScope(githubScope);
   }
 
   public String getGithubStateCookieName() {
-    return githubStateCookieName;
+    return github.getStateCookie().getName();
   }
 
   public void setGithubStateCookieName(String githubStateCookieName) {
-    this.githubStateCookieName = githubStateCookieName;
+    github.getStateCookie().setName(githubStateCookieName);
   }
 
   public String getGithubStateCookiePath() {
-    return githubStateCookiePath;
+    return github.getStateCookie().getPath();
   }
 
   public void setGithubStateCookiePath(String githubStateCookiePath) {
-    this.githubStateCookiePath = githubStateCookiePath;
+    github.getStateCookie().setPath(githubStateCookiePath);
   }
 
   public String getRefreshCookieSameSite() {
-    return refreshCookieSameSite;
+    return refreshCookie.getSameSite();
   }
 
   public void setRefreshCookieSameSite(String refreshCookieSameSite) {
-    this.refreshCookieSameSite = refreshCookieSameSite;
+    refreshCookie.setSameSite(refreshCookieSameSite);
   }
 
   public boolean isRefreshCookieSecure() {
-    return refreshCookieSecure;
+    return refreshCookie.isSecure();
   }
 
   public void setRefreshCookieSecure(boolean refreshCookieSecure) {
-    this.refreshCookieSecure = refreshCookieSecure;
+    refreshCookie.setSecure(refreshCookieSecure);
   }
 
   public String getBootstrapAdminUsername() {
-    return bootstrapAdminUsername;
+    return bootstrap.getAdmin().getUsername();
   }
 
   public void setBootstrapAdminUsername(String bootstrapAdminUsername) {
-    this.bootstrapAdminUsername = bootstrapAdminUsername;
+    bootstrap.getAdmin().setUsername(bootstrapAdminUsername);
   }
 
   public String getBootstrapAdminPassword() {
-    return bootstrapAdminPassword;
+    return bootstrap.getAdmin().getPassword();
   }
 
   public void setBootstrapAdminPassword(String bootstrapAdminPassword) {
-    this.bootstrapAdminPassword = bootstrapAdminPassword;
+    bootstrap.getAdmin().setPassword(bootstrapAdminPassword);
   }
 
   public String getBootstrapAdminRole() {
-    return bootstrapAdminRole;
+    return bootstrap.getAdmin().getRole();
   }
 
   public void setBootstrapAdminRole(String bootstrapAdminRole) {
-    this.bootstrapAdminRole = bootstrapAdminRole;
+    bootstrap.getAdmin().setRole(bootstrapAdminRole);
   }
 
   public String getBootstrapAdminEmail() {
-    return bootstrapAdminEmail;
+    return bootstrap.getAdmin().getEmail();
   }
 
   public void setBootstrapAdminEmail(String bootstrapAdminEmail) {
-    this.bootstrapAdminEmail = bootstrapAdminEmail;
+    bootstrap.getAdmin().setEmail(bootstrapAdminEmail);
   }
 
   public String getBootstrapUserUsername() {
-    return bootstrapUserUsername;
+    return bootstrap.getUser().getUsername();
   }
 
   public void setBootstrapUserUsername(String bootstrapUserUsername) {
-    this.bootstrapUserUsername = bootstrapUserUsername;
+    bootstrap.getUser().setUsername(bootstrapUserUsername);
   }
 
   public String getBootstrapUserPassword() {
-    return bootstrapUserPassword;
+    return bootstrap.getUser().getPassword();
   }
 
   public void setBootstrapUserPassword(String bootstrapUserPassword) {
-    this.bootstrapUserPassword = bootstrapUserPassword;
+    bootstrap.getUser().setPassword(bootstrapUserPassword);
   }
 
   public String getBootstrapUserRole() {
-    return bootstrapUserRole;
+    return bootstrap.getUser().getRole();
   }
 
   public void setBootstrapUserRole(String bootstrapUserRole) {
-    this.bootstrapUserRole = bootstrapUserRole;
+    bootstrap.getUser().setRole(bootstrapUserRole);
   }
 
   public String getBootstrapUserEmail() {
-    return bootstrapUserEmail;
+    return bootstrap.getUser().getEmail();
   }
 
   public void setBootstrapUserEmail(String bootstrapUserEmail) {
-    this.bootstrapUserEmail = bootstrapUserEmail;
+    bootstrap.getUser().setEmail(bootstrapUserEmail);
   }
 
   public String getMailDeliveryMode() {
-    return mailDeliveryMode;
+    return mail.getDeliveryMode().name();
   }
 
   public void setMailDeliveryMode(String mailDeliveryMode) {
-    this.mailDeliveryMode = mailDeliveryMode;
+    mail.setDeliveryMode(MailDeliveryMode.valueOf(mailDeliveryMode.toUpperCase(Locale.ROOT)));
   }
 
   public boolean isDemoMailboxEnabled() {
-    return "DEMO_PREVIEW".equalsIgnoreCase(mailDeliveryMode);
+    return MailDeliveryMode.DEMO_PREVIEW == mail.getDeliveryMode();
   }
 
   public boolean isGithubConfigured() {
-    return githubClientId != null
-        && !githubClientId.isBlank()
-        && githubClientSecret != null
-        && !githubClientSecret.isBlank();
+    return github.getClientId() != null
+        && !github.getClientId().isBlank()
+        && github.getClientSecret() != null
+        && !github.getClientSecret().isBlank();
+  }
+
+  public static class Jwt {
+
+    @NotBlank private String issuer;
+    @NotBlank private String secret;
+
+    @Min(15)
+    private long accessTokenTtlMinutes;
+
+    public String getIssuer() {
+      return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+      this.issuer = issuer;
+    }
+
+    public String getSecret() {
+      return secret;
+    }
+
+    public void setSecret(String secret) {
+      this.secret = secret;
+    }
+
+    public long getAccessTokenTtlMinutes() {
+      return accessTokenTtlMinutes;
+    }
+
+    public void setAccessTokenTtlMinutes(long accessTokenTtlMinutes) {
+      this.accessTokenTtlMinutes = accessTokenTtlMinutes;
+    }
+  }
+
+  public static class RefreshToken {
+
+    @Min(1)
+    private long ttlDays;
+
+    public long getTtlDays() {
+      return ttlDays;
+    }
+
+    public void setTtlDays(long ttlDays) {
+      this.ttlDays = ttlDays;
+    }
+  }
+
+  public static class AccountActions {
+
+    @Min(1)
+    private long tokenTtlHours;
+
+    @Min(1)
+    private long requestCooldownSeconds = 30;
+
+    public long getTokenTtlHours() {
+      return tokenTtlHours;
+    }
+
+    public void setTokenTtlHours(long tokenTtlHours) {
+      this.tokenTtlHours = tokenTtlHours;
+    }
+
+    public long getRequestCooldownSeconds() {
+      return requestCooldownSeconds;
+    }
+
+    public void setRequestCooldownSeconds(long requestCooldownSeconds) {
+      this.requestCooldownSeconds = requestCooldownSeconds;
+    }
+  }
+
+  public static class RefreshCookie {
+
+    @NotBlank private String name;
+    @NotBlank private String path;
+
+    @Pattern(regexp = "(?i)STRICT|LAX|NONE")
+    private String sameSite;
+
+    private boolean secure;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public String getPath() {
+      return path;
+    }
+
+    public void setPath(String path) {
+      this.path = path;
+    }
+
+    public String getSameSite() {
+      return sameSite;
+    }
+
+    public void setSameSite(String sameSite) {
+      this.sameSite = sameSite;
+    }
+
+    public boolean isSecure() {
+      return secure;
+    }
+
+    public void setSecure(boolean secure) {
+      this.secure = secure;
+    }
+  }
+
+  public static class Frontend {
+
+    @NotBlank private String baseUrl;
+
+    public String getBaseUrl() {
+      return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+      this.baseUrl = baseUrl;
+    }
+  }
+
+  @SuppressFBWarnings(
+      value = "EI_EXPOSE_REP",
+      justification = "Spring configuration properties expose nested mutable beans for binding.")
+  public static class GitHub {
+
+    private String clientId;
+    private String clientSecret;
+    @NotBlank private String scope;
+    @NotNull private URI authorizationUrl;
+    @NotNull private URI tokenUrl;
+    @NotNull private URI apiBaseUrl;
+    @NotBlank private String apiVersion;
+    @NotBlank private String userAgent;
+    @NotNull private Duration timeout;
+    private boolean allowSignup;
+
+    @Min(1)
+    private long loginTicketTtlMinutes;
+
+    @Min(16)
+    private int stateEntropyBytes = 32;
+
+    @Valid private Cookie stateCookie = new Cookie();
+
+    public String getClientId() {
+      return clientId;
+    }
+
+    public void setClientId(String clientId) {
+      this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+      return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+      this.clientSecret = clientSecret;
+    }
+
+    public String getScope() {
+      return scope;
+    }
+
+    public void setScope(String scope) {
+      this.scope = scope;
+    }
+
+    public URI getAuthorizationUrl() {
+      return authorizationUrl;
+    }
+
+    public void setAuthorizationUrl(URI authorizationUrl) {
+      this.authorizationUrl = authorizationUrl;
+    }
+
+    public URI getTokenUrl() {
+      return tokenUrl;
+    }
+
+    public void setTokenUrl(URI tokenUrl) {
+      this.tokenUrl = tokenUrl;
+    }
+
+    public URI getApiBaseUrl() {
+      return apiBaseUrl;
+    }
+
+    public void setApiBaseUrl(URI apiBaseUrl) {
+      this.apiBaseUrl = apiBaseUrl;
+    }
+
+    public String getApiVersion() {
+      return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+      this.apiVersion = apiVersion;
+    }
+
+    public String getUserAgent() {
+      return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+      this.userAgent = userAgent;
+    }
+
+    public Duration getTimeout() {
+      return timeout;
+    }
+
+    public void setTimeout(Duration timeout) {
+      this.timeout = timeout;
+    }
+
+    public boolean isAllowSignup() {
+      return allowSignup;
+    }
+
+    public void setAllowSignup(boolean allowSignup) {
+      this.allowSignup = allowSignup;
+    }
+
+    public long getLoginTicketTtlMinutes() {
+      return loginTicketTtlMinutes;
+    }
+
+    public void setLoginTicketTtlMinutes(long loginTicketTtlMinutes) {
+      this.loginTicketTtlMinutes = loginTicketTtlMinutes;
+    }
+
+    public int getStateEntropyBytes() {
+      return stateEntropyBytes;
+    }
+
+    public void setStateEntropyBytes(int stateEntropyBytes) {
+      this.stateEntropyBytes = stateEntropyBytes;
+    }
+
+    public Cookie getStateCookie() {
+      return stateCookie;
+    }
+
+    public void setStateCookie(Cookie stateCookie) {
+      this.stateCookie = stateCookie == null ? new Cookie() : stateCookie;
+    }
+  }
+
+  public static class Cookie {
+
+    @NotBlank private String name;
+    @NotBlank private String path;
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public String getPath() {
+      return path;
+    }
+
+    public void setPath(String path) {
+      this.path = path;
+    }
+  }
+
+  public static class Mail {
+
+    @NotNull private MailDeliveryMode deliveryMode = MailDeliveryMode.SMTP;
+
+    public MailDeliveryMode getDeliveryMode() {
+      return deliveryMode;
+    }
+
+    public void setDeliveryMode(MailDeliveryMode deliveryMode) {
+      this.deliveryMode = deliveryMode == null ? MailDeliveryMode.SMTP : deliveryMode;
+    }
+  }
+
+  public static class Bootstrap {
+
+    @Valid private Account admin = new Account();
+    @Valid private Account user = new Account();
+
+    public Account getAdmin() {
+      return admin;
+    }
+
+    public void setAdmin(Account admin) {
+      this.admin = admin == null ? new Account() : admin;
+    }
+
+    public Account getUser() {
+      return user;
+    }
+
+    public void setUser(Account user) {
+      this.user = user == null ? new Account() : user;
+    }
+  }
+
+  public static class Account {
+
+    private String username;
+    private String password;
+    private String role;
+    private String email;
+
+    public String getUsername() {
+      return username;
+    }
+
+    public void setUsername(String username) {
+      this.username = username;
+    }
+
+    public String getPassword() {
+      return password;
+    }
+
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+    public String getRole() {
+      return role;
+    }
+
+    public void setRole(String role) {
+      this.role = role;
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public void setEmail(String email) {
+      this.email = email;
+    }
   }
 }

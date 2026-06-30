@@ -10,7 +10,7 @@ import io.weblinkpilot.auth.exception.EmailNotVerifiedException;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
 import io.weblinkpilot.auth.exception.UsernameAlreadyExistsException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
-import io.weblinkpilot.shared.contracts.UserProfileResponse;
+import io.weblinkpilot.shared.api.auth.UserProfileResponse;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
@@ -72,14 +72,13 @@ public class UserAccountService {
 
     Role userRole = roleCatalogService.getRequiredRole(RoleNames.USER);
     UserAccount account =
-        new UserAccount(
-            normalizedUsername,
-            passwordEncoder.encode(rawPassword),
-            normalizedEmail,
-            userRole,
-            true,
-            OffsetDateTime.now(ZoneOffset.UTC),
-            null);
+        UserAccount.builder()
+            .username(normalizedUsername)
+            .passwordHash(passwordEncoder.encode(rawPassword))
+            .email(normalizedEmail)
+            .role(userRole)
+            .createdAt(OffsetDateTime.now(ZoneOffset.UTC))
+            .build();
     return repository.save(account);
   }
 
@@ -121,14 +120,14 @@ public class UserAccountService {
     Role userRole = roleCatalogService.getRequiredRole(RoleNames.USER);
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
     UserAccount account =
-        new UserAccount(
-            normalizedUsername,
-            passwordEncoder.encode(UUID.randomUUID().toString()),
-            normalizedEmail.isBlank() ? null : normalizedEmail,
-            userRole,
-            true,
-            now,
-            now);
+        UserAccount.builder()
+            .username(normalizedUsername)
+            .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
+            .email(normalizedEmail.isBlank() ? null : normalizedEmail)
+            .role(userRole)
+            .createdAt(now)
+            .emailVerifiedAt(now)
+            .build();
     account.markLoggedIn(now);
     return repository.save(account);
   }
@@ -146,15 +145,12 @@ public class UserAccountService {
         .orElseGet(
             () ->
                 repository.save(
-                    new UserAccount(
+                    bootstrapAccount(
                         username,
-                        passwordEncoder.encode(password),
-                        normalizeBootstrapEmail(bootstrapAdminEmail),
-                        roleCatalogService.getRequiredRole(
-                            normalizeBootstrapRole(bootstrapAdminRole, RoleNames.ADMIN)),
-                        true,
-                        OffsetDateTime.now(ZoneOffset.UTC),
-                        OffsetDateTime.now(ZoneOffset.UTC))));
+                        password,
+                        bootstrapAdminEmail,
+                        bootstrapAdminRole,
+                        RoleNames.ADMIN)));
   }
 
   @Transactional
@@ -170,15 +166,12 @@ public class UserAccountService {
         .orElseGet(
             () ->
                 repository.save(
-                    new UserAccount(
+                    bootstrapAccount(
                         username,
-                        passwordEncoder.encode(password),
-                        normalizeBootstrapEmail(bootstrapUserEmail),
-                        roleCatalogService.getRequiredRole(
-                            normalizeBootstrapRole(bootstrapUserRole, RoleNames.USER)),
-                        true,
-                        OffsetDateTime.now(ZoneOffset.UTC),
-                        OffsetDateTime.now(ZoneOffset.UTC))));
+                        password,
+                        bootstrapUserEmail,
+                        bootstrapUserRole,
+                        RoleNames.USER)));
   }
 
   @Transactional(readOnly = true)
@@ -220,6 +213,20 @@ public class UserAccountService {
       return "";
     }
     return username.trim().toLowerCase(Locale.ROOT);
+  }
+
+  private UserAccount bootstrapAccount(
+      String username, String password, String email, String configuredRole, String defaultRole) {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    return UserAccount.builder()
+        .username(username)
+        .passwordHash(passwordEncoder.encode(password))
+        .email(normalizeBootstrapEmail(email))
+        .role(
+            roleCatalogService.getRequiredRole(normalizeBootstrapRole(configuredRole, defaultRole)))
+        .createdAt(now)
+        .emailVerifiedAt(now)
+        .build();
   }
 
   private String normalizeEmail(String email) {

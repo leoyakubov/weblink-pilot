@@ -1,0 +1,243 @@
+package io.weblinkpilot.auth.token;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.weblinkpilot.auth.config.AuthProperties;
+import io.weblinkpilot.auth.domain.RefreshToken;
+import io.weblinkpilot.auth.domain.Role;
+import io.weblinkpilot.auth.domain.UserAccount;
+import io.weblinkpilot.auth.exception.InvalidRefreshTokenException;
+import io.weblinkpilot.auth.repository.RefreshTokenRepository;
+import io.weblinkpilot.auth.support.AfterCommitExecutor;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+
+@ExtendWith(MockitoExtension.class)
+class RefreshTokenServiceTest {
+
+  @Mock private RefreshTokenRepository refreshTokenRepository;
+
+  @Mock private StringRedisTemplate redisTemplate;
+
+  @Mock private ValueOperations<String, String> valueOperations;
+
+  @Mock private SetOperations<String, String> setOperations;
+
+  private RefreshTokenService service;
+  private ObjectMapper objectMapper;
+
+  @BeforeEach
+  void setUp() {
+    AuthProperties authProperties = new AuthProperties();
+    authProperties.setRefreshTokenTtlDays(30);
+    objectMapper = new ObjectMapper().findAndRegisterModules();
+    lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    lenient().when(redisTemplate.opsForSet()).thenReturn(setOperations);
+    lenient()
+        .when(refreshTokenRepository.save(any(RefreshToken.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    lenient().when(setOperations.members(anyString())).thenReturn(Set.of());
+    RefreshTokenSessionCache sessionCache =
+        new RefreshTokenSessionCache(redisTemplate, objectMapper, authProperties);
+    RefreshTokenUserIndex userIndex = new RefreshTokenUserIndex(redisTemplate);
+    service =
+        new RefreshTokenService(
+            refreshTokenRepository,
+            sessionCache,
+            userIndex,
+            new AfterCommitExecutor(),
+            authProperties);
+  }
+
+  @Test
+  void issuesRefreshTokenWithFutureExpiry() throws Exception {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
+    ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
+
+    String rawToken = service.issueRefreshToken(account);
+
+    assertThat(rawToken).isNotBlank();
+    verify(refreshTokenRepository).save(tokenCaptor.capture());
+    RefreshToken savedToken = tokenCaptor.getValue();
+    assertThat(savedToken.getUser()).isSameAs(account);
+    assertThat(savedToken.getExpiresAt()).isAfter(savedToken.getCreatedAt());
+
+    verify(valueOperations).set(keyCaptor.capture(), valueCaptor.capture(), ttlCaptor.capture());
+    assertThat(keyCaptor.getValue()).startsWith("auth:refresh:");
+    assertThat(ttlCaptor.getValue()).isEqualTo(Duration.ofDays(30));
+    verify(setOperations).add(anyString(), anyString());
+
+    RefreshTokenSessionCache.RefreshSession session =
+        objectMapper.readValue(
+            valueCaptor.getValue(), RefreshTokenSessionCache.RefreshSession.class);
+    assertThat(session.username()).isEqualTo("alice");
+    assertThat(session.role()).isEqualTo("USER");
+    assertThat(session.expiresAt()).isAfter(session.issuedAt());
+  }
+
+  @Test
+  void rotatesActiveRefreshTokenAndUsesCacheIfAvailable() throws Exception {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
+    RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
+    RefreshTokenSessionCache.RefreshSession session =
+        new RefreshTokenSessionCache.RefreshSession(
+            "alice", "USER", issuedAt, issuedAt.plusDays(30));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+    when(valueOperations.get(anyString())).thenReturn(objectMapper.writeValueAsString(session));
+
+    RefreshTokenService.RotationResult result = service.rotateRefreshToken("refresh-token");
+
+    assertThat(result.username()).isEqualTo("alice");
+    assertThat(result.role()).isEqualTo("USER");
+    assertThat(result.refreshToken()).isNotBlank();
+    InOrder inOrder = org.mockito.Mockito.inOrder(valueOperations, refreshTokenRepository);
+    inOrder.verify(valueOperations).get(anyString());
+    inOrder.verify(refreshTokenRepository).findByTokenHash(anyString());
+    verify(refreshTokenRepository).save(token);
+    verify(redisTemplate).delete(anyString());
+    verify(valueOperations).set(anyString(), anyString(), any(Duration.class));
+    verify(setOperations).remove(anyString(), anyString());
+  }
+
+  @Test
+  void rotatesActiveRefreshTokenFallsBackToDatabaseWhenCacheMisses() {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
+    RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+    when(valueOperations.get(anyString())).thenReturn(null);
+
+    RefreshTokenService.RotationResult result = service.rotateRefreshToken("refresh-token");
+
+    assertThat(result.username()).isEqualTo("alice");
+    InOrder inOrder = org.mockito.Mockito.inOrder(valueOperations, refreshTokenRepository);
+    inOrder.verify(valueOperations).get(anyString());
+    inOrder.verify(refreshTokenRepository).findByTokenHash(anyString());
+    verify(valueOperations).set(anyString(), anyString(), any(Duration.class));
+  }
+
+  @Test
+  void rejectsMissingRefreshToken() {
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> service.rotateRefreshToken("missing"))
+        .isInstanceOf(InvalidRefreshTokenException.class);
+  }
+
+  @Test
+  void rejectsExpiredRefreshToken() {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusDays(31);
+    RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+
+    assertThatThrownBy(() -> service.rotateRefreshToken("expired"))
+        .isInstanceOf(InvalidRefreshTokenException.class);
+    verify(redisTemplate).delete(anyString());
+  }
+
+  @Test
+  void revokeRefreshTokenDeletesRedisKey() {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
+    RefreshToken token = new RefreshToken("token-hash", account, issuedAt, issuedAt.plusDays(30));
+    RefreshTokenSessionCache.RefreshSession session =
+        new RefreshTokenSessionCache.RefreshSession(
+            "alice", "USER", issuedAt, issuedAt.plusDays(30));
+    when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+    try {
+      when(valueOperations.get(anyString())).thenReturn(objectMapper.writeValueAsString(session));
+    } catch (Exception exception) {
+      throw new IllegalStateException(exception);
+    }
+
+    service.revokeRefreshToken("refresh-token");
+
+    InOrder inOrder = org.mockito.Mockito.inOrder(valueOperations, refreshTokenRepository);
+    inOrder.verify(valueOperations).get(anyString());
+    inOrder.verify(refreshTokenRepository).findByTokenHash(anyString());
+    verify(refreshTokenRepository).save(token);
+    assertThat(token.getRevokedAt()).isNotNull();
+    verify(redisTemplate).delete(anyString());
+    verify(setOperations).remove(anyString(), anyString());
+  }
+
+  @Test
+  void revokesAllTokensForUserUsingRedisIndexWhenAvailable() {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
+    RefreshToken first = new RefreshToken("token-hash-1", account, issuedAt, issuedAt.plusDays(30));
+    RefreshToken second =
+        new RefreshToken("token-hash-2", account, issuedAt, issuedAt.plusDays(30));
+    when(setOperations.members(anyString())).thenReturn(Set.of("token-hash-1", "token-hash-2"));
+    when(refreshTokenRepository.findAllByTokenHashIn(anyCollection()))
+        .thenReturn(List.of(first, second));
+
+    service.revokeAllForUser("alice");
+
+    verify(setOperations).members(anyString());
+    verify(refreshTokenRepository).findAllByTokenHashIn(anyCollection());
+    verify(refreshTokenRepository, never()).findAllByUsername(anyString());
+    verify(refreshTokenRepository).saveAll(List.of(first, second));
+    verify(redisTemplate, org.mockito.Mockito.atLeast(3)).delete(anyString());
+  }
+
+  @Test
+  void revokesAllTokensForUserFallsBackToUsernameQueryWhenRedisIndexIsStale() {
+    UserAccount account =
+        new UserAccount(
+            "alice", "hashed", new Role("USER"), true, OffsetDateTime.now(ZoneOffset.UTC));
+    OffsetDateTime issuedAt = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1);
+    RefreshToken token = new RefreshToken("token-hash-1", account, issuedAt, issuedAt.plusDays(30));
+    when(setOperations.members(anyString())).thenReturn(Set.of("stale-hash"));
+    when(refreshTokenRepository.findAllByTokenHashIn(anyCollection())).thenReturn(List.of());
+    when(refreshTokenRepository.findAllByUsername("alice")).thenReturn(List.of(token));
+
+    service.revokeAllForUser("alice");
+
+    verify(setOperations).members(anyString());
+    verify(refreshTokenRepository).findAllByTokenHashIn(anyCollection());
+    verify(refreshTokenRepository).findAllByUsername("alice");
+    verify(refreshTokenRepository).saveAll(List.of(token));
+    verify(redisTemplate, org.mockito.Mockito.atLeast(2)).delete(anyString());
+  }
+}

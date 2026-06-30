@@ -11,13 +11,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.service.AccountManagementService;
-import io.weblinkpilot.auth.service.AuthCookieService;
-import io.weblinkpilot.auth.service.AuthFrontendRedirectService;
 import io.weblinkpilot.auth.service.AuthService;
-import io.weblinkpilot.auth.service.AuthService.AuthSession;
 import io.weblinkpilot.auth.service.GitHubOAuthService;
 import io.weblinkpilot.auth.service.OAuthLoginService;
-import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
+import io.weblinkpilot.auth.session.AuthSession;
+import io.weblinkpilot.auth.web.support.AuthCookieRequestResolver;
+import io.weblinkpilot.auth.web.support.AuthCookieService;
+import io.weblinkpilot.auth.web.support.AuthFrontendRedirectService;
+import io.weblinkpilot.auth.web.support.AuthSessionResponseFactory;
+import io.weblinkpilot.shared.api.auth.AuthCredentialsRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +41,8 @@ class AuthControllerTest {
 
   private MockMvc mockMvc;
   private AuthCookieService authCookieService;
+  private AuthCookieRequestResolver cookieRequestResolver;
+  private AuthSessionResponseFactory responseFactory;
 
   @BeforeEach
   void setUp() {
@@ -53,16 +57,21 @@ class AuthControllerTest {
     authProperties.setGithubLoginTicketTtlMinutes(10);
     authProperties.setFrontendBaseUrl("http://localhost:8081");
     authCookieService = new AuthCookieService(authProperties);
+    cookieRequestResolver = new AuthCookieRequestResolver(authCookieService);
+    responseFactory = new AuthSessionResponseFactory(authCookieService);
     authFrontendRedirectService = new AuthFrontendRedirectService(authProperties);
     mockMvc =
         MockMvcBuilders.standaloneSetup(
-                new AuthController(
-                    authService,
-                    accountManagementService,
+                new AuthController(authService),
+                new AuthSessionController(authService, cookieRequestResolver, responseFactory),
+                new AuthAccountController(authService, accountManagementService),
+                new GitHubOAuthController(
                     authCookieService,
+                    cookieRequestResolver,
+                    authFrontendRedirectService,
+                    responseFactory,
                     gitHubOAuthService,
-                    oauthLoginService,
-                    authFrontendRedirectService))
+                    oauthLoginService))
             .build();
   }
 
@@ -210,7 +219,7 @@ class AuthControllerTest {
   void accountReturnsProfilePayload() throws Exception {
     when(accountManagementService.profile("alice"))
         .thenReturn(
-            new io.weblinkpilot.shared.contracts.AccountProfileResponse(
+            new io.weblinkpilot.shared.api.auth.AccountProfileResponse(
                 "alice",
                 "USER",
                 "alice@example.com",
@@ -218,7 +227,7 @@ class AuthControllerTest {
                 "2026-05-30T10:00:00Z",
                 "2026-05-30T12:00:00Z",
                 java.util.List.of(
-                    new io.weblinkpilot.shared.contracts.AccountIdentityResponse(
+                    new io.weblinkpilot.shared.api.auth.AccountIdentityResponse(
                         "GITHUB", "alice-github"))));
 
     mockMvc
@@ -305,7 +314,7 @@ class AuthControllerTest {
   @Test
   void completeGithubLoginReturnsAccessTokenAndRefreshCookie() throws Exception {
     when(oauthLoginService.completeLogin("login-ticket"))
-        .thenReturn(new OAuthLoginService.AuthSession("token-9", "refresh-9", "alice", "USER"));
+        .thenReturn(new AuthSession("token-9", "refresh-9", "alice", "USER"));
 
     mockMvc
         .perform(

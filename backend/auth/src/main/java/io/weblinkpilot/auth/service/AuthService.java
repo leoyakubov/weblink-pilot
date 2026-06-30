@@ -1,22 +1,19 @@
 package io.weblinkpilot.auth.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.UserAccount;
-import io.weblinkpilot.shared.contracts.AuthCredentialsRequest;
-import io.weblinkpilot.shared.contracts.UserProfileResponse;
+import io.weblinkpilot.auth.session.AuthSession;
+import io.weblinkpilot.auth.token.JwtService;
+import io.weblinkpilot.auth.token.RefreshTokenService;
+import io.weblinkpilot.shared.api.auth.AuthCredentialsRequest;
+import io.weblinkpilot.shared.api.auth.UserProfileResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressFBWarnings(
-    value = "EI_EXPOSE_REP2",
-    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class AuthService {
-
-  public record AuthSession(String token, String refreshToken, String username, String role) {}
 
   private final UserAccountService userAccountService;
   private final JwtService jwtService;

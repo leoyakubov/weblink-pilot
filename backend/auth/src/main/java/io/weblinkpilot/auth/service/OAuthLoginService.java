@@ -1,12 +1,15 @@
 package io.weblinkpilot.auth.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.AccountActionTokenType;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
 import io.weblinkpilot.auth.exception.InvalidAccountActionTokenException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.auth.session.AuthSession;
+import io.weblinkpilot.auth.token.AccountActionTokenService;
+import io.weblinkpilot.auth.token.JwtService;
+import io.weblinkpilot.auth.token.RefreshTokenService;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -14,12 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressFBWarnings(
-    value = "EI_EXPOSE_REP2",
-    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class OAuthLoginService {
-
-  public record AuthSession(String token, String refreshToken, String username, String role) {}
 
   private final AccountActionTokenService tokenService;
   private final RefreshTokenService refreshTokenService;

@@ -3,8 +3,11 @@ package io.weblinkpilot.auth.service;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.domain.AccountActionTokenType;
 import io.weblinkpilot.auth.domain.UserAccount;
+import io.weblinkpilot.auth.event.PasswordResetLinkRequestedEvent;
 import io.weblinkpilot.auth.exception.InvalidAccountActionTokenException;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.auth.support.SafeLogValue;
+import io.weblinkpilot.auth.token.AccountActionTokenService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -55,11 +58,13 @@ public class PasswordResetService {
       throw new IllegalArgumentException("Email is required.");
     }
 
-    log.debug("auth.password-reset.requested email={}", normalizedEmail);
+    log.debug("auth.password-reset.requested email={}", SafeLogValue.email(normalizedEmail));
 
     UserAccount account = userAccountRepository.findByEmailIgnoreCase(normalizedEmail).orElse(null);
     if (account == null) {
-      log.debug("auth.password-reset.skipped reason=account_not_found email={}", normalizedEmail);
+      log.debug(
+          "auth.password-reset.skipped reason=account_not_found email={}",
+          SafeLogValue.email(normalizedEmail));
       return null;
     }
 
@@ -80,7 +85,7 @@ public class PasswordResetService {
     log.info(
         "auth.password-reset.confirmed username={} email={}",
         account.getUsername(),
-        account.getEmail());
+        SafeLogValue.email(account.getEmail()));
   }
 
   private String sendResetLink(UserAccount account) {
@@ -90,12 +95,12 @@ public class PasswordResetService {
     log.info(
         "auth.password-reset.queued username={} email={}",
         account.getUsername(),
-        account.getEmail());
+        SafeLogValue.email(account.getEmail()));
     if (demoMailboxEnabled) {
       log.info(
           "auth.password-reset.demo-preview username={} email={} link={}",
           account.getUsername(),
-          account.getEmail(),
+          SafeLogValue.email(account.getEmail()),
           link);
       return link;
     }

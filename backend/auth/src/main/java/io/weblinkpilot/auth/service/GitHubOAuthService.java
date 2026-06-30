@@ -5,8 +5,10 @@ import io.weblinkpilot.auth.domain.SocialIdentity;
 import io.weblinkpilot.auth.domain.SocialLoginProvider;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.AccountDisabledException;
+import io.weblinkpilot.auth.integration.github.GitHubApiClient;
 import io.weblinkpilot.auth.repository.SocialIdentityRepository;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
+import io.weblinkpilot.auth.support.SafeLogValue;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,7 +25,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 public class GitHubOAuthService {
 
-  private static final String AUTHORIZATION_BASE_URL = "https://github.com/login/oauth/authorize";
+  private static final String CLIENT_ID_PARAM = "client_id";
+  private static final String REDIRECT_URI_PARAM = "redirect_uri";
+  private static final String SCOPE_PARAM = "scope";
+  private static final String STATE_PARAM = "state";
+  private static final String ALLOW_SIGNUP_PARAM = "allow_signup";
+  private static final String FALLBACK_USERNAME_PREFIX = "gh";
+  private static final String USERNAME_INVALID_CHARS_REGEX = "[^a-z0-9-]";
+  private static final String USERNAME_REPEATED_DASHES_REGEX = "-+";
+  private static final String USERNAME_EDGE_DASH_REGEX = "^-|-$";
   private static final Logger log = LoggerFactory.getLogger(GitHubOAuthService.class);
 
   private final GitHubApiClient gitHubApiClient;
@@ -34,6 +44,9 @@ public class GitHubOAuthService {
   private final String clientId;
   private final String clientSecret;
   private final String scope;
+  private final String authorizationUrl;
+  private final boolean allowSignup;
+  private final int stateEntropyBytes;
   private final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private final SecureRandom secureRandom = new SecureRandom();
 
@@ -52,6 +65,9 @@ public class GitHubOAuthService {
     this.clientId = authProperties.getGithubClientId();
     this.clientSecret = authProperties.getGithubClientSecret();
     this.scope = authProperties.getGithubScope();
+    this.authorizationUrl = authProperties.getGithub().getAuthorizationUrl().toString();
+    this.allowSignup = authProperties.getGithub().isAllowSignup();
+    this.stateEntropyBytes = authProperties.getGithub().getStateEntropyBytes();
   }
 
   public boolean isConfigured() {
@@ -62,19 +78,19 @@ public class GitHubOAuthService {
   }
 
   public String createStateToken() {
-    byte[] bytes = new byte[32];
+    byte[] bytes = new byte[stateEntropyBytes];
     secureRandom.nextBytes(bytes);
     return encoder.encodeToString(bytes);
   }
 
   public String buildAuthorizationUrl(String redirectUri, String state) {
     ensureConfigured();
-    return UriComponentsBuilder.fromUriString(AUTHORIZATION_BASE_URL)
-        .queryParam("client_id", clientId)
-        .queryParam("redirect_uri", redirectUri)
-        .queryParam("scope", scope)
-        .queryParam("state", state)
-        .queryParam("allow_signup", "false")
+    return UriComponentsBuilder.fromUriString(authorizationUrl)
+        .queryParam(CLIENT_ID_PARAM, clientId)
+        .queryParam(REDIRECT_URI_PARAM, redirectUri)
+        .queryParam(SCOPE_PARAM, scope)
+        .queryParam(STATE_PARAM, state)
+        .queryParam(ALLOW_SIGNUP_PARAM, Boolean.toString(allowSignup))
         .build()
         .encode()
         .toUriString();
@@ -170,7 +186,7 @@ public class GitHubOAuthService {
           account.getUsername(),
           profile.login(),
           providerUserId,
-          email);
+          SafeLogValue.email(email));
     } else {
       String username = createUsername(profile);
       account = userAccountService.createSocialUser(username, email);
@@ -191,7 +207,7 @@ public class GitHubOAuthService {
   private String createUsername(GitHubApiClient.GitHubProfile profile) {
     String base = normalizeGithubLogin(profile.login());
     if (base.isBlank()) {
-      base = "gh" + profile.id();
+      base = FALLBACK_USERNAME_PREFIX + profile.id();
     }
     String username = base;
     int suffix = 1;
@@ -209,8 +225,8 @@ public class GitHubOAuthService {
     return login
         .trim()
         .toLowerCase(Locale.ROOT)
-        .replaceAll("[^a-z0-9-]", "-")
-        .replaceAll("-+", "-")
-        .replaceAll("^-|-$", "");
+        .replaceAll(USERNAME_INVALID_CHARS_REGEX, "-")
+        .replaceAll(USERNAME_REPEATED_DASHES_REGEX, "-")
+        .replaceAll(USERNAME_EDGE_DASH_REGEX, "");
   }
 }

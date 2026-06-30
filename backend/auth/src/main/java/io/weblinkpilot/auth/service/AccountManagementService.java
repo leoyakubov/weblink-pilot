@@ -1,23 +1,17 @@
 package io.weblinkpilot.auth.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import io.weblinkpilot.auth.domain.SocialIdentity;
 import io.weblinkpilot.auth.domain.UserAccount;
 import io.weblinkpilot.auth.exception.InvalidCredentialsException;
+import io.weblinkpilot.auth.mapper.AuthResponseMapper;
 import io.weblinkpilot.auth.repository.SocialIdentityRepository;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
-import io.weblinkpilot.shared.contracts.AccountIdentityResponse;
-import io.weblinkpilot.shared.contracts.AccountProfileResponse;
-import java.time.OffsetDateTime;
-import java.util.List;
+import io.weblinkpilot.auth.token.RefreshTokenService;
+import io.weblinkpilot.shared.api.auth.AccountProfileResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@SuppressFBWarnings(
-    value = "EI_EXPOSE_REP2",
-    justification = "Spring-managed dependencies are intentionally retained by this service.")
 public class AccountManagementService {
 
   private final UserAccountRepository userAccountRepository;
@@ -25,35 +19,31 @@ public class AccountManagementService {
   private final PasswordEncoder passwordEncoder;
   private final RefreshTokenService refreshTokenService;
   private final UserAccountService userAccountService;
+  private final AuthResponseMapper responseMapper;
 
   public AccountManagementService(
       UserAccountRepository userAccountRepository,
       SocialIdentityRepository socialIdentityRepository,
       PasswordEncoder passwordEncoder,
       RefreshTokenService refreshTokenService,
-      UserAccountService userAccountService) {
+      UserAccountService userAccountService,
+      AuthResponseMapper responseMapper) {
     this.userAccountRepository = userAccountRepository;
     this.socialIdentityRepository = socialIdentityRepository;
     this.passwordEncoder = passwordEncoder;
     this.refreshTokenService = refreshTokenService;
     this.userAccountService = userAccountService;
+    this.responseMapper = responseMapper;
   }
 
   @Transactional(readOnly = true)
   public AccountProfileResponse profile(String username) {
     UserAccount account = userAccountService.getRequiredUser(username);
-    List<AccountIdentityResponse> identities =
+    var identities =
         socialIdentityRepository.findAllByUsername(account.getUsername()).stream()
-            .map(this::toResponse)
+            .map(responseMapper::toIdentity)
             .toList();
-    return new AccountProfileResponse(
-        account.getUsername(),
-        account.getRoleName(),
-        account.getEmail(),
-        account.isEmailVerified(),
-        toText(account.getCreatedAt()),
-        toText(account.getLastLoginAt()),
-        identities);
+    return responseMapper.toProfile(account, identities);
   }
 
   @Transactional
@@ -69,13 +59,5 @@ public class AccountManagementService {
     account.setPasswordHash(passwordEncoder.encode(newPassword));
     userAccountRepository.save(account);
     refreshTokenService.revokeAllForUser(account.getUsername());
-  }
-
-  private AccountIdentityResponse toResponse(SocialIdentity identity) {
-    return new AccountIdentityResponse(identity.getProvider().name(), identity.getProviderLogin());
-  }
-
-  private String toText(OffsetDateTime value) {
-    return value == null ? null : value.toString();
   }
 }
