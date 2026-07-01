@@ -31,17 +31,17 @@ The old implementation checklist has been merged here so we only maintain one pl
 | 21  | &#x1F7E2; Done | [Testing scenarios and README polish](#phase-21-testing-scenarios-and-readme-polish)               | Added README test scenarios and flow diagrams for auth, email, link creation, redirects, analytics, admin monitoring, and account recovery.                                                                                                                                                                                                          |
 | 22  | &#x1F7E2; Done | [AI link enrichment](#phase-22-ai-link-enrichment)                                                 | Added practical AI enrichment for created links with generated metadata, summary, category, tags, icon, suggested alias, provider abstraction, async processing, retry, and graceful fallback.                                                                                                                                                       |
 | 23  | &#x1F7E2; Done | [Codebase refactoring and security review](#phase-23-codebase-refactoring-and-security-review)     | Completed backend maintainability/security pass: route policy constants, auth log masking, AI regenerate protection, typed link filters, link response mapper, demo seed catalog, token digest utility, monitoring split, refresh-token support split, AI provider helper split, URL creation split, and monitoring health status enum are in place. |
-| 24  | In progress    | [Pagination for list pages](#phase-24-pagination-for-links-and-analytics-list-pages)               | Add pagination to the links, analytics, and admin users list pages across backend APIs, frontend tables, and supporting docs so large datasets stay usable.                                                                                                                                                                                          |
-| 25  | Planned        | [Email templating engine](#phase-25-email-templating-engine)                                       | Move auth and reminder emails to a proper templating engine so mail content, layout, and localization can evolve without string-concatenation templates.                                                                                                                                                                                             |
-| 26  | Planned        | [RabbitMQ async messaging](#phase-26-rabbitmq-async-messaging)                                     | Add RabbitMQ if we want queued analytics, background jobs, or live event fan-out without pushing everything through the request thread.                                                                                                                                                                                                              |
-| 27  | Planned        | [Expiry reminder emails](#phase-27-expiry-reminder-emails)                                         | Add a scheduled backend job that scans each user's links, finds links nearing expiry, and emails a reminder list to the user.                                                                                                                                                                                                                        |
+| 24  | &#x1F7E2; Done | [Pagination for list pages](#phase-24-pagination-for-links-and-analytics-list-pages)               | Links, analytics, home latest links, and admin users now use page-based backend contracts and shared frontend pagination controls.                                                                                                                                                                                                                    |
+| 25  | &#x1F7E2; Done | [Email templating engine](#phase-25-email-templating-engine)                                       | Auth account emails now render through Thymeleaf text templates with a shared layout, focused renderer tests, and template workflow docs.                                                                                                                                                                                                             |
+| 26  | Deferred       | [RabbitMQ async messaging](#phase-26-rabbitmq-async-messaging)                                     | Deferred until there is a proven need for broker-backed queueing beyond the current async/event approach.                                                                                                                                                                                                                                           |
+| 27  | Deferred       | [Expiry reminder emails](#phase-27-expiry-reminder-emails)                                         | Deferred for now; link expiration exists, but scheduled reminder emails are not part of the current scope.                                                                                                                                                                                                                                           |
 
 ## Execution Checklist
 
 Status note:
 
-- Phases 0-23 are already shipped and documented here as the implemented baseline.
-- Phases 24-27 are the remaining planned roadmap items.
+- Phases 0-25 are already shipped and documented here as the implemented baseline.
+- Phases 26-27 are explicitly deferred and should not be picked up unless the product scope changes.
 - The auth baseline now includes refresh cookies, password reset, email verification, GitHub social login, and richer account management.
 - Remaining phases include checklists with `[x]` for done items and `[ ]` for pending items.
 
@@ -700,7 +700,7 @@ Checklist:
 
 Goals:
 
-- move auth and reminder emails away from ad hoc string assembly
+- move auth account emails away from ad hoc string assembly
 - use a real templating engine for email layout and reusable fragments
 - keep the email content easier to maintain, review, and localize
 - preserve the current delivery flow and tests while changing only the rendering layer
@@ -708,7 +708,7 @@ Goals:
 Exit criteria:
 
 - email templates are rendered through a proper templating engine
-- auth and reminder emails share reusable layout/components
+- auth emails share reusable layout/components
 - email rendering has focused tests for the important variants
 - docs explain how to update or add templates
 
@@ -716,11 +716,12 @@ Checklist:
 
 - [x] Pick and wire the templating engine
 - [x] Migrate password-reset and verification emails
-- [ ] Migrate expiry reminder emails
 - [x] Add template-focused tests
 - [x] Document the email template workflow
 
 ### Phase 26 - RabbitMQ async messaging
+
+Status: Deferred. Do not start this phase unless the app has a concrete queue-backed workload that the current synchronous/event-driven approach cannot handle cleanly.
 
 Goals:
 
@@ -744,6 +745,8 @@ Checklist:
 - [ ] Keep RabbitMQ optional until the need is proven
 
 ### Phase 27 - Expiry reminder emails
+
+Status: Deferred. Link expiration stays in scope, but scheduled reminder emails are intentionally out of the current implementation plan.
 
 Goals:
 
@@ -795,5 +798,5 @@ Checklist:
 23. codebase refactoring and security review
 24. pagination for links and analytics list pages
 25. email templating engine
-26. RabbitMQ async messaging
-27. expiry reminder emails
+26. RabbitMQ async messaging - deferred
+27. expiry reminder emails - deferred
