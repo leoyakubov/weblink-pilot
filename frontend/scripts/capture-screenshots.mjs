@@ -633,9 +633,9 @@ async function main() {
       });
 
       await withPage(browser, { admin: true }, async (page) => {
-        await page.goto(`${baseUrl}/analytics`, { waitUntil: 'networkidle' });
-        await page.getByRole('heading', { name: /link analytics/i }).waitFor();
-        await page.locator('.analytics-table__row').first().waitFor();
+        await page.goto(`${baseUrl}/analytics/openai-docs`, { waitUntil: 'networkidle' });
+        await page.getByRole('heading', { name: /analytics for "openai-docs"/i }).waitFor();
+        await page.getByText('QR vs redirect trend').waitFor();
         await capture(page, '04-analytics-overview.png');
       });
 

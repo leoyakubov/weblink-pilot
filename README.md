@@ -82,9 +82,9 @@ npm --prefix frontend run screenshots
 | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | ![Home page with create-link form and latest links](docs/images/01-home-create-link.png) | ![Successful link creation state with short URL and QR actions](docs/images/02-link-created-success.png) |
 
-| Link details                                                                              | Analytics                                                                                         |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| ![Link details page with metadata, QR code, and actions](docs/images/03-link-details.png) | ![Analytics overview with filters, totals, and pagination](docs/images/04-analytics-overview.png) |
+| Link details                                                                              | Analytics                                                                                                    |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| ![Link details page with metadata, QR code, and actions](docs/images/03-link-details.png) | ![Per-link analytics detail with interaction totals and trend charts](docs/images/04-analytics-overview.png) |
 
 | Authentication                                                                          | Admin monitoring                                                                                     |
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
