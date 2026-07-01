@@ -124,7 +124,7 @@ These are optional but useful once the modular monolith grows further.
 
 Example in this repo:
 
-- `backend/application/src/test/java/io/weblinkpilot/architecture/ArchitectureTest.java`
+- `backend/application/src/test/java/io/weblinkpilot/architecture/ModulithStructureTest.java`
 
 ## Coverage
 

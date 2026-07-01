@@ -26,10 +26,14 @@ Use these shared components before adding page-specific markup:
 
 - `PageIntro` for page eyebrow, title, and description
 - `PanelCard` for standard content panels
-- `FeatureCard` for compact product/feature cards
 - `RefreshButton` for refresh actions
 - `LinkList` for latest/history link rows
-- `AnalyticsSummaryPanel` for repeated analytics summaries
+- `LinkFilters` for links/history filtering controls
+- `PaginationControls` for page-based list navigation
+- `QrCodeModal` for QR preview actions
+- `AuthNoticeModal` for auth prompts on public flows
+
+Home-specific helpers such as `FeatureCard` and `HelpTooltip` live beside the Home page under `features/home/components`.
 
 ## Design Changes From The Current Redesign Pass
 

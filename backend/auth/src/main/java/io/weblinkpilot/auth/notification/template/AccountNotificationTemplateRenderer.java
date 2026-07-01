@@ -33,9 +33,7 @@ public class AccountNotificationTemplateRenderer {
     return new AccountNotificationEmail(
         "Reset your WeblinkPilot password",
         renderWithLayout(
-            "auth/mail/password-reset",
-            Map.of("link", link),
-            "Reset your WeblinkPilot password"));
+            "auth/mail/password-reset", Map.of("link", link), "Reset your WeblinkPilot password"));
   }
 
   public AccountNotificationEmail emailVerification(String link) {

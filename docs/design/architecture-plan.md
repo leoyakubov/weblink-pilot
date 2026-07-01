@@ -113,8 +113,6 @@ Responsibilities:
 
 - Spring Boot application bootstrap
 - security configuration
-- JWT auth endpoints
-- user and role management
 - admin monitoring endpoints
 - Flyway wiring
 - cache wiring
@@ -197,9 +195,10 @@ The frontend is a Vue 3 app with:
 - a cleaner SaaS-style landing page
 - separate sign-in and sign-up pages
 - a public create flow that works for anonymous and signed-in users
-- a dashboard for analytics inspection
+- paginated links, analytics, home latest links, and admin users pages
 - a details page for a single short link
-- an admin-only monitoring page
+- account recovery, email verification, and GitHub OAuth completion pages
+- admin-only monitoring and users pages
 
 ## 7. Security Model
 

@@ -51,9 +51,9 @@ npm run dev
 
 Repo-level helper:
 
-- local frontend shell: [`scripts/frontend/local-run-frontend.ps1`](../scripts/frontend/local-run-frontend.ps1)
+- local frontend shell: [`scripts/dev/frontend-local.sh`](../scripts/dev/frontend-local.sh)
 
-Netlify needs a SPA fallback for direct route refreshes like `/dashboard`, so the repo includes `public/_redirects` with `/* /index.html 200`.
+Netlify needs a SPA fallback for direct route refreshes like `/analytics`, `/links`, or `/account`, so the repo includes `public/_redirects` with `/* /index.html 200`.
 
 For demo performance, the repo also ships:
 

@@ -439,9 +439,6 @@ public class AuthProperties {
     }
   }
 
-  @SuppressFBWarnings(
-      value = "EI_EXPOSE_REP",
-      justification = "Spring configuration properties expose nested mutable beans for binding.")
   public static class GitHub {
 
     private String clientId;

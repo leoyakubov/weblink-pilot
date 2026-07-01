@@ -28,7 +28,7 @@ wsl
 ```
 
 ```bash
-cd /mnt/c/Users/dev/Documents/Pet-project/weblink-pilot
+cd ~/projects/weblink-pilot
 bash ./scripts/run-before-push.sh
 ```
 
@@ -52,7 +52,7 @@ bash ./scripts/run-before-push.sh fe
 
 - Bash
 - Java 21
-- Node.js and npm
+- Node.js 24.16.0 LTS and npm 11.13.0
 - Docker with Compose
 - Git
 - `curl`, `jq`, and `lsof`

@@ -54,6 +54,7 @@ Why:
 - `auth`
 - `links`
 - `analytics`
+- `ai`
 - `application`
 - `build-support`
 
@@ -84,7 +85,6 @@ Why:
 - Vue Router 4.6.4
 - Vite 8.0.14
 - TypeScript 5.9.3
-- Pinia
 - Vitest
 - Playwright
 

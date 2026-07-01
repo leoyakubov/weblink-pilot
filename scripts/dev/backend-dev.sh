@@ -43,7 +43,7 @@ docker exec weblink-pilot-ollama ollama pull "$APP_AI_OLLAMA_MODEL"
 docker exec weblink-pilot-ollama ollama run "$APP_AI_OLLAMA_MODEL" "Return only: OK" >/dev/null
 
 if ! command -v java >/dev/null 2>&1; then
-  echo "java is not available on PATH. Install Java 21 or newer before running this script." >&2
+  echo "java is not available on PATH. Install Java 21 before running this script." >&2
   exit 1
 fi
 

@@ -56,7 +56,7 @@ flowchart TD
 | Frontend deploy workflow | Done   | GitHub Actions builds the Vue app and deploys it to Netlify.                                                                                                                                                                                                                                                      |
 | Deployment smoke tests   | Done   | GitHub Actions checks the live backend health endpoint and the freshly deployed frontend URL after deploys with separate backend and frontend smoke workflows. Backend smoke is dispatched only after a real backend deploy finishes, and frontend smoke uses the Netlify deploy URL returned by the deploy step. |
 | Render runtime           | Done   | The backend runs on Render with Postgres and the demo profile.                                                                                                                                                                                                                                                    |
-| Redis cache              | Next   | Add a Render Key Value instance and point the demo profile at its internal Redis URL.                                                                                                                                                                                                                             |
+| Redis cache              | Done   | Render Key Value is part of the chosen demo architecture, and the demo profile reads `REDIS_URL` for Redis-backed cache/session behavior.                                                                                                                                                                          |
 | Frontend host config     | Done   | Netlify site secrets and the backend API URL are configured.                                                                                                                                                                                                                                                      |
 | Backend public URL       | Done   | The backend is reachable over HTTPS from the browser.                                                                                                                                                                                                                                                             |
 | CORS origin              | Done   | The exact Netlify origin is allowed by the backend CORS config.                                                                                                                                                                                                                                                   |
@@ -64,11 +64,11 @@ flowchart TD
 
 ## GitHub Actions workflows
 
-- CI: [`.github/workflows/ci.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/ci.yml)
-- Render deploy: [`.github/workflows/deploy-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-backend.yml)
-- Netlify deploy: [`.github/workflows/deploy-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/deploy-frontend.yml)
-- Deployment smoke backend: [`.github/workflows/smoke-backend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/smoke-backend.yml)
-- Deployment smoke frontend: [`.github/workflows/smoke-frontend.yml`](/C:/Users/dev/Desktop/weblink-pilot/.github/workflows/smoke-frontend.yml)
+- CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
+- Render deploy: [`.github/workflows/deploy-backend.yml`](../../.github/workflows/deploy-backend.yml)
+- Netlify deploy: [`.github/workflows/deploy-frontend.yml`](../../.github/workflows/deploy-frontend.yml)
+- Deployment smoke backend: [`.github/workflows/smoke-backend.yml`](../../.github/workflows/smoke-backend.yml)
+- Deployment smoke frontend: [`.github/workflows/smoke-frontend.yml`](../../.github/workflows/smoke-frontend.yml)
 
 ## Setup
 

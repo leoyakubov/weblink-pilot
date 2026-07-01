@@ -58,7 +58,7 @@ The product is designed to look and feel like a real production service rather t
 - [x] link list and detail pages
 - [x] chart-based analytics dashboard
 - [x] copy/share actions
-- [x] QR download in PNG/SVG
+- [x] QR rendering and download using PNG
 - [x] rate limiting
 - [x] cache-backed redirects
 - [x] security headers, strict CORS validation, deployment-safe operational metrics, and dedicated auth throttling
@@ -72,6 +72,7 @@ The product is designed to look and feel like a real production service rather t
 - [ ] branded domains
 - [ ] bulk link generation
 - [ ] API keys
+- [ ] SVG QR output if vector downloads become useful
 - [ ] webhook delivery for click events
 - [ ] additional auth/account extensions if the product needs them:
   - [ ] more identity providers
@@ -141,18 +142,18 @@ Analytics should be:
 
 ## 8. Broker Decision
 
-Recommended approach for v1:
+Current approach:
 
 - no external broker yet
 - internal domain events only
-- prepare the contract for future Kafka or RabbitMQ integration
+- keep event contracts explicit so broker-backed delivery remains a wiring option later
 
-Recommended broker later:
+Broker options if the product outgrows internal events:
 
 - Kafka if we want event-stream and analytics story
 - RabbitMQ if we want simpler queues and retries
 
-For this project, Kafka is the stronger long-term fit, but it should be introduced only when there is a clear operational reason.
+For the current roadmap, both Kafka and RabbitMQ stay deferred until there is a clear operational reason beyond the existing Spring events and async executor.
 
 ## 9. Repository Strategy
 

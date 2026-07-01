@@ -11,12 +11,12 @@ For the Redis/cache breakdown behind those flows, see [cache-redis-scenarios.md]
 ## High-Level View
 
 ```mermaid
-flowchart LR
+flowchart TB
   U["User"] --> F["Frontend (Vue 3)"]
   F -->|"sync: HTTP API"| B["Backend (Spring Boot modular monolith)"]
   B -->|"sync: repositories"| DB["PostgreSQL"]
   B -->|"sync: cache-aside"| R["Redis"]
-  B -->|"async: domain events"| E["Analytics / background handlers"]
+  B -.->|"async: domain events"| E["Analytics / AI / email handlers"]
 ```
 
 Legend:
@@ -40,6 +40,8 @@ Legend:
 - validates and persists data
 - issues auth tokens and cookies
 - handles redirects and analytics events
+- renders account emails from Thymeleaf text templates and sends them through SMTP
+- enriches link metadata through the configured AI provider
 - serves admin and monitoring endpoints
 
 ### Database And Cache
@@ -60,11 +62,12 @@ sequenceDiagram
   participant DB as PostgreSQL
 
   U->>F: Open the site
-  F->>B: GET app shell and initial API calls (sync)
-  B->>DB: load initial state if needed (sync)
-  DB-->>B: initial data
-  B-->>F: page data / auth state
-  F-->>U: render dashboard or landing page
+  F->>F: load SPA shell and route modules
+  F->>B: GET /api/v1/auth/me or refresh if needed (sync)
+  B->>DB: load auth/account state if needed (sync)
+  DB-->>B: account data
+  B-->>F: auth state / page data
+  F-->>U: render home, links, analytics, account, or admin page
 ```
 
 ### 2. Sign in or refresh session
@@ -120,12 +123,14 @@ sequenceDiagram
   participant DB as PostgreSQL
   participant R as Redis
   participant A as Analytics
+  participant AI as AI enrichment
 
   U->>F: Submit create-link form
   F->>B: POST /api/v1/urls (sync)
   B->>DB: validate and persist link (sync)
   B->>R: warm hot lookup cache (sync)
   B-->>A: publish LinkCreatedEvent (async)
+  B-->>AI: publish LinkCreatedEvent (async)
   B-->>F: short-link response
   F-->>U: show created link and QR
 ```
@@ -213,6 +218,8 @@ Used for:
 
 - link creation notifications
 - click analytics fan-out
+- AI metadata enrichment after link creation
+- account email side effects after reset or verification requests
 - future background jobs that do not need to block the user
 
 ## Sync Vs Async Summary
@@ -228,7 +235,9 @@ Used for:
 ### Asynchronous
 
 - link-created events to analytics
+- link-created events to AI enrichment
 - link-clicked events to analytics
+- account notification events to SMTP delivery
 - future background processing that should not block the request path
 
 ## Practical Rule Of Thumb

@@ -16,14 +16,17 @@ weblink-pilot/
 |   `-- build-support/
 |-- frontend/
 |   |-- package.json
+|   |-- public/
 |   |-- src/
 |   `-- tests/
 |-- infra/
 |   |-- docker-compose.yml
-|   `-- deployment/
+|   `-- sonar/
 |-- scripts/
-|   |-- win/
-|   `-- unix/
+|   |-- dev/
+|   |-- git/
+|   |-- quality/
+|   `-- security/
 `-- docs/
     |-- README.md
     |-- planning/
@@ -32,12 +35,19 @@ weblink-pilot/
     |-- design/
     |   |-- architecture-plan.md
     |   |-- backend-module-plan.md
+    |   |-- module-communication.md
+    |   |-- app-communication.md
+    |   |-- cache-redis-scenarios.md
+    |   |-- async-operations-strategy.md
     |   |-- frontend-plan.md
+    |   |-- frontend-visual-system.md
+    |   |-- spring-modulith-migration.md
     |   |-- adr.md
     |   |-- tech-stack.md
     |   `-- repo-structure.md
     |-- implementation/
     |   |-- api-contract-v1.md
+    |   |-- email-templates.md
     |   |-- development-standards.md
     |   `-- development-environment.md
     |-- testing/
@@ -47,6 +57,8 @@ weblink-pilot/
     |-- operations/
     |   `-- deployment.md
     `-- reference/
+        |-- backend-code-quality-review.md
+        |-- github-presentation.md
         |-- interview-notes.md
         `-- security-review.md
 ```
@@ -76,10 +88,13 @@ Backend should remain a modular monolith:
 
 Frontend should be a standalone Vue application:
 
-- one app
-- mobile-first responsive UI
-- API-driven views
-- QR code preview and analytics pages
+- `src/router` owns route registration and route groups
+- `src/core` owns the app shell, navigation, and layout chrome
+- `src/account` owns sign-in, registration, recovery, verification, OAuth completion, and account settings
+- `src/admin` owns monitoring, browser reset, and users pages
+- `src/features` owns product pages such as home, about, links, and analytics
+- `src/shared` owns reusable UI components, composables, HTTP/settings services, types, and small utilities
+- page folders keep `.vue`, `.ts`, `.css`, and tests side by side
 
 ## Workflow docs
 

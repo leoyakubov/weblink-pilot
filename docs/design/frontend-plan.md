@@ -1,264 +1,173 @@
-# Frontend Plan
+# Frontend Architecture Plan
 
 ## Purpose
 
-The frontend will be a Vue-based, mobile-first interface for the WeblinkPilot product.
+The frontend is a Vue 3, mobile-first application for creating short links, sharing QR codes, browsing owned/demo links, inspecting analytics, managing account flows, and opening admin-only operational views.
 
-Its job is to make link creation, QR handling, and analytics easy on both mobile and desktop without making the user think about backend complexity.
+The app should feel like a small real SaaS product while keeping the browser layer thin: presentation, routing, auth state, and HTTP calls live in the frontend; business rules stay in the backend.
 
-## Frontend goals
-
-- mobile-first UX
-- fast link creation flow
-- clear short-link result screen
-- QR code preview and download
-- analytics dashboard with readable metrics
-- responsive behavior for desktop and mobile
-- API-driven architecture
-
-## Recommended stack
+## Current Stack
 
 - Vue 3
 - TypeScript
 - Vite
 - Vue Router
-- Pinia
-- Tailwind CSS
+- PrimeVue controls and Nora theme preset
+- Custom CSS tokens and page/component CSS files
 - Vitest
-- Playwright
+- Playwright-based e2e smoke flows
+
+The project does not use Tailwind or Pinia right now. Keep state simple with focused modules and composables unless the app grows enough to justify a dedicated state library.
+
+## Folder Structure
+
+```text
+frontend/src/
+|-- account/
+|   |-- login/
+|   |-- register/
+|   |-- password-reset/
+|   |-- email-verification/
+|   |-- github/
+|   `-- account-settings/
+|-- admin/
+|   |-- monitoring/
+|   `-- users/
+|-- core/
+|-- features/
+|   |-- about/
+|   |-- analytics/
+|   |-- home/
+|   `-- links/
+|-- router/
+`-- shared/
+    |-- components/
+    |-- composables/
+    |-- services/
+    |-- types/
+    `-- utils/
+```
+
+Rules:
+
+- `router/` owns route registration and route groups.
+- `core/` owns app shell, navigation, and layout chrome.
+- `account/` owns auth, recovery, verification, OAuth completion, and account settings.
+- `admin/` owns admin-only pages and operational utilities.
+- `features/` owns product-facing pages.
+- `shared/` owns reusable UI, HTTP/settings services, types, composables, and utilities.
+- Page folders keep `.vue`, `.ts`, `.css`, and tests side by side.
+- Feature-specific components stay beside the feature when they are not reused elsewhere.
+
+## Page Map
+
+| Route | Owner | Purpose |
+| --- | --- | --- |
+| `/` | `features/home` | Home page, create-link flow, latest links, QR modal, and pagination |
+| `/links` | `features/links/history` | Links list with filters, quick actions, and pagination |
+| `/history` | router redirect | Backward-compatible redirect to `/links` |
+| `/link/:code` | `features/links/link` | Link details, QR code, copy/share/open actions, and JSON preview |
+| `/analytics` | `features/analytics/analytics` | Analytics overview across visible links with pagination |
+| `/dashboard` | router redirect | Backward-compatible redirect to `/analytics` |
+| `/analytics/:code` | `features/analytics/analytics-detail` | Per-link analytics detail page |
+| `/about` | `features/about` | Product, access, stack, implementation, API, and project reference |
+| `/auth/signin` | `account/login` | Sign-in form |
+| `/auth/signup` | `account/register` | Registration form |
+| `/auth/forgot-password` | `account/password-reset/request` | Password reset request |
+| `/auth/reset-password` | `account/password-reset/confirm` | Password reset confirmation |
+| `/auth/verify-email/request` | `account/email-verification/request` | Verification email request |
+| `/auth/verify-email` | `account/email-verification/confirm` | Verification confirmation |
+| `/auth/github/complete` | `account/github` | GitHub OAuth ticket completion |
+| `/account` | `account/account-settings` | Profile, password/security, and identity providers |
+| `/account/security` | router redirect | Backward-compatible redirect to `/account` |
+| `/monitoring` | `admin/monitoring` | Admin monitoring and runtime links |
+| `/settings/reset` | `admin/monitoring/reset` | Browser settings reset utility |
+| `/admin/users` | `admin/users` | Admin read-only users directory with pagination |
+
+## Shared Components
+
+Use shared components when a pattern appears on more than one page:
+
+- `PageIntro` for page header text.
+- `PanelCard` for standard content sections.
+- `LinkList` for home/latest and links/history list rows.
+- `LinkFilters` for links filtering controls.
+- `PaginationControls` for page-based navigation.
+- `QrCodeModal` for QR previews.
+- `RefreshButton` for refresh actions.
+- `AuthNoticeModal` for sign-in prompts.
+
+Keep page-specific components close to the page. For example, Home-only helpers live in `features/home/components`.
+
+## State And API Integration
+
+Current state model:
+
+- `account/AuthSession.ts` owns auth bootstrap, current user, access token state, refresh behavior, and logout.
+- `account/AccountProfileState.ts` owns account profile state.
+- API clients live beside the feature they serve, for example `LinksApi.ts`, `AnalyticsApi.ts`, `AccountApi.ts`, and `AdminApi.ts`.
+- `shared/services/http.ts` is the common HTTP layer.
+- `shared/services/settings.ts` owns browser-stored frontend settings such as API base URL.
+
+Guidelines:
+
+- Keep server state close to the page or feature that loads it.
+- Do not put domain rules in the frontend.
+- Use backend pagination metadata instead of calculating page counts in the browser.
+- Keep tokens and sensitive auth behavior centralized in the account layer.
+
+## Styling Direction
 
-## Page map
+The app uses a custom CSS visual system, not a template migration.
 
-### 1. Landing / Create Link
+Current conventions:
 
-Primary purpose:
+- Global `styles.css` keeps design tokens, resets, PrimeVue baseline wiring, and generic app-wide helpers.
+- Page and component styles live beside their `.vue` files.
+- Shared component styles live beside the shared component.
+- Avoid moving page-specific selectors back into global CSS.
+- Keep dark shell contrast and action visibility strong.
 
-- create a new short URL quickly
+See [frontend-visual-system.md](frontend-visual-system.md) for visual decisions and anti-goals.
 
-Main elements:
+## Routing And Access
 
-- original URL input
-- custom alias input
-- expiration selector
-- create button
-- optional advanced section
+Vue Router is centralized under `src/router`.
 
-Mobile behavior:
+Route guards:
 
-- full-width form
-- large touch targets
-- sticky create action where useful
+- bootstrap auth state before route decisions
+- redirect non-admin users away from admin routes
+- redirect anonymous users away from authenticated account routes
 
-### 2. Link Created Success Screen
+Public pages include home, links, link details, analytics reads, auth/recovery pages, about, and browser reset.
 
-Primary purpose:
+Protected pages include account settings and admin-only monitoring/users pages.
 
-- confirm creation and provide share actions
+## Testing Plan
 
-Main elements:
+Use nearby tests for page and feature behavior:
 
-- short link display
-- copy button
-- open button
-- QR preview
-- QR download action
-- expiration summary
+- `*.test.ts` beside page/controller files
+- router tests under `src/router`
+- API client tests beside the API client
+- shared service/component tests beside the shared unit
 
-### 3. Redirect / Scan Experience
+Verification commands:
 
-Primary purpose:
+- `npm --prefix frontend run test:run`
+- `npm --prefix frontend run lint`
+- `npm --prefix frontend run build`
+- `npm --prefix frontend run test:e2e`
+- `bash ./scripts/run-before-push.sh fe` for the frontend quality gate
 
-- act as the visual bridge when scanning a QR code or opening a short URL page
-
-Notes:
-
-- actual redirect happens in backend
-- frontend can provide an optional preview or branded interstitial later
-
-### 4. Analytics Dashboard
-
-Primary purpose:
-
-- show link performance and usage patterns
-
-Main elements:
-
-- total clicks
-- unique visitors
-- click trend chart
-- recent clicks table
-- browser/device/referrer breakdown
-- country or geo summary
-
-### 5. Link List / History
-
-Primary purpose:
-
-- manage previously created links
-
-Main elements:
-
-- search
-- filters
-- list rows or cards
-- status indicators
-- quick actions
-
-### 6. Link Details
-
-Primary purpose:
-
-- show one link with stats and management actions
-
-Main elements:
-
-- original URL
-- short URL
-- QR code
-- analytics snapshot
-- edit/disable/delete actions later
-
-### 7. Auth / Admin
-
-Primary purpose:
-
-- protect management views if we decide to expose them in the first version
-
-Potential variants:
-
-- simple login form
-- token-based login later
-- hidden behind basic auth for a first pass
-
-## Component plan
-
-### Core components
-
-- `AppShell`
-- `TopNav`
-- `MobileBottomBar`
-- `PageHeader`
-- `LinkForm`
-- `ExpirationPicker`
-- `AliasInput`
-- `ShortUrlCard`
-- `QrPreviewCard`
-- `CopyButton`
-- `MetricCard`
-- `AnalyticsChart`
-- `RecentClicksTable`
-- `EmptyState`
-- `ErrorState`
-- `LoadingState`
-
-### Shared UI patterns
-
-- card-based layout
-- strong spacing hierarchy
-- one primary action per screen
-- bottom sheet or modal only when needed
-- consistent status badges
-
-## State management plan
-
-Use Pinia for:
-
-- created link state
-- current link detail state
-- analytics snapshot state
-- UI preferences
-- auth state if needed
-
-Keep server state separated from local UI state.
-
-Recommended split:
-
-- server state through composables or lightweight query abstraction
-- UI state in Pinia
-
-## API integration plan
-
-Frontend should consume backend-only APIs:
-
-- create short link
-- fetch short link details
-- fetch QR code
-- fetch analytics summary
-- fetch link history
-
-The frontend should not contain domain logic beyond presentation rules.
-
-## QR code UX plan
-
-QR should be visible in two places:
-
-- success screen after creation
-- link details screen
-
-UX behavior:
-
-- preview on screen
-- download action
-- copy short link action
-- share action on mobile where supported
-
-## Mobile-first layout plan
-
-Layout principles:
-
-- form-first on creation screens
-- single-column default
-- bottom-aligned primary CTA on small screens
-- charts collapse into cards on mobile
-- tables become stacked rows or condensed list items
-
-## Design system direction
-
-The design system should be simple but polished:
-
-- strong typography hierarchy
-- subtle gradients or accent backgrounds
-- compact but readable cards
-- visible feedback for copy, success, and loading states
-
-## Routing plan
-
-Suggested routes:
-
-- `/` - landing and create form
-- `/link/:code` - link details
-- `/dashboard` - analytics dashboard
-- `/history` - link history
-- `/auth` - login or admin entry
-
-## Testing plan
-
-### Unit tests
-
-- component rendering
-- form validation
-- computed UI states
-- router guards
-
-### Integration tests
-
-- create link flow
-- QR preview rendering
-- dashboard data loading
-
-### E2E tests
-
-- create link and copy short URL
-- create link and open QR
-- navigate to dashboard and verify analytics widgets
-
-## Future frontend evolution
+## Future Frontend Evolution
 
 Potential future additions:
 
 - branded domains UI
 - bulk short URL creation
-- custom dashboard widgets
-- theme switcher
-- export analytics
-
+- API key management UI
+- richer analytics export
+- team or organization account screens
+- SVG QR downloads if the backend adds vector output

@@ -38,6 +38,24 @@ Refresh token endpoints:
 
 `GET /api/v1/auth/me`
 
+`GET /api/v1/auth/account`
+
+`POST /api/v1/auth/account/password`
+
+`POST /api/v1/auth/password-reset/request`
+
+`POST /api/v1/auth/password-reset/confirm`
+
+`POST /api/v1/auth/email-verification/request`
+
+`POST /api/v1/auth/email-verification/confirm`
+
+GitHub OAuth endpoints:
+
+- `GET /api/v1/auth/oauth2/github/start`
+- `GET /api/v1/auth/oauth2/github/callback`
+- `POST /api/v1/auth/oauth2/github/complete`
+
 ## Endpoints
 
 ### 1. Create short URL
@@ -279,6 +297,16 @@ Response:
 }
 ```
 
+### 11. Admin monitoring
+
+`GET /api/v1/admin/monitoring`
+
+Notes:
+
+- admin-only endpoint
+- returns health, runtime links, selected configuration, and service status for the monitoring page
+- public actuator health/info stay separate from the admin monitoring API
+
 ## Error contract
 
 Use a stable error payload:
@@ -326,7 +354,6 @@ Later versions may add:
 
 - `PATCH /api/v1/urls/{code}`
 - `DELETE /api/v1/urls/{code}`
-- `GET /api/v1/urls`
 - bulk creation
 - branded domains
 - export endpoints

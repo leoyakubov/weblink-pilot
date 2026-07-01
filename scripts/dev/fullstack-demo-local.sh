@@ -58,7 +58,7 @@ if [[ ! -f "$mvnw" ]]; then
 fi
 
 if ! command -v java >/dev/null 2>&1; then
-  echo "java is not available on PATH. Install Java 21 or newer before running this script." >&2
+  echo "java is not available on PATH. Install Java 21 before running this script." >&2
   exit 1
 fi
 

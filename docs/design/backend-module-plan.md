@@ -229,20 +229,36 @@ Public endpoints:
 - `POST /api/v1/urls`
 - `GET /r/{code}`
 - `GET /q/{code}`
+- `GET /api/v1/urls?page=0&size=10`
 - `GET /api/v1/urls/{code}`
 - `GET /api/v1/urls/{code}/qr`
 - `GET /api/v1/urls/{code}/preview`
 - `GET /api/v1/analytics/{code}`
 - `GET /api/v1/analytics/{code}/count`
+- `GET /api/v1/analytics/{code}/details`
+- `GET /api/v1/ai/links/{code}/metadata`
+- `POST /api/v1/ai/links/{code}/metadata/regenerate`
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh`
 - `POST /api/v1/auth/logout`
 - `GET /api/v1/auth/me`
+- `GET /api/v1/auth/account`
+- `POST /api/v1/auth/account/password`
+- `POST /api/v1/auth/password-reset/request`
+- `POST /api/v1/auth/password-reset/confirm`
+- `POST /api/v1/auth/email-verification/request`
+- `POST /api/v1/auth/email-verification/confirm`
+- `GET /api/v1/auth/oauth2/github/start`
+- `GET /api/v1/auth/oauth2/github/callback`
+- `POST /api/v1/auth/oauth2/github/complete`
 
 Admin endpoints:
 
 - `GET /api/v1/admin/overview`
+- `GET /api/v1/admin/link-creators`
+- `GET /api/v1/admin/users?page=0&size=10`
+- `GET /api/v1/admin/monitoring`
 
 ## Data Model Snapshot
 
