@@ -8,7 +8,8 @@ public record LinkSearchCriteria(
     String creator,
     String ownerRole,
     ExpirationFilter expiration,
-    int limit) {
+    int page,
+    int size) {
 
   private static final int DEFAULT_LIMIT = 10;
   private static final int MAX_LIMIT = 50;
@@ -23,8 +24,12 @@ public record LinkSearchCriteria(
   }
 
   public static LinkSearchCriteria guest(String expiration, int limit) {
+    return guest(expiration, 0, limit);
+  }
+
+  public static LinkSearchCriteria guest(String expiration, int page, int size) {
     return new LinkSearchCriteria(
-        null, false, null, null, ExpirationFilter.from(expiration), limit);
+        null, false, null, null, ExpirationFilter.from(expiration), page, size);
   }
 
   public static LinkSearchCriteria user(
@@ -35,27 +40,38 @@ public record LinkSearchCriteria(
       String expiration,
       int limit) {
     return new LinkSearchCriteria(
-        ownerUsername, admin, creator, ownerRole, ExpirationFilter.from(expiration), limit);
+        ownerUsername, admin, creator, ownerRole, ExpirationFilter.from(expiration), 0, limit);
   }
 
-  public int queryLimit() {
-    return queryLimit(DEFAULT_LIMIT, MAX_LIMIT);
+  public static LinkSearchCriteria user(
+      String ownerUsername,
+      boolean admin,
+      String creator,
+      String ownerRole,
+      String expiration,
+      int page,
+      int size) {
+    return new LinkSearchCriteria(
+        ownerUsername, admin, creator, ownerRole, ExpirationFilter.from(expiration), page, size);
   }
 
-  public int resultLimit(int defaultLimit, int maxLimit) {
-    return clampLimit(limit, defaultLimit, maxLimit);
+  public int pageNumber() {
+    return Math.max(0, page);
   }
 
-  public int queryLimit(int defaultLimit, int maxLimit) {
-    int resultLimit = resultLimit(defaultLimit, maxLimit);
-    return expiration == null ? resultLimit : maxLimit;
+  public int pageSize(int defaultLimit, int maxLimit) {
+    return clampSize(size, defaultLimit, maxLimit);
+  }
+
+  public int pageSize() {
+    return pageSize(DEFAULT_LIMIT, MAX_LIMIT);
   }
 
   public boolean creatorIsAnonymous() {
     return ANONYMOUS_CREATOR.equalsIgnoreCase(creator) || GUEST_CREATOR.equalsIgnoreCase(creator);
   }
 
-  private static int clampLimit(int value, int defaultLimit, int maxLimit) {
+  private static int clampSize(int value, int defaultLimit, int maxLimit) {
     int normalizedDefault = Math.max(1, defaultLimit);
     int normalizedMax = Math.max(normalizedDefault, maxLimit);
     return Math.max(1, Math.min(value <= 0 ? normalizedDefault : value, normalizedMax));

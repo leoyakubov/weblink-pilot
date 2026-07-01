@@ -8,6 +8,18 @@ function apiUrl(path) {
   return `http://localhost:8080/api/v1${path}`;
 }
 
+function paginatedLinks(content, size = 5) {
+  return {
+    content,
+    page: 0,
+    size,
+    totalElements: content.length,
+    totalPages: content.length > 0 ? 1 : 0,
+    first: true,
+    last: true,
+  };
+}
+
 test('guest can create a link and open the details page', async () => {
   const { browser, page } = await openPage();
   let created = false;
@@ -32,24 +44,26 @@ test('guest can create a link and open the details page', async () => {
           }),
         };
       },
-      'GET /api/v1/urls?limit=5': async () => ({
+      'GET /api/v1/urls?page=0&size=5': async () => ({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(
-          created
-            ? [
-                {
-                  code: 'openai-docs',
-                  shortUrl: 'http://localhost:8080/r/openai-docs',
-                  qrCodeUrl: apiUrl('/urls/openai-docs/qr'),
-                  originalUrl: 'https://openai.com/docs',
-                  createdAt: '2026-06-12T10:00:00Z',
-                  expiresAt: null,
-                  clickCount: 0,
-                  ownerUsername: null,
-                },
-              ]
-            : [],
+          paginatedLinks(
+            created
+              ? [
+                  {
+                    code: 'openai-docs',
+                    shortUrl: 'http://localhost:8080/r/openai-docs',
+                    qrCodeUrl: apiUrl('/urls/openai-docs/qr'),
+                    originalUrl: 'https://openai.com/docs',
+                    createdAt: '2026-06-12T10:00:00Z',
+                    expiresAt: null,
+                    clickCount: 0,
+                    ownerUsername: null,
+                  },
+                ]
+              : [],
+          ),
         ),
       }),
       'GET /api/v1/urls/openai-docs/preview': async () => ({

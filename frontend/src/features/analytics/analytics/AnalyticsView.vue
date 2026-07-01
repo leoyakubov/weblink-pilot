@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router';
 import Button from 'primevue/button';
 import LinkFilters from '@/shared/components/LinkFilters.vue';
 import PageIntro from '@/shared/components/PageIntro.vue';
+import PaginationControls from '@/shared/components/PaginationControls.vue';
 import PanelCard from '@/shared/components/PanelCard.vue';
 import RefreshButton from '@/shared/components/RefreshButton.vue';
 import { useAnalyticsView } from './AnalyticsView';
@@ -10,6 +11,7 @@ import './AnalyticsView.css';
 
 const {
   filters,
+  pagination,
   rows,
   creatorOptions,
   loading,
@@ -17,6 +19,9 @@ const {
   canFilterByCreator,
   visibleRows,
   loadAnalyticsOverview,
+  applyFilters,
+  previousPage,
+  nextPage,
   scopeLabel,
   ownerLabel,
   ownerRoleLabel,
@@ -48,7 +53,7 @@ const {
         :creator-options="creatorOptions"
         :show-admin-filters="canFilterByCreator"
         :loading="loading"
-        @apply="loadAnalyticsOverview"
+        @apply="applyFilters"
       />
 
       <p v-if="errorMessage" class="status error">
@@ -117,6 +122,19 @@ const {
         <p class="eyebrow">No analytics</p>
         <h4 class="card-title">No links match the current filters.</h4>
       </div>
+
+      <PaginationControls
+        v-if="visibleRows.length || pagination.totalElements"
+        :page="pagination.page"
+        :size="pagination.size"
+        :total-elements="pagination.totalElements"
+        :total-pages="pagination.totalPages"
+        :first="pagination.first"
+        :last="pagination.last"
+        :loading="loading"
+        @previous="previousPage"
+        @next="nextPage"
+      />
     </PanelCard>
   </section>
 </template>

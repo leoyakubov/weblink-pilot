@@ -13,6 +13,7 @@ import {
   getRedirectPreview,
   listAdminUsers,
   listLinks,
+  listLinksPageRequest,
   login,
   logoutSession,
   requestEmailVerification,
@@ -174,20 +175,28 @@ describe('api helpers', () => {
 
   it('lists recent links from the backend', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
-      expect(String(input)).toBe('http://localhost:8080/api/v1/urls?limit=5');
+      expect(String(input)).toBe('http://localhost:8080/api/v1/urls?page=0&size=5');
       return new Response(
-        JSON.stringify([
-          {
-            code: 'two',
-            shortUrl: 'http://localhost:8080/r/two',
-            qrCodeUrl: 'http://localhost:8080/api/v1/urls/two/qr',
-            originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/two',
-            createdAt: '2026-05-22T15:00:00Z',
-            expiresAt: null,
-            clickCount: 2,
-            ownerUsername: null,
-          },
-        ]),
+        JSON.stringify({
+          content: [
+            {
+              code: 'two',
+              shortUrl: 'http://localhost:8080/r/two',
+              qrCodeUrl: 'http://localhost:8080/api/v1/urls/two/qr',
+              originalUrl: 'https://github.com/weblinkpilot/weblink-pilot/two',
+              createdAt: '2026-05-22T15:00:00Z',
+              expiresAt: null,
+              clickCount: 2,
+              ownerUsername: null,
+            },
+          ],
+          page: 0,
+          size: 5,
+          totalElements: 1,
+          totalPages: 1,
+          first: true,
+          last: true,
+        }),
         {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -214,9 +223,44 @@ describe('api helpers', () => {
   it('passes the creator filter when requesting recent links', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       expect(String(input)).toBe(
-        'http://localhost:8080/api/v1/urls?limit=8&creator=alice&expiration=EXPIRED',
+        'http://localhost:8080/api/v1/urls?page=2&size=8&creator=alice&expiration=EXPIRED',
       );
-      return new Response(JSON.stringify([]), {
+      return new Response(
+        JSON.stringify({
+          content: [],
+          page: 2,
+          size: 8,
+          totalElements: 0,
+          totalPages: 0,
+          first: false,
+          last: true,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(listLinksPageRequest(2, 8, settings, 'alice', null, 'EXPIRED')).resolves.toEqual({
+      content: [],
+      page: 2,
+      size: 8,
+      totalElements: 0,
+      totalPages: 0,
+      first: false,
+      last: true,
+    });
+  });
+
+  it('passes the creator filter through the recent links wrapper', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe(
+        'http://localhost:8080/api/v1/urls?page=0&size=8&creator=alice&expiration=EXPIRED',
+      );
+      return new Response(JSON.stringify({ content: [] }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });

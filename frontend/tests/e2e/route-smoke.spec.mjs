@@ -37,6 +37,18 @@ function makeLink(overrides = {}) {
   };
 }
 
+function paginatedLinks(content, size = 10) {
+  return {
+    content,
+    page: 0,
+    size,
+    totalElements: content.length,
+    totalPages: content.length > 0 ? 1 : 0,
+    first: true,
+    last: true,
+  };
+}
+
 function makeAnalyticsDetails(code = 'openai-docs') {
   return {
     code,
@@ -171,26 +183,18 @@ test('signed-in user can open analytics, links, and account routes', async () =>
           username: 'alice',
           role: 'USER',
         }),
-      'GET /api/v1/urls?limit=8': async () =>
-        jsonResponse([
-          makeLink({
-            ownerUsername: 'alice',
-            originalUrl: 'https://openai.com/docs',
-            shortUrl: 'http://localhost:8080/r/openai-docs',
-            code: 'openai-docs',
-            qrCodeUrl: 'http://localhost:8080/api/v1/urls/openai-docs/qr',
-          }),
-        ]),
-      'GET /api/v1/urls?limit=20': async () =>
-        jsonResponse([
-          makeLink({
-            ownerUsername: 'alice',
-            originalUrl: 'https://openai.com/docs',
-            shortUrl: 'http://localhost:8080/r/openai-docs',
-            code: 'openai-docs',
-            qrCodeUrl: 'http://localhost:8080/api/v1/urls/openai-docs/qr',
-          }),
-        ]),
+      'GET /api/v1/urls?page=0&size=10': async () =>
+        jsonResponse(
+          paginatedLinks([
+            makeLink({
+              ownerUsername: 'alice',
+              originalUrl: 'https://openai.com/docs',
+              shortUrl: 'http://localhost:8080/r/openai-docs',
+              code: 'openai-docs',
+              qrCodeUrl: 'http://localhost:8080/api/v1/urls/openai-docs/qr',
+            }),
+          ]),
+        ),
       'GET /api/v1/urls/openai-docs': async () =>
         jsonResponse(
           makeLink({
@@ -314,29 +318,33 @@ test('admin can open monitoring and filter analytics links by creator', async ()
           { username: 'admin', role: 'ADMIN' },
           { username: 'alice', role: 'USER' },
         ]),
-      'GET /api/v1/urls?limit=20': async (request, url) => {
+      'GET /api/v1/urls?page=0&size=10': async (request, url) => {
         requestedUrls.push(url.pathname + url.search);
-        return jsonResponse([
-          makeLink({
-            ownerUsername: 'admin',
-            originalUrl: 'https://github.com/orgs/github-org',
-            code: 'github-org',
-            shortUrl: 'http://localhost:8080/r/github-org',
-            qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-          }),
-        ]);
+        return jsonResponse(
+          paginatedLinks([
+            makeLink({
+              ownerUsername: 'admin',
+              originalUrl: 'https://github.com/orgs/github-org',
+              code: 'github-org',
+              shortUrl: 'http://localhost:8080/r/github-org',
+              qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+            }),
+          ]),
+        );
       },
-      'GET /api/v1/urls?limit=20&creator=alice': async (request, url) => {
+      'GET /api/v1/urls?page=0&size=10&creator=alice': async (request, url) => {
         requestedUrls.push(url.pathname + url.search);
-        return jsonResponse([
-          makeLink({
-            ownerUsername: 'alice',
-            originalUrl: 'https://openai.com/docs',
-            code: 'openai-docs',
-            shortUrl: 'http://localhost:8080/r/openai-docs',
-            qrCodeUrl: 'http://localhost:8080/api/v1/urls/openai-docs/qr',
-          }),
-        ]);
+        return jsonResponse(
+          paginatedLinks([
+            makeLink({
+              ownerUsername: 'alice',
+              originalUrl: 'https://openai.com/docs',
+              code: 'openai-docs',
+              shortUrl: 'http://localhost:8080/r/openai-docs',
+              qrCodeUrl: 'http://localhost:8080/api/v1/urls/openai-docs/qr',
+            }),
+          ]),
+        );
       },
       'GET /api/v1/analytics/openai-docs': async () =>
         jsonResponse({
@@ -397,7 +405,7 @@ test('admin can open monitoring and filter analytics links by creator', async ()
     await Promise.all([
       page.waitForResponse(
         (response) =>
-          response.url().includes('/api/v1/urls?limit=20&creator=alice') &&
+          response.url().includes('/api/v1/urls?page=0&size=10&creator=alice') &&
           response.status() === 200,
       ),
       page.getByRole('button', { name: 'Apply filters' }).click(),

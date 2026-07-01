@@ -6,6 +6,7 @@ import {
   getLinkCreatorOptions,
   getRedirectPreview,
   listLinks,
+  listLinksPage,
   regenerateAiLinkMetadata,
 } from './LinksApi';
 import type { ApiSettings } from '@/shared/types/api';
@@ -26,6 +27,7 @@ vi.mock('@/shared/services/http', () => ({
   getLinkRequest: mocks.httpMock('getLinkRequest'),
   getRedirectPreviewRequest: mocks.httpMock('getRedirectPreviewRequest'),
   listLinksRequest: mocks.httpMock('listLinksRequest'),
+  listLinksPageRequest: mocks.httpMock('listLinksPageRequest'),
   regenerateAiLinkMetadataRequest: mocks.httpMock('regenerateAiLinkMetadataRequest'),
 }));
 
@@ -39,6 +41,7 @@ describe('LinksApi', () => {
   it('delegates link calls to HTTP services', () => {
     createLink({ originalUrl: 'https://example.com', customAlias: 'example' }, settings);
     listLinks(10, settings, 'admin', 'ADMIN', 'active');
+    listLinksPage(2, 10, settings, 'admin', 'ADMIN', 'active');
     getLink('redis', settings);
     getAiLinkMetadata('redis', settings);
     regenerateAiLinkMetadata('redis', settings);
@@ -50,6 +53,14 @@ describe('LinksApi', () => {
       settings,
     );
     expect(mocks.calls.get('listLinksRequest')).toHaveBeenCalledWith(
+      10,
+      settings,
+      'admin',
+      'ADMIN',
+      'active',
+    );
+    expect(mocks.calls.get('listLinksPageRequest')).toHaveBeenCalledWith(
+      2,
       10,
       settings,
       'admin',

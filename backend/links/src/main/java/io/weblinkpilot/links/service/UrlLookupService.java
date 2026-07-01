@@ -12,18 +12,23 @@ import io.weblinkpilot.links.mapper.LinkResponseMapper;
 import io.weblinkpilot.links.repository.ShortLinkRepository;
 import io.weblinkpilot.links.support.PublicUrlBuilder;
 import io.weblinkpilot.shared.api.ai.AiLinkMetadataResponse;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.LinkResponse;
 import io.weblinkpilot.shared.ports.LinkAiMetadataService;
 import io.weblinkpilot.shared.ports.LinkOwnerMetadataService;
 import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,39 +153,23 @@ public class UrlLookupService {
 
   @Transactional(readOnly = true)
   public List<LinkResponse> listRecentLinks(LinkSearchCriteria criteria) {
-    int queryLimit = criteria.queryLimit(defaultBrowseLimit, maxBrowseLimit);
-    int resultLimit = criteria.resultLimit(defaultBrowseLimit, maxBrowseLimit);
-    List<ShortLink> content;
-    if (criteria.admin() && criteria.creator() != null) {
-      content = loadFilteredByCreator(criteria, queryLimit);
-    } else if (criteria.admin() && criteria.ownerRole() != null) {
-      content = loadFilteredByRole(criteria, queryLimit);
-    } else if (criteria.admin()) {
-      content =
-          repository
-              .findAllByDeletedAtIsNull(PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-              .getContent();
-    } else if (criteria.ownerUsername() == null) {
-      content =
-          repository
-              .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(
-                  PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-              .getContent();
-    } else {
-      content =
-          repository
-              .findAllByOwnerUsernameAndDeletedAtIsNull(
-                  criteria.ownerUsername(), PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-              .getContent();
-    }
-    List<LinkResponse> links =
-        withAiMetadata(
-            content.stream()
-                .filter(link -> matchesExpirationFilter(link, criteria.expiration()))
-                .limit(resultLimit)
-                .toList());
-    log.info("url.link.list.success limit={} returned={}", resultLimit, links.size());
-    return links;
+    return listRecentLinksPage(criteria).content();
+  }
+
+  @Transactional(readOnly = true)
+  public PaginatedResponse<LinkResponse> listRecentLinksPage(LinkSearchCriteria criteria) {
+    int page = criteria.pageNumber();
+    int size = criteria.pageSize(defaultBrowseLimit, maxBrowseLimit);
+    PageRequest pageRequest = PageRequest.of(page, size, NEWEST_LINKS_FIRST);
+    Page<ShortLink> pageResult = loadPage(criteria, pageRequest);
+    List<LinkResponse> links = withAiMetadata(pageResult.getContent());
+    log.info(
+        "url.link.list.success page={} size={} returned={} total={}",
+        page,
+        size,
+        links.size(),
+        pageResult.getTotalElements());
+    return PaginatedResponse.of(links, page, size, pageResult.getTotalElements());
   }
 
   private List<LinkResponse> withAiMetadata(List<ShortLink> links) {
@@ -194,53 +183,89 @@ public class UrlLookupService {
     return metadata == null ? Map.of() : metadata;
   }
 
-  private List<ShortLink> loadFilteredByCreator(LinkSearchCriteria criteria, int queryLimit) {
-    if (criteria.creatorIsAnonymous()) {
-      return repository
-          .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(
-              PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-          .getContent();
+  private Page<ShortLink> loadPage(LinkSearchCriteria criteria, PageRequest pageRequest) {
+    List<String> roleUsernames = roleUsernames(criteria);
+    if (criteria.admin() && criteria.ownerRole() != null && roleUsernames.isEmpty()) {
+      return new PageImpl<>(List.of(), pageRequest, 0);
     }
-
-    return repository
-        .findAllByOwnerUsernameAndDeletedAtIsNull(
-            criteria.creator(), PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-        .getContent();
+    return repository.findAll(specification(criteria, roleUsernames), pageRequest);
   }
 
-  private List<ShortLink> loadFilteredByRole(LinkSearchCriteria criteria, int queryLimit) {
-    if (ANONYMOUS_ROLE.equalsIgnoreCase(criteria.ownerRole())) {
-      return repository
-          .findAllByOwnerUsernameIsNullAndDeletedAtIsNull(
-              PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-          .getContent();
-    }
-
-    List<String> usernames =
-        linkOwnerMetadataService.usernamesByRole(criteria.ownerRole()).stream()
-            .map(String::trim)
-            .map(username -> username.toLowerCase(Locale.ROOT))
-            .filter(username -> !username.isBlank())
-            .toList();
-    if (usernames.isEmpty()) {
+  private List<String> roleUsernames(LinkSearchCriteria criteria) {
+    if (!criteria.admin()
+        || criteria.ownerRole() == null
+        || ANONYMOUS_ROLE.equalsIgnoreCase(criteria.ownerRole())) {
       return List.of();
     }
 
-    return repository
-        .findAllByOwnerUsernameInAndDeletedAtIsNull(
-            usernames, PageRequest.of(0, queryLimit, NEWEST_LINKS_FIRST))
-        .getContent();
+    return linkOwnerMetadataService.usernamesByRole(criteria.ownerRole()).stream()
+        .map(String::trim)
+        .map(username -> username.toLowerCase(Locale.ROOT))
+        .filter(username -> !username.isBlank())
+        .toList();
+  }
+
+  private Specification<ShortLink> specification(
+      LinkSearchCriteria criteria, List<String> roleUsernames) {
+    return Specification.allOf(
+        notDeleted(),
+        ownershipSpecification(criteria, roleUsernames),
+        expirationSpecification(criteria.expiration()));
+  }
+
+  private Specification<ShortLink> notDeleted() {
+    return (root, query, builder) -> builder.isNull(root.get("deletedAt"));
+  }
+
+  private Specification<ShortLink> ownershipSpecification(
+      LinkSearchCriteria criteria, List<String> roleUsernames) {
+    return (root, query, builder) -> {
+      if (criteria.admin()) {
+        if (criteria.creator() != null) {
+          if (criteria.creatorIsAnonymous()) {
+            return builder.isNull(root.get("ownerUsername"));
+          }
+          return builder.equal(root.get("ownerUsername"), criteria.creator());
+        }
+        if (ANONYMOUS_ROLE.equalsIgnoreCase(criteria.ownerRole())) {
+          return builder.isNull(root.get("ownerUsername"));
+        }
+        if (criteria.ownerRole() != null) {
+          return root.get("ownerUsername").in(roleUsernames);
+        }
+        return builder.conjunction();
+      }
+
+      if (criteria.ownerUsername() == null) {
+        return builder.isNull(root.get("ownerUsername"));
+      }
+      return builder.equal(root.get("ownerUsername"), criteria.ownerUsername());
+    };
+  }
+
+  private Specification<ShortLink> expirationSpecification(ExpirationFilter expirationFilter) {
+    return (root, query, builder) -> {
+      if (expirationFilter == null) {
+        return builder.conjunction();
+      }
+
+      OffsetDateTime now = OffsetDateTime.now(clock);
+      return switch (expirationFilter) {
+        case ACTIVE ->
+            builder.or(
+                builder.isNull(root.get("expiresAt")),
+                builder.greaterThan(root.get("expiresAt"), now));
+        case EXPIRED ->
+            builder.and(
+                builder.isNotNull(root.get("expiresAt")),
+                builder.lessThanOrEqualTo(root.get("expiresAt"), now));
+        case NEVER -> builder.isNull(root.get("expiresAt"));
+      };
+    };
   }
 
   private String hostOf(String url) {
     String host = java.net.URI.create(url).getHost();
     return host == null ? url : host;
-  }
-
-  private boolean matchesExpirationFilter(ShortLink link, ExpirationFilter expirationFilter) {
-    if (expirationFilter == null) {
-      return true;
-    }
-    return expirationFilter.matches(link, clock);
   }
 }

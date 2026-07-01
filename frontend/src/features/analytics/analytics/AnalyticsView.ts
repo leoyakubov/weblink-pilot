@@ -4,7 +4,7 @@ import { ApiRequestError } from '@/shared/services/http';
 import { isAdminUser } from '@/account/AuthSession';
 import { loadSettings } from '@/shared/services/settings';
 import { getAnalyticsSummary } from '@/features/analytics/AnalyticsApi';
-import { getLinkCreatorOptions, listLinks } from '@/features/links/LinksApi';
+import { getLinkCreatorOptions, listLinksPage } from '@/features/links/LinksApi';
 import type {
   AnalyticsSummaryResponse,
   LinkCreatorOptionResponse,
@@ -21,6 +21,7 @@ export function useAnalyticsView() {
   const route = useRoute();
   const router = useRouter();
   const settings = loadSettings();
+  const pageSize = 10;
 
   const filters = reactive({
     ownerScope: String(route.query.scope ?? 'all'),
@@ -29,6 +30,14 @@ export function useAnalyticsView() {
   });
 
   const rows = ref<AnalyticsRow[]>([]);
+  const pagination = reactive({
+    page: Number(route.query.page ?? 0) || 0,
+    size: pageSize,
+    totalElements: 0,
+    totalPages: 0,
+    first: true,
+    last: true,
+  });
   const creatorOptions = ref<LinkCreatorOptionResponse[]>([]);
   const loading = ref(false);
   const errorMessage = ref('');
@@ -79,7 +88,15 @@ export function useAnalyticsView() {
       const creator = backendCreatorFilter();
       const ownerRole = backendOwnerRoleFilter();
       const expiration = backendExpirationFilter();
-      const links = await listLinks(20, settings, creator, ownerRole, expiration);
+      const response = await listLinksPage(
+        pagination.page,
+        pagination.size,
+        settings,
+        creator,
+        ownerRole,
+        expiration,
+      );
+      const links = response.content;
       const analyticsRows = await Promise.all(
         links.map(async (link) => {
           try {
@@ -104,8 +121,15 @@ export function useAnalyticsView() {
         }),
       );
       rows.value = analyticsRows;
+      pagination.page = response.page;
+      pagination.size = response.size;
+      pagination.totalElements = response.totalElements;
+      pagination.totalPages = response.totalPages;
+      pagination.first = response.first;
+      pagination.last = response.last;
       router.replace({
         query: {
+          ...(pagination.page > 0 ? { page: String(pagination.page) } : {}),
           ...(canFilterByCreator.value && filters.ownerScope !== 'all'
             ? { scope: filters.ownerScope }
             : {}),
@@ -117,6 +141,10 @@ export function useAnalyticsView() {
       });
     } catch (error) {
       rows.value = [];
+      pagination.totalElements = 0;
+      pagination.totalPages = 0;
+      pagination.first = true;
+      pagination.last = true;
       errorMessage.value = error instanceof Error ? error.message : 'Could not load analytics.';
     } finally {
       loading.value = false;
@@ -150,6 +178,27 @@ export function useAnalyticsView() {
     return labels[filters.ownerScope] ?? 'all links';
   }
 
+  function applyFilters() {
+    pagination.page = 0;
+    void loadAnalyticsOverview();
+  }
+
+  function previousPage() {
+    if (pagination.first || loading.value) {
+      return;
+    }
+    pagination.page -= 1;
+    void loadAnalyticsOverview();
+  }
+
+  function nextPage() {
+    if (pagination.last || loading.value) {
+      return;
+    }
+    pagination.page += 1;
+    void loadAnalyticsOverview();
+  }
+
   function ownerLabel(link: LinkResponse) {
     return link.ownerUsername ?? 'anonymous';
   }
@@ -175,6 +224,7 @@ export function useAnalyticsView() {
   });
   return {
     filters,
+    pagination,
     rows,
     creatorOptions,
     loading,
@@ -182,6 +232,9 @@ export function useAnalyticsView() {
     canFilterByCreator,
     visibleRows,
     loadAnalyticsOverview,
+    applyFilters,
+    previousPage,
+    nextPage,
     scopeLabel,
     ownerLabel,
     ownerRoleLabel,

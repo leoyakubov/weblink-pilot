@@ -16,6 +16,7 @@ import type {
   LinkCreatorOptionResponse,
   LinkResponse,
   OAuthLoginCompleteRequest,
+  PaginatedResponse,
   PasswordChangeRequest,
   PasswordResetConfirmRequest,
   PasswordResetRequest,
@@ -446,7 +447,20 @@ export function listLinksRequest(
   ownerRole?: string | null,
   expiration?: string | null,
 ) {
-  const params = new URLSearchParams({ limit: String(limit) });
+  return listLinksPageRequest(0, limit, settings, creator, ownerRole, expiration).then(
+    (response) => response.content,
+  );
+}
+
+export function listLinksPageRequest(
+  page: number = 0,
+  size: number = 10,
+  settings: ApiSettings = loadSettings(),
+  creator?: string | null,
+  ownerRole?: string | null,
+  expiration?: string | null,
+) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
   const creatorQuery = creator?.trim();
   const ownerRoleQuery = ownerRole?.trim();
   const expirationQuery = expiration?.trim();
@@ -459,7 +473,11 @@ export function listLinksRequest(
   if (expirationQuery) {
     params.set('expiration', expirationQuery);
   }
-  return requestJson<LinkResponse[]>(`/urls?${params.toString()}`, { method: 'GET' }, settings);
+  return requestJson<PaginatedResponse<LinkResponse>>(
+    `/urls?${params.toString()}`,
+    { method: 'GET' },
+    settings,
+  );
 }
 
 export function getLinkCreatorOptionsRequest(settings: ApiSettings = loadSettings()) {

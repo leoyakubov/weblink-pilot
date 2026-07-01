@@ -1,15 +1,24 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { isAdminUser } from '@/account/AuthSession';
 import { loadSettings } from '@/shared/services/settings';
-import { getLinkCreatorOptions, listLinks } from '@/features/links/LinksApi';
+import { getLinkCreatorOptions, listLinksPage } from '@/features/links/LinksApi';
 import type { LinkCreatorOptionResponse, LinkResponse } from '@/shared/types/api';
 
 export function useHistoryView() {
+  const pageSize = 10;
   const settings = loadSettings();
   const filters = reactive({
     ownerScope: 'all',
     expirationScope: 'all',
     creator: '',
+  });
+  const pagination = reactive({
+    page: 0,
+    size: pageSize,
+    totalElements: 0,
+    totalPages: 0,
+    first: true,
+    last: true,
   });
   const links = ref<LinkResponse[]>([]);
   const creatorOptions = ref<LinkCreatorOptionResponse[]>([]);
@@ -79,19 +88,52 @@ export function useHistoryView() {
     errorMessage.value = '';
 
     try {
-      links.value = await listLinks(
-        20,
+      const response = await listLinksPage(
+        pagination.page,
+        pagination.size,
         settings,
         backendCreatorFilter(),
         backendOwnerRoleFilter(),
         backendExpirationFilter(),
       );
+      links.value = response.content;
+      pagination.page = response.page;
+      pagination.size = response.size;
+      pagination.totalElements = response.totalElements;
+      pagination.totalPages = response.totalPages;
+      pagination.first = response.first;
+      pagination.last = response.last;
     } catch (error) {
       links.value = [];
+      pagination.totalElements = 0;
+      pagination.totalPages = 0;
+      pagination.first = true;
+      pagination.last = true;
       errorMessage.value = error instanceof Error ? error.message : 'Could not load recent links';
     } finally {
       loading.value = false;
     }
+  }
+
+  function applyFilters() {
+    pagination.page = 0;
+    void refresh();
+  }
+
+  function previousPage() {
+    if (pagination.first || loading.value) {
+      return;
+    }
+    pagination.page -= 1;
+    void refresh();
+  }
+
+  function nextPage() {
+    if (pagination.last || loading.value) {
+      return;
+    }
+    pagination.page += 1;
+    void refresh();
   }
 
   async function loadCreatorOptions() {
@@ -119,6 +161,7 @@ export function useHistoryView() {
   }
   return {
     filters,
+    pagination,
     links,
     creatorOptions,
     loading,
@@ -129,6 +172,9 @@ export function useHistoryView() {
     canFilterByCreator,
     scopeLabel,
     refresh,
+    applyFilters,
+    previousPage,
+    nextPage,
     openQrModal,
     closeQrModal,
   };

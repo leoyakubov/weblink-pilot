@@ -5,6 +5,7 @@ import Button from 'primevue/button';
 import LinkFilters from '@/shared/components/LinkFilters.vue';
 import LinkList from '@/shared/components/LinkList.vue';
 import PageIntro from '@/shared/components/PageIntro.vue';
+import PaginationControls from '@/shared/components/PaginationControls.vue';
 import PanelCard from '@/shared/components/PanelCard.vue';
 import QrCodeModal from '@/shared/components/QrCodeModal.vue';
 import RefreshButton from '@/shared/components/RefreshButton.vue';
@@ -12,6 +13,7 @@ import { useHistoryView } from './HistoryView';
 
 const {
   filters,
+  pagination,
   links,
   creatorOptions,
   loading,
@@ -22,6 +24,9 @@ const {
   canFilterByCreator,
   scopeLabel,
   refresh,
+  applyFilters,
+  previousPage,
+  nextPage,
   openQrModal,
   closeQrModal,
 } = useHistoryView();
@@ -51,7 +56,7 @@ const {
         :creator-options="creatorOptions"
         :show-admin-filters="canFilterByCreator"
         :loading="loading"
-        @apply="refresh"
+        @apply="applyFilters"
       />
 
       <p v-if="errorMessage" class="status error">
@@ -74,6 +79,19 @@ const {
           <Button label="Create link" icon="pi pi-plus" />
         </RouterLink>
       </div>
+
+      <PaginationControls
+        v-if="hasLinks || pagination.totalElements"
+        :page="pagination.page"
+        :size="pagination.size"
+        :total-elements="pagination.totalElements"
+        :total-pages="pagination.totalPages"
+        :first="pagination.first"
+        :last="pagination.last"
+        :loading="loading"
+        @previous="previousPage"
+        @next="nextPage"
+      />
     </PanelCard>
 
     <QrCodeModal

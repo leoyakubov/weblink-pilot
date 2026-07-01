@@ -12,11 +12,11 @@ import io.weblinkpilot.links.qr.QrCodeService;
 import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
 import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.CreateLinkRequest;
 import io.weblinkpilot.shared.api.links.LinkResponse;
 import io.weblinkpilot.shared.api.links.RedirectPreviewResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -117,26 +117,31 @@ public class UrlController {
   }
 
   @GetMapping
-  public ResponseEntity<List<LinkResponse>> list(
+  public ResponseEntity<PaginatedResponse<LinkResponse>> list(
       Authentication authentication,
       @RequestParam(name = "limit", defaultValue = DEFAULT_LIMIT_SENTINEL) int limit,
+      @RequestParam(name = "page", defaultValue = "0") int page,
+      @RequestParam(name = "size", defaultValue = DEFAULT_LIMIT_SENTINEL) int size,
       @RequestParam(name = "creator", required = false) String creator,
       @RequestParam(name = "ownerRole", required = false) String ownerRole,
       @RequestParam(name = "expiration", required = false) String expiration) {
     browseCounter.increment();
+    int requestedSize = size > 0 ? size : limit;
     if (isAuthenticated(authentication)) {
       return ResponseEntity.ok(
-          urlLookupService.listRecentLinks(
+          urlLookupService.listRecentLinksPage(
               LinkSearchCriteria.user(
                   currentUsername(authentication),
                   isAdmin(authentication),
                   creator,
                   ownerRole,
                   expiration,
-                  limit)));
+                  page,
+                  requestedSize)));
     }
     return ResponseEntity.ok(
-        urlLookupService.listRecentLinks(LinkSearchCriteria.guest(expiration, limit)));
+        urlLookupService.listRecentLinksPage(
+            LinkSearchCriteria.guest(expiration, page, requestedSize)));
   }
 
   @GetMapping("/{code}")

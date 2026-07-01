@@ -20,7 +20,7 @@ vi.mock('vue-router', () => ({
 vi.mock('@/features/links/LinksApi', () => ({
   buildApiBaseUrl: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
   getLinkCreatorOptions: mocks.getLinkCreatorOptionsMock,
-  listLinks: mocks.listLinksMock,
+  listLinksPage: mocks.listLinksMock,
 }));
 
 vi.mock('@/account/AuthSession', () => ({
@@ -47,18 +47,26 @@ describe('HistoryView', () => {
   });
 
   it('renders recent links and opens quick actions', async () => {
-    mocks.listLinksMock.mockResolvedValue([
-      {
-        code: 'github-org',
-        shortUrl: 'http://localhost:8080/r/github-org',
-        qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-        originalUrl: 'https://github.com/orgs/github-org',
-        createdAt: '2026-05-23T11:00:00Z',
-        expiresAt: null,
-        clickCount: 3,
-        ownerUsername: 'admin',
-      },
-    ]);
+    mocks.listLinksMock.mockResolvedValue({
+      content: [
+        {
+          code: 'github-org',
+          shortUrl: 'http://localhost:8080/r/github-org',
+          qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+          originalUrl: 'https://github.com/orgs/github-org',
+          createdAt: '2026-05-23T11:00:00Z',
+          expiresAt: null,
+          clickCount: 3,
+          ownerUsername: 'admin',
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+      first: true,
+      last: true,
+    });
 
     const wrapper = mount(HistoryView, {
       global: {
@@ -78,7 +86,7 @@ describe('HistoryView', () => {
     expect(wrapper.text()).toContain('Owner group');
     expect(wrapper.text()).toContain('github-org');
     expect(wrapper.text()).toContain('3 clicks');
-    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '', '');
+    expect(mocks.listLinksMock).toHaveBeenCalledWith(0, 10, expect.any(Object), '', '', '');
 
     const buttons = wrapper.findAll('button');
     await buttons.find((button) => button.text().includes('QR code'))?.trigger('click');
@@ -88,7 +96,7 @@ describe('HistoryView', () => {
   });
 
   it('passes selected admin filters to the links request', async () => {
-    mocks.listLinksMock.mockResolvedValue([]);
+    mocks.listLinksMock.mockResolvedValue(emptyPage());
 
     const wrapper = mount(HistoryView);
     await flushPromises();
@@ -101,11 +109,11 @@ describe('HistoryView', () => {
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '', '');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(0, 10, expect.any(Object), 'user', '', '');
   });
 
   it('passes selected expiration filters to the links request', async () => {
-    mocks.listLinksMock.mockResolvedValue([]);
+    mocks.listLinksMock.mockResolvedValue(emptyPage());
 
     const wrapper = mount(HistoryView);
     await flushPromises();
@@ -117,11 +125,18 @@ describe('HistoryView', () => {
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), '', '', 'EXPIRED');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(
+      0,
+      10,
+      expect.any(Object),
+      '',
+      '',
+      'EXPIRED',
+    );
   });
 
   it('limits creator options to the selected owner group', async () => {
-    mocks.listLinksMock.mockResolvedValue([]);
+    mocks.listLinksMock.mockResolvedValue(emptyPage());
 
     const wrapper = mount(HistoryView);
     await flushPromises();
@@ -144,7 +159,7 @@ describe('HistoryView', () => {
 
   it('keeps expiration filters available for non-admin users', async () => {
     mocks.authState.currentUser = { username: 'user', role: 'USER' };
-    mocks.listLinksMock.mockResolvedValue([]);
+    mocks.listLinksMock.mockResolvedValue(emptyPage());
 
     const wrapper = mount(HistoryView);
     await flushPromises();
@@ -160,6 +175,25 @@ describe('HistoryView', () => {
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), '', '', 'NEVER');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(
+      0,
+      10,
+      expect.any(Object),
+      '',
+      '',
+      'NEVER',
+    );
   });
 });
+
+function emptyPage() {
+  return {
+    content: [],
+    page: 0,
+    size: 10,
+    totalElements: 0,
+    totalPages: 0,
+    first: true,
+    last: true,
+  };
+}

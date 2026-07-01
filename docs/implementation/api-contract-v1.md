@@ -129,31 +129,45 @@ Response:
 }
 ```
 
-### 5. List recent links
+### 5. List links
 
-`GET /api/v1/urls?limit=10`
+`GET /api/v1/urls?page=0&size=10`
+
+Compatibility:
+
+- `limit=10` is still accepted and treated as `size=10` when `size` is not provided
+- `page` is zero-based
+- `size` is capped server-side by the configured browse maximum
 
 Response:
 
 ```json
-[
-  {
-    "code": "my-link",
-    "shortUrl": "https://weblink-pilot.io/r/my-link",
-    "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr",
-    "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
-    "createdAt": "2026-05-22T11:00:00Z",
-    "expiresAt": "2026-12-31T23:59:59Z",
-    "clickCount": 128
-  }
-]
+{
+  "content": [
+    {
+      "code": "my-link",
+      "shortUrl": "https://weblink-pilot.io/r/my-link",
+      "qrCodeUrl": "https://weblink-pilot.io/api/v1/urls/my-link/qr",
+      "originalUrl": "https://github.com/weblinkpilot/weblink-pilot/some/long/link",
+      "createdAt": "2026-05-22T11:00:00Z",
+      "expiresAt": "2026-12-31T23:59:59Z",
+      "clickCount": 128
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 42,
+  "totalPages": 5,
+  "first": true,
+  "last": false
+}
 ```
 
 Notes:
 
 - returns the newest links first
 - intended for authenticated dashboard and history views
-- `limit` is capped server-side
+- analytics overview uses this endpoint to page through visible links, then loads summaries for the current page
 
 ### 6. Get QR code
 

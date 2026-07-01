@@ -13,6 +13,7 @@ import io.weblinkpilot.links.qr.QrCodeService;
 import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
 import io.weblinkpilot.links.support.PublicUrlBuilder;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.CreateLinkRequest;
 import io.weblinkpilot.shared.api.links.LinkResponse;
 import io.weblinkpilot.shared.api.links.RedirectPreviewResponse;
@@ -102,14 +103,14 @@ class UrlApiIntegrationTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
-        .thenReturn(List.of(first, second));
+    when(urlLookupService.listRecentLinksPage(any(LinkSearchCriteria.class)))
+        .thenReturn(PaginatedResponse.of(List.of(first, second), 0, 10, 2));
 
-    List<LinkResponse> response =
-        controller.list(auth("alice", "USER"), 10, null, null, null).getBody();
+    PaginatedResponse<LinkResponse> response =
+        controller.list(auth("alice", "USER"), 10, 0, 0, null, null, null).getBody();
 
-    assertEquals("two", response.get(0).code());
-    assertEquals("one", response.get(1).code());
+    assertEquals("two", response.content().get(0).code());
+    assertEquals("one", response.content().get(1).code());
   }
 
   @Test

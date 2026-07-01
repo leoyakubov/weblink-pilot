@@ -3,7 +3,6 @@ package io.weblinkpilot.links.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -32,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @ExtendWith(MockitoExtension.class)
 class UrlLookupServiceTest {
@@ -131,7 +131,7 @@ class UrlLookupServiceTest {
             OffsetDateTime.now(ZoneOffset.UTC),
             null);
 
-    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
+    when(repository.findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(second, first)));
     when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
     when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
@@ -144,7 +144,7 @@ class UrlLookupServiceTest {
 
     assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
     final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(repository).findAllByOwnerUsernameIsNullAndDeletedAtIsNull(pageableCaptor.capture());
+    verify(repository).findAll(any(Specification.class), pageableCaptor.capture());
     final Pageable pageable = pageableCaptor.getValue();
     assertThat(pageable.getPageSize()).isEqualTo(50);
     assertThat(pageable.getSort())
@@ -187,7 +187,7 @@ class UrlLookupServiceTest {
             OffsetDateTime.now(ZoneOffset.UTC),
             OffsetDateTime.now(ZoneOffset.UTC));
 
-    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
+    when(repository.findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(second, first)));
     when(linkAiMetadataService.metadataByCodes(List.of("two", "one")))
         .thenReturn(Map.of("two", metadata));
@@ -224,7 +224,7 @@ class UrlLookupServiceTest {
             OffsetDateTime.now(ZoneOffset.UTC),
             null);
 
-    when(repository.findAllByOwnerUsernameAndDeletedAtIsNull(anyString(), any(Pageable.class)))
+    when(repository.findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(second, first)));
     when(publicUrlBuilder.buildShortUrl("two")).thenReturn("http://localhost:8080/r/two");
     when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
@@ -237,8 +237,7 @@ class UrlLookupServiceTest {
 
     assertThat(response).extracting(LinkResponse::code).containsExactly("two", "one");
     final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(repository)
-        .findAllByOwnerUsernameAndDeletedAtIsNull(anyString(), pageableCaptor.capture());
+    verify(repository).findAll(any(Specification.class), pageableCaptor.capture());
     assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(50);
   }
 
@@ -253,7 +252,7 @@ class UrlLookupServiceTest {
             OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1),
             null);
 
-    when(repository.findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class)))
+    when(repository.findAll(any(Specification.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(List.of(first)));
     when(publicUrlBuilder.buildShortUrl("one")).thenReturn("http://localhost:8080/r/one");
     when(publicUrlBuilder.buildQrCodeUrl("one"))
@@ -262,7 +261,7 @@ class UrlLookupServiceTest {
     final List<LinkResponse> response = service.listRecentLinks("admin", true, "anonymous", 99);
 
     assertThat(response).extracting(LinkResponse::code).containsExactly("one");
-    verify(repository).findAllByOwnerUsernameIsNullAndDeletedAtIsNull(any(Pageable.class));
+    verify(repository).findAll(any(Specification.class), any(Pageable.class));
   }
 
   @Test
@@ -293,8 +292,8 @@ class UrlLookupServiceTest {
             now.minusMinutes(3),
             null);
 
-    when(repository.findAllByDeletedAtIsNull(any(Pageable.class)))
-        .thenReturn(new PageImpl<>(List.of(active, expired, never)));
+    when(repository.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(active, never)));
     when(publicUrlBuilder.buildShortUrl("active")).thenReturn("http://localhost:8080/r/active");
     when(publicUrlBuilder.buildQrCodeUrl("active"))
         .thenReturn("http://localhost:8080/api/v1/urls/active/qr");
@@ -307,7 +306,7 @@ class UrlLookupServiceTest {
 
     assertThat(response).extracting(LinkResponse::code).containsExactly("active", "never");
     final ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-    verify(repository).findAllByDeletedAtIsNull(pageableCaptor.capture());
-    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(50);
+    verify(repository).findAll(any(Specification.class), pageableCaptor.capture());
+    assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(10);
   }
 }

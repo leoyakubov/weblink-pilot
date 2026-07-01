@@ -4,6 +4,7 @@ import type {
   CreateLinkRequest,
   LinkCreatorOptionResponse,
   LinkResponse,
+  PaginatedResponse,
   RedirectPreviewResponse,
 } from '@/shared/types/api';
 import { loadSettings } from '@/shared/services/settings';
@@ -14,6 +15,7 @@ import {
   getLinkCreatorOptionsRequest,
   getRedirectPreviewRequest,
   listLinksRequest,
+  listLinksPageRequest,
   regenerateAiLinkMetadataRequest,
 } from '@/shared/services/http';
 
@@ -29,6 +31,17 @@ export function listLinks(
   expiration?: string | null,
 ) {
   return listLinksRequest(limit, settings, creator, ownerRole, expiration);
+}
+
+export function listLinksPage(
+  page: number,
+  size: number,
+  settings: ApiSettings = loadSettings(),
+  creator?: string | null,
+  ownerRole?: string | null,
+  expiration?: string | null,
+) {
+  return listLinksPageRequest(page, size, settings, creator, ownerRole, expiration);
 }
 
 export function getLink(code: string, settings: ApiSettings = loadSettings()) {
@@ -54,6 +67,7 @@ export function getLinkCreatorOptions(settings: ApiSettings = loadSettings()) {
 export type {
   AiLinkMetadataResponse,
   LinkCreatorOptionResponse,
+  PaginatedResponse,
   LinkResponse,
   RedirectPreviewResponse,
 };

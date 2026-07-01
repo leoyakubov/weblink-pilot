@@ -23,6 +23,16 @@ export interface LinkResponse {
   aiMetadata?: AiLinkMetadataResponse | null;
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 export interface AiLinkMetadataResponse {
   code: string;
   status: string;

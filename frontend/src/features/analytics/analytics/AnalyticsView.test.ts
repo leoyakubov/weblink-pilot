@@ -49,7 +49,7 @@ vi.mock('@/features/analytics/AnalyticsApi', () => ({
 
 vi.mock('@/features/links/LinksApi', () => ({
   getLinkCreatorOptions: mocks.getLinkCreatorOptionsMock,
-  listLinks: mocks.listLinksMock,
+  listLinksPage: mocks.listLinksMock,
 }));
 
 vi.mock('@/shared/services/settings', () => ({
@@ -65,19 +65,27 @@ describe('AnalyticsView', () => {
     vi.clearAllMocks();
     mocks.authState.currentUser = { username: 'admin', role: 'ADMIN' };
     mocks.routeState.query = {};
-    mocks.listLinksMock.mockResolvedValue([
-      {
-        code: 'redis',
-        shortUrl: 'http://localhost:8080/r/redis',
-        qrCodeUrl: 'http://localhost:8080/api/v1/urls/redis/qr',
-        originalUrl: 'https://redis.io/docs/latest/develop/',
-        createdAt: '2026-05-23T11:00:00Z',
-        expiresAt: null,
-        clickCount: 4,
-        ownerUsername: 'user',
-        ownerRole: 'USER',
-      },
-    ]);
+    mocks.listLinksMock.mockResolvedValue({
+      content: [
+        {
+          code: 'redis',
+          shortUrl: 'http://localhost:8080/r/redis',
+          qrCodeUrl: 'http://localhost:8080/api/v1/urls/redis/qr',
+          originalUrl: 'https://redis.io/docs/latest/develop/',
+          createdAt: '2026-05-23T11:00:00Z',
+          expiresAt: null,
+          clickCount: 4,
+          ownerUsername: 'user',
+          ownerRole: 'USER',
+        },
+      ],
+      page: 0,
+      size: 10,
+      totalElements: 1,
+      totalPages: 1,
+      first: true,
+      last: true,
+    });
     mocks.getLinkCreatorOptionsMock.mockResolvedValue([
       { username: 'anonymous', role: 'ANONYMOUS' },
       { username: 'admin', role: 'ADMIN' },
@@ -108,7 +116,7 @@ describe('AnalyticsView', () => {
     expect(wrapper.text()).toContain('Redirects');
     expect(wrapper.text()).toContain('QR scans');
     expect(wrapper.text()).toContain('Analytics');
-    expect(mocks.listLinksMock).toHaveBeenCalledWith(20, expect.any(Object), '', '', '');
+    expect(mocks.listLinksMock).toHaveBeenCalledWith(0, 10, expect.any(Object), '', '', '');
     expect(mocks.getAnalyticsSummaryMock).toHaveBeenCalledWith('redis', expect.any(Object));
   });
 
@@ -124,6 +132,6 @@ describe('AnalyticsView', () => {
       ?.trigger('click');
     await flushPromises();
 
-    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(20, expect.any(Object), 'user', '', '');
+    expect(mocks.listLinksMock).toHaveBeenLastCalledWith(0, 10, expect.any(Object), 'user', '', '');
   });
 });

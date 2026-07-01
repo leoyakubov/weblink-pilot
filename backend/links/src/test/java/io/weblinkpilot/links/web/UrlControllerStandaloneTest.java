@@ -20,6 +20,7 @@ import io.weblinkpilot.links.service.UrlLookupService;
 import io.weblinkpilot.links.service.UrlService;
 import io.weblinkpilot.links.support.PublicUrlBuilder;
 import io.weblinkpilot.links.web.error.UrlExceptionHandler;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.CreateLinkRequest;
 import io.weblinkpilot.shared.api.links.LinkResponse;
 import java.time.OffsetDateTime;
@@ -120,14 +121,16 @@ class UrlControllerStandaloneTest {
             null,
             0,
             null);
-    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
-        .thenReturn(List.of(first, second));
+    when(urlLookupService.listRecentLinksPage(any(LinkSearchCriteria.class)))
+        .thenReturn(PaginatedResponse.of(List.of(first, second), 0, 10, 2));
 
     mockMvc
         .perform(get("/api/v1/urls"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].code").value("two"))
-        .andExpect(jsonPath("$[1].code").value("one"));
+        .andExpect(jsonPath("$.content[0].code").value("two"))
+        .andExpect(jsonPath("$.content[1].code").value("one"))
+        .andExpect(jsonPath("$.page").value(0))
+        .andExpect(jsonPath("$.totalElements").value(2));
   }
 
   @Test
@@ -152,19 +155,23 @@ class UrlControllerStandaloneTest {
             null,
             0,
             "alice");
-    when(urlLookupService.listRecentLinks(any(LinkSearchCriteria.class)))
-        .thenReturn(List.of(first, second));
+    when(urlLookupService.listRecentLinksPage(any(LinkSearchCriteria.class)))
+        .thenReturn(PaginatedResponse.of(List.of(first, second), 1, 10, 12));
 
     mockMvc
         .perform(
             get("/api/v1/urls")
+                .param("page", "1")
+                .param("size", "10")
                 .param("creator", "alice")
                 .principal(
                     new TestingAuthenticationToken(
                         "admin", "n/a", List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].code").value("two"))
-        .andExpect(jsonPath("$[1].code").value("one"));
+        .andExpect(jsonPath("$.content[0].code").value("two"))
+        .andExpect(jsonPath("$.content[1].code").value("one"))
+        .andExpect(jsonPath("$.page").value(1))
+        .andExpect(jsonPath("$.totalPages").value(2));
   }
 
   @Test
