@@ -39,6 +39,7 @@
 .admin-users-table {
   display: grid;
   gap: 0.58rem;
+  margin-bottom: 0.9rem;
   min-width: 0;
   overflow-x: auto;
 }

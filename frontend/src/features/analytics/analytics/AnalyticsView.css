@@ -81,16 +81,3 @@
   grid-column: 1 / -1;
   margin-top: 0.35rem;
 }
-
-.analytics-filter-grid {
-  grid-template-columns: repeat(3, minmax(10rem, 1fr)) max-content;
-  align-items: end;
-}
-
-.analytics-filter-actions {
-  align-self: end;
-}
-
-.analytics-filter-actions .button {
-  white-space: nowrap;
-}

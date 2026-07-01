@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AdminOverviewServiceTest {
@@ -76,7 +78,8 @@ class AdminOverviewServiceTest {
             createdAt,
             createdAt.plusHours(1));
     admin.markLoggedIn(createdAt.plusHours(2));
-    when(userAccountRepository.findAll()).thenReturn(List.of(user, admin));
+    when(userAccountRepository.findAllByOrderByUsernameAsc(PageRequest.of(0, 10)))
+        .thenReturn(new PageImpl<>(List.of(admin, user), PageRequest.of(0, 10), 2));
 
     List<AdminUserResponse> response = service.users();
 
@@ -86,5 +89,31 @@ class AdminOverviewServiceTest {
     assertThat(response.get(0).emailVerified()).isTrue();
     assertThat(response.get(0).lastLoginAt()).isEqualTo(createdAt.plusHours(2));
     assertThat(response.get(1).emailVerified()).isFalse();
+  }
+
+  @Test
+  void usersPageReturnsPaginationMetadata() {
+    OffsetDateTime createdAt = OffsetDateTime.of(2026, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC);
+    UserAccount admin =
+        new UserAccount(
+            "admin",
+            "hash",
+            "admin@example.com",
+            new Role("ADMIN"),
+            true,
+            createdAt,
+            createdAt.plusHours(1));
+    when(userAccountRepository.findAllByOrderByUsernameAsc(PageRequest.of(1, 5)))
+        .thenReturn(new PageImpl<>(List.of(admin), PageRequest.of(1, 5), 6));
+
+    var response = service.usersPage(1, 5);
+
+    assertThat(response.content()).extracting(AdminUserResponse::username).containsExactly("admin");
+    assertThat(response.page()).isEqualTo(1);
+    assertThat(response.size()).isEqualTo(5);
+    assertThat(response.totalElements()).isEqualTo(6);
+    assertThat(response.totalPages()).isEqualTo(2);
+    assertThat(response.first()).isFalse();
+    assertThat(response.last()).isTrue();
   }
 }

@@ -5,6 +5,7 @@ import InputText from 'primevue/inputtext';
 import LinkList from '@/shared/components/LinkList.vue';
 import FeatureCard from './components/FeatureCard.vue';
 import PageIntro from '@/shared/components/PageIntro.vue';
+import PaginationControls from '@/shared/components/PaginationControls.vue';
 import PanelCard from '@/shared/components/PanelCard.vue';
 import RefreshButton from '@/shared/components/RefreshButton.vue';
 import HelpTooltip from './components/HelpTooltip.vue';
@@ -25,12 +26,15 @@ const {
   isCopied,
   linkPreviewUrl,
   loadingRecent,
+  nextRecentPage,
   openExternal,
   openQrModal,
+  previousRecentPage,
   qrModalTitle,
   qrModalUrl,
   recentError,
   recentLinks,
+  recentPagination,
   refreshRecent,
   submit,
   submitting,
@@ -183,6 +187,19 @@ const {
         <h4 class="card-title">Create your first short link and it will appear here.</h4>
         <p class="muted">This section reflects the latest saved data from the backend.</p>
       </div>
+
+      <PaginationControls
+        v-if="recentLinks.length || recentPagination.totalElements"
+        :page="recentPagination.page"
+        :size="recentPagination.size"
+        :total-elements="recentPagination.totalElements"
+        :total-pages="recentPagination.totalPages"
+        :first="recentPagination.first"
+        :last="recentPagination.last"
+        :loading="loadingRecent"
+        @previous="previousRecentPage"
+        @next="nextRecentPage"
+      />
     </PanelCard>
 
     <QrCodeModal

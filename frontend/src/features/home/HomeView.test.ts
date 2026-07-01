@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => ({
     currentUser: null as null | { username: string; role: string },
   },
   createLinkMock: vi.fn(),
-  listLinksMock: vi.fn(),
+  listLinksPageMock: vi.fn(),
   saveSettingsMock: vi.fn(),
   buildApiBaseUrlMock: vi.fn((path: string) => `http://localhost:8080/api/v1${path}`),
 }));
@@ -22,7 +22,7 @@ vi.mock('@/shared/services/http', () => ({
 
 vi.mock('@/features/links/LinksApi', () => ({
   createLink: mocks.createLinkMock,
-  listLinks: mocks.listLinksMock,
+  listLinksPage: mocks.listLinksPageMock,
 }));
 
 vi.mock('@/shared/services/settings', () => ({
@@ -39,8 +39,21 @@ describe('HomeView', () => {
     vi.clearAllMocks();
     document.body.innerHTML = '';
     mocks.authState.currentUser = null;
-    mocks.listLinksMock.mockResolvedValue([]);
+    mocks.listLinksPageMock.mockResolvedValue(pageOfLinks([]));
   });
+
+  function pageOfLinks(content: unknown[], overrides = {}) {
+    return {
+      content,
+      page: 0,
+      size: 5,
+      totalElements: content.length,
+      totalPages: content.length ? 1 : 0,
+      first: true,
+      last: true,
+      ...overrides,
+    };
+  }
 
   function mountHome() {
     return mount(HomeView, {
@@ -115,18 +128,20 @@ describe('HomeView', () => {
   });
 
   it('opens the existing-link modal for the same anonymous full URL', async () => {
-    mocks.listLinksMock.mockResolvedValue([
-      {
-        code: 'docs',
-        shortUrl: 'http://localhost:8080/r/docs',
-        qrCodeUrl: 'http://localhost:8080/api/v1/urls/docs/qr',
-        originalUrl: 'https://github.com/leoyakubov/weblink-pilot',
-        createdAt: '2026-05-23T11:00:00Z',
-        expiresAt: null,
-        clickCount: 2,
-        ownerUsername: null,
-      },
-    ]);
+    mocks.listLinksPageMock.mockResolvedValue(
+      pageOfLinks([
+        {
+          code: 'docs',
+          shortUrl: 'http://localhost:8080/r/docs',
+          qrCodeUrl: 'http://localhost:8080/api/v1/urls/docs/qr',
+          originalUrl: 'https://github.com/leoyakubov/weblink-pilot',
+          createdAt: '2026-05-23T11:00:00Z',
+          expiresAt: null,
+          clickCount: 2,
+          ownerUsername: null,
+        },
+      ]),
+    );
 
     const wrapper = mountHome();
     await flushPromises();
@@ -149,18 +164,23 @@ describe('HomeView', () => {
       role: 'ADMIN',
     };
 
-    mocks.listLinksMock.mockResolvedValue([
-      {
-        code: 'github-org',
-        shortUrl: 'http://localhost:8080/r/github-org',
-        qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
-        originalUrl: 'https://github.com/orgs/github-org',
-        createdAt: '2026-05-23T11:00:00Z',
-        expiresAt: null,
-        clickCount: 3,
-        ownerUsername: 'admin',
-      },
-    ]);
+    mocks.listLinksPageMock.mockResolvedValue(
+      pageOfLinks(
+        [
+          {
+            code: 'github-org',
+            shortUrl: 'http://localhost:8080/r/github-org',
+            qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+            originalUrl: 'https://github.com/orgs/github-org',
+            createdAt: '2026-05-23T11:00:00Z',
+            expiresAt: null,
+            clickCount: 3,
+            ownerUsername: 'admin',
+          },
+        ],
+        { totalElements: 6, totalPages: 2, last: false },
+      ),
+    );
 
     const wrapper = mountHome();
     await flushPromises();
@@ -170,5 +190,36 @@ describe('HomeView', () => {
     expect(wrapper.text()).toContain('admin');
     expect(wrapper.text()).toContain('Details');
     expect(wrapper.text()).toContain('Analytics');
+    expect(wrapper.text()).toContain('Page 1 of 2');
+  });
+
+  it('loads the next recent links page from home pagination', async () => {
+    mocks.listLinksPageMock.mockResolvedValue(
+      pageOfLinks(
+        [
+          {
+            code: 'github-org',
+            shortUrl: 'http://localhost:8080/r/github-org',
+            qrCodeUrl: 'http://localhost:8080/api/v1/urls/github-org/qr',
+            originalUrl: 'https://github.com/orgs/github-org',
+            createdAt: '2026-05-23T11:00:00Z',
+            expiresAt: null,
+            clickCount: 3,
+            ownerUsername: null,
+          },
+        ],
+        { totalElements: 6, totalPages: 2, last: false },
+      ),
+    );
+
+    const wrapper = mountHome();
+    await flushPromises();
+
+    const nextButton = wrapper.findAll('button').find((button) => button.text().includes('Next'));
+    expect(nextButton).toBeDefined();
+    await nextButton?.trigger('click');
+    await flushPromises();
+
+    expect(mocks.listLinksPageMock).toHaveBeenLastCalledWith(1, 5, expect.any(Object));
   });
 });

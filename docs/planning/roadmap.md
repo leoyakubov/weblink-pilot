@@ -689,10 +689,10 @@ Checklist:
 
 - [x] Add backend pagination to links list endpoints
 - [x] Use the paginated links endpoint as the backend source for analytics overview pagination
-- [ ] Add backend pagination to admin users list endpoints
+- [x] Add backend pagination to admin users list endpoints
 - [x] Add frontend pagination controls for links pages
 - [x] Add frontend pagination controls for analytics pages
-- [ ] Add frontend pagination controls for admin users pages
+- [x] Add frontend pagination controls for admin users pages
 - [x] Update API contract docs for the links list behavior
 - [ ] Update testing docs and remaining references for the new list behavior
 

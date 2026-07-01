@@ -3,6 +3,8 @@ package io.weblinkpilot.auth.repository;
 import io.weblinkpilot.auth.domain.UserAccount;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +25,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
   @Query(
       "select u.username from UserAccount u join u.role r where upper(r.name) = upper(:roleName)")
   List<String> findUsernamesByRoleName(@Param("roleName") String roleName);
+
+  Page<UserAccount> findAllByOrderByUsernameAsc(Pageable pageable);
 }

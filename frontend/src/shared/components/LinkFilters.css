@@ -1,6 +1,22 @@
 .embedded-filter-grid {
+  align-items: end;
+  grid-template-columns: repeat(3, minmax(10rem, 1fr)) max-content;
   padding: 0.75rem;
   border: 1px solid rgba(125, 211, 252, 0.18);
   border-radius: var(--radius-lg);
   background: rgba(4, 10, 20, 0.28);
+}
+
+.analytics-filter-actions {
+  align-self: end;
+}
+
+.analytics-filter-actions .button {
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .embedded-filter-grid {
+    grid-template-columns: 1fr;
+  }
 }

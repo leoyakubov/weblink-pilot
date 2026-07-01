@@ -431,8 +431,17 @@ export function getAdminMonitoringRequest(settings: ApiSettings = loadSettings()
 }
 
 export function listAdminUsersRequest(settings: ApiSettings = loadSettings()) {
-  return requestJson<AdminUserResponse[]>(
-    '/admin/users',
+  return listAdminUsersPageRequest(0, 10, settings).then((response) => response.content);
+}
+
+export function listAdminUsersPageRequest(
+  page: number = 0,
+  size: number = 10,
+  settings: ApiSettings = loadSettings(),
+) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  return requestJson<PaginatedResponse<AdminUserResponse>>(
+    `/admin/users?${params.toString()}`,
     {
       method: 'GET',
     },
@@ -555,6 +564,7 @@ export const changePassword = changePasswordRequest;
 export const getAdminOverview = getAdminOverviewRequest;
 export const getAdminMonitoring = getAdminMonitoringRequest;
 export const listAdminUsers = listAdminUsersRequest;
+export const listAdminUsersPage = listAdminUsersPageRequest;
 export const getLinkCreatorOptions = getLinkCreatorOptionsRequest;
 export const listLinks = listLinksRequest;
 export const getLink = getLinkRequest;

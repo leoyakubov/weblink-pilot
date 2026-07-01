@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.weblinkpilot.auth.service.AdminOverviewService;
 import io.weblinkpilot.shared.api.admin.AdminOverviewResponse;
 import io.weblinkpilot.shared.api.admin.AdminUserResponse;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.LinkCreatorOptionResponse;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,7 +40,8 @@ public class AdminController {
   @GetMapping("/users")
   @Operation(summary = "Admin users")
   @SecurityRequirement(name = "bearerAuth")
-  public List<AdminUserResponse> users() {
-    return adminOverviewService.users();
+  public PaginatedResponse<AdminUserResponse> users(
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+    return adminOverviewService.usersPage(page, size);
   }
 }

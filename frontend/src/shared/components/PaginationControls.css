@@ -29,6 +29,11 @@
   gap: 0.5rem;
 }
 
+.pagination-controls__actions .p-button {
+  justify-content: center;
+  min-width: 8rem;
+}
+
 @media (max-width: 640px) {
   .pagination-controls {
     align-items: stretch;

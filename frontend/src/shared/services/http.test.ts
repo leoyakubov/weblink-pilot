@@ -12,6 +12,7 @@ import {
   getCurrentUser,
   getRedirectPreview,
   listAdminUsers,
+  listAdminUsersPageRequest,
   listLinks,
   listLinksPageRequest,
   login,
@@ -735,21 +736,29 @@ describe('api helpers', () => {
 
   it('loads admin users from the backend', async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/users');
+      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/users?page=0&size=10');
       const headers = new Headers(init?.headers);
       expect(headers.get('Authorization')).toBe('Bearer jwt-token');
       return new Response(
-        JSON.stringify([
-          {
-            username: 'admin',
-            email: 'admin@example.com',
-            role: 'ADMIN',
-            enabled: true,
-            emailVerified: true,
-            createdAt: '2026-06-20T10:00:00Z',
-            lastLoginAt: '2026-06-21T10:00:00Z',
-          },
-        ]),
+        JSON.stringify({
+          content: [
+            {
+              username: 'admin',
+              email: 'admin@example.com',
+              role: 'ADMIN',
+              enabled: true,
+              emailVerified: true,
+              createdAt: '2026-06-20T10:00:00Z',
+              lastLoginAt: '2026-06-21T10:00:00Z',
+            },
+          ],
+          page: 0,
+          size: 10,
+          totalElements: 1,
+          totalPages: 1,
+          first: true,
+          last: true,
+        }),
         {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -770,5 +779,35 @@ describe('api helpers', () => {
         lastLoginAt: '2026-06-21T10:00:00Z',
       },
     ]);
+  });
+
+  it('loads paginated admin users from the backend', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe('http://localhost:8080/api/v1/admin/users?page=2&size=5');
+      return new Response(
+        JSON.stringify({
+          content: [],
+          page: 2,
+          size: 5,
+          totalElements: 11,
+          totalPages: 3,
+          first: false,
+          last: true,
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    });
+
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(listAdminUsersPageRequest(2, 5, settings)).resolves.toMatchObject({
+      page: 2,
+      size: 5,
+      totalElements: 11,
+      totalPages: 3,
+    });
   });
 });

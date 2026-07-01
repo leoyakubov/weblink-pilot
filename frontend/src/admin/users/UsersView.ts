@@ -1,6 +1,6 @@
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { loadSettings } from '@/shared/services/settings';
-import { listAdminUsers } from '@/admin/AdminApi';
+import { listAdminUsersPage } from '@/admin/AdminApi';
 import type { AdminUserResponse } from '@/shared/types/api';
 
 export function useUsersView() {
@@ -8,8 +8,16 @@ export function useUsersView() {
   const users = ref<AdminUserResponse[]>([]);
   const loading = ref(false);
   const errorMessage = ref('');
+  const pagination = reactive({
+    page: 0,
+    size: 10,
+    totalElements: 0,
+    totalPages: 0,
+    first: true,
+    last: true,
+  });
 
-  const totalUsers = computed(() => users.value.length);
+  const totalUsers = computed(() => pagination.totalElements);
   const adminUsers = computed(() => users.value.filter((user) => user.role === 'ADMIN').length);
   const activeUsers = computed(() => users.value.filter((user) => user.enabled).length);
 
@@ -36,13 +44,40 @@ export function useUsersView() {
     errorMessage.value = '';
 
     try {
-      users.value = await listAdminUsers(settings);
+      const response = await listAdminUsersPage(pagination.page, pagination.size, settings);
+      users.value = response.content;
+      pagination.page = response.page;
+      pagination.size = response.size;
+      pagination.totalElements = response.totalElements;
+      pagination.totalPages = response.totalPages;
+      pagination.first = response.first;
+      pagination.last = response.last;
     } catch (error) {
       users.value = [];
+      pagination.totalElements = 0;
+      pagination.totalPages = 0;
+      pagination.first = true;
+      pagination.last = true;
       errorMessage.value = error instanceof Error ? error.message : 'Could not load users';
     } finally {
       loading.value = false;
     }
+  }
+
+  function previousPage() {
+    if (pagination.first || loading.value) {
+      return;
+    }
+    pagination.page -= 1;
+    void refresh();
+  }
+
+  function nextPage() {
+    if (pagination.last || loading.value) {
+      return;
+    }
+    pagination.page += 1;
+    void refresh();
   }
 
   onMounted(() => {
@@ -50,6 +85,7 @@ export function useUsersView() {
   });
   return {
     users,
+    pagination,
     loading,
     errorMessage,
     totalUsers,
@@ -58,5 +94,7 @@ export function useUsersView() {
     formatDateTime,
     statusLabel,
     refresh,
+    previousPage,
+    nextPage,
   };
 }

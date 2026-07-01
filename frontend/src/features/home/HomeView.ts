@@ -3,10 +3,11 @@ import { createCopyAction } from '@/shared/composables/CopyAction';
 import { authState } from '@/account/AuthSession';
 import { buildApiBaseUrl } from '@/shared/services/http';
 import { loadSettings, saveSettings } from '@/shared/services/settings';
-import { createLink, listLinks } from '@/features/links/LinksApi';
+import { createLink, listLinksPage } from '@/features/links/LinksApi';
 import type { ApiSettings, CreateLinkRequest, LinkResponse } from '@/shared/types/api';
 
 const CREATE_COOLDOWN_MS = 1500;
+const RECENT_PAGE_SIZE = 5;
 
 export function useHomeView() {
   const settings = reactive<ApiSettings>(loadSettings());
@@ -20,6 +21,14 @@ export function useHomeView() {
   const recentLinks = ref<LinkResponse[]>([]);
   const loadingRecent = ref(false);
   const recentError = ref('');
+  const recentPagination = reactive({
+    page: 0,
+    size: RECENT_PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 0,
+    first: true,
+    last: true,
+  });
   const errorMessage = ref('');
   const successMessage = ref('');
   const submitting = ref(false);
@@ -71,9 +80,20 @@ export function useHomeView() {
     recentError.value = '';
 
     try {
-      recentLinks.value = await listLinks(5, settings);
+      const response = await listLinksPage(recentPagination.page, recentPagination.size, settings);
+      recentLinks.value = response.content;
+      recentPagination.page = response.page;
+      recentPagination.size = response.size;
+      recentPagination.totalElements = response.totalElements;
+      recentPagination.totalPages = response.totalPages;
+      recentPagination.first = response.first;
+      recentPagination.last = response.last;
     } catch (error) {
       recentLinks.value = [];
+      recentPagination.totalElements = 0;
+      recentPagination.totalPages = 0;
+      recentPagination.first = true;
+      recentPagination.last = true;
       recentError.value = error instanceof Error ? error.message : 'Could not load recent links';
     } finally {
       loadingRecent.value = false;
@@ -116,6 +136,7 @@ export function useHomeView() {
       createdModalMode.value = 'created';
       successMessage.value = `Created ${createdLink.value.code} successfully`;
       createdModalOpen.value = true;
+      recentPagination.page = 0;
       await refreshRecent();
     } catch (error) {
       errorMessage.value = error instanceof Error ? error.message : 'Something went wrong';
@@ -140,6 +161,22 @@ export function useHomeView() {
 
   function closeCreatedModal() {
     createdModalOpen.value = false;
+  }
+
+  function previousRecentPage() {
+    if (recentPagination.first || loadingRecent.value) {
+      return;
+    }
+    recentPagination.page -= 1;
+    void refreshRecent();
+  }
+
+  function nextRecentPage() {
+    if (recentPagination.last || loadingRecent.value) {
+      return;
+    }
+    recentPagination.page += 1;
+    void refreshRecent();
   }
 
   onMounted(() => {
@@ -168,10 +205,13 @@ export function useHomeView() {
     loadingRecent,
     openExternal,
     openQrModal,
+    nextRecentPage,
+    previousRecentPage,
     qrModalTitle,
     qrModalUrl,
     recentError,
     recentLinks,
+    recentPagination,
     refreshRecent,
     submit,
     submitting,

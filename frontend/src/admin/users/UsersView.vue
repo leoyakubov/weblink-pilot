@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import './UsersView.css';
 import PageIntro from '@/shared/components/PageIntro.vue';
+import PaginationControls from '@/shared/components/PaginationControls.vue';
 import PanelCard from '@/shared/components/PanelCard.vue';
 import RefreshButton from '@/shared/components/RefreshButton.vue';
 import { useUsersView } from './UsersView';
 
 const {
   users,
+  pagination,
   loading,
   errorMessage,
   totalUsers,
@@ -15,6 +17,8 @@ const {
   formatDateTime,
   statusLabel,
   refresh,
+  previousPage,
+  nextPage,
 } = useUsersView();
 </script>
 
@@ -47,11 +51,11 @@ const {
           <dd>{{ totalUsers }}</dd>
         </div>
         <div>
-          <dt>Admins</dt>
+          <dt>Admins on page</dt>
           <dd>{{ adminUsers }}</dd>
         </div>
         <div>
-          <dt>Active</dt>
+          <dt>Active on page</dt>
           <dd>{{ activeUsers }}</dd>
         </div>
       </dl>
@@ -89,6 +93,19 @@ const {
         <h4 class="card-title">No accounts were returned by the backend.</h4>
         <p class="muted">Refresh after the backend starts or after account seed data is loaded.</p>
       </div>
+
+      <PaginationControls
+        v-if="users.length || pagination.totalElements"
+        :page="pagination.page"
+        :size="pagination.size"
+        :total-elements="pagination.totalElements"
+        :total-pages="pagination.totalPages"
+        :first="pagination.first"
+        :last="pagination.last"
+        :loading="loading"
+        @previous="previousPage"
+        @next="nextPage"
+      />
     </PanelCard>
   </section>
 </template>

@@ -6,14 +6,20 @@ import io.weblinkpilot.auth.mapper.AuthResponseMapper;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
 import io.weblinkpilot.shared.api.admin.AdminOverviewResponse;
 import io.weblinkpilot.shared.api.admin.AdminUserResponse;
+import io.weblinkpilot.shared.api.common.PaginatedResponse;
 import io.weblinkpilot.shared.api.links.LinkCreatorOptionResponse;
 import io.weblinkpilot.shared.ports.LinkStatisticsService;
 import java.util.Comparator;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AdminOverviewService {
+
+  private static final int DEFAULT_PAGE_SIZE = 10;
+  private static final int MAX_PAGE_SIZE = 100;
 
   private final UserAccountRepository userAccountRepository;
   private final LinkStatisticsService linkStatisticsService;
@@ -52,9 +58,25 @@ public class AdminOverviewService {
   }
 
   public List<AdminUserResponse> users() {
-    return userAccountRepository.findAll().stream()
-        .sorted(Comparator.comparing(UserAccount::getUsername))
-        .map(responseMapper::toAdminUser)
-        .toList();
+    return usersPage(0, DEFAULT_PAGE_SIZE).content();
+  }
+
+  public PaginatedResponse<AdminUserResponse> usersPage(int page, int size) {
+    int pageNumber = Math.max(0, page);
+    int pageSize = clampPageSize(size);
+    Page<UserAccount> users =
+        userAccountRepository.findAllByOrderByUsernameAsc(PageRequest.of(pageNumber, pageSize));
+    return PaginatedResponse.of(
+        users.getContent().stream().map(responseMapper::toAdminUser).toList(),
+        users.getNumber(),
+        users.getSize(),
+        users.getTotalElements());
+  }
+
+  private int clampPageSize(int size) {
+    if (size <= 0) {
+      return DEFAULT_PAGE_SIZE;
+    }
+    return Math.min(size, MAX_PAGE_SIZE);
   }
 }

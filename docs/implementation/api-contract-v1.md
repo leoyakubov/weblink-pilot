@@ -244,6 +244,41 @@ Suggested behavior:
 Regenerates metadata for a link that already has an AI metadata row.
 The response body is the updated `AiLinkMetadataResponse`.
 
+### 10. Admin users
+
+`GET /api/v1/admin/users?page=0&size=10`
+
+Notes:
+
+- admin-only endpoint
+- `page` is zero-based
+- `size` defaults to `10` and is capped server-side
+- results are sorted by username ascending
+
+Response:
+
+```json
+{
+  "content": [
+    {
+      "username": "admin",
+      "email": "admin@example.com",
+      "role": "ADMIN",
+      "enabled": true,
+      "emailVerified": true,
+      "createdAt": "2026-06-20T10:00:00Z",
+      "lastLoginAt": "2026-06-21T10:00:00Z"
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 12,
+  "totalPages": 2,
+  "first": true,
+  "last": false
+}
+```
+
 ## Error contract
 
 Use a stable error payload:
