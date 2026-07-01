@@ -21,6 +21,7 @@ This repo keeps one documentation tree with a small set of categories so it is e
 ## Implementation & Development
 
 - [API Contract v1](implementation/api-contract-v1.md) - the agreed backend/frontend contract surface.
+- [Email Templates](implementation/email-templates.md) - Thymeleaf text template workflow for account emails.
 - [Development Standards](implementation/development-standards.md) - formatting, testing, coverage, scanning, and release hygiene.
 - [Development Environment](implementation/development-environment.md) - local setup, scripts, verification commands, and commit readiness.
 - [Agent Instructions](../AGENTS.md) - repository-specific guidance for coding agents.

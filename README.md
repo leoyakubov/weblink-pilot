@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Production-shaped URL shortener built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, and Docker.
+  Production-shaped URL shortener built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, Thymeleaf, and Docker.
 </p>
 
 <p align="center">
@@ -128,6 +128,7 @@ For a deeper manual QA guide, see the [Feature Testing Guide](docs/testing/featu
 - Vue 3
 - PostgreSQL
 - Redis
+- Thymeleaf email templates
 - Docker and Docker Compose
 - JWT authentication
 - Testcontainers
@@ -155,6 +156,7 @@ Start with the [Documentation Index](docs/README.md).
 ### Implementation & Development
 
 - [API Contract v1](docs/implementation/api-contract-v1.md)
+- [Email Templates](docs/implementation/email-templates.md)
 - [Development Standards](docs/implementation/development-standards.md)
 - [Development Environment](docs/implementation/development-environment.md)
 - [Agent Instructions](AGENTS.md)
