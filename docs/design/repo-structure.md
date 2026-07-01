@@ -58,8 +58,6 @@ weblink-pilot/
     |   `-- deployment.md
     `-- reference/
         |-- backend-code-quality-review.md
-        |-- github-presentation.md
-        |-- interview-notes.md
         `-- security-review.md
 ```
 

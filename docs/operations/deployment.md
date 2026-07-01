@@ -4,8 +4,8 @@
 
 - frontend: Netlify
 - backend: Render
-- database: Render Postgres
-- cache: Render Key Value (Redis)
+- production-shaped database/cache: Render Postgres plus Render Key Value (Redis)
+- free portfolio demo database/cache: in-memory H2 plus local cache through the `demo-ephemeral` profile
 
 ## Architecture
 
@@ -55,8 +55,8 @@ flowchart TD
 | Backend readiness gate   | Done   | The backend deploy workflow waits for the new Render deploy to become live before it dispatches backend smoke.                                                                                                                                                                                                    |
 | Frontend deploy workflow | Done   | GitHub Actions builds the Vue app and deploys it to Netlify.                                                                                                                                                                                                                                                      |
 | Deployment smoke tests   | Done   | GitHub Actions checks the live backend health endpoint and the freshly deployed frontend URL after deploys with separate backend and frontend smoke workflows. Backend smoke is dispatched only after a real backend deploy finishes, and frontend smoke uses the Netlify deploy URL returned by the deploy step. |
-| Render runtime           | Done   | The backend runs on Render with Postgres and the demo profile.                                                                                                                                                                                                                                                    |
-| Redis cache              | Done   | Render Key Value is part of the chosen demo architecture, and the demo profile reads `REDIS_URL` for Redis-backed cache/session behavior.                                                                                                                                                                          |
+| Render runtime           | Done   | The backend runs on Render with the `demo` profile. The optional `demo-ephemeral` override keeps the public portfolio demo alive without paid database resources.                                                                                                                                                 |
+| Redis cache              | Done   | Render Key Value is part of the production-shaped demo architecture. The `demo-ephemeral` override switches to local cache for the free public demo.                                                                                                                                                              |
 | Frontend host config     | Done   | Netlify site secrets and the backend API URL are configured.                                                                                                                                                                                                                                                      |
 | Backend public URL       | Done   | The backend is reachable over HTTPS from the browser.                                                                                                                                                                                                                                                             |
 | CORS origin              | Done   | The exact Netlify origin is allowed by the backend CORS config.                                                                                                                                                                                                                                                   |
@@ -154,6 +154,17 @@ Privacy note:
 
 ### 3. Render setup
 
+Choose one backend data mode:
+
+| Mode                   | Render resources                 | Best for                                                                 | Persistence                                       |
+| ---------------------- | -------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------- |
+| Production-shaped demo | Web Service, Postgres, Key Value | Demonstrating the full production-like architecture                      | Data survives backend restarts and deploys        |
+| Ephemeral free demo    | Web Service only                 | Keeping the public portfolio demo online without paid database resources | Data resets whenever the backend process restarts |
+
+The production-shaped mode is the recommended architecture for realistic deployments. The ephemeral mode is acceptable for the public portfolio demo when demo data is not important: Flyway recreates the schema and the bootstrap runner recreates default users, links, metadata, and analytics on startup.
+
+#### Production-shaped Render setup
+
 Create these Render resources:
 
 - one Web Service for the backend
@@ -194,6 +205,31 @@ Optional:
 
 - `APP_PUBLIC_BASE_URL=https://weblink-pilot.onrender.com`
 
+#### Ephemeral Render setup
+
+Create only the backend Web Service and run it with the regular `demo` profile plus the `demo-ephemeral` override:
+
+- `SPRING_PROFILES_ACTIVE=demo,demo-ephemeral`
+- `JWT_SECRET=<long random secret>` or `APP_AUTH_JWT_SECRET=<long random secret>`
+- `BOOTSTRAP_ADMIN_USERNAME=<admin-username>`
+- `BOOTSTRAP_ADMIN_PASSWORD=<admin-password>`
+- `BOOTSTRAP_ADMIN_ROLE=ADMIN`
+- `BOOTSTRAP_USER_USERNAME=<user-username>`
+- `BOOTSTRAP_USER_PASSWORD=<user-password>`
+- `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
+- `APP_PUBLIC_BASE_URL=https://weblink-pilot.onrender.com`
+
+Do not set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, or `REDIS_URL` for this mode unless you intentionally want to override the in-memory defaults.
+
+The `demo-ephemeral` profile uses:
+
+- H2 in PostgreSQL compatibility mode for the database
+- local in-memory cache instead of Redis
+- demo-preview account email delivery by default
+- disabled Redis health checks
+
+This mode avoids Render Free Postgres expiration, but it also means links created by visitors disappear after a backend restart, redeploy, or free-tier sleep/wake cycle. Seed data is recreated automatically on startup.
+
 The backend deploy workflow uses:
 
 - `RENDER_DEPLOY_HOOK_URL` to trigger a new Render deploy
@@ -216,7 +252,7 @@ The smoke output prints the backend HTTP status plus `status=UP`, and the fronte
 
 The Netlify frontend needs a backend URL that is reachable from the browser.
 For a live demo, HTTPS is strongly recommended for the backend endpoint.
-The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` so it picks up PostgreSQL, public URL, CORS, and SMTP settings from `application-demo.yml`.
+The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` for the production-shaped PostgreSQL/Redis setup, or `SPRING_PROFILES_ACTIVE=demo,demo-ephemeral` for the no-external-database portfolio demo.
 The demo profile keeps the mail health indicator disabled so the `/actuator/health` endpoint stays responsive even if the external SMTP provider is slow or temporarily unreachable.
 
 If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted because the backend falls back to `RENDER_EXTERNAL_URL`.
@@ -225,21 +261,21 @@ If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted be
 
 The backend sends these browser-facing security headers from the Spring Security configuration:
 
-| Header | Current value | Why it exists |
-| ------ | ------------- | ------------- |
+| Header                    | Current value                                                                                                                                                                                                                                              | Why it exists                                                                                                                           |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `Content-Security-Policy` | `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:* http://127.0.0.1:* https:` | Reduces XSS impact, blocks plugin/object content, blocks framing, and limits where scripts, images, fonts, and API calls can load from. |
-| `Referrer-Policy` | `same-origin` | Avoids leaking full cross-site referrer paths while keeping same-origin navigation context. |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables browser features the app does not need. |
-| `X-Frame-Options` | `SAMEORIGIN` | Adds legacy clickjacking protection alongside `frame-ancestors`. |
+| `Referrer-Policy`         | `same-origin`                                                                                                                                                                                                                                              | Avoids leaking full cross-site referrer paths while keeping same-origin navigation context.                                             |
+| `Permissions-Policy`      | `camera=(), microphone=(), geolocation=(), payment=()`                                                                                                                                                                                                     | Disables browser features the app does not need.                                                                                        |
+| `X-Frame-Options`         | `SAMEORIGIN`                                                                                                                                                                                                                                               | Adds legacy clickjacking protection alongside `frame-ancestors`.                                                                        |
 
 Operational endpoints use this deployment model:
 
-| Environment | Recommended value | Result |
-| ----------- | ----------------- | ------ |
-| Local direct development | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `local` profile default | Prometheus-style metrics can be opened locally without an admin token. |
-| Docker dev stack | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `dev` profile default | The local Prometheus container can scrape `/actuator/prometheus`. |
-| Demo / Render | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset | `/actuator/health` and `/actuator/info` stay public; `/actuator/metrics` and `/actuator/prometheus` require admin access. |
-| Production-style deployments | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset | Metrics are not public unless you deliberately place them behind a private network or separate observability gateway. |
+| Environment                  | Recommended value                                                            | Result                                                                                                                    |
+| ---------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Local direct development     | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `local` profile default | Prometheus-style metrics can be opened locally without an admin token.                                                    |
+| Docker dev stack             | `APP_SECURITY_PUBLIC_OBSERVABILITY=true` through the `dev` profile default   | The local Prometheus container can scrape `/actuator/prometheus`.                                                         |
+| Demo / Render                | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset                           | `/actuator/health` and `/actuator/info` stay public; `/actuator/metrics` and `/actuator/prometheus` require admin access. |
+| Production-style deployments | `APP_SECURITY_PUBLIC_OBSERVABILITY=false` or unset                           | Metrics are not public unless you deliberately place them behind a private network or separate observability gateway.     |
 
 Do not set `APP_SECURITY_PUBLIC_OBSERVABILITY=true` in the public demo unless you have another protection layer in front of actuator metrics.
 The admin monitoring UI still uses `/api/v1/admin/monitoring`, which is protected by the admin role.

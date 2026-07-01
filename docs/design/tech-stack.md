@@ -37,6 +37,7 @@ Why:
 
 - PostgreSQL 16
 - Redis 7
+- H2 for tests and the optional ephemeral hosted demo
 
 ### Testing
 

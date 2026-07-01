@@ -5,12 +5,53 @@
 </p>
 
 <p align="center">
-  Production-shaped URL shortener with AI metadata enrichment, built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, Thymeleaf, and Docker.
+  Production-shaped short links with QR codes, analytics, and AI metadata.
 </p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.0.6-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.0.6" />
+  <img src="https://img.shields.io/badge/Vue-3.5-42B883?logo=vuedotjs&logoColor=white" alt="Vue 3.5" />
+  <img src="https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js 24" />
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker ready" />
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
+  <img src="https://img.shields.io/badge/Redis-7-FF4438?logo=redis&logoColor=white" alt="Redis 7" />
+</p>
+
+WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and AI metadata enrichment that classifies links and generates readable titles, summaries, tags, icons, and suggested aliases.
+
+## Table of Contents
+
+- [Live Demo](#live-demo)
+- [Preview](#preview)
+- [Features](#features)
+- [Production Highlights](#production-highlights)
+- [Tech Stack](#tech-stack)
+- [Why Modular Monolith?](#why-modular-monolith)
+- [Architecture](#architecture)
+- [Roadmap](#roadmap)
+- [Run Locally](#run-locally)
+- [Troubleshooting](#troubleshooting)
+- [Demo Walkthrough](#demo-walkthrough)
+- [Quality Gates](#quality-gates)
+- [Key Pages](#key-pages)
+- [API Overview](#api-overview)
+- [Docs](#docs)
+- [Repository Structure](#repository-structure)
+- [Limitations And Production Notes](#limitations-and-production-notes)
+- [License](#license)
+
+## Live Demo
 
 <p align="center">
   <a href="https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml">
     <img src="https://github.com/leoyakubov/weblink-pilot/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" />
+  </a>
+  <a href="https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml">
+    <img src="https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-backend.yml/badge.svg?branch=main" alt="Backend deploy" />
+  </a>
+  <a href="https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml">
+    <img src="https://github.com/leoyakubov/weblink-pilot/actions/workflows/deploy-frontend.yml/badge.svg?branch=main" alt="Frontend deploy" />
   </a>
   <a href="https://github.com/leoyakubov/weblink-pilot/actions/workflows/smoke-backend.yml">
     <img src="https://github.com/leoyakubov/weblink-pilot/actions/workflows/smoke-backend.yml/badge.svg?branch=main" alt="Smoke backend" />
@@ -26,57 +67,12 @@
   </a>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white" alt="Java 21" />
-  <img src="https://img.shields.io/badge/Spring%20Boot-4.0.6-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.0.6" />
-  <img src="https://img.shields.io/badge/Vue-3.5-42B883?logo=vuedotjs&logoColor=white" alt="Vue 3.5" />
-  <img src="https://img.shields.io/badge/Node.js-24-5FA04E?logo=nodedotjs&logoColor=white" alt="Node.js 24" />
-  <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker ready" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
-  <img src="https://img.shields.io/badge/Redis-7-FF4438?logo=redis&logoColor=white" alt="Redis 7" />
-</p>
-
-WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and AI metadata enrichment that classifies links and generates readable titles, summaries, tags, icons, and suggested aliases.
-
-The repo is organized as a monorepo so the backend, frontend, docs, infra, and scripts stay in one place and move together.
-
-## Table of Contents
-
-- [Live Demo](#live-demo)
-- [Preview](#preview)
-- [Project Scope](#project-scope)
-- [What Is Implemented](#what-is-implemented)
-- [Roadmap](#roadmap)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Run Locally](#run-locally)
-- [Demo Walkthrough](#demo-walkthrough)
-- [Quality Gates](#quality-gates)
-- [Key Pages](#key-pages)
-- [API Overview](#api-overview)
-- [Docs](#docs)
-- [Repository Structure](#repository-structure)
-- [Key Terms](#key-terms)
-- [Backend-Only Quick Start](#backend-only-quick-start)
-- [Limitations And Production Notes](#limitations-and-production-notes)
-- [Troubleshooting](#troubleshooting)
-- [Interview Talking Points](#interview-talking-points)
-
-## Live Demo
-
 Open the deployed frontend here: [weblink-pilot.netlify.app](https://weblink-pilot.netlify.app)
 
 The demo frontend is configured to use the Render backend at `https://weblink-pilot.onrender.com`.
 Render free plans can sleep after inactivity, so backend requests may take extra time or require a retry while the service wakes up.
-For reliable API exploration, run the project locally and open Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
 ## Preview
-
-Screenshots are generated from the Vue app with deterministic mocked API data:
-
-```bash
-npm --prefix frontend run screenshots
-```
 
 | Home                                                                                     | Link created                                                                                             |
 | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -90,18 +86,7 @@ npm --prefix frontend run screenshots
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | ![Sign-in page with local and GitHub authentication actions](docs/images/05-signin.png) | ![Admin monitoring page with health checks and runtime metrics](docs/images/06-admin-monitoring.png) |
 
-## Project Scope
-
-- Modular Spring Boot backend with clear auth, links, analytics, and AI metadata boundaries.
-- Backend module boundaries are designed so heavily used features can be extracted into microservices later if scale or team ownership requires it.
-- Redis cache-aside redirect flow for frequently used short codes.
-- Asynchronous click analytics so redirects can stay focused on fast resolution.
-- JWT-based authentication with user and admin roles.
-- Vue 3 frontend with dedicated pages for links, analytics, account, and monitoring.
-- Dockerized local and demo environments for repeatable review.
-- Documentation for architecture, API behavior, testing, deployment, and roadmap decisions.
-
-## What Is Implemented
+## Features
 
 - Anonymous and signed-in short-link creation with random codes or custom aliases.
 - Link expiration, archived expired codes, and reserved short-code behavior.
@@ -117,16 +102,37 @@ npm --prefix frontend run screenshots
 - Admin monitoring for health, runtime metrics, configuration, service links, and users.
 - Dockerized local/dev/demo stacks, deployment smoke checks, coverage gates, and secret/dependency scans.
 
-## Roadmap
+## Production Highlights
 
-The full planning source of truth lives in the [Roadmap](docs/planning/roadmap.md).
+- Modular monolith with clean backend boundaries.
+- Redis cache-aside redirect flow.
+- JWT access tokens with refresh-cookie rotation.
+- Flyway migrations for repeatable database evolution.
+- Testcontainers-backed backend verification.
+- Dockerized local and demo environments.
+- GitHub Actions CI and deployment workflows.
+- AI metadata enrichment for created links.
+- OpenAPI docs and monitoring endpoints.
 
-Near-term focus:
+## Tech Stack
 
-- Keep the README, screenshots, and docs aligned with the shipped UI and API.
-- Continue polishing auth, links, analytics, and deployment smoke coverage.
-- Keep email template maintenance simple as account flows evolve.
-- Revisit broker-backed async messaging and expiry reminder emails only if product scope requires them.
+- Java 21
+- Spring Boot
+- Vue 3
+- PostgreSQL
+- Redis
+- Thymeleaf email templates
+- Docker and Docker Compose
+- JWT authentication
+- Testcontainers
+- OpenAPI
+- Flyway
+
+## Why Modular Monolith?
+
+WeblinkPilot intentionally starts as a modular monolith.
+
+That keeps local development, CI, and deployment simple while preserving clear bounded contexts that can later be extracted if traffic or ownership needs change.
 
 ## Architecture
 
@@ -191,19 +197,19 @@ SMTP/Mailpit handles account emails.
 
 Actuator, metrics, and logs expose runtime visibility.
 
-## Tech Stack
+## Roadmap
 
-- Java 21
-- Spring Boot
-- Vue 3
-- PostgreSQL
-- Redis
-- Thymeleaf email templates
-- Docker and Docker Compose
-- JWT authentication
-- Testcontainers
-- OpenAPI
-- Flyway
+The full planning source of truth lives in the [Roadmap](docs/planning/roadmap.md).
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| URL lifecycle and QR codes | Done | Create, redirect, preview, QR output, expiration, custom aliases, anonymous links, and owned links are implemented. |
+| Analytics | Done | Redirect and QR events are tracked with summaries, context, and per-link views. |
+| Authentication and access control | Done | JWT auth, refresh cookies, password reset, email verification, GitHub login, user roles, and admin access are in place. |
+| AI link enrichment | Done | Created links can receive generated metadata, summaries, categories, tags, icons, and suggested aliases. |
+| Monitoring and operations | Done | Admin monitoring, health checks, metrics, demo deployment, and smoke checks are in place. |
+| RabbitMQ async messaging | Planned | Broker-backed queueing is deferred until the current event approach is no longer enough. |
+| Expiry reminder emails | Planned | Link expiration exists; scheduled reminder emails are a future product extension. |
 
 ## Run Locally
 
@@ -237,6 +243,17 @@ bash ./scripts/dev/fullstack-dev.sh
 bash ./scripts/run-before-push.sh
 bash ./scripts/quality/deployment-smoke.sh
 ```
+
+## Troubleshooting
+
+- If `8080`, `8081`, `5432`, `6379`, or `8025` is already in use, stop the old local process or Docker container and restart the dev stack.
+- If the frontend cannot reach the backend, check `VITE_API_BASE_URL` and use `/settings/reset` to clear stale browser settings.
+- If password reset or verification emails do not arrive locally, open Mailpit at `http://localhost:8025` and confirm the Mailpit container is running.
+- If Redis or PostgreSQL errors appear during the dev stack, restart Docker and rerun `bash ./scripts/dev/fullstack-dev.sh`.
+- If frontend dependencies behave strangely across Windows, WSL, and macOS, reinstall `frontend/node_modules` from the same shell you use to run the app.
+- If e2e tests cannot launch a browser in WSL, use the repo scripts, which can drive the configured system browser path.
+- If the live demo responds slowly at first, wait a few seconds and retry because Render free services can cold start after inactivity.
+- If admin pages redirect to home, sign in as `admin / admin123` or verify your account has the `ADMIN` role.
 
 ## Demo Walkthrough
 
@@ -357,9 +374,7 @@ Start with the [Documentation Index](docs/README.md).
 ### Release & Reference
 
 - [Changelog](CHANGELOG.md)
-- [Interview Notes](docs/reference/interview-notes.md)
 - [Security Review](docs/reference/security-review.md)
-- [GitHub Presentation Checklist](docs/reference/github-presentation.md)
 
 ## Repository Structure
 
@@ -368,48 +383,6 @@ Start with the [Documentation Index](docs/README.md).
 - `docs/` - planning, design, implementation, testing, operations, and reference docs
 - `infra/` - Docker, deployment, and local environment tooling
 - `scripts/` - repo automation for dev, quality, and security tasks
-
-## Key Terms
-
-- **Short code**: the compact identifier used in `/r/{code}` and `/q/{code}`.
-- **Cache-aside**: the redirect path checks Redis first and falls back to PostgreSQL when the cache misses.
-- **Modular monolith**: one deployable Spring Boot backend split into explicit feature modules.
-- **Feature module**: a backend business boundary such as `auth`, `links`, `analytics`, or `ai`.
-- **Shared contracts**: DTOs, events, ports, and shared types used to keep module boundaries stable.
-- **Domain event**: an internal Spring event used when the producer should not know or wait for the consumer.
-- **Async analytics**: click events are published outside the redirect response path so redirects stay fast.
-- **AI metadata enrichment**: background generation of title, summary, category, tags, and icon metadata for created links.
-- **Refresh cookie**: an HttpOnly cookie that stores the refresh token while the access token stays short-lived.
-
-## Backend-Only Quick Start
-
-Requires Java 21. Maven is downloaded automatically by the wrapper on the first run.
-
-From `backend/` on Windows:
-
-```powershell
-.\mvnw.cmd -pl application -am clean package -DskipTests
-java -jar application\target\application-0.1.0-SNAPSHOT.jar
-```
-
-On macOS/Linux:
-
-```bash
-./mvnw -pl application -am clean package -DskipTests
-java -jar application/target/application-0.1.0-SNAPSHOT.jar
-```
-
-Useful API endpoints after startup:
-
-- `http://localhost:8080/swagger-ui.html`
-- `http://localhost:8080/v3/api-docs`
-- `http://localhost:8080/r/{code}`
-- `http://localhost:8080/api/v1/urls/{code}/preview`
-- `http://localhost:8080/api/v1/urls/{code}/qr`
-- `http://localhost:8080/api/v1/analytics/{code}`
-- `http://localhost:8080/api/v1/analytics/{code}/count`
-- `http://localhost:8080/api/v1/admin/monitoring`
-- `http://localhost:8080/api/v1/admin/users`
 
 ## Limitations And Production Notes
 
@@ -433,23 +406,6 @@ Security posture:
 - Demo/public observability keeps health/info public while metrics/prometheus require admin access by default.
 - See [Security Review](docs/reference/security-review.md) for the deeper risk register and mitigations.
 
-## Troubleshooting
+## License
 
-- If `8080`, `8081`, `5432`, `6379`, or `8025` is already in use, stop the old local process or Docker container and restart the dev stack.
-- If the frontend cannot reach the backend, check `VITE_API_BASE_URL` and use `/settings/reset` to clear stale browser settings.
-- If password reset or verification emails do not arrive locally, open Mailpit at `http://localhost:8025` and confirm the Mailpit container is running.
-- If Redis or PostgreSQL errors appear during the dev stack, restart Docker and rerun `bash ./scripts/dev/fullstack-dev.sh`.
-- If frontend dependencies behave strangely across Windows, WSL, and macOS, reinstall `frontend/node_modules` from the same shell you use to run the app.
-- If e2e tests cannot launch a browser in WSL, use the repo scripts, which can drive the configured system browser path.
-- If the live demo responds slowly at first, wait a few seconds and retry because Render free services can cold start after inactivity.
-- If admin pages redirect to home, sign in as `admin / admin123` or verify your account has the `ADMIN` role.
-
-## Interview Talking Points
-
-- Modular monolith keeps delivery velocity high while preserving extraction paths.
-- Random short codes improve unpredictability for default links.
-- Cache-aside lookup keeps redirects fast.
-- Analytics is asynchronous so redirect latency stays low.
-- The project can later split analytics into a separate service if scale demands it.
-
-For shorter prep notes, see [Interview Notes](docs/reference/interview-notes.md).
+WeblinkPilot is released under the [MIT License](LICENSE).
