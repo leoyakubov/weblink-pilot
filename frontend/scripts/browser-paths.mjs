@@ -105,7 +105,7 @@ async function launchChromiumWithPipe(executablePath) {
   return { browser, cleanup: async () => {} };
 }
 
-async function launchWindowsBrowserViaCdp(executablePath) {
+async function launchBrowserViaCdp(executablePath) {
   const debugPort = 9222 + Math.floor(Math.random() * 500);
   const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), 'weblink-pilot-browser-'));
   const browserArgs = [
@@ -166,8 +166,16 @@ export async function launchHeadlessBrowser() {
   }
 
   if (isWindowsDebuggableBrowser(executablePath)) {
-    return launchWindowsBrowserViaCdp(executablePath);
+    return launchBrowserViaCdp(executablePath);
   }
 
-  return launchChromiumWithPipe(executablePath);
+  try {
+    return await launchChromiumWithPipe(executablePath);
+  } catch (error) {
+    if (process.platform === 'darwin') {
+      return launchBrowserViaCdp(executablePath);
+    }
+
+    throw error;
+  }
 }
