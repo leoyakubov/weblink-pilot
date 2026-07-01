@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/
+
+User-agent: *
+Disallow: /admin
+Disallow: /monitoring
+Disallow: /account
+Disallow: /auth
+Disallow: /settings
+Disallow: /api/
+

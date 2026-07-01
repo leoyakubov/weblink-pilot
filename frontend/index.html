@@ -2,18 +2,28 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
             content="WeblinkPilot is a mobile-first URL shortener with QR codes and analytics-ready foundations."
         />
+        <meta name="google" content="notranslate" />
         <meta name="theme-color" content="#07101d" />
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" href="/content/images/weblinkpilot-favicon-64.png" />
+        <link rel="apple-touch-icon" href="/content/images/weblinkpilot-apple-touch-icon-180.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="stylesheet" href="/content/css/loading.css" />
         <title>WeblinkPilot</title>
     </head>
     <body>
-        <div id="app"></div>
+        <div id="app">
+            <div class="app-loading" aria-label="Loading WeblinkPilot">
+                <img src="/content/images/weblinkpilot-icon-512.png" alt="" />
+                <p>Loading WeblinkPilot...</p>
+            </div>
+        </div>
+        <noscript>You need to enable JavaScript to run WeblinkPilot.</noscript>
         <script type="module" src="/src/main.ts"></script>
     </body>
 </html>

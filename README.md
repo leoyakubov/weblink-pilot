@@ -1,7 +1,7 @@
 # WeblinkPilot
 
 <p align="center">
-  <img src="frontend/public/icons/weblinkpilot-icon.png" alt="WeblinkPilot logo" width="96" />
+  <img src="frontend/public/content/images/weblinkpilot-icon-512.png" alt="WeblinkPilot logo" width="96" />
 </p>
 
 <p align="center">

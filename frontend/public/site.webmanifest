@@ -1,0 +1,19 @@
+{
+  "name": "WeblinkPilot",
+  "short_name": "WeblinkPilot",
+  "description": "A production-shaped URL shortener with QR codes, analytics, authentication, and admin monitoring.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#07101d",
+  "background_color": "#09111f",
+  "icons": [
+    {
+      "src": "/content/images/weblinkpilot-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
