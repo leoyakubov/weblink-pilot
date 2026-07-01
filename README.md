@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Production-shaped short links with QR codes, analytics, and AI metadata.
+  Production-shaped short link platform showcasing modular monolith architecture, AI enrichment, analytics, and modern backend engineering practices.
 </p>
 
 <p align="center">
@@ -19,27 +19,6 @@
 </p>
 
 WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and AI metadata enrichment that classifies links and generates readable titles, summaries, tags, icons, and suggested aliases.
-
-## Table of Contents
-
-- [Live Demo](#live-demo)
-- [Preview](#preview)
-- [Features](#features)
-- [Production Highlights](#production-highlights)
-- [Tech Stack](#tech-stack)
-- [Why Modular Monolith?](#why-modular-monolith)
-- [Architecture](#architecture)
-- [Roadmap](#roadmap)
-- [Run Locally](#run-locally)
-- [Troubleshooting](#troubleshooting)
-- [Demo Walkthrough](#demo-walkthrough)
-- [Quality Gates](#quality-gates)
-- [Key Pages](#key-pages)
-- [API Overview](#api-overview)
-- [Docs](#docs)
-- [Repository Structure](#repository-structure)
-- [Limitations And Production Notes](#limitations-and-production-notes)
-- [License](#license)
 
 ## Live Demo
 
@@ -88,17 +67,31 @@ Render free plans can sleep after inactivity, so backend requests may take extra
 
 ## Features
 
+**Link Management**
+
 - Anonymous and signed-in short-link creation with random codes or custom aliases.
-- Link expiration, archived expired codes, and reserved short-code behavior.
-- QR generation for mobile sharing and QR-specific redirect analytics.
-- Redis-backed cache-aside redirect lookup for hot short codes.
-- Click analytics with browser, device, referrer, country, and event-source context.
-- Paginated home latest links, links history, analytics overview, and admin users pages.
-- JWT access tokens plus HttpOnly refresh-cookie rotation.
+- Link expiration, archived expired codes, reserved short-code behavior, QR generation, and QR-specific redirects.
+- Paginated latest links, link history, link details, copy/share actions, and JSON preview.
+
+**Authentication**
+
+- JWT access tokens with HttpOnly refresh-cookie rotation.
 - Registration, login, logout, account profile, password change, password reset, and email verification.
-- GitHub OAuth login completion flow.
-- Thymeleaf text templates for account notification emails.
-- AI metadata enrichment with stub, Ollama, or OpenAI-compatible providers.
+- GitHub OAuth login completion flow and user/admin roles.
+
+**Analytics**
+
+- Redirect and QR click analytics with browser, device, referrer, country, and event-source context.
+- Per-link analytics detail pages and aggregate analytics overview.
+
+**AI Metadata**
+
+- AI enrichment with generated titles, summaries, categories, tags, icons, and suggested aliases.
+- Stub, Ollama, and OpenAI-compatible provider options.
+
+**Operations**
+
+- Redis-backed cache-aside redirect lookup for hot short codes.
 - Admin monitoring for health, runtime metrics, configuration, service links, and users.
 - Dockerized local/dev/demo stacks, deployment smoke checks, coverage gates, and secret/dependency scans.
 
@@ -116,17 +109,30 @@ Render free plans can sleep after inactivity, so backend requests may take extra
 
 ## Tech Stack
 
+**Backend**
+
 - Java 21
 - Spring Boot
-- Vue 3
-- PostgreSQL
-- Redis
-- Thymeleaf email templates
-- Docker and Docker Compose
 - JWT authentication
-- Testcontainers
 - OpenAPI
 - Flyway
+- Thymeleaf email templates
+
+**Frontend**
+
+- Vue 3
+- TypeScript
+- Node.js 24
+- Vite
+
+**Infrastructure**
+
+- PostgreSQL
+- Redis
+- Docker and Docker Compose
+- Testcontainers
+- GitHub Actions
+- Netlify and Render
 
 ## Why Modular Monolith?
 
@@ -215,28 +221,29 @@ The full planning source of truth lives in the [Roadmap](docs/planning/roadmap.m
 
 See [Development Environment](docs/implementation/development-environment.md) for the full setup.
 
-Fast path after cloning:
-
-1. Install Java 21, Node.js 24 LTS (`24.16.0`), npm 11 (`11.13.0`), and Docker.
-2. Copy local env files if you need overrides: `cp backend/.env.example backend/.env` and `cp frontend/.env.example frontend/.env`.
-3. Put a local JWT secret in `backend/.env`, for example `JWT_SECRET=change-me-to-a-long-local-secret`.
-4. Start the full local Docker stack:
+**Quick Start**
 
 ```bash
 bash ./scripts/dev/fullstack-dev.sh
 ```
 
-5. Open the frontend at `http://localhost:8081`.
-6. Open Swagger UI at `http://localhost:8080/swagger-ui.html`.
-7. Open Mailpit at `http://localhost:8025` for verification and reset emails.
-8. Sign in with seeded credentials if you want owned links or admin pages:
+Open the frontend at `http://localhost:8081`.
+
+**Detailed Setup**
+
+1. Install Java 21, Node.js 24 LTS (`24.16.0`), npm 11 (`11.13.0`), and Docker.
+2. Copy local env files if you need overrides: `cp backend/.env.example backend/.env` and `cp frontend/.env.example frontend/.env`.
+3. Put a local JWT secret in `backend/.env`, for example `JWT_SECRET=change-me-to-a-long-local-secret`.
+4. Open Swagger UI at `http://localhost:8080/swagger-ui.html`.
+5. Open Mailpit at `http://localhost:8025` for verification and reset emails.
+6. Sign in with seeded credentials if you want owned links or admin pages:
 
 | Role  | Username | Password   |
 | ----- | -------- | ---------- |
 | Admin | `admin`  | `admin123` |
 | User  | `user`   | `user123`  |
 
-Common helper scripts:
+**Common Helper Scripts**
 
 ```bash
 bash ./scripts/dev/fullstack-dev.sh
@@ -339,12 +346,12 @@ The full API contract lives in [API Contract v1](docs/implementation/api-contrac
 
 Start with the [Documentation Index](docs/README.md).
 
-### Planning & Requirements
+**Planning & Requirements**
 
 - [Product Spec](docs/planning/product-spec.md)
 - [Roadmap](docs/planning/roadmap.md)
 
-### Design & Architecture
+**Design & Architecture**
 
 - [Architecture Plan](docs/design/architecture-plan.md)
 - [Backend Module Plan](docs/design/backend-module-plan.md)
@@ -353,7 +360,7 @@ Start with the [Documentation Index](docs/README.md).
 - [Tech Stack](docs/design/tech-stack.md)
 - [Repository Structure](docs/design/repo-structure.md)
 
-### Implementation & Development
+**Implementation & Development**
 
 - [API Contract v1](docs/implementation/api-contract-v1.md)
 - [Email Templates](docs/implementation/email-templates.md)
@@ -361,28 +368,28 @@ Start with the [Documentation Index](docs/README.md).
 - [Development Environment](docs/implementation/development-environment.md)
 - [Agent Instructions](AGENTS.md)
 
-### Testing & QA
+**Testing & QA**
 
 - [Feature Testing Guide](docs/testing/feature-testing.md)
 - [Auth Testing Workflow](docs/testing/auth-testing.md)
 - [Backend Testing Strategy](docs/testing/backend-testing.md)
 
-### Deployment & Operations
+**Deployment & Operations**
 
 - [Deployment](docs/operations/deployment.md)
 
-### Release & Reference
+**Release & Reference**
 
 - [Changelog](CHANGELOG.md)
 - [Security Review](docs/reference/security-review.md)
 
 ## Repository Structure
 
-- `backend/` - Java modular monolith and infrastructure
-- `frontend/` - Vue mobile-first web application
-- `docs/` - planning, design, implementation, testing, operations, and reference docs
-- `infra/` - Docker, deployment, and local environment tooling
-- `scripts/` - repo automation for dev, quality, and security tasks
+- `backend/` - Java modular monolith and infrastructure.
+- `frontend/` - Vue mobile-first web application.
+- `docs/` - planning, design, implementation, testing, operations, and reference docs.
+- `infra/` - Docker, deployment, and local environment tooling.
+- `scripts/` - repo automation for dev, quality, and security tasks.
 
 ## Limitations And Production Notes
 
