@@ -55,19 +55,64 @@ The repo is organized as a monorepo so the backend, frontend, docs, infra, and s
 
 ```mermaid
 flowchart TB
-    UI["Vue 3 frontend"] --> API["Spring Boot modular backend"]
-    API --> DB["PostgreSQL"]
-    API --> CACHE["Redis"]
-    API --> MAIL["Mailpit or SMTP"]
+    CLIENT["Client\nDesktop or mobile browser"]
 
-    API --> AUTH["Auth module"]
-    API --> LINKS["URL module"]
-    API --> ANALYTICS["Analytics module"]
-    API --> APP["Application module"]
+    subgraph FRONTEND["Frontend"]
+        UI["Vue 3 SPA"]
+    end
 
-    LINKS --> ANALYTICS
-    ANALYTICS --> DB
+    subgraph BACKEND["Spring Boot backend"]
+        APP["Application module\ncomposition root"]
+
+        subgraph MODULES["Feature modules"]
+            direction LR
+            AUTH["Auth"]
+            LINKS["Links"]
+            ANALYTICS["Analytics"]
+            AI["AI metadata"]
+        end
+
+        EVENTS["Async events\nSpring events + executor"]
+    end
+
+    subgraph COMPONENTS["App components / infrastructure"]
+        DB[("PostgreSQL")]
+        CACHE[("Redis / local cache")]
+        MAIL[/"Mailpit or SMTP"/]
+        AI_PROVIDER{{"AI provider\nStub / Ollama / OpenAI-compatible"}}
+        OBS(["Actuator, metrics, logs"])
+    end
+
+    CLIENT -->|"HTTP"| UI
+    UI -->|"REST API"| APP
+
+    APP -->|"routes requests to"| MODULES
+
+    MODULES -->|"persistent data"| DB
+    MODULES -->|"cacheable reads and counters"| CACHE
+    APP -->|"health and runtime data"| OBS
+
+    MODULES -.->|"domain events"| EVENTS
+    EVENTS -.->|"account emails"| MAIL
+    EVENTS -.->|"cache invalidation"| CACHE
+    AI -->|"metadata generation"| AI_PROVIDER
 ```
+
+Solid arrows show request-time interactions.
+
+Dotted arrows show asynchronous event-driven work handled by Spring events and the application async executor.
+
+Async events cover account emails, click analytics, AI enrichment, and cache invalidation.
+
+Backend modules share contracts and event types through the `shared` module.
+
+PostgreSQL is the durable store.
+
+Redis/local cache is the fast path for cacheable reads and counters.
+
+SMTP/Mailpit handles account emails.
+
+Actuator, metrics, and logs expose runtime visibility.
 
 ## Key Pages
 
