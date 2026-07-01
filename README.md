@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/Redis-7-FF4438?logo=redis&logoColor=white" alt="Redis 7" />
 </p>
 
-WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and AI metadata enrichment that classifies links and generates readable titles, summaries, tags, icons, and suggested aliases.
+WeblinkPilot is a production-shaped backend application built around the URL shortening domain. It demonstrates modular architecture, caching, asynchronous processing, authentication, analytics, and AI-powered metadata enrichment in a realistic SaaS-style application.
 
 ## Live Demo
 
@@ -187,6 +187,8 @@ flowchart TB
     AI -->|"metadata generation"| AI_PROVIDER
 ```
 
+Design goal: keep deployment simple while enforcing module boundaries that can later be extracted into independent services if justified.
+
 Solid arrows show request-time interactions.
 
 Dotted arrows show asynchronous event-driven work handled by Spring events and the application async executor.
@@ -207,15 +209,15 @@ Actuator, metrics, and logs expose runtime visibility.
 
 The full planning source of truth lives in the [Roadmap](docs/planning/roadmap.md).
 
-| Area | Status | Notes |
+| Status | Area | Notes |
 | --- | --- | --- |
-| URL lifecycle and QR codes | Done | Create, redirect, preview, QR output, expiration, custom aliases, anonymous links, and owned links are implemented. |
-| Analytics | Done | Redirect and QR events are tracked with summaries, context, and per-link views. |
-| Authentication and access control | Done | JWT auth, refresh cookies, password reset, email verification, GitHub login, user roles, and admin access are in place. |
-| AI link enrichment | Done | Created links can receive generated metadata, summaries, categories, tags, icons, and suggested aliases. |
-| Monitoring and operations | Done | Admin monitoring, health checks, metrics, demo deployment, and smoke checks are in place. |
-| RabbitMQ async messaging | Planned | Broker-backed queueing is deferred until the current event approach is no longer enough. |
-| Expiry reminder emails | Planned | Link expiration exists; scheduled reminder emails are a future product extension. |
+| &#x1F7E2; Completed | URL lifecycle and QR codes | Create, redirect, preview, QR output, expiration, custom aliases, anonymous links, and owned links are implemented. |
+| &#x1F7E2; Completed | Analytics | Redirect and QR events are tracked with summaries, context, and per-link views. |
+| &#x1F7E2; Completed | Authentication and access control | JWT auth, refresh cookies, password reset, email verification, GitHub login, user roles, and admin access are in place. |
+| &#x1F7E2; Completed | AI link enrichment | Created links can receive generated metadata, summaries, categories, tags, icons, and suggested aliases. |
+| &#x1F7E2; Completed | Monitoring and operations | Admin monitoring, health checks, metrics, demo deployment, and smoke checks are in place. |
+| &#x26AA; Planned | RabbitMQ async messaging | Broker-backed queueing is deferred until the current event approach is no longer enough. |
+| &#x26AA; Planned | Expiry reminder emails | Link expiration exists; scheduled reminder emails are a future product extension. |
 
 ## Run Locally
 
