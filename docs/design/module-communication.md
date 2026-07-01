@@ -51,22 +51,66 @@ Legend:
 ## High-Level Module View
 
 ```mermaid
-flowchart LR
-  A["application"] -->|"sync: public services / named interfaces"| B["auth"]
-  A -->|"sync: public services / named interfaces"| C["links"]
-  A -->|"sync: public services / named interfaces"| D["analytics"]
-  A -->|"sync: public services / named interfaces"| AI["ai"]
-  B -->|"sync: shared port LinkStatisticsService"| S["shared"]
-  D -->|"sync: shared port LinkOwnershipLookupService"| S
-  C -->|"implements shared ports"| S
-  C -->|"async: LinkCreatedEvent / LinkClickedEvent"| D
-  C -->|"async: LinkCreatedEvent"| AI
-  C -->|"sync: cache-aside"| R["Redis"]
-  D -->|"async: cache invalidation event"| R
-  C -->|"sync: repositories"| P["PostgreSQL"]
-  B -->|"sync: repositories"| P
-  D -->|"sync: repositories"| P
+flowchart TB
+  CLIENT["Frontend / API client"]
+
+  subgraph ENTRY["Spring Boot runtime"]
+    APP["application\ncomposition root"]
+  end
+
+  subgraph MODULES["Feature modules"]
+    direction LR
+    AUTH["auth\nidentity + account"]
+    LINKS["links\nshort links + redirects"]
+    ANALYTICS["analytics\nclicks + summaries"]
+    AI["ai\nmetadata enrichment"]
+  end
+
+  subgraph CONTRACTS["Shared contracts"]
+    SHARED["shared\nDTOs, events, ports"]
+  end
+
+  subgraph INFRA["App components / infrastructure"]
+    direction LR
+    DB[("PostgreSQL")]
+    CACHE[("Redis / local cache")]
+    SMTP[/"SMTP\nMailpit or Brevo"/]
+    AI_PROVIDER{{"AI provider\nStub / Ollama / OpenAI-compatible"}}
+    OBS(["Actuator, metrics, logs"])
+  end
+
+  CLIENT -->|"HTTP / REST"| APP
+
+  APP -->|"sync: public APIs"| AUTH
+  APP -->|"sync: public APIs"| LINKS
+  APP -->|"sync: public APIs"| ANALYTICS
+  APP -->|"sync: public APIs"| AI
+
+  MODULES -.->|"compile-time DTOs, events, ports"| SHARED
+
+  AUTH -->|"sync: users, tokens, roles"| DB
+  LINKS -->|"sync: short links, aliases"| DB
+  ANALYTICS -->|"sync: clicks, summaries"| DB
+  AI -->|"sync: generated metadata"| DB
+
+  AUTH -->|"sync: refresh sessions, throttling"| CACHE
+  LINKS -->|"sync: cache-aside redirects"| CACHE
+  ANALYTICS -.->|"async: cache invalidation"| CACHE
+
+  LINKS -.->|"async: LinkClickedEvent"| ANALYTICS
+  LINKS -.->|"async: LinkCreatedEvent"| AI
+  AUTH -.->|"async: reset / verification email"| SMTP
+
+  AI -->|"metadata generation"| AI_PROVIDER
+  APP -->|"runtime visibility"| OBS
 ```
+
+Shape legend:
+
+- Cylinders represent stateful storage.
+- Slanted blocks represent external I/O.
+- Hexagons represent external providers.
+- Rounded blocks represent runtime observability.
 
 ## Short-Link Creation Flow
 
