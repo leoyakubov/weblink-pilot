@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Production-shaped URL shortener built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, Thymeleaf, and Docker.
+  Production-shaped URL shortener with AI metadata enrichment, built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, Thymeleaf, and Docker.
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@
   <img src="https://img.shields.io/badge/Redis-7-FF4438?logo=redis&logoColor=white" alt="Redis 7" />
 </p>
 
-WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and a modular Spring Boot backend with a Vue frontend.
+WeblinkPilot is a URL shortener for creating, sharing, and tracking short links. It combines fast redirects, QR generation, click analytics, authentication, admin monitoring, and AI metadata enrichment that classifies links and generates readable titles, summaries, tags, icons, and suggested aliases.
 
 The repo is organized as a monorepo so the backend, frontend, docs, infra, and scripts stay in one place and move together.
 
@@ -46,6 +46,7 @@ The repo is organized as a monorepo so the backend, frontend, docs, infra, and s
 - [Preview](#preview)
 - [Project Scope](#project-scope)
 - [What Is Implemented](#what-is-implemented)
+- [Roadmap](#roadmap)
 - [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
 - [Run Locally](#run-locally)
@@ -115,6 +116,17 @@ npm --prefix frontend run screenshots
 - AI metadata enrichment with stub, Ollama, or OpenAI-compatible providers.
 - Admin monitoring for health, runtime metrics, configuration, service links, and users.
 - Dockerized local/dev/demo stacks, deployment smoke checks, coverage gates, and secret/dependency scans.
+
+## Roadmap
+
+The full planning source of truth lives in the [Roadmap](docs/planning/roadmap.md).
+
+Near-term focus:
+
+- Keep the README, screenshots, and docs aligned with the shipped UI and API.
+- Continue polishing auth, links, analytics, and deployment smoke coverage.
+- Keep email template maintenance simple as account flows evolve.
+- Revisit broker-backed async messaging and expiry reminder emails only if product scope requires them.
 
 ## Architecture
 

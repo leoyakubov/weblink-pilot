@@ -69,21 +69,27 @@ Ready-to-paste README block:
 ## Screenshots
 
 ### Home
+
 ![Home page with create-link form](docs/images/01-home-create-link.png)
 
 ### Link created
+
 ![Successful link creation state](docs/images/02-link-created-success.png)
 
 ### Link details
+
 ![Link details page](docs/images/03-link-details.png)
 
 ### Analytics
+
 ![Analytics overview](docs/images/04-analytics-overview.png)
 
 ### Authentication
+
 ![Sign in page](docs/images/05-signin.png)
 
 ### Admin monitoring
+
 ![Admin monitoring page](docs/images/06-admin-monitoring.png)
 ```
 
@@ -97,7 +103,7 @@ Set these in the repository "About" panel:
 
 Suggested `About` text:
 
-> Production-shaped URL shortener with Vue, Spring Boot, PostgreSQL, Redis, QR codes, analytics, JWT auth, and Dockerized local/demo environments.
+> Production-shaped URL shortener with AI metadata enrichment, Vue, Spring Boot, PostgreSQL, Redis, QR codes, analytics, JWT auth, and Dockerized local/demo environments.
 
 Suggested topics:
 
@@ -110,6 +116,7 @@ Suggested topics:
 - `docker`
 - `modular-monolith`
 - `url-shortener`
+- `ai-enrichment`
 - `portfolio-project`
 - `testcontainers`
 
@@ -141,11 +148,11 @@ Suggested `v0.1.0` release notes:
 
 If you want a very short description for GitHub, use this:
 
-> Production-shaped URL shortener with QR codes, analytics, JWT auth, Redis caching, and Dockerized local/demo environments.
+> Production-shaped URL shortener with AI link classification, QR codes, analytics, JWT auth, Redis caching, and Dockerized local/demo environments.
 
 If you want a slightly more detailed version for the repo description, use this:
 
-> WeblinkPilot is a portfolio-ready URL shortener built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, and Docker. It includes QR generation, analytics, JWT auth, admin monitoring, and a modular backend architecture.
+> WeblinkPilot is a URL shortener built with Java, Spring Boot, Vue 3, PostgreSQL, Redis, and Docker. It includes QR generation, analytics, JWT auth, admin monitoring, and AI enrichment that classifies links and generates titles, summaries, tags, icons, and suggested aliases.
 
 ## 5. Issues And Board
 
