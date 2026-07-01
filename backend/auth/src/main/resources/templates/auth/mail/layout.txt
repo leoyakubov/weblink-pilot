@@ -1,0 +1,6 @@
+Hi,
+
+[(${body})]
+
+Thanks,
+The WeblinkPilot team

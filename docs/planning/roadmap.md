@@ -714,11 +714,11 @@ Exit criteria:
 
 Checklist:
 
-- [ ] Pick and wire the templating engine
-- [ ] Migrate password-reset and verification emails
+- [x] Pick and wire the templating engine
+- [x] Migrate password-reset and verification emails
 - [ ] Migrate expiry reminder emails
-- [ ] Add template-focused tests
-- [ ] Document the email template workflow
+- [x] Add template-focused tests
+- [x] Document the email template workflow
 
 ### Phase 26 - RabbitMQ async messaging
 
