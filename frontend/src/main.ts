@@ -3,7 +3,7 @@ import PrimeVue from 'primevue/config';
 import Nora from '@primeuix/themes/nora';
 import 'primeicons/primeicons.css';
 import App from './App.vue';
-import router from './app/router';
+import router from './router';
 import './styles.css';
 
 createApp(App)

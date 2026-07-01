@@ -1,0 +1,61 @@
+.account-settings-grid > .card {
+  align-self: start;
+}
+
+.account-settings-grid > .card:first-child {
+  max-width: 38rem;
+  width: 100%;
+}
+
+.account-settings-grid--single {
+  justify-items: start;
+}
+
+.account-form-card {
+  width: min(620px, 100%);
+}
+
+.account-form-card .form-grid,
+.account-form-card .detail-list {
+  width: min(100%, 86%);
+  justify-self: center;
+}
+
+.account-form-card .p-button,
+.account-form-card .button {
+  border-color: rgba(186, 230, 253, 0.72);
+  background: rgba(56, 189, 248, 0.28);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(2, 6, 23, 0.22);
+}
+
+.account-form-card .p-button:hover,
+.account-form-card .p-button:focus-visible,
+.account-form-card .button:hover,
+.account-form-card .button:focus-visible {
+  border-color: rgba(186, 230, 253, 0.9);
+  background: rgba(56, 189, 248, 0.38);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.account-form-card .p-inputtext,
+.account-form-card .p-password-input,
+.account-form-card .input {
+  border-color: rgba(226, 232, 240, 0.92);
+  background: rgba(248, 250, 252, 0.96);
+  color: #0f172a;
+}
+
+.account-form-card .p-inputtext::placeholder,
+.account-form-card .p-password-input::placeholder,
+.account-form-card .input::placeholder {
+  color: rgba(51, 65, 85, 0.72);
+}
+
+.account-form-card .p-inputtext:focus,
+.account-form-card .p-password-input:focus,
+.account-form-card .input:focus {
+  border-color: rgba(56, 189, 248, 0.95);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+}

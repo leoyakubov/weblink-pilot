@@ -1,0 +1,6 @@
+.embedded-filter-grid {
+  padding: 0.75rem;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: var(--radius-lg);
+  background: rgba(4, 10, 20, 0.28);
+}

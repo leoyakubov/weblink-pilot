@@ -1,0 +1,37 @@
+.panel-card__header > div {
+  position: relative;
+  padding-left: 0.92rem;
+}
+
+.panel-card__header > div::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.18rem;
+  width: 0.26rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #38bdf8 0%, #f59e0b 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.panel-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.3rem;
+  margin-bottom: 0.25rem;
+}
+
+.panel-card__description {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+@media (max-width: 960px) {
+  .panel-card__header {
+    flex-direction: column;
+  }
+}

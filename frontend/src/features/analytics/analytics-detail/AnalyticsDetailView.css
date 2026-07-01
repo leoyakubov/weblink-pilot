@@ -1,0 +1,123 @@
+.analytics-detail-page > .page-intro .page-intro__title,
+.analytics-detail-page > .page-intro .page-intro__description {
+  max-width: none;
+}
+
+.analytics-detail-row {
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.analytics-detail-row > .card {
+  height: 100%;
+}
+
+.analytics-detail-row > .card > .card-inner {
+  height: 100%;
+  align-content: start;
+}
+
+.analytics-detail-row--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analytics-detail-list div {
+  grid-template-columns: minmax(10rem, 0.42fr) minmax(0, 1fr);
+}
+
+.analytics-detail-list dd {
+  display: grid;
+  justify-items: end;
+}
+
+.analytics-chart {
+  display: grid;
+  gap: 0.62rem;
+  margin-top: 0.2rem;
+}
+
+.analytics-chart + .detail-list {
+  margin-top: 0.7rem;
+}
+
+.analytics-chart-row {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.analytics-chart-row__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: rgba(248, 250, 252, 0.92);
+  font-weight: 850;
+}
+
+.analytics-chart-row__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.analytics-chart-row__meta strong {
+  color: #ffffff;
+  font-weight: 950;
+}
+
+.analytics-chart-track {
+  display: flex;
+  width: 100%;
+  height: 0.72rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+}
+
+.analytics-chart-fill {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #38bdf8, #f59e0b);
+}
+
+.analytics-chart-track--stacked .analytics-chart-fill {
+  border-radius: 0;
+}
+
+.analytics-chart-track--stacked .analytics-chart-fill:first-child {
+  border-radius: 999px 0 0 999px;
+}
+
+.analytics-chart-track--stacked .analytics-chart-fill:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.analytics-chart-fill--redirect,
+.analytics-chart-fill--unique {
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+}
+
+.analytics-chart-fill--qr,
+.analytics-chart-fill--returning {
+  background: linear-gradient(90deg, #f59e0b, #facc15);
+}
+
+.analytics-chart-legend {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+@media (max-width: 960px) {
+  .analytics-detail-row--three {
+    grid-template-columns: 1fr;
+  }
+}

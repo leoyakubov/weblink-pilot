@@ -1,0 +1,238 @@
+.monitoring-table div,
+.monitoring-runtime-list div {
+  align-items: center;
+  min-height: 0;
+}
+
+.monitoring-table dd,
+.monitoring-runtime-list dd {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.monitoring-table .monitoring-data-row {
+  grid-template-columns: minmax(16rem, 1fr) max-content;
+}
+
+.detail-list--link-detail.detail-list--analytics div {
+  grid-template-columns: minmax(11.8rem, max-content) minmax(0, 1fr);
+}
+
+.detail-list--link-detail.detail-list--analytics dt {
+  white-space: nowrap;
+}
+
+.detail-list--link-detail.detail-list--analytics dd {
+  justify-self: end;
+  text-align: right;
+}
+
+.monitoring-table .monitoring-data-row dd strong {
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.monitoring-table dd strong,
+.monitoring-table dd .footnote,
+.monitoring-runtime-list dd strong,
+.monitoring-runtime-list dd .footnote {
+  display: inline;
+}
+
+.monitoring-table .footnote,
+.monitoring-runtime-list .footnote {
+  color: rgba(203, 213, 225, 0.72);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.monitoring-table dt .footnote {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.monitoring-card-row {
+  align-items: stretch;
+}
+
+.monitoring-card-row > .card {
+  height: 100%;
+}
+
+.monitoring-card-row > .card > .card-inner {
+  height: 100%;
+  align-content: start;
+}
+
+.monitoring-runtime-list div {
+  grid-template-columns: minmax(11.5rem, 0.52fr) minmax(0, 1fr);
+}
+
+.monitoring-runtime-list dt,
+.monitoring-runtime-list dd {
+  white-space: normal;
+}
+
+.monitoring-runtime-list dt {
+  overflow-wrap: anywhere;
+}
+
+.monitoring-overview-list div:nth-child(odd) {
+  background: rgba(2, 6, 23, 0.74);
+}
+
+.monitoring-overview-list div:nth-child(even) {
+  background: rgba(13, 24, 44, 0.76);
+}
+
+.monitoring-overview-list dd {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.monitoring-link .p-button,
+.monitoring-link .p-button.p-button-outlined {
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.42);
+  background: rgba(56, 189, 248, 0.16);
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.18);
+}
+
+.monitoring-link .p-button:hover,
+.monitoring-link .p-button:focus-visible,
+.monitoring-link .p-button.p-button-outlined:hover,
+.monitoring-link .p-button.p-button-outlined:focus-visible {
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.78);
+  background: rgba(56, 189, 248, 0.26);
+  transform: translateY(-1px);
+}
+
+.monitoring-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.monitoring-row-actions .status {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.monitoring-health-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.8fr) minmax(7.5rem, max-content) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.monitoring-health-row .status {
+  justify-self: start;
+  margin: 0;
+}
+
+.monitoring-health-row p {
+  justify-self: end;
+  text-align: right;
+}
+
+.monitoring-health-row .monitoring-health-error {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  color: #fecaca;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.monitoring-health-list,
+.monitoring-endpoint-grid {
+  align-self: start;
+}
+
+.monitoring-health-list .list-item,
+.monitoring-endpoint-grid .list-item {
+  padding: 0.58rem 0.72rem;
+}
+
+.monitoring-health-copy {
+  min-width: 0;
+}
+
+.monitoring-health-copy strong,
+.monitoring-endpoint-grid strong {
+  margin-bottom: 0.2rem;
+}
+
+.monitoring-health-copy p,
+.monitoring-endpoint-grid p {
+  line-height: 1.42;
+}
+
+.monitoring-metric-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.monitoring-metric-group {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.monitoring-metric-group h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.monitoring-endpoint-grid {
+  grid-template-columns: 1fr;
+}
+
+.monitoring-config-actions {
+  margin-top: 0.85rem;
+}
+
+@media (max-width: 960px) {
+  .monitoring-table dd,
+  .monitoring-runtime-list dd {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    text-align: left;
+  }
+
+  .monitoring-table .monitoring-data-row,
+  .monitoring-runtime-list .monitoring-data-row {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-table .monitoring-data-row dd,
+  .monitoring-runtime-list .monitoring-data-row dd {
+    display: flex;
+  }
+
+  .monitoring-table .monitoring-data-row dd strong,
+  .monitoring-runtime-list .monitoring-data-row dd strong {
+    justify-self: start;
+  }
+
+  .monitoring-health-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .monitoring-health-row .status,
+  .monitoring-health-row p {
+    justify-self: start;
+    text-align: left;
+  }
+}

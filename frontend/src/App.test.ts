@@ -30,7 +30,7 @@ vi.mock('vue-router', () => ({
   }),
 }));
 
-vi.mock('@/features/auth/services/auth.service', () => ({
+vi.mock('@/account/AuthSession', () => ({
   authState: mocks.authState,
   bootstrapAuth: mocks.bootstrapAuthMock,
   isAdminUser: () =>

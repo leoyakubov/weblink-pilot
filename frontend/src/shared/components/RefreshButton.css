@@ -1,0 +1,19 @@
+.refresh-button.p-button,
+.refresh-button.p-button.p-button-outlined {
+  min-width: 10.5rem;
+  justify-content: center;
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.42);
+  background: rgba(56, 189, 248, 0.16);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.14);
+}
+
+.refresh-button.p-button:hover,
+.refresh-button.p-button:focus-visible,
+.refresh-button.p-button.p-button-outlined:hover,
+.refresh-button.p-button.p-button-outlined:focus-visible {
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.78);
+  background: rgba(56, 189, 248, 0.26);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.14);
+}

@@ -16,7 +16,7 @@ const testConfig = {
   environment: 'jsdom',
   globals: true,
   include: ['src/**/*.test.ts'],
-  setupFiles: ['src/test/setup.ts'],
+  setupFiles: ['src/setup.ts'],
   cache: false,
 };
 

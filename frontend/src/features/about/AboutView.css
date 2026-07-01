@@ -1,0 +1,70 @@
+.about-card-row {
+  align-items: stretch;
+}
+
+.about-card-row > .card {
+  height: 100%;
+}
+
+.about-card-row > .card > .card-inner {
+  height: 100%;
+}
+
+.detail-list--about-product {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.detail-list--about-product div {
+  grid-template-columns: 1fr;
+}
+
+.detail-list--about-horizontal div {
+  grid-template-columns: minmax(8.5rem, 0.34fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.detail-list--about-links div {
+  grid-template-columns: minmax(7.5rem, 0.3fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.detail-list--about-links a {
+  color: #ffffff;
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-color: rgba(56, 189, 248, 0.66);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+}
+
+.detail-list--about-links a:hover,
+.detail-list--about-links a:focus-visible {
+  text-decoration-color: rgba(245, 158, 11, 0.9);
+}
+
+.about-toolbar {
+  padding: 0.78rem 0.84rem;
+  border-radius: var(--radius-lg);
+  border: var(--border);
+  background: rgba(4, 10, 20, 0.36);
+}
+
+.about-toolbar__copy {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.about-toolbar__eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+}
+
+@media (max-width: 960px) {
+  .auth-primary-actions,
+  .analytics-filter-grid,
+  .monitoring-endpoint-grid,
+  .detail-list--about-product {
+    grid-template-columns: 1fr;
+  }
+}
