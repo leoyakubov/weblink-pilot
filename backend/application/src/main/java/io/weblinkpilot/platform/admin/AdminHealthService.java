@@ -1,6 +1,7 @@
 package io.weblinkpilot.platform.admin;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import io.weblinkpilot.ai.config.AiProperties;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
@@ -33,6 +34,7 @@ public class AdminHealthService {
   private final ObjectProvider<RedisConnectionFactory> redisConnectionFactory;
   private final ObjectProvider<JavaMailSenderImpl> mailSender;
   private final AuthProperties authProperties;
+  private final AiProperties aiProperties;
   private final PlatformCacheProperties cacheProperties;
   private final ShortLinkRepository shortLinkRepository;
   private final ClickEventRepository clickEventRepository;
@@ -44,6 +46,7 @@ public class AdminHealthService {
       ObjectProvider<RedisConnectionFactory> redisConnectionFactory,
       ObjectProvider<JavaMailSenderImpl> mailSender,
       AuthProperties authProperties,
+      AiProperties aiProperties,
       PlatformCacheProperties cacheProperties,
       ShortLinkRepository shortLinkRepository,
       ClickEventRepository clickEventRepository,
@@ -53,6 +56,7 @@ public class AdminHealthService {
     this.redisConnectionFactory = redisConnectionFactory;
     this.mailSender = mailSender;
     this.authProperties = authProperties;
+    this.aiProperties = aiProperties;
     this.cacheProperties = cacheProperties;
     this.shortLinkRepository = shortLinkRepository;
     this.clickEventRepository = clickEventRepository;
@@ -68,6 +72,7 @@ public class AdminHealthService {
         mailHealth(),
         jwtConfigHealth(),
         githubOAuthHealth(),
+        aiProviderHealth(),
         analyticsStorageHealth(),
         seededDataHealth());
   }
@@ -173,6 +178,57 @@ public class AdminHealthService {
         "Not configured; username/password auth is available.");
   }
 
+  private AdminHealthComponentResponse aiProviderHealth() {
+    if (!aiProperties.isEnabled()) {
+      return health(
+          HealthComponent.AI_PROVIDER,
+          AdminHealthStatus.DISABLED,
+          "AI metadata enrichment is disabled.");
+    }
+
+    String provider = aiProperties.getProvider().trim().toLowerCase(Locale.ROOT);
+    return switch (provider) {
+      case "stub" ->
+          health(
+              HealthComponent.AI_PROVIDER,
+              AdminHealthStatus.UP,
+              "stub provider; deterministic metadata, no external AI calls.");
+      case "ollama" ->
+          health(
+              HealthComponent.AI_PROVIDER,
+              AdminHealthStatus.CONFIGURED,
+              "ollama provider configured at "
+                  + aiProperties.getOllama().getBaseUrl()
+                  + " using model "
+                  + aiProperties.getOllama().getModel()
+                  + ".");
+      case "openai" -> openAiProviderHealth();
+      default ->
+          health(
+              HealthComponent.AI_PROVIDER,
+              AdminHealthStatus.WARNING,
+              "Unsupported AI provider configured: " + aiProperties.getProvider() + ".");
+    };
+  }
+
+  private AdminHealthComponentResponse openAiProviderHealth() {
+    if (aiProperties.getOpenai().getApiKey() == null
+        || aiProperties.getOpenai().getApiKey().isBlank()) {
+      return health(
+          HealthComponent.AI_PROVIDER,
+          AdminHealthStatus.WARNING,
+          "openai provider selected but API key is missing.");
+    }
+    return health(
+        HealthComponent.AI_PROVIDER,
+        AdminHealthStatus.CONFIGURED,
+        "openai-compatible provider configured at "
+            + aiProperties.getOpenai().getBaseUrl()
+            + " using model "
+            + aiProperties.getOpenai().getModel()
+            + ".");
+  }
+
   private AdminHealthComponentResponse analyticsStorageHealth() {
     try {
       long events = clickEventRepository.count();
@@ -264,6 +320,7 @@ public class AdminHealthService {
     REDIS("Redis"),
     JWT_CONFIG("JWT config"),
     GITHUB_OAUTH("GitHub OAuth"),
+    AI_PROVIDER("AI provider"),
     ANALYTICS_STORAGE("Analytics storage"),
     SEEDED_DATA("Seeded data");
 

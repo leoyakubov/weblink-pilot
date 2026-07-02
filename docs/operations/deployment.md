@@ -230,6 +230,28 @@ The `demo-ephemeral` profile uses:
 
 This mode avoids Render Free Postgres expiration, but it also means links created by visitors disappear after a backend restart, redeploy, or free-tier sleep/wake cycle. Seed data is recreated automatically on startup.
 
+#### H2 plus Render Key Value setup
+
+For a more production-shaped free demo, keep the ephemeral H2 database but use Render Key Value as the Redis-compatible cache layer:
+
+- `SPRING_PROFILES_ACTIVE=demo,demo-h2-redis`
+- `REDIS_URL=<internal Render Key Value Redis URL>`
+- `APP_AI_PROVIDER=stub`
+- `JWT_SECRET=<long random secret>` or `APP_AUTH_JWT_SECRET=<long random secret>`
+- `BOOTSTRAP_ADMIN_USERNAME=<admin-username>`
+- `BOOTSTRAP_ADMIN_PASSWORD=<admin-password>`
+- `BOOTSTRAP_ADMIN_ROLE=ADMIN`
+- `BOOTSTRAP_USER_USERNAME=<user-username>`
+- `BOOTSTRAP_USER_PASSWORD=<user-password>`
+- `APP_CORS_ALLOWED_ORIGIN_PATTERNS=https://weblink-pilot.netlify.app`
+- `APP_PUBLIC_BASE_URL=https://weblink-pilot.onrender.com`
+
+Do not set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, or `SPRING_DATASOURCE_PASSWORD` for this mode. The `demo-h2-redis` profile forces the application database to in-memory H2 while the base `demo` profile keeps `app.cache.provider=redis`.
+
+This mode avoids Render Free Postgres expiration and still demonstrates Redis-backed cache behavior. Render Key Value on the free plan should be treated as volatile infrastructure: it is useful for cache, counters, and fast-path reads, but not as the durable source of truth.
+
+AI enrichment uses the deterministic `stub` provider by default in this demo mode, so generated metadata is predictable and the public deployment does not call an external LLM. The admin monitoring health snapshot reports the active AI provider. If `APP_AI_PROVIDER=openai` is enabled later, set `APP_AI_OPENAI_API_KEY`; otherwise the AI provider health check reports a warning.
+
 The backend deploy workflow uses:
 
 - `RENDER_DEPLOY_HOOK_URL` to trigger a new Render deploy
@@ -252,7 +274,7 @@ The smoke output prints the backend HTTP status plus `status=UP`, and the fronte
 
 The Netlify frontend needs a backend URL that is reachable from the browser.
 For a live demo, HTTPS is strongly recommended for the backend endpoint.
-The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` for the production-shaped PostgreSQL/Redis setup, or `SPRING_PROFILES_ACTIVE=demo,demo-ephemeral` for the no-external-database portfolio demo.
+The deployed backend should run with `SPRING_PROFILES_ACTIVE=demo` for the production-shaped PostgreSQL/Redis setup, `SPRING_PROFILES_ACTIVE=demo,demo-h2-redis` for the H2 plus Render Key Value portfolio demo, or `SPRING_PROFILES_ACTIVE=demo,demo-ephemeral` for the no-external-service portfolio demo.
 The demo profile keeps the mail health indicator disabled so the `/actuator/health` endpoint stays responsive even if the external SMTP provider is slow or temporarily unreachable.
 
 If you use Render's default service URL, `APP_PUBLIC_BASE_URL` can be omitted because the backend falls back to `RENDER_EXTERNAL_URL`.

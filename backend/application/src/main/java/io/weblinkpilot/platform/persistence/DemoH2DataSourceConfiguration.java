@@ -9,15 +9,15 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile(PlatformProfiles.DEMO_EPHEMERAL)
-public class DemoEphemeralDataSourceConfiguration {
+@Profile(PlatformProfiles.DEMO_EPHEMERAL + " | " + PlatformProfiles.DEMO_H2_REDIS)
+public class DemoH2DataSourceConfiguration {
 
   private static final String H2_DEMO_URL =
       "jdbc:h2:mem:weblinkpilot_demo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
 
   @Bean
   @Primary
-  public DataSource demoEphemeralDataSource() {
+  public DataSource demoH2DataSource() {
     HikariDataSource dataSource = new HikariDataSource();
     dataSource.setJdbcUrl(H2_DEMO_URL);
     dataSource.setUsername("sa");

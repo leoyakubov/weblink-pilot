@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.weblinkpilot.ai.config.AiProperties;
 import io.weblinkpilot.analytics.repository.ClickEventRepository;
 import io.weblinkpilot.auth.config.AuthProperties;
 import io.weblinkpilot.auth.repository.UserAccountRepository;
@@ -66,6 +67,7 @@ class AdminMonitoringServiceTest {
                 provider(null),
                 provider(mailSender("localhost", 1025)),
                 healthyAuthProperties(),
+                aiProperties("stub"),
                 cacheProperties("local"),
                 securityProperties(true),
                 rateLimitProperties(true, 20),
@@ -91,6 +93,11 @@ class AdminMonitoringServiceTest {
     assertHealth(snapshot, "Redis", "DISABLED", "Local cache provider is active.");
     assertHealth(snapshot, "Mail", "CONFIGURED", "localhost:1025");
     assertHealth(snapshot, "GitHub OAuth", "UP", "Client credentials are configured.");
+    assertHealth(
+        snapshot,
+        "AI provider",
+        "UP",
+        "stub provider; deterministic metadata, no external AI calls.");
     assertHealth(
         snapshot,
         "Seeded data",
@@ -129,6 +136,7 @@ class AdminMonitoringServiceTest {
                 provider((RedisConnectionFactory) null),
                 provider(null),
                 auth,
+                aiProperties("openai"),
                 cacheProperties("redis"),
                 securityProperties(false),
                 rateLimitProperties(true, 20),
@@ -148,6 +156,8 @@ class AdminMonitoringServiceTest {
         "JWT secret is configured but shorter than recommended.");
     assertHealth(
         snapshot, "GitHub OAuth", "INFO", "Not configured; username/password auth is available.");
+    assertHealth(
+        snapshot, "AI provider", "WARNING", "openai provider selected but API key is missing.");
     assertHealth(snapshot, "Analytics storage", "DOWN", "Check failed.");
     assertHealthError(
         snapshot, "Analytics storage", "IllegalStateException", "analytics unavailable");
@@ -168,6 +178,7 @@ class AdminMonitoringServiceTest {
       ObjectProvider<RedisConnectionFactory> redisConnectionFactory,
       ObjectProvider<JavaMailSenderImpl> mailSender,
       AuthProperties authProperties,
+      AiProperties aiProperties,
       PlatformCacheProperties cacheProperties,
       PlatformSecurityProperties securityProperties,
       RateLimitProperties rateLimitProperties,
@@ -182,6 +193,7 @@ class AdminMonitoringServiceTest {
             redisConnectionFactory,
             mailSender,
             authProperties,
+            aiProperties,
             cacheProperties,
             shortLinkRepository,
             clickEventRepository,
@@ -241,6 +253,12 @@ class AdminMonitoringServiceTest {
 
   private static PlatformCacheProperties cacheProperties(String provider) {
     PlatformCacheProperties properties = new PlatformCacheProperties();
+    properties.setProvider(provider);
+    return properties;
+  }
+
+  private static AiProperties aiProperties(String provider) {
+    AiProperties properties = new AiProperties();
     properties.setProvider(provider);
     return properties;
   }
