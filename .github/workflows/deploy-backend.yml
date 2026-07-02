@@ -147,7 +147,7 @@ jobs:
 
       - name: Wait for backend to become ready
         if: steps.manual.outputs.backend_changed == 'true' || steps.changes.outputs.backend_changed == 'true'
-        run: sh ./scripts/dev/render-deploy-wait.sh
+        run: sh ./scripts/dev/render-wait-live-deploy.sh
         env:
           BASELINE_DEPLOY_ID: ${{ steps.baseline.outputs.baseline_deploy_id }}
 
