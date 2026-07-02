@@ -98,14 +98,17 @@ Render free plans can sleep after inactivity, so backend requests may take extra
 ## Production Highlights
 
 - Modular monolith with clean backend boundaries.
+- Spring Modulith and ArchUnit checks for module-boundary verification.
 - Redis cache-aside redirect flow.
 - JWT access tokens with refresh-cookie rotation.
+- Bucket4j rate limiting for API, redirect, and public auth endpoints.
+- Security headers, CORS hardening, and protected actuator metrics by default.
 - Flyway migrations for repeatable database evolution.
 - Testcontainers-backed backend verification.
 - Dockerized local and demo environments.
 - GitHub Actions CI and deployment workflows.
 - AI metadata enrichment for created links.
-- OpenAPI docs and monitoring endpoints.
+- OpenAPI docs, admin monitoring, and Prometheus/Grafana observability support.
 
 ## Tech Stack
 
@@ -113,14 +116,22 @@ Render free plans can sleep after inactivity, so backend requests may take extra
 
 - Java 21
 - Spring Boot
+- Spring Security
+- Spring Data JPA and Hibernate
+- Spring Modulith
+- Spring Cache and Spring Data Redis
+- Bucket4j
+- Spring Actuator and Micrometer
 - JWT authentication
 - OpenAPI
 - Flyway
-- Thymeleaf email templates
+- Thymeleaf
 
 **Frontend**
 
 - Vue 3
+- Vue Router
+- PrimeVue
 - TypeScript
 - Node.js 24
 - Vite
@@ -129,10 +140,26 @@ Render free plans can sleep after inactivity, so backend requests may take extra
 
 - PostgreSQL
 - Redis
+- H2 (for ephemeral demo/test profiles)
 - Docker and Docker Compose
-- Testcontainers
 - GitHub Actions
 - Netlify and Render
+- Brevo SMTP, Mailpit (for local development)
+- OpenAI, Ollama (for local development)
+- Prometheus and Grafana
+- SonarQube stack (local)
+
+**Testing and Quality**
+
+- Spring Boot Test, Spring Security Test, Spring Modulith tests
+- JUnit 5, Mockito, and AssertJ
+- Testcontainers
+- ArchUnit
+- JaCoCo, Checkstyle, SpotBugs, OWASP Dependency Check
+- Vitest, Vue Test Utils, and jsdom
+- Playwright
+- ESLint and Prettier
+- SonarQube analysis
 
 ## Why Modular Monolith?
 
@@ -143,48 +170,50 @@ That keeps local development, CI, and deployment simple while preserving clear b
 ## Architecture
 
 ```mermaid
-flowchart TB
-    CLIENT["Client\nDesktop or mobile browser"]
+flowchart LR
+    CLIENT["Client"]
+    UI["Vue 3 SPA"]
+    API["Spring Boot API"]
 
-    subgraph FRONTEND["Frontend"]
-        UI["Vue 3 SPA"]
+    subgraph MODULES["Backend modules"]
+        AUTH["Auth"]
+        LINKS["Links"]
+        ANALYTICS["Analytics"]
+        AI["AI metadata"]
     end
 
-    subgraph BACKEND["Spring Boot backend"]
-        APP["Application module\ncomposition root"]
-
-        subgraph MODULES["Feature modules"]
-            direction LR
-            AUTH["Auth"]
-            LINKS["Links"]
-            ANALYTICS["Analytics"]
-            AI["AI metadata"]
-        end
-
-        EVENTS["Async events\nSpring events + executor"]
-    end
-
-    subgraph COMPONENTS["App components / infrastructure"]
-        DB[("PostgreSQL")]
-        CACHE[("Redis / local cache")]
-        MAIL[/"Mailpit or SMTP"/]
-        AI_PROVIDER{{"AI provider\nStub / Ollama / OpenAI-compatible"}}
-        OBS(["Actuator, metrics, logs"])
-    end
+    DB[("PostgreSQL")]
+    CACHE[("Redis / local cache")]
+    EVENTS["Async events"]
+    MAIL["Mailpit / SMTP"]
+    PROVIDER["Stub / Ollama / OpenAI-compatible"]
+    OBS["Actuator / metrics / logs"]
 
     CLIENT -->|"HTTP"| UI
-    UI -->|"REST API"| APP
+    UI -->|"REST API"| API
+    API --> AUTH
+    API --> LINKS
+    API --> ANALYTICS
+    API --> AI
 
-    APP -->|"routes requests to"| MODULES
+    AUTH --> DB
+    LINKS --> DB
+    ANALYTICS --> DB
+    AI --> DB
 
-    MODULES -->|"persistent data"| DB
-    MODULES -->|"cacheable reads and counters"| CACHE
-    APP -->|"health and runtime data"| OBS
+    LINKS --> CACHE
+    ANALYTICS --> CACHE
+    AUTH --> CACHE
 
-    MODULES -.->|"domain events"| EVENTS
-    EVENTS -.->|"account emails"| MAIL
-    EVENTS -.->|"cache invalidation"| CACHE
-    AI -->|"metadata generation"| AI_PROVIDER
+    AUTH -.-> EVENTS
+    LINKS -.-> EVENTS
+    ANALYTICS -.-> EVENTS
+    AI -.-> EVENTS
+
+    EVENTS -.-> MAIL
+    EVENTS -.-> CACHE
+    AI --> PROVIDER
+    API --> OBS
 ```
 
 Design goal: keep deployment simple while enforcing module boundaries that can later be extracted into independent services if justified.
